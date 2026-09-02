@@ -10,6 +10,12 @@
 		6D011D2F2C000001001D0001 /* cool_spotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D2E2C000001001D0001 /* cool_spotApp.swift */; };
 		6D011D312C000001001D0001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D302C000001001D0001 /* ContentView.swift */; };
 		6D011D3D2C000001001D0001 /* cool_spotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D3C2C000001001D0001 /* cool_spotTests.swift */; };
+		6D011D512C000001001D0001 /* PrototypeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D502C000001001D0001 /* PrototypeModels.swift */; };
+		6D011D532C000001001D0001 /* PrototypeSharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D522C000001001D0001 /* PrototypeSharedViews.swift */; };
+		6D011D552C000001001D0001 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D542C000001001D0001 /* ExploreView.swift */; };
+		6D011D572C000001001D0001 /* PlaceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D562C000001001D0001 /* PlaceDetailView.swift */; };
+		6D011D592C000001001D0001 /* ContributionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D582C000001001D0001 /* ContributionView.swift */; };
+		6D011D5B2C000001001D0001 /* SavedYouViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D5A2C000001001D0001 /* SavedYouViews.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +34,12 @@
 		6D011D302C000001001D0001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6D011D382C000001001D0001 /* cool_spotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cool_spotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D011D3C2C000001001D0001 /* cool_spotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cool_spotTests.swift; sourceTree = "<group>"; };
+		6D011D502C000001001D0001 /* PrototypeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeModels.swift; sourceTree = "<group>"; };
+		6D011D522C000001001D0001 /* PrototypeSharedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeSharedViews.swift; sourceTree = "<group>"; };
+		6D011D542C000001001D0001 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
+		6D011D562C000001001D0001 /* PlaceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailView.swift; sourceTree = "<group>"; };
+		6D011D582C000001001D0001 /* ContributionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContributionView.swift; sourceTree = "<group>"; };
+		6D011D5A2C000001001D0001 /* SavedYouViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedYouViews.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +83,12 @@
 			children = (
 				6D011D2E2C000001001D0001 /* cool_spotApp.swift */,
 				6D011D302C000001001D0001 /* ContentView.swift */,
+				6D011D502C000001001D0001 /* PrototypeModels.swift */,
+				6D011D522C000001001D0001 /* PrototypeSharedViews.swift */,
+				6D011D542C000001001D0001 /* ExploreView.swift */,
+				6D011D562C000001001D0001 /* PlaceDetailView.swift */,
+				6D011D582C000001001D0001 /* ContributionView.swift */,
+				6D011D5A2C000001001D0001 /* SavedYouViews.swift */,
 			);
 			path = "cool-spot";
 			sourceTree = "<group>";
@@ -184,6 +202,12 @@
 			files = (
 				6D011D2F2C000001001D0001 /* cool_spotApp.swift in Sources */,
 				6D011D312C000001001D0001 /* ContentView.swift in Sources */,
+				6D011D512C000001001D0001 /* PrototypeModels.swift in Sources */,
+				6D011D532C000001001D0001 /* PrototypeSharedViews.swift in Sources */,
+				6D011D552C000001001D0001 /* ExploreView.swift in Sources */,
+				6D011D572C000001001D0001 /* PlaceDetailView.swift in Sources */,
+				6D011D592C000001001D0001 /* ContributionView.swift in Sources */,
+				6D011D5B2C000001001D0001 /* SavedYouViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
