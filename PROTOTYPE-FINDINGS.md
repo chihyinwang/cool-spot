@@ -299,3 +299,19 @@ The owner clarified that providing understandable information is the app’s pri
 - Photo, palette, Directions/Save, the independent report path and post-presence shortcut remain. The questionnaire has not been redesigned in this pass.
 
 Success still needs a timed participant test: can someone explain whether they would go, why, and what is unknown in 30 seconds? A correct decision not to go also counts. Native runtime verification and unit tests are not evidence of improved participant comprehension or completion rates.
+
+## Readability pass — 4 September 2026
+
+**Status: implemented after owner feedback; reduced reading effort is not yet participant-validated.**
+
+The owner found the current information generally understandable but described the page as text-heavy and crowded. They approved a bounded layout cleanup only if none of the previously discussed meanings became unclear or disappeared.
+
+- Chose zero wording changes for this pass. Source comparison confirms all 131 string literals in PlaceDetailView.swift are unchanged; evidence and report/presence logic blocks are also unchanged.
+- Introduced local spacing roles to distinguish major section breaks from related text and grouped information, without changing section order.
+- Kept cooling evidence prominent; reduced the relative weight of planning/report headings and the width of the independent report button, retaining its outline, icon, label and disabled behavior.
+- Removed enclosing boxes around visitor quotations, not the quotations or their attribution. Tightened correction-action/helper grouping and enlarged three local text-action hit targets.
+- Preserved the photo, full three-way evidence, source/freshness/uncertainty, all-features expansion, current-use count, persistent Directions/Save, both report entries and every anonymity/duration/eligibility explanation. No model, Saved, Settings, real-location or expiry behavior changed.
+
+Developer verification: 14 existing tests passed; native iPhone Light/Dark and iPad captures; expanded features; independent report opens with no preselection and does not change the people count; presence success still reveals the optional three-way question; maximum Dynamic Type retains the remote-disabled explanation and How this works route. These are implementation checks, not proof of improved usability or a complete accessibility audit.
+
+Next: let first-time users run the same 30-second decision task and observe whether they can find evidence with less reading/search effort. Do not remove protected explanation text merely to make the page shorter.

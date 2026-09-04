@@ -20,6 +20,14 @@ private struct VisitReportPresentation: Identifiable {
     let initialExperience: CoolingExperience?
 }
 
+// Local reading rhythm, not a new app-wide design system. Keep copy and flow intact.
+private enum PlaceDetailRhythm {
+    static let relatedText: CGFloat = 8
+    static let sectionContent: CGFloat = 16
+    static let relatedSections: CGFloat = 24
+    static let sectionBreak: CGFloat = 32
+}
+
 struct CoolSpotDetailView: View {
     @ObservedObject var store: PrototypeStore
     let spot: CoolSpot
@@ -43,18 +51,25 @@ struct CoolSpotDetailView: View {
                     PlacePhoto(spot: spot)
                         .frame(height: 184)
                         .clipped()
-                    VStack(alignment: .leading, spacing: 24) {
-                        header
-                        experienceSummary
-                        coolingFeatures
-                        CurrentUseSummary(count: store.presence(for: spot))
+                    VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionBreak) {
+                        VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedSections) {
+                            header
+                            experienceSummary
+                        }
+                        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
+                            coolingFeatures
+                            CurrentUseSummary(count: store.presence(for: spot))
+                        }
                         visitPlanning
                         recentExperience
                         livePresence
-                        VStack(spacing: 10) {
-                            Button("Report a problem") { showProblem = true }.foregroundStyle(.red)
+                        Button { showProblem = true } label: {
+                            Text("Report a problem")
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .contentShape(Rectangle())
                         }
-                        .frame(maxWidth: .infinity)
+                        .font(.subheadline)
+                        .foregroundStyle(.red)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 16)
@@ -215,8 +230,8 @@ struct CoolSpotDetailView: View {
     }
 
     var coolingFeatures: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
+            VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedText) {
                 Text("Why it may help you cool down").font(.title3.bold())
                     .accessibilityAddTraits(.isHeader)
                 Text(spot.source == .gla ? "Place information from the Greater London Authority"
@@ -224,72 +239,87 @@ struct CoolSpotDetailView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            FlowLayout(spacing: 8) {
-                ForEach(expandFeatures ? spot.features : Array(spot.features.prefix(3))) {
-                    InfoPill(feature: $0)
+            VStack(alignment: .leading, spacing: 4) {
+                FlowLayout(spacing: 8) {
+                    ForEach(expandFeatures ? spot.features : Array(spot.features.prefix(3))) {
+                        InfoPill(feature: $0)
+                    }
                 }
-            }
-            if spot.features.count > 3 {
-                Button {
-                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { expandFeatures.toggle() }
-                } label: {
-                    Label(expandFeatures ? "Show fewer cooling features"
-                                         : "Show all \(spot.features.count) cooling features",
-                          systemImage: expandFeatures ? "chevron.up" : "chevron.down")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(minHeight: 44)
+                if spot.features.count > 3 {
+                    Button {
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { expandFeatures.toggle() }
+                    } label: {
+                        Label(expandFeatures ? "Show fewer cooling features"
+                                             : "Show all \(spot.features.count) cooling features",
+                              systemImage: expandFeatures ? "chevron.up" : "chevron.down")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(minHeight: 44)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(AppStyle.brand)
                 }
-                .buttonStyle(.plain)
-                .foregroundStyle(AppStyle.brand)
             }
             if !spot.features.contains(.airConditioning) {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Air conditioning not confirmed", systemImage: "questionmark.circle")
                         .font(.subheadline).foregroundStyle(.secondary)
-                    Button("Edit cooling features") { showContribution = true }
-                        .font(.subheadline.weight(.semibold))
-                        .tint(AppStyle.brand)
+                    Button { showContribution = true } label: {
+                        Text("Edit cooling features")
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .tint(AppStyle.brand)
                 }
             }
         }
     }
 
     var visitPlanning: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Before you go").font(.title3.bold()).accessibilityAddTraits(.isHeader)
-            Text("Check the venue’s opening hours before setting off.")
-                .font(.subheadline).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
+            VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedText) {
+                Text("Before you go").font(.headline).accessibilityAddTraits(.isHeader)
+                Text("Check the venue’s opening hours before setting off.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+            }
             FactRow(symbol: "figure.roll", title: "Wheelchair access not confirmed")
-            Button("Add or correct place details") { showContribution = true }
+            VStack(alignment: .leading, spacing: 0) {
+                Button { showContribution = true } label: {
+                    Text("Add or correct place details")
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                }
                 .font(.subheadline.weight(.semibold))
-            Text("Cooling features, access, seating or photo")
-                .font(.caption).foregroundStyle(.secondary)
+                Text("Cooling features, access, seating or photo")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
         }
     }
 
     var recentExperience: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Visitor reports").font(.title3.bold()).accessibilityAddTraits(.isHeader)
+        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
+            Text("Visitor reports").font(.headline).accessibilityAddTraits(.isHeader)
             visitorDetails
-            Button {
-                openVisitReport()
-            } label: {
-                Label("Share how it felt", systemImage: "text.bubble")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(SecondaryButtonStyle())
-            .disabled(!store.canReportVisit(for: spot))
-            .accessibilityIdentifier("independentVisitReport")
-            if !store.canReportVisit(for: spot) {
-                Text("Start a report when you’re here. You can finish it within 24 hours, even after leaving.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedText) {
+                Button {
+                    openVisitReport()
+                } label: {
+                    Label("Share how it felt", systemImage: "text.bubble")
+                }
+                .buttonStyle(SecondaryButtonStyle())
+                .disabled(!store.canReportVisit(for: spot))
+                .accessibilityIdentifier("independentVisitReport")
+                if !store.canReportVisit(for: spot) {
+                    Text("Start a report when you’re here. You can finish it within 24 hours, even after leaving.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
     }
 
     var visitorDetails: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
             DisclosureGroup(isExpanded: $expandStays) {
                 StayDistribution(reports: store.stays(for: spot)).padding(.top, 10)
             } label: {
@@ -299,13 +329,14 @@ struct CoolSpotDetailView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
+            .font(.subheadline)
             ForEach(Array(store.comments(for: spot).prefix(2).enumerated()), id: \.offset) { _, text in
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedText) {
                     Text("“\(text)”").font(.subheadline)
                     Text("Visitor report").font(.caption).foregroundStyle(.secondary)
                 }
-                .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+                .padding(.vertical, 4)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -355,7 +386,7 @@ struct CurrentUseSummary: View {
                 Text(count == 0
                      ? "No one has shared recently"
                      : "\(count) \(count == 1 ? "person is" : "people are") cooling off here")
-                    .font(.headline)
+                    .font(.subheadline.weight(.semibold))
                 Text("Shared in the last 10 minutes")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -375,7 +406,7 @@ struct LivePresenceCard: View {
     let report: (CoolingExperience) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
             if isCheckedIn {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Others can now see one more person here",
@@ -428,7 +459,7 @@ struct LivePresenceCard: View {
                 .foregroundStyle(.secondary)
             }
         }
-        .padding(16)
+        .padding(20)
         .background(AppStyle.blue, in: RoundedRectangle(cornerRadius: 16))
         .accessibilityElement(children: .contain)
     }
