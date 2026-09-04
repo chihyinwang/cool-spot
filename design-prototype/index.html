@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Cool Spot — Visual Directions</title>
+    <style>
+      :root {
+        --ink: #14201f;
+        --muted: #5d6967;
+        --paper: #f4f3ed;
+        --panel: rgba(255, 255, 255, 0.8);
+        --line: rgba(20, 32, 31, 0.13);
+        --accent: #0d4c52;
+        --accent-soft: #cfeadf;
+        --signal: #f4c847;
+        --radius: 14px;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--paper); }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Noto Sans TC", sans-serif;
+        background:
+          radial-gradient(circle at 8% 5%, color-mix(in srgb, var(--accent-soft) 58%, transparent), transparent 28rem),
+          var(--paper);
+        transition: background-color 280ms ease, color 280ms ease;
+      }
+
+      button, a { font: inherit; }
+
+      button:focus-visible, a:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--accent) 65%, white);
+        outline-offset: 3px;
+      }
+
+      .shell {
+        width: min(1480px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 28px 0 122px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 24px;
+        align-items: start;
+        padding-bottom: 22px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .eyebrow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 0 0 12px;
+        font-size: 12px;
+        line-height: 1.3;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .prototype-tag {
+        padding: 6px 8px;
+        color: #6e5100;
+        background: #fff1b5;
+        border: 1px solid #e2c65f;
+        border-radius: 6px;
+      }
+
+      h1 {
+        max-width: 900px;
+        margin: 0;
+        font-size: clamp(30px, 4.2vw, 62px);
+        line-height: 0.99;
+        letter-spacing: -0.045em;
+      }
+
+      .intro {
+        max-width: 760px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: clamp(16px, 1.5vw, 20px);
+        line-height: 1.55;
+      }
+
+      .goal {
+        width: min(340px, 100%);
+        padding: 15px 0 0 20px;
+        border-left: 3px solid var(--signal);
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .goal strong { color: var(--ink); }
+
+      .direction {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.72fr);
+        gap: 28px;
+        margin-top: 28px;
+        align-items: start;
+      }
+
+      .visual {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        background: #e7ebe7;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 30px 75px rgba(21, 37, 34, 0.12);
+      }
+
+      .visual img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .visual-note {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        padding: 7px 10px;
+        color: #fff;
+        background: rgba(14, 22, 21, 0.77);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 7px;
+        backdrop-filter: blur(10px);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+      }
+
+      .brief {
+        position: sticky;
+        top: 24px;
+      }
+
+      .counter {
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 10px 0 0;
+        font-size: clamp(30px, 3.1vw, 46px);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
+
+      .thesis {
+        margin: 12px 0 0;
+        color: var(--accent);
+        font-size: 19px;
+        font-weight: 690;
+        line-height: 1.4;
+      }
+
+      .traits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 18px 0 24px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .traits li {
+        padding: 7px 10px;
+        background: color-mix(in srgb, var(--accent-soft) 62%, white);
+        border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin-bottom: 26px;
+      }
+
+      .swatch {
+        aspect-ratio: 1.45;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+
+      .analysis {
+        display: grid;
+        gap: 19px;
+      }
+
+      .analysis section {
+        padding-top: 17px;
+        border-top: 1px solid var(--line);
+      }
+
+      .analysis h3 {
+        margin: 0 0 7px;
+        font-size: 13px;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+      }
+
+      .analysis p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .web-note {
+        margin-top: 26px;
+        padding: 16px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .web-note strong { color: var(--accent); }
+
+      .switcher {
+        position: fixed;
+        z-index: 5;
+        left: 50%;
+        bottom: max(18px, env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: 46px minmax(196px, auto) 46px;
+        align-items: center;
+        gap: 5px;
+        padding: 6px;
+        color: white;
+        background: rgba(15, 23, 22, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 15px;
+        box-shadow: 0 14px 44px rgba(0, 0, 0, 0.26);
+        backdrop-filter: blur(18px);
+        transform: translateX(-50%);
+      }
+
+      .switcher button {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0;
+        color: inherit;
+        background: transparent;
+        border: 0;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .switcher button:hover { background: rgba(255, 255, 255, 0.11); }
+
+      .variant-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+        padding: 3px;
+        background: rgba(255, 255, 255, 0.09);
+        border-radius: 10px;
+      }
+
+      .variant-tabs button {
+        min-width: 58px;
+        min-height: 38px;
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .variant-tabs button[aria-current="true"] {
+        color: #12201e;
+        background: var(--accent-soft);
+      }
+
+      .hint {
+        position: fixed;
+        right: 20px;
+        bottom: 28px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      @media (max-width: 900px) {
+        .shell { width: min(100% - 26px, 720px); padding-top: 18px; }
+        header { grid-template-columns: 1fr; }
+        .goal { padding-top: 0; }
+        .direction { grid-template-columns: 1fr; }
+        .brief { position: static; }
+        .hint { display: none; }
+      }
+
+      @media (max-width: 520px) {
+        .shell { width: min(100% - 20px, 480px); }
+        h1 { font-size: 36px; }
+        .switcher { grid-template-columns: 44px minmax(166px, auto) 44px; }
+        .variant-tabs button { min-width: 48px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Throwaway visual-direction prototype. Switch with ?variant=A, B, or C. -->
+    <main class="shell">
+      <header>
+        <div>
+          <p class="eyebrow">
+            <span class="prototype-tag">Throwaway prototype · not production</span>
+            <span>Cool Spot · iOS visual direction</span>
+          </p>
+          <h1>哪一種感覺，能讓人在熱浪中更快相信並行動？</h1>
+          <p class="intro">三個方向共用同一個核心任務，但用不同方式表達「可信、清新、好奇、互助」。這裡先比較視覺與資訊層級，還不是最終介面規格。</p>
+        </div>
+        <p class="goal"><strong>30 秒任務</strong><br />找到、判斷並開始前往一個可信的降溫地點。</p>
+      </header>
+
+      <article class="direction" aria-live="polite">
+        <figure class="visual">
+          <img id="directionImage" alt="" />
+          <figcaption class="visual-note">Visual probe · not a UX spec</figcaption>
+        </figure>
+
+        <aside class="brief">
+          <div class="counter" id="counter"></div>
+          <h2 id="title"></h2>
+          <p class="thesis" id="thesis"></p>
+          <ul class="traits" id="traits"></ul>
+          <div class="palette" id="palette" aria-label="配色樣本"></div>
+
+          <div class="analysis">
+            <section>
+              <h3>這個方向的優勢</h3>
+              <p id="strength"></p>
+            </section>
+            <section>
+              <h3>要小心的地方</h3>
+              <p id="risk"></p>
+            </section>
+            <section>
+              <h3>適合你如果⋯</h3>
+              <p id="fit"></p>
+            </section>
+          </div>
+
+          <p class="web-note"><strong>Web 負責選方向；SwiftUI 負責驗證真實性。</strong><br />選定後，會用 NavigationStack、sheet、TabView、Dynamic Type、VoiceOver、safe area 與原生控制項重新落地，而不是直接把這張圖照抄。</p>
+        </aside>
+      </article>
+    </main>
+
+    <nav class="switcher" aria-label="切換視覺方向">
+      <button id="previous" aria-label="上一個方向">←</button>
+      <div class="variant-tabs">
+        <button data-variant="A">A</button>
+        <button data-variant="B">B</button>
+        <button data-variant="C">C</button>
+      </div>
+      <button id="next" aria-label="下一個方向">→</button>
+    </nav>
+    <div class="hint" aria-hidden="true">也可以使用鍵盤 ← →</div>
+
+    <script>
+      const directions = {
+        A: {
+          title: "Shaded Civic Wayfinder",
+          thesis: "The map guides; evidence reassures.",
+          traits: ["克制", "安定", "公共服務但不官僚"],
+          colors: ["#0D4C52", "#CFF2E3", "#F7C847", "#F7F8F7"],
+          image: "assets/direction-a.png",
+          imageAlt: "方向 A：深青與薄荷色的地圖優先 iOS 介面，搭配官方標示、社群回報與明確的路線按鈕。",
+          strength: "最接近 Cool Spot 現有品牌，也最容易從目前原型演進。可信度、清新感與行動急迫性取得平衡。",
+          risk: "如果圖片、文案與內容節奏仍太通用，整體可能顯得保守，和一般城市服務 App 拉不開距離。",
+          fit: "你想穩健升級現有方向，讓產品先看起來可靠、成熟，再逐步加入更多個性。",
+          css: { accent: "#0D4C52", soft: "#CFEADF", signal: "#F4C847", paper: "#F4F3ED", ink: "#14201F", muted: "#5D6967" }
+        },
+        B: {
+          title: "London Heat Signal",
+          thesis: "Evidence first. Act fast.",
+          traits: ["高對比", "都市感", "果斷"],
+          colors: ["#111827", "#1657D8", "#D6ED3F", "#FFFFFF"],
+          image: "assets/direction-b.png",
+          imageAlt: "方向 B：鈷藍與檸檬黃的高對比 iOS 介面，把附近地點、降溫證據與行動按鈕放在最前面。",
+          strength: "最直接服務 30 秒決策目標，資訊階層最強，數據、可信證據與無障礙狀態也容易擴充。",
+          risk: "容易偏向監控台或緊急服務；檸檬黃必須節制，否則會製造警報感，削弱日常使用的親切度。",
+          fit: "你想把『快速判斷、立刻行動』放在品牌個性之前，並接受更鮮明、更城市化的產品語氣。",
+          css: { accent: "#1657D8", soft: "#D6ED3F", signal: "#D6ED3F", paper: "#F3F5F6", ink: "#111827", muted: "#596170" }
+        },
+        C: {
+          title: "Neighbourhood Cooling Commons",
+          thesis: "Useful places, strengthened by neighbours.",
+          traits: ["親切", "社區感", "探索性"],
+          colors: ["#0B4D52", "#CDEFF6", "#5EA957", "#FFDEA8"],
+          image: "assets/direction-c.png",
+          imageAlt: "方向 C：天空藍、綠色與杏色的社區導向 iOS 介面，以場所照片、鄰里回報與穩定資訊建立信任。",
+          strength: "最能表達好奇與互助，也最適合讓每個降溫點成為有故事、有鄰里知識的真實場所。",
+          risk: "目前探針的照片與即時回報比重偏高，可能像社群動態；必須清楚區分官方資訊、穩定事實與近期經驗。",
+          fit: "你希望 Cool Spot 不只是工具，而是有地方感、能累積社區互助網絡的長期產品。",
+          css: { accent: "#0B4D52", soft: "#CDEFF6", signal: "#FFBF5E", paper: "#F5F3EC", ink: "#17302E", muted: "#5C6D69" }
+        }
+      };
+
+      const order = ["A", "B", "C"];
+      const root = document.documentElement;
+
+      function selectedFromUrl() {
+        const value = new URLSearchParams(location.search).get("variant")?.toUpperCase();
+        return directions[value] ? value : "A";
+      }
+
+      function render(key, updateHistory = true) {
+        const direction = directions[key];
+        document.getElementById("counter").textContent = `Direction ${key} · ${order.indexOf(key) + 1} of 3`;
+        document.getElementById("title").textContent = direction.title;
+        document.getElementById("thesis").textContent = direction.thesis;
+        document.getElementById("strength").textContent = direction.strength;
+        document.getElementById("risk").textContent = direction.risk;
+        document.getElementById("fit").textContent = direction.fit;
+
+        const image = document.getElementById("directionImage");
+        image.src = direction.image;
+        image.alt = direction.imageAlt;
+
+        document.getElementById("traits").replaceChildren(...direction.traits.map((trait) => {
+          const item = document.createElement("li");
+          item.textContent = trait;
+          return item;
+        }));
+
+        document.getElementById("palette").replaceChildren(...direction.colors.map((color) => {
+          const swatch = document.createElement("div");
+          swatch.className = "swatch";
+          swatch.style.background = color;
+          swatch.title = color;
+          swatch.setAttribute("aria-label", color);
+          return swatch;
+        }));
+
+        Object.entries(direction.css).forEach(([token, value]) => root.style.setProperty(`--${token}`, value));
+        document.querySelectorAll("[data-variant]").forEach((button) => {
+          button.setAttribute("aria-current", String(button.dataset.variant === key));
+        });
+
+        if (updateHistory) history.replaceState({}, "", `?variant=${key}`);
+        document.title = `Cool Spot — Direction ${key}`;
+        document.body.dataset.variant = key;
+      }
+
+      function step(amount) {
+        const current = order.indexOf(document.body.dataset.variant || "A");
+        render(order[(current + amount + order.length) % order.length]);
+      }
+
+      document.querySelectorAll("[data-variant]").forEach((button) => {
+        button.addEventListener("click", () => render(button.dataset.variant));
+      });
+      document.getElementById("previous").addEventListener("click", () => step(-1));
+      document.getElementById("next").addEventListener("click", () => step(1));
+      window.addEventListener("keydown", (event) => {
+        const tag = event.target.tagName;
+        if (["INPUT", "TEXTAREA", "SELECT"].includes(tag) || event.target.isContentEditable) return;
+        if (event.key === "ArrowLeft") step(-1);
+        if (event.key === "ArrowRight") step(1);
+      });
+      window.addEventListener("popstate", () => render(selectedFromUrl(), false));
+
+      render(selectedFromUrl(), false);
+    </script>
+  </body>
+</html>

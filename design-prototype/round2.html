@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Cool Spot — Round 2</title>
+    <style>
+      :root {
+        --ink: #123735;
+        --teal: #0b4f52;
+        --teal-strong: #073d40;
+        --mint: #d9f2e8;
+        --sky: #dceff3;
+        --sun: #f2c84b;
+        --surface: #ffffff;
+        --canvas: #f2f5f4;
+        --muted: #5b6b69;
+        --line: #d8e1df;
+        --danger: #a64037;
+        --radius: 14px;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background: var(--canvas);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Noto Sans TC", sans-serif;
+      }
+
+      button { font: inherit; }
+
+      button:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--teal) 65%, white);
+        outline-offset: 3px;
+      }
+
+      .page {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 116px;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 28px;
+        align-items: flex-start;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .prototype-label {
+        display: inline-flex;
+        margin: 0 0 12px;
+        padding: 6px 8px;
+        color: #614900;
+        background: #fff0ad;
+        border: 1px solid #dcc15d;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 760;
+        letter-spacing: 0.045em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 700px;
+        margin: 0;
+        font-size: clamp(30px, 4vw, 52px);
+        line-height: 1.02;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+      }
+
+      .lede {
+        max-width: 680px;
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.55;
+        text-wrap: pretty;
+      }
+
+      .test-controls {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 8px;
+        align-items: center;
+        min-width: 250px;
+      }
+
+      .timer {
+        grid-column: 1 / -1;
+        color: var(--teal);
+        font-size: 36px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 750;
+        letter-spacing: -0.035em;
+      }
+
+      .timer small {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 560;
+        letter-spacing: 0;
+      }
+
+      .secondary-button {
+        min-height: 44px;
+        padding: 0 14px;
+        color: var(--teal);
+        background: transparent;
+        border: 1px solid #a8bcba;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .secondary-button.primary {
+        color: white;
+        background: var(--teal);
+        border-color: var(--teal);
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(270px, 0.75fr) minmax(390px, 1.25fr);
+        gap: clamp(28px, 6vw, 76px);
+        align-items: start;
+        margin-top: 26px;
+      }
+
+      .brief {
+        position: sticky;
+        top: 24px;
+        padding-top: 14px;
+      }
+
+      .variant-number {
+        color: var(--teal);
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      h2 {
+        margin: 9px 0 6px;
+        font-size: 34px;
+        line-height: 1.05;
+        letter-spacing: -0.035em;
+      }
+
+      .variant-purpose {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .attention-path {
+        margin: 24px 0 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: path;
+      }
+
+      .attention-path li {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+        align-items: center;
+        min-height: 48px;
+        border-bottom: 1px solid var(--line);
+        counter-increment: path;
+      }
+
+      .attention-path li::before {
+        content: counter(path);
+        display: grid;
+        width: 26px;
+        height: 26px;
+        place-items: center;
+        color: var(--teal);
+        background: var(--mint);
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 750;
+      }
+
+      .question {
+        margin-top: 24px;
+        padding: 15px;
+        color: #314643;
+        background: var(--sky);
+        border-radius: 10px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .question strong { color: var(--teal-strong); }
+
+      .state-readout {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .phone-wrap {
+        display: grid;
+        justify-items: center;
+        min-width: 0;
+      }
+
+      .phone {
+        position: relative;
+        width: min(393px, 100%);
+        height: min(796px, calc(100vh - 160px));
+        min-height: 650px;
+        overflow: hidden;
+        background: var(--surface);
+        border: 8px solid #172321;
+        border-radius: 44px;
+        box-shadow: 0 12px 34px rgba(17, 37, 34, 0.2);
+      }
+
+      .screen {
+        height: 100%;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+
+      .screen::-webkit-scrollbar { display: none; }
+
+      .status-bar {
+        position: sticky;
+        z-index: 3;
+        top: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 34px;
+        padding: 0 20px;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(10px);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .status-icons { letter-spacing: 2px; }
+
+      .native-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 48px;
+        padding: 0 14px;
+      }
+
+      .icon-button {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        place-items: center;
+        color: var(--teal);
+        background: transparent;
+        border: 0;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 22px;
+      }
+
+      .nav-title { font-size: 16px; font-weight: 700; }
+
+      .hero-photo {
+        display: block;
+        width: 100%;
+        height: 184px;
+        object-fit: cover;
+      }
+
+      .hero-photo.large { height: 274px; }
+
+      .content { padding: 18px 18px 34px; }
+
+      .source-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 2px 8px;
+        color: var(--teal-strong);
+        background: var(--mint);
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 720;
+      }
+
+      .badge.neutral { color: #4f605d; background: #edf1f0; }
+
+      .place-title {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+      }
+
+      .subline {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 15px;
+      }
+
+      .fact {
+        display: inline-flex;
+        gap: 5px;
+        align-items: center;
+        min-height: 30px;
+        padding: 5px 9px;
+        color: #31524e;
+        background: #f0f5f4;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .directions {
+        display: flex;
+        width: 100%;
+        min-height: 52px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 18px;
+        color: white;
+        background: var(--teal);
+        border: 0;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 750;
+      }
+
+      .section-title {
+        margin: 24px 0 10px;
+        font-size: 19px;
+        letter-spacing: -0.015em;
+      }
+
+      .evidence-band {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: center;
+        margin-top: 20px;
+        padding: 14px;
+        background: var(--mint);
+        border-radius: var(--radius);
+      }
+
+      .score {
+        color: var(--teal-strong);
+        font-size: 28px;
+        font-weight: 780;
+        letter-spacing: -0.035em;
+      }
+
+      .evidence-band p { margin: 0; font-size: 13px; line-height: 1.4; }
+      .evidence-band p + p { margin-top: 3px; color: #47635f; font-size: 11px; }
+
+      .feature-list { margin: 0; padding: 0; list-style: none; }
+
+      .feature-list li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 42px;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+
+      .feature-list span:last-child { color: var(--teal); font-weight: 700; }
+
+      .compact-photo {
+        width: 100%;
+        height: 130px;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+
+      .proof-hero {
+        padding: 18px;
+        background: var(--mint);
+      }
+
+      .proof-hero .score { font-size: 48px; }
+      .proof-hero h3 { margin: 2px 0 0; font-size: 20px; }
+      .proof-hero p { margin: 7px 0 0; color: #3f5e59; font-size: 13px; line-height: 1.45; }
+
+      .verified-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(11, 79, 82, 0.2);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .photo-identity {
+        position: relative;
+        min-height: 274px;
+      }
+
+      .photo-identity::after {
+        content: "";
+        position: absolute;
+        inset: 46% 0 0;
+        background: linear-gradient(transparent, rgba(7, 24, 23, 0.78));
+        pointer-events: none;
+      }
+
+      .photo-title {
+        position: absolute;
+        z-index: 1;
+        right: 18px;
+        bottom: 18px;
+        left: 18px;
+        color: white;
+      }
+
+      .photo-title .place-title { font-size: 32px; }
+      .photo-title .subline { color: rgba(255, 255, 255, 0.88); }
+
+      .community-note {
+        margin-top: 18px;
+        padding: 14px;
+        background: var(--sky);
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .community-note strong { display: block; margin-bottom: 4px; color: var(--teal-strong); }
+
+      .sticky-action {
+        position: sticky;
+        z-index: 2;
+        bottom: 0;
+        padding: 10px 18px 18px;
+        background: linear-gradient(transparent, white 24%);
+      }
+
+      .sticky-action .directions { margin-top: 10px; }
+
+      .success-sheet {
+        position: absolute;
+        z-index: 6;
+        inset: 0;
+        display: none;
+        align-items: flex-end;
+        background: rgba(7, 24, 23, 0.32);
+      }
+
+      .success-sheet.visible { display: flex; }
+
+      .sheet-content {
+        width: 100%;
+        padding: 22px 20px 30px;
+        background: white;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .sheet-content h3 { margin: 0; font-size: 22px; }
+      .sheet-content p { margin: 7px 0 16px; color: var(--muted); line-height: 1.45; }
+
+      .switcher {
+        position: fixed;
+        z-index: 10;
+        left: 50%;
+        bottom: max(16px, env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: 46px minmax(250px, auto) 46px;
+        gap: 4px;
+        align-items: center;
+        padding: 6px;
+        color: white;
+        background: #142321;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(7, 24, 23, 0.24);
+      }
+
+      .switcher button {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0;
+        color: inherit;
+        background: transparent;
+        border: 0;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .switcher button:hover { background: rgba(255, 255, 255, 0.1); }
+
+      .variant-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+      }
+
+      .variant-tabs button {
+        min-width: 72px;
+        padding: 0 9px;
+        font-size: 12px;
+        font-weight: 720;
+      }
+
+      .variant-tabs button[aria-current="true"] {
+        color: var(--teal-strong);
+        background: var(--mint);
+      }
+
+      @media (max-width: 760px) {
+        .page { width: min(100% - 20px, 520px); padding-top: 14px; }
+        .page-header { display: block; }
+        .test-controls { margin-top: 18px; }
+        .workspace { grid-template-columns: 1fr; gap: 24px; }
+        .brief { position: static; }
+        .phone { height: 720px; }
+        .switcher { grid-template-columns: 44px minmax(218px, auto) 44px; }
+        .variant-tabs button { min-width: 61px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Three structurally different detail hierarchies, switchable via ?variant=A/B/C. -->
+    <main class="page">
+      <header class="page-header">
+        <div>
+          <p class="prototype-label">Throwaway prototype · round 2</p>
+          <h1>同一個地點，哪種順序讓你最快決定前往？</h1>
+          <p class="lede">配色、照片和資料完全相同。這一輪只測「判斷＋開始前往」，避免把資訊層級和視覺風格混在一起。</p>
+        </div>
+        <div class="test-controls">
+          <div class="timer"><span id="timer">00.0</span>s<small id="timerLabel">尚未開始</small></div>
+          <button class="secondary-button primary" id="startTest">開始測試</button>
+          <button class="secondary-button" id="resetTest">重設</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="brief">
+          <div class="variant-number" id="variantNumber"></div>
+          <h2 id="variantTitle"></h2>
+          <p class="variant-purpose" id="variantPurpose"></p>
+          <ol class="attention-path" id="attentionPath"></ol>
+          <div class="question"><strong>測試方式</strong><br />按「開始測試」，把自己想成正在炎熱街道上。快速瀏覽手機畫面；當你願意前往 Riverside Library 時，按 Directions。</div>
+          <div class="state-readout" id="stateReadout"></div>
+        </aside>
+
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="screen" id="phoneScreen"></div>
+            <div class="success-sheet" id="successSheet" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+              <div class="sheet-content">
+                <h3 id="successTitle">路線已開始</h3>
+                <p id="successCopy"></p>
+                <button class="directions" id="tryAgain">再測一次</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="switcher" aria-label="切換資訊層級版本">
+      <button id="previous" aria-label="上一個版本">←</button>
+      <div class="variant-tabs">
+        <button data-variant="A">A 行動</button>
+        <button data-variant="B">B 證據</button>
+        <button data-variant="C">C 場所</button>
+      </div>
+      <button id="next" aria-label="下一個版本">→</button>
+    </nav>
+
+    <template id="sharedStatus">
+      <div class="status-bar"><span>9:41</span><span class="status-icons">● ◔ ▰</span></div>
+    </template>
+
+    <script>
+      const photo = "assets/riverside-library-prototype.png";
+      const variants = {
+        A: {
+          title: "行動優先",
+          purpose: "先回答『多遠、是否開放、怎麼去』，可信證據緊接在主要行動之後。",
+          path: ["8 分鐘、目前開放", "Directions", "18/21 人覺得涼"],
+          render: () => `
+            <div class="status-bar"><span>9:41</span><span class="status-icons">● ◔ ▰</span></div>
+            <div class="native-nav"><button class="icon-button" aria-label="返回">‹</button><span class="nav-title">Cool Spot</span><button class="icon-button" aria-label="分享">↗</button></div>
+            <img class="hero-photo" src="${photo}" alt="Riverside Library 的無障礙入口、樹蔭與室內空間" />
+            <div class="content">
+              <div class="source-row"><span class="badge">✓ Official place</span><span class="badge neutral">Library</span></div>
+              <h3 class="place-title">Riverside Library</h3>
+              <p class="subline">Tooley Street · London SE1</p>
+              <div class="facts"><span class="fact">🚶 8 min</span><span class="fact">Open until 7pm</span><span class="fact">Free</span></div>
+              <button class="directions" data-directions>↗ Directions</button>
+              <div class="evidence-band"><div class="score">18/21</div><div><p><strong>felt cool here</strong></p><p>Reports from the last 30 days</p></div></div>
+              <h4 class="section-title">What makes it useful</h4>
+              <ul class="feature-list"><li><span>Indoor cooler space</span><span>Confirmed</span></li><li><span>Seating available</span><span>Yes</span></li><li><span>Step-free entrance</span><span>Yes</span></li><li><span>Drinking water</span><span>Available</span></li></ul>
+            </div>`,
+        },
+        B: {
+          title: "證據優先",
+          purpose: "先回答『它真的能幫我降溫嗎、資料可信嗎』，確認後再提供路線。",
+          path: ["18/21 人覺得涼", "官方來源與時間範圍", "距離與 Directions"],
+          render: () => `
+            <div class="status-bar"><span>9:41</span><span class="status-icons">● ◔ ▰</span></div>
+            <div class="native-nav"><button class="icon-button" aria-label="返回">‹</button><span class="nav-title">Evidence</span><button class="icon-button" aria-label="儲存">♡</button></div>
+            <div class="proof-hero">
+              <div class="score">18 of 21</div>
+              <h3>visitors felt cool here</h3>
+              <p>Recent personal experiences—not a guarantee of current conditions.</p>
+              <div class="verified-row"><span>✓ Official place information</span><span>·</span><span>30 days</span></div>
+            </div>
+            <div class="content">
+              <img class="compact-photo" src="${photo}" alt="Riverside Library 的無障礙入口、樹蔭與室內空間" />
+              <div class="source-row" style="margin-top:14px"><span class="badge neutral">Library</span><span class="badge neutral">Free entry</span></div>
+              <h3 class="place-title">Riverside Library</h3>
+              <p class="subline">8 min walk · Open until 7pm</p>
+              <button class="directions" data-directions>↗ Directions</button>
+              <h4 class="section-title">Verified practical details</h4>
+              <ul class="feature-list"><li><span>Indoor cooler space</span><span>Confirmed</span></li><li><span>Step-free entrance</span><span>Yes</span></li><li><span>Seating</span><span>Available</span></li><li><span>Last place update</span><span>2 days ago</span></li></ul>
+            </div>`,
+        },
+        C: {
+          title: "場所優先",
+          purpose: "先用照片與場所身分回答『我要找的是哪裡』，再補實用條件與社區經驗。",
+          path: ["入口照片與場所名稱", "距離、開放、免費", "社區經驗與 Directions"],
+          render: () => `
+            <div class="status-bar"><span>9:41</span><span class="status-icons">● ◔ ▰</span></div>
+            <div class="photo-identity">
+              <img class="hero-photo large" src="${photo}" alt="Riverside Library 的無障礙入口、樹蔭與室內空間" />
+              <div class="photo-title"><div class="source-row"><span class="badge">✓ Official place</span></div><h3 class="place-title">Riverside Library</h3><p class="subline">Tooley Street · London SE1</p></div>
+            </div>
+            <div class="content">
+              <div class="facts"><span class="fact">🚶 8 min</span><span class="fact">Open until 7pm</span><span class="fact">Free</span><span class="fact">Step-free</span></div>
+              <div class="community-note"><strong>Neighbours found it useful</strong>18 of 21 recent visitors felt cool here. Several mentioned quiet seating away from the entrance.</div>
+              <h4 class="section-title">Before you go</h4>
+              <ul class="feature-list"><li><span>Indoor cooler space</span><span>Confirmed</span></li><li><span>Seating available</span><span>Yes</span></li><li><span>Drinking water</span><span>Available</span></li></ul>
+            </div>
+            <div class="sticky-action"><button class="directions" data-directions>↗ Directions · 8 min</button></div>`,
+        },
+      };
+
+      const order = ["A", "B", "C"];
+      const screen = document.getElementById("phoneScreen");
+      const timerOutput = document.getElementById("timer");
+      const timerLabel = document.getElementById("timerLabel");
+      let current = new URLSearchParams(location.search).get("variant")?.toUpperCase();
+      if (!variants[current]) current = "A";
+      let running = false;
+      let startedAt = 0;
+      let elapsed = 0;
+      let timerFrame;
+
+      function updateReadout() {
+        const state = document.getElementById("successSheet").classList.contains("visible") ? "Directions started" : "Reviewing detail";
+        document.getElementById("stateReadout").textContent = `Prototype state · Variant ${current} · ${state} · Timer ${running ? "running" : "idle/stopped"}`;
+      }
+
+      function renderVariant(key, updateUrl = true) {
+        current = key;
+        const variant = variants[key];
+        document.getElementById("variantNumber").textContent = `版本 ${key} · 3 選 1`;
+        document.getElementById("variantTitle").textContent = variant.title;
+        document.getElementById("variantPurpose").textContent = variant.purpose;
+        document.getElementById("attentionPath").replaceChildren(...variant.path.map((text) => {
+          const li = document.createElement("li");
+          li.textContent = text;
+          return li;
+        }));
+        screen.innerHTML = variant.render();
+        document.getElementById("successSheet").classList.remove("visible");
+        screen.scrollTop = 0;
+        screen.querySelectorAll("[data-directions]").forEach((button) => button.addEventListener("click", completeTest));
+        document.querySelectorAll("[data-variant]").forEach((button) => button.setAttribute("aria-current", String(button.dataset.variant === key)));
+        if (updateUrl) history.replaceState({}, "", `?variant=${key}`);
+        document.title = `Cool Spot — Round 2 · ${key}`;
+        resetTimer();
+        updateReadout();
+      }
+
+      function tick(now) {
+        if (!running) return;
+        elapsed = (now - startedAt) / 1000;
+        timerOutput.textContent = elapsed.toFixed(1).padStart(4, "0");
+        timerFrame = requestAnimationFrame(tick);
+      }
+
+      function startTest() {
+        cancelAnimationFrame(timerFrame);
+        elapsed = 0;
+        timerOutput.textContent = "00.0";
+        timerLabel.textContent = "目標：30 秒內按 Directions";
+        document.getElementById("successSheet").classList.remove("visible");
+        screen.scrollTop = 0;
+        running = true;
+        startedAt = performance.now();
+        timerFrame = requestAnimationFrame(tick);
+        updateReadout();
+      }
+
+      function resetTimer() {
+        running = false;
+        cancelAnimationFrame(timerFrame);
+        elapsed = 0;
+        timerOutput.textContent = "00.0";
+        timerLabel.textContent = "尚未開始";
+      }
+
+      function completeTest() {
+        if (running) {
+          elapsed = (performance.now() - startedAt) / 1000;
+          timerOutput.textContent = elapsed.toFixed(1).padStart(4, "0");
+        }
+        running = false;
+        cancelAnimationFrame(timerFrame);
+        timerLabel.textContent = elapsed <= 30 ? "完成：30 秒內" : "完成：超過 30 秒";
+        document.getElementById("successCopy").textContent = `版本 ${current} · ${elapsed ? elapsed.toFixed(1) + " 秒" : "未計時"}。現在記下：你按下前是否已知道它多遠、是否開放，以及為什麼可信？`;
+        document.getElementById("successSheet").classList.add("visible");
+        updateReadout();
+      }
+
+      function step(amount) {
+        const index = order.indexOf(current);
+        renderVariant(order[(index + amount + order.length) % order.length]);
+      }
+
+      document.getElementById("startTest").addEventListener("click", startTest);
+      document.getElementById("resetTest").addEventListener("click", () => { resetTimer(); document.getElementById("successSheet").classList.remove("visible"); updateReadout(); });
+      document.getElementById("tryAgain").addEventListener("click", startTest);
+      document.getElementById("previous").addEventListener("click", () => step(-1));
+      document.getElementById("next").addEventListener("click", () => step(1));
+      document.querySelectorAll("[data-variant]").forEach((button) => button.addEventListener("click", () => renderVariant(button.dataset.variant)));
+      window.addEventListener("keydown", (event) => {
+        const tag = event.target.tagName;
+        if (["INPUT", "TEXTAREA", "SELECT"].includes(tag) || event.target.isContentEditable) return;
+        if (event.key === "ArrowLeft") step(-1);
+        if (event.key === "ArrowRight") step(1);
+      });
+      window.addEventListener("popstate", () => {
+        const key = new URLSearchParams(location.search).get("variant")?.toUpperCase();
+        renderVariant(variants[key] ? key : "A", false);
+      });
+
+      renderVariant(current, false);
+    </script>
+  </body>
+</html>

@@ -1,13 +1,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .system
     @StateObject private var store = PrototypeStore()
     @State private var selectedTab: Int
     @State private var showDetailPreview: Bool
     @State private var showContributionPreview: Bool
+    private let detailPreviewSpotID: String
 
     init() {
         let arguments = ProcessInfo.processInfo.arguments
+        if let index = arguments.firstIndex(of: "--detail-spot"), arguments.indices.contains(index + 1) {
+            detailPreviewSpotID = arguments[index + 1]
+        } else {
+            detailPreviewSpotID = "library"
+        }
         let requestedTab: Int
         if arguments.contains("--saved-tab") {
             requestedTab = 1
@@ -31,19 +38,20 @@ struct ContentView: View {
                 .tabItem { Label("Saved", systemImage: "bookmark") }
                 .tag(1)
 
-            YouView(store: store)
+            YouView(store: store, appearance: $appearance)
                 .tabItem { Label("You", systemImage: "person.crop.circle") }
                 .tag(2)
         }
         .tint(AppStyle.brand)
         .sheet(isPresented: $showDetailPreview) {
-            if let spot = store.spot("library") {
+            if let spot = store.spot(detailPreviewSpotID) {
                 CoolSpotDetailView(store: store, spot: spot)
             }
         }
         .sheet(isPresented: $showContributionPreview) {
             ContributionFlow(store: store, source: .currentLocation)
         }
+        .preferredColorScheme(appearance.colorScheme)
     }
 }
 

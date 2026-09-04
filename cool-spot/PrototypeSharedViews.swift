@@ -8,7 +8,7 @@ struct SourceBadge: View {
             .foregroundStyle(.primary)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(source == .gla ? AppStyle.sunSurface : AppStyle.mint, in: Capsule())
+            .background(source == .gla ? AppStyle.mint : AppStyle.blue, in: Capsule())
     }
 }
 
@@ -19,7 +19,7 @@ struct InfoPill: View {
             .font(.subheadline.weight(.medium))
             .foregroundStyle(.primary)
             .padding(.horizontal, 12)
-            .padding(.vertical, 9)
+            .padding(.vertical, 8)
             .background(AppStyle.mint, in: Capsule())
     }
 }
@@ -28,23 +28,50 @@ struct FactRow: View {
     let symbol: String
     let title: String
     var body: some View {
-        HStack(spacing: 13) {
-            Image(systemName: symbol).foregroundStyle(AppStyle.brand).frame(width: 26)
-            Text(title).font(.subheadline)
-            Spacer()
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Image(systemName: symbol).foregroundStyle(AppStyle.brand).frame(width: 24)
+                .accessibilityHidden(true)
+            Text(title).font(.subheadline).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
         }
+        .accessibilityElement(children: .combine)
     }
 }
 
 struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(.white)
+            .foregroundStyle(isEnabled ? Color.white : Color.secondary)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical, 14)
             .padding(.horizontal, 18)
-            .background(AppStyle.ink.opacity(configuration.isPressed ? 0.76 : 1),
+            .background(isEnabled ? AppStyle.ink.opacity(configuration.isPressed ? 0.76 : 1)
+                                  : AppStyle.controlSurface,
                         in: RoundedRectangle(cornerRadius: 14))
+    }
+}
+
+struct SecondaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .foregroundStyle(isEnabled ? AppStyle.brand : Color.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 18)
+            .background(Color(uiColor: .systemBackground),
+                        in: RoundedRectangle(cornerRadius: 14))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(isEnabled ? AppStyle.brand.opacity(configuration.isPressed ? 0.48 : 0.68)
+                                      : AppStyle.subtleBorder, lineWidth: 1)
+            }
+            .opacity(configuration.isPressed ? 0.72 : 1)
     }
 }
 
@@ -143,25 +170,30 @@ struct FlowLayout: Layout {
         let result = layout(subviews, width: bounds.width)
         for (index, point) in result.points.enumerated() {
             subviews[index].place(at: CGPoint(x: bounds.minX + point.x, y: bounds.minY + point.y),
-                                  proposal: .unspecified)
+                                  proposal: ProposedViewSize(width: result.sizes[index].width,
+                                                             height: result.sizes[index].height))
         }
     }
 
-    private func layout(_ subviews: Subviews, width: CGFloat) -> (size: CGSize, points: [CGPoint]) {
+    private func layout(_ subviews: Subviews, width: CGFloat) -> (size: CGSize, points: [CGPoint], sizes: [CGSize]) {
         var points: [CGPoint] = []
+        var sizes: [CGSize] = []
         var cursor = CGPoint.zero
         var rowHeight: CGFloat = 0
         for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+            let ideal = subview.sizeThatFits(.unspecified)
+            let itemWidth = max(0, min(ideal.width, width))
+            let size = subview.sizeThatFits(ProposedViewSize(width: itemWidth, height: nil))
             if cursor.x > 0, cursor.x + size.width > width {
                 cursor.x = 0
                 cursor.y += rowHeight + spacing
                 rowHeight = 0
             }
             points.append(cursor)
+            sizes.append(CGSize(width: itemWidth, height: size.height))
             cursor.x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
         }
-        return (.init(width: width, height: cursor.y + rowHeight), points)
+        return (.init(width: width, height: cursor.y + rowHeight), points, sizes)
     }
 }

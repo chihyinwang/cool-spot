@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Cool Spot — Round 3.2</title>
+    <style>
+      :root {
+        --ink: #0d4047;
+        --ink-pressed: #092f35;
+        --mint: #c7eddb;
+        --mint-soft: #ecf8f2;
+        --sky: #d1edf5;
+        --sky-soft: #edf8fb;
+        --sun: #fac247;
+        --sun-soft: #fff0c2;
+        --canvas: #eef3f2;
+        --surface: #ffffff;
+        --label: #102c30;
+        --secondary: #4c6265;
+        --line: #d8e2e1;
+        --radius-control: 14px;
+        --radius-surface: 16px;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--label);
+        background: var(--canvas);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Noto Sans TC", sans-serif;
+      }
+
+      button { font: inherit; }
+
+      button:focus-visible {
+        outline: 3px solid #59aab4;
+        outline-offset: 3px;
+      }
+
+      .page {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 72px;
+      }
+
+      .page-header {
+        max-width: 760px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid #cfdad8;
+      }
+
+      .prototype-label {
+        display: inline-flex;
+        margin: 0 0 12px;
+        padding: 6px 8px;
+        color: #604800;
+        background: var(--sun-soft);
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 720px;
+        margin: 0;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.02;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+      }
+
+      .lede {
+        max-width: 700px;
+        margin: 13px 0 0;
+        color: var(--secondary);
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(280px, 0.8fr) minmax(393px, 1.2fr);
+        gap: clamp(34px, 7vw, 84px);
+        align-items: start;
+        margin-top: 28px;
+      }
+
+      .brief {
+        position: sticky;
+        top: 24px;
+      }
+
+      .brief h2 {
+        margin: 0 0 8px;
+        color: var(--ink);
+        font-size: 28px;
+        line-height: 1.12;
+        letter-spacing: -0.025em;
+      }
+
+      .brief > p {
+        margin: 0;
+        color: var(--secondary);
+        line-height: 1.55;
+      }
+
+      .test-list {
+        margin: 24px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .test-list li {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+        align-items: start;
+        padding: 13px 0;
+        border-bottom: 1px solid #cfdad8;
+        line-height: 1.45;
+      }
+
+      .test-list li::before {
+        display: grid;
+        width: 26px;
+        height: 26px;
+        place-items: center;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 750;
+      }
+
+      .test-list li:nth-child(1)::before { content: "1"; }
+      .test-list li:nth-child(2)::before { content: "2"; }
+      .test-list li:nth-child(3)::before { content: "3"; }
+
+      .prototype-note {
+        margin-top: 22px;
+        padding: 14px;
+        color: #29484c;
+        background: var(--sky);
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .state-controls {
+        display: grid;
+        gap: 9px;
+        margin-top: 18px;
+      }
+
+      .state-controls button {
+        min-height: 44px;
+        padding: 0 14px;
+        color: var(--ink);
+        background: transparent;
+        border: 1px solid #93aaad;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 650;
+        text-align: left;
+      }
+
+      .state-controls button:hover { background: rgba(255, 255, 255, 0.7); }
+
+      .phone-wrap { display: grid; justify-items: center; }
+
+      .phone {
+        position: relative;
+        width: min(393px, 100%);
+        height: min(844px, calc(100vh - 56px));
+        min-height: 680px;
+        overflow: hidden;
+        background: var(--surface);
+        border: 8px solid #172321;
+        border-radius: 44px;
+        box-shadow: 0 12px 32px rgba(17, 37, 34, 0.2);
+      }
+
+      .screen {
+        height: 100%;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+
+      .screen::-webkit-scrollbar { display: none; }
+
+      .photo-wrap {
+        position: relative;
+        height: 210px;
+      }
+
+      .place-photo {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 47%;
+      }
+
+      .photo-nav {
+        position: absolute;
+        inset: 12px 12px auto;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .round-button {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        place-items: center;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.94);
+        border: 0;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 24px;
+        font-weight: 620;
+      }
+
+      .content { padding: 18px 18px 116px; }
+
+      .place-title {
+        margin: 0;
+        color: var(--label);
+        font-size: 30px;
+        line-height: 1.06;
+        letter-spacing: -0.032em;
+      }
+
+      .place-meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin: 8px 0 0;
+        color: var(--secondary);
+        font-size: 14px;
+      }
+
+      .source-badge {
+        display: inline-flex;
+        min-height: 28px;
+        align-items: center;
+        gap: 6px;
+        margin-top: 13px;
+        padding: 4px 9px;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .experience {
+        margin-top: 18px;
+        padding: 16px;
+        color: white;
+        background: var(--ink);
+        border-radius: var(--radius-surface);
+      }
+
+      .experience-label {
+        margin: 0 0 7px;
+        color: #bfe8e2;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .experience h3 {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.12;
+        letter-spacing: -0.022em;
+      }
+
+      .experience-meta {
+        margin: 7px 0 0;
+        color: #d4e6e4;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .section-heading { margin: 22px 0 8px; }
+
+      .section-heading h3 {
+        margin: 0;
+        font-size: 19px;
+        line-height: 1.25;
+        letter-spacing: -0.015em;
+      }
+
+      .section-source {
+        margin: 4px 0 0;
+        color: var(--secondary);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .feature-list,
+      .planning-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .feature-row,
+      .planning-row {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 10px;
+        align-items: center;
+        min-height: 48px;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+        font-weight: 620;
+      }
+
+      .feature-icon,
+      .planning-icon {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 50%;
+        font-size: 15px;
+      }
+
+      .planning-icon { background: var(--sky); }
+
+      .feature-extra-list[hidden] { display: none; }
+
+      .disclosure {
+        display: flex;
+        width: 100%;
+        min-height: 46px;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+        color: var(--ink);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 720;
+      }
+
+      .disclosure .chevron { transition: transform 180ms ease-out; }
+      .disclosure[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+      .bottom-actions {
+        position: absolute;
+        z-index: 5;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+        gap: 10px;
+        padding: 10px 16px 18px;
+        background: rgba(255, 255, 255, 0.94);
+        border-top: 1px solid var(--line);
+        backdrop-filter: blur(16px);
+      }
+
+      .primary-action,
+      .secondary-action,
+      .presence-action,
+      .report-choice {
+        min-height: 50px;
+        border-radius: var(--radius-control);
+        cursor: pointer;
+        font-weight: 720;
+      }
+
+      .primary-action {
+        color: white;
+        background: var(--ink);
+        border: 1px solid var(--ink);
+      }
+
+      .primary-action:active { background: var(--ink-pressed); }
+
+      .secondary-action {
+        color: var(--ink);
+        background: white;
+        border: 1px solid #88a1a4;
+      }
+
+      .live-presence {
+        margin-top: 24px;
+        padding: 15px;
+        background: var(--sky-soft);
+        border-radius: var(--radius-surface);
+      }
+
+      .presence-title {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .presence-dot {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 50%;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .presence-title h3 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.2;
+      }
+
+      .presence-title p,
+      .presence-explainer,
+      .presence-privacy,
+      .presence-success p {
+        margin: 3px 0 0;
+        color: var(--secondary);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .presence-explainer { margin-top: 11px; }
+
+      .presence-privacy { margin-top: 8px; }
+
+      .presence-action {
+        width: 100%;
+        margin-top: 12px;
+        color: white;
+        background: var(--ink);
+        border: 1px solid var(--ink);
+      }
+
+      .presence-action[hidden],
+      .presence-privacy[hidden],
+      .presence-success[hidden] {
+        display: none;
+      }
+
+      .presence-success {
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        gap: 9px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #b9dce3;
+      }
+
+      .presence-success-icon {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        place-items: center;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .presence-success strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.3;
+      }
+
+      .presence-remove {
+        min-height: 44px;
+        margin-top: 2px;
+        padding: 0;
+        color: var(--ink);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        text-align: left;
+      }
+
+      .visit-report {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid #b9dce3;
+      }
+
+      .visit-report[hidden] { display: none; }
+
+      .visit-report h4 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.25;
+      }
+
+      .visit-report > p {
+        margin: 5px 0 11px;
+        color: var(--secondary);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .report-choices { display: grid; gap: 8px; }
+
+      .report-choice {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 12px;
+        color: var(--ink);
+        background: white;
+        border: 1px solid #9eaeac;
+        text-align: left;
+      }
+
+      .report-choice[aria-pressed="true"] {
+        color: white;
+        background: var(--ink);
+        border-color: var(--ink);
+      }
+
+      .report-choice[aria-pressed="true"]::after { content: "✓"; }
+
+      .report-note {
+        min-height: 18px;
+        margin: 9px 0 0;
+        color: #3d573f;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .reset {
+        width: 100%;
+        min-height: 44px;
+        margin-top: 14px;
+        color: var(--secondary);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      @media (max-width: 760px) {
+        .page { width: min(100% - 20px, 520px); padding-top: 14px; }
+        .workspace { grid-template-columns: 1fr; gap: 24px; }
+        .brief { position: static; }
+        .phone { height: 760px; }
+      }
+
+      body.capture {
+        width: 393px;
+        min-height: 844px;
+        overflow: hidden;
+        background: white;
+      }
+
+      body.capture .page {
+        width: 393px;
+        margin: 0;
+        padding: 0;
+      }
+
+      body.capture .page-header,
+      body.capture .brief {
+        display: none;
+      }
+
+      body.capture .workspace {
+        display: block;
+        margin: 0;
+      }
+
+      body.capture .phone {
+        width: 393px;
+        height: 844px;
+        min-height: 844px;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition-duration: 0.01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-header">
+        <p class="prototype-label">Throwaway prototype · round 3.2</p>
+        <h1>按鈕說目的，定位只是背後的檢查</h1>
+        <p class="lede">這輪測試第一次看到區塊時，使用者能否在點擊前理解「我在這裡降溫」會匿名增加公開人數，以及成功後別人會看到什麼。</p>
+      </header>
+
+      <section class="workspace">
+        <aside class="brief">
+          <h2>先讀，再點一次</h2>
+          <p>不要先看操作說明。先只讀手機裡的區塊，確認你能不能預測按鈕的結果。</p>
+          <ol class="test-list">
+            <li><span>第一次看到時：能否理解 <strong>I’m cooling off here</strong> 會讓其他人知道這個場所正在被使用？</span></li>
+            <li><span>直接點一次：位置確認與匿名分享會一起完成，不再要求先按 Use My Location。</span></li>
+            <li><span>成功後：確認訊息是否清楚交代別人看到的是人數、看不到你的身分，而且十分鐘後自動結束。</span></li>
+          </ol>
+          <div class="prototype-note"><strong>資料規則：</strong>Cooling Features 是可複選的訪客回報。主畫面列出所有成立的特徵，但不在每一項旁邊放人數。</div>
+          <div class="state-controls" aria-label="快速切換原型狀態">
+            <button id="showUnknown">第一次看到 · 尚未確認位置</button>
+            <button id="showAway">不在附近 · 只顯示功能說明</button>
+            <button id="showNearby">已知人在附近 · 可以分享</button>
+            <button id="showEverything">直接展開全部 Features</button>
+            <button id="showReport">已告知他人 · 顯示體感回報</button>
+          </div>
+        </aside>
+
+        <div class="phone-wrap">
+          <div class="phone" aria-label="Cool Spot 場所詳情互動原型">
+            <div class="screen" id="screen">
+              <div class="photo-wrap">
+                <img class="place-photo" src="assets/riverside-library-prototype.png" alt="Riverside Library 的入口、樹蔭與室內空間" />
+                <div class="photo-nav">
+                  <button class="round-button" aria-label="返回">‹</button>
+                  <button class="round-button" aria-label="更多選項">•••</button>
+                </div>
+              </div>
+
+              <div class="content">
+                <h2 class="place-title">Riverside Library</h2>
+                <p class="place-meta"><span aria-hidden="true">↗</span><span>7 min walk · Tooley Street</span></p>
+                <div class="source-badge"><span aria-hidden="true">✓</span> Official Cool Space</div>
+
+                <section class="experience" aria-labelledby="experience-title">
+                  <p class="experience-label">Most visitors said</p>
+                  <h3 id="experience-title">Much cooler than outside</h3>
+                  <p class="experience-meta">8 reports in the past 7 days · Latest 2 hours ago</p>
+                </section>
+
+                <section aria-labelledby="features-title">
+                  <div class="section-heading">
+                    <h3 id="features-title">Why it may help you cool down</h3>
+                    <p class="section-source">Based on recent visitor reports</p>
+                  </div>
+                  <ul class="feature-list">
+                    <li class="feature-row"><span class="feature-icon" aria-hidden="true">❄</span><span>Air conditioning</span></li>
+                    <li class="feature-row"><span class="feature-icon" aria-hidden="true">⌂</span><span>Cooler indoor space</span></li>
+                    <li class="feature-row"><span class="feature-icon" aria-hidden="true">♒</span><span>Drinking water</span></li>
+                  </ul>
+                  <button class="disclosure" id="featureDisclosure" aria-expanded="false">
+                    <span class="disclosure-label">Show all 7 cooling features</span>
+                    <span class="chevron" aria-hidden="true">⌄</span>
+                  </button>
+                  <ul class="feature-list feature-extra-list" id="featureExtras" hidden>
+                    <li class="feature-row"><span class="feature-icon" aria-hidden="true">≋</span><span>Natural ventilation</span></li>
+                    <li class="feature-row"><span class="feature-icon" aria-hidden="true">⌁</span><span>Structural shade</span></li>
+                    <li class="feature-row"><span class="feature-icon" aria-hidden="true">♣</span><span>Tree shade</span></li>
+                    <li class="feature-row"><span class="feature-icon" aria-hidden="true">≈</span><span>Water nearby</span></li>
+                  </ul>
+                </section>
+
+                <section class="live-presence" data-location-state="unknown" aria-labelledby="presence-title">
+                  <div class="presence-title">
+                    <span class="presence-dot" id="presenceCount" aria-hidden="true">2</span>
+                    <div>
+                      <h3 id="presence-title">2 people are cooling off here</h3>
+                      <p>From people who tapped “I’m cooling off here” in the last 10 minutes</p>
+                    </div>
+                  </div>
+                  <p class="presence-explainer" id="presenceExplainer" aria-live="polite">If you’re here too, let others know this Cool Spot is being used. They’ll see the number increase, not who you are.</p>
+                  <button class="presence-action" id="presenceAction">I’m cooling off here</button>
+                  <p class="presence-privacy" id="presencePrivacy">We’ll briefly check that you’re near this place. Your location isn’t shared.</p>
+
+                  <div class="presence-success" id="presenceSuccess" role="status" hidden>
+                    <span class="presence-success-icon" aria-hidden="true">✓</span>
+                    <div>
+                      <strong>You’ve let others know you’re here</strong>
+                      <p>They can see one more person cooling off here, but not your identity. This ends automatically in 10 minutes.</p>
+                      <button class="presence-remove" id="presenceRemove">Remove me from this number</button>
+                    </div>
+                  </div>
+
+                  <div class="visit-report" id="visitReport" hidden>
+                    <h4>How did it feel compared with outside?</h4>
+                    <p>Optional. This describes your experience; it does not change the number of people shown above.</p>
+                    <div class="report-choices">
+                      <button class="report-choice" aria-pressed="false">Not cooler</button>
+                      <button class="report-choice" aria-pressed="false">A little cooler</button>
+                      <button class="report-choice" aria-pressed="false">Much cooler</button>
+                    </div>
+                    <p class="report-note" id="reportNote" aria-live="polite"></p>
+                  </div>
+                </section>
+
+                <section aria-labelledby="planning-title">
+                  <div class="section-heading">
+                    <h3 id="planning-title">Plan your visit</h3>
+                  </div>
+                  <ul class="planning-list">
+                    <li class="planning-row"><span class="planning-icon" aria-hidden="true">£</span><span>Free to enter</span></li>
+                    <li class="planning-row"><span class="planning-icon" aria-hidden="true">▱</span><span>Seating available</span></li>
+                    <li class="planning-row"><span class="planning-icon" aria-hidden="true">◷</span><span>Opening hours not verified</span></li>
+                  </ul>
+                </section>
+
+                <button class="reset" id="resetInside">Reset prototype state</button>
+              </div>
+            </div>
+            <div class="bottom-actions" aria-label="場所操作">
+              <button class="primary-action">↗ Directions</button>
+              <button class="secondary-action">♡ Save</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const screen = document.getElementById("screen");
+      const disclosure = document.getElementById("featureDisclosure");
+      const disclosureLabel = disclosure.querySelector(".disclosure-label");
+      const featureExtras = document.getElementById("featureExtras");
+      const presenceAction = document.getElementById("presenceAction");
+      const presenceExplainer = document.getElementById("presenceExplainer");
+      const presencePrivacy = document.getElementById("presencePrivacy");
+      const presenceCount = document.getElementById("presenceCount");
+      const presenceTitle = document.getElementById("presence-title");
+      const presenceSuccess = document.getElementById("presenceSuccess");
+      const presenceRemove = document.getElementById("presenceRemove");
+      const livePresence = document.querySelector(".live-presence");
+      const visitReport = document.getElementById("visitReport");
+      const reportChoices = Array.from(document.querySelectorAll(".report-choice"));
+      const reportNote = document.getElementById("reportNote");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      function setFeaturesExpanded(expanded) {
+        disclosure.setAttribute("aria-expanded", String(expanded));
+        disclosureLabel.textContent = expanded ? "Show fewer cooling features" : "Show all 7 cooling features";
+        featureExtras.hidden = !expanded;
+      }
+
+      let locationState = "unknown";
+
+      function setPresence(active) {
+        if (locationState !== "nearby") return;
+        presenceAction.hidden = active;
+        presencePrivacy.hidden = active;
+        presenceSuccess.hidden = !active;
+        presenceCount.textContent = active ? "3" : "2";
+        presenceTitle.textContent = active
+          ? "3 people are cooling off here"
+          : "2 people are cooling off here";
+        visitReport.hidden = !active;
+      }
+
+      function setLocationState(nextState) {
+        locationState = nextState;
+        livePresence.dataset.locationState = nextState;
+        presenceCount.textContent = "2";
+        presenceTitle.textContent = "2 people are cooling off here";
+        presenceSuccess.hidden = true;
+        visitReport.hidden = true;
+
+        if (nextState === "unknown") {
+          presenceExplainer.textContent = "If you’re here too, let others know this Cool Spot is being used. They’ll see the number increase, not who you are.";
+          presenceAction.hidden = false;
+          presenceAction.textContent = "I’m cooling off here";
+          presencePrivacy.hidden = false;
+          presencePrivacy.textContent = "We’ll briefly check that you’re near this place. Your location isn’t shared.";
+        } else if (nextState === "away") {
+          presenceExplainer.textContent = "When you’re at this place, you can let others know it’s being used for cooling. Other people will see only the number, not your identity.";
+          presenceAction.hidden = true;
+          presenceAction.textContent = "I’m cooling off here";
+          presencePrivacy.hidden = false;
+          presencePrivacy.textContent = "This option becomes available when you’re nearby.";
+        } else {
+          presenceExplainer.textContent = "If you’re here too, let others know this Cool Spot is being used. They’ll see the number increase, not who you are.";
+          presenceAction.hidden = false;
+          presenceAction.textContent = "I’m cooling off here";
+          presencePrivacy.hidden = false;
+          presencePrivacy.textContent = "Your location was checked once and isn’t shared.";
+        }
+      }
+
+      function resetPrototype() {
+        setFeaturesExpanded(false);
+        setLocationState("unknown");
+        reportChoices.forEach((choice) => choice.setAttribute("aria-pressed", "false"));
+        reportNote.textContent = "";
+        screen.scrollTop = 0;
+      }
+
+      disclosure.addEventListener("click", () => {
+        setFeaturesExpanded(disclosure.getAttribute("aria-expanded") !== "true");
+      });
+
+      presenceAction.addEventListener("click", () => {
+        if (locationState === "unknown") {
+          setLocationState("nearby");
+        }
+        setPresence(true);
+        requestAnimationFrame(() => presenceSuccess.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "nearest" }));
+      });
+
+      presenceRemove.addEventListener("click", () => setPresence(false));
+
+      reportChoices.forEach((choice) => choice.addEventListener("click", () => {
+        reportChoices.forEach((item) => item.setAttribute("aria-pressed", String(item === choice)));
+        reportNote.textContent = "Selected. What helped can be asked as an optional next step.";
+      }));
+
+      document.getElementById("showUnknown").addEventListener("click", resetPrototype);
+      document.getElementById("showAway").addEventListener("click", () => setLocationState("away"));
+      document.getElementById("showNearby").addEventListener("click", () => {
+        setLocationState("nearby");
+        requestAnimationFrame(() => livePresence.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "center" }));
+      });
+      document.getElementById("showEverything").addEventListener("click", () => {
+        setFeaturesExpanded(true);
+        screen.scrollTop = 280;
+      });
+      document.getElementById("showReport").addEventListener("click", () => {
+        setLocationState("nearby");
+        setPresence(true);
+        requestAnimationFrame(() => visitReport.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "center" }));
+      });
+      document.getElementById("resetInside").addEventListener("click", resetPrototype);
+      resetPrototype();
+
+      const prototypeParams = new URLSearchParams(window.location.search);
+      const requestedState = prototypeParams.get("state");
+
+      if (requestedState === "away") setLocationState("away");
+      if (requestedState === "nearby") setLocationState("nearby");
+      if (requestedState === "shared") {
+        setLocationState("nearby");
+        setPresence(true);
+      }
+
+      if (prototypeParams.get("capture") === "1") {
+        document.body.classList.add("capture");
+        requestAnimationFrame(() => {
+          const targetTop = livePresence.offsetTop - (screen.clientHeight - livePresence.offsetHeight) / 2;
+          screen.scrollTop = Math.max(0, targetTop);
+        });
+      }
+    </script>
+  </body>
+</html>

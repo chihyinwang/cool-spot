@@ -258,3 +258,44 @@ This blocker was fixed during the test round and the prototype was rebuilt succe
 - Newly **Published**, **Added to an existing Cool Spot**, or **Not published** outcomes can appear in recent activity.
 - Older completed outcomes move to the full contribution history.
 - Prototype controls remain testing instrumentation only; they are not part of the intended user-facing product.
+
+## Follow-up hypothesis — progressive live presence
+
+**Status: selected for the next prototype; not yet validated by usability testing.**
+
+After reviewing three interaction structures, the project selected a progressive live-presence hypothesis for the next test:
+
+1. A dedicated **I'm cooling off here** action sits after reviewed cooling features. On first encounter, a dismissible contextual tip explains the public anonymous ten-minute effect; a compact permanent privacy line and **How this works** sheet keep the explanation recoverable without leaving a large instruction block on every visit.
+2. A successful action updates Live Presence, then reveals an optional relative-experience shortcut on the same place detail rather than presenting two competing actions up front. A separate **Share how it felt** entry remains in **Recent visitor reports**; sharing Live Presence is never a prerequisite for reporting an experience.
+3. The public count describes people using the place to cool down; it must not be presented as proof that the place feels cooler, has capacity or has seats available.
+4. The optional Visit Report asks **How did it feel compared with outside?** using **Not cooler**, **A little cooler**, and **Much cooler**, followed by optional concrete causes. The selected answer is carried into the report form and nothing publishes until the person confirms.
+5. A Saved Location remains a private memory aid. Its detail may show **No cooling information yet** and offer **Add cooling information**, but saving does not imply an intention to contribute or confirm a visit.
+
+The next test must determine whether people understand the live action before tapping, whether the first-time tip is useful without making the screen feel instructional, whether the persistent **How this works** route is discoverable, whether a disabled nearby-only action creates frustration, whether the progressive question feels lightweight, and whether the distinction between current use and cooling effectiveness survives the combined flow. Until that test runs, these statements remain design hypotheses rather than confirmed findings.
+
+### Implementation review correction — report access
+
+The first SwiftUI translation exposed the report form only after sharing Live Presence. Project review identified this as an unintended prerequisite: someone reporting an ineffective visit should not first have to publicly state that they are cooling off there. The correction restores an independent report entry while retaining the post-presence shortcut and the same proximity / 24-hour eligibility rule. This is a confirmed implementation gap, not a usability-test result; discoverability of the independent entry still needs testing.
+
+## Information-first revision — 3 September 2026
+
+**Status: implemented after owner prioritisation and expert critique; not yet participant-validated.**
+
+The owner clarified that providing understandable information is the app’s primary value; gathering new reports is secondary. This supersedes the earlier hypothesis that placed the full live-presence invitation before visit-planning information.
+
+### Confirmed implementation defects addressed
+
+- The fixed “Most visitors said” label overstated agreement in the 6/14 park fixture. The summary now uses an exact fraction, with explicit tied and zero-report states.
+- A submitted report changed counts without updating Latest. Submitted reports now carry a timestamp and freshness is derived from the same place’s available reports.
+- The two-column utility bar and unconstrained feature pills broke at the largest accessibility text size. Actions now stack at accessibility sizes, and individual flow items are measured and placed within the available width.
+- Custom primary buttons looked enabled when disabled. Both shared button styles now represent disabled state, with an explicit selection requirement before report publication.
+
+### New layout hypothesis to test
+
+- Entry cost, seating and unverified opening hours appear with place identity.
+- All three experience counts sit directly under the cooling summary, so contrary responses are not buried below contribution UI.
+- Cooling features retain the three-item preview and complete expandable list, without invented per-feature vote counts.
+- The current-use count remains near the cooling information, while the live-presence contribution action moves below the visitor details and is visually secondary.
+- Photo, palette, Directions/Save, the independent report path and post-presence shortcut remain. The questionnaire has not been redesigned in this pass.
+
+Success still needs a timed participant test: can someone explain whether they would go, why, and what is unknown in 30 seconds? A correct decision not to go also counts. Native runtime verification and unit tests are not evidence of improved participant comprehension or completion rates.

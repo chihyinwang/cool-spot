@@ -174,3 +174,16 @@ Do not repeat all six missions. Only recheck the interactions that failed:
 4. **Open You:** explain the page’s purpose, the three contribution counts, sign-in benefit, current review outcomes and the new Cool Hunt goal. Confirm that long history has a separate destination.
 
 For each interaction, stop as soon as the intended action is either obvious or cannot be found. The retest is intended to validate the corrections, not begin another open-ended feature-discovery round.
+
+## Information-first retest
+
+Run this before further contribution-flow design. Do not coach the participant with interface labels.
+
+1. **Decision, 30 seconds:** Open Riverside Library. “You are hot and want to cool down. Would you go here? Tell me what you based that on and what you still need to know.” Record whether they notice experience, sample size, features, entry/seating and unknown hours. Do not require a Directions tap: a well-supported decision not to go is valid.
+2. **Conflicting evidence:** Open Shade beside the playground. Ask what the reports tell them, without mentioning “majority.” Check whether 6/14 is understood alongside the 5 Not cooler responses rather than interpreted as broad agreement.
+3. **Complete information:** Ask them to find every cooling feature and explain whether the people count proves that it feels cool or has seats available.
+4. **Secondary contribution regression:** Ask them to report an ineffective visit at the nearby library without first sharing presence. Verify a blank initial choice, explicit Publish, updated count and Latest, and unchanged people count. Separately verify the preselected shortcut after sharing presence.
+
+Developer checks: empty and tied response sets; single-report grammar; timestamp isolation by place; original proximity/24-hour rules; disabled controls; normal and largest Dynamic Type; Light and Dark Mode. All data and location remain simulated, and relaunch resets state. Do not treat these checks as participant findings.
+
+For repeatable native inspection, `--detail-preview` opens the library; `--detail-preview --detail-spot shade` opens the conflicting-evidence / away fixture. These are prototype launch arguments, not user-facing controls.

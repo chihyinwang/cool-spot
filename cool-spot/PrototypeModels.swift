@@ -6,6 +6,31 @@ import UIKit
 // Question: can people distinguish discovering, privately saving, visiting,
 // and contributing reviewed public cooling information?
 
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    static let storageKey = "appAppearance"
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: "Match System"
+        case .light: "Light"
+        case .dark: "Dark"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+}
+
 enum AppStyle {
     // A fixed dark fill used only when the foreground is explicitly white.
     static let ink = Color(red: 0.05, green: 0.25, blue: 0.28)
@@ -119,6 +144,30 @@ enum CoolingFeature: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
+enum CoolingExperience: String, CaseIterable, Identifiable, Hashable {
+    case notCooler = "Not cooler"
+    case aLittleCooler = "A little cooler"
+    case muchCooler = "Much cooler"
+
+    var id: String { rawValue }
+
+    var symbol: String {
+        switch self {
+        case .notCooler: "sun.max"
+        case .aLittleCooler: "wind"
+        case .muchCooler: "snowflake"
+        }
+    }
+
+    var summary: String {
+        switch self {
+        case .notCooler: "Not cooler than outside"
+        case .aLittleCooler: "A little cooler than outside"
+        case .muchCooler: "Much cooler than outside"
+        }
+    }
+}
+
 enum AccessType: String, CaseIterable, Identifiable {
     case free = "Free to enter"
     case purchase = "Purchase expected"
@@ -169,11 +218,11 @@ struct CoolSpot: Identifiable {
     let seating: SeatingType
     let distance: String
     let presenceCount: Int
-    let coolReports: Int
-    let notCoolReports: Int
+    let experienceReports: [CoolingExperience: Int]
+    let latestReportAt: Date
     let stayReports: [StayLength: Int]
     let comments: [String]
-    let isNearby: Bool
+    var isNearby: Bool
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
@@ -262,9 +311,37 @@ struct Contribution: Identifiable {
 struct VisitReport: Identifiable {
     let id: UUID
     let spotID: String
-    let foundCool: Bool
+    let experience: CoolingExperience
+    let helpedFeatures: Set<CoolingFeature>
     let stayLength: StayLength?
     let comment: String
+    let submittedAt: Date
+}
+
+struct CoolingEvidence: Equatable {
+    let counts: [CoolingExperience: Int]
+
+    var total: Int { counts.values.reduce(0, +) }
+
+    // A plurality is not a majority. Ties and no evidence have no single leader.
+    var leadingExperience: CoolingExperience? {
+        guard total > 0, let largest = counts.values.max() else { return nil }
+        let leaders = CoolingExperience.allCases.filter { counts[$0, default: 0] == largest }
+        return leaders.count == 1 ? leaders.first : nil
+    }
+
+    var headline: String {
+        guard total > 0 else { return "No visitor reports yet" }
+        return leadingExperience?.summary ?? "Visitors had different experiences"
+    }
+
+    var attribution: String {
+        if total == 1 { return "1 visitor reported" }
+        guard let leadingExperience else {
+            return "\(total) visitor reports"
+        }
+        return "\(counts[leadingExperience, default: 0]) of \(total) reports said"
+    }
 }
 
 @MainActor
@@ -274,6 +351,8 @@ final class PrototypeStore: ObservableObject {
     @Published var contributions = Fixtures.contributions
     @Published var visitReports: [VisitReport] = []
     @Published var activePresenceSpotID: String?
+    // Prototype-only visit eligibility. No public presence is created by starting a report.
+    @Published private(set) var visitConfirmedAt: [String: Date] = [:]
     @Published var unlockedTypes: Set<PlaceType> = [.library, .park]
     @Published var isSignedIn = false
 
@@ -323,27 +402,76 @@ final class PrototypeStore: ObservableObject {
         spot.presenceCount + (activePresenceSpotID == spot.id ? 1 : 0)
     }
 
-    func checkIn(_ spot: CoolSpot) {
+    func checkIn(_ spot: CoolSpot, at now: Date = .now) {
         guard spot.isNearby else { return }
+        visitConfirmedAt[spot.id] = now
         activePresenceSpotID = spot.id
         unlockedTypes.insert(spot.type)
+    }
+
+    func canReportVisit(for spot: CoolSpot, at now: Date = .now) -> Bool {
+        if spot.isNearby { return true }
+        guard let confirmedAt = visitConfirmedAt[spot.id] else { return false }
+        let elapsed = now.timeIntervalSince(confirmedAt)
+        return elapsed >= 0 && elapsed < 24 * 60 * 60
+    }
+
+    @discardableResult
+    func beginVisitReport(for spot: CoolSpot, at now: Date = .now) -> Bool {
+        guard canReportVisit(for: spot, at: now) else { return false }
+        if spot.isNearby { visitConfirmedAt[spot.id] = now }
+        return true
     }
 
     func submitContribution(title: String, kind: ContributionKind) {
         contributions.insert(.init(id: UUID(), title: title, kind: kind, status: .inReview, createdAt: .now), at: 0)
     }
 
-    func submitReport(spot: CoolSpot, foundCool: Bool, stay: StayLength?, comment: String) {
-        visitReports.insert(.init(id: UUID(), spotID: spot.id, foundCool: foundCool,
-                                  stayLength: stay, comment: comment), at: 0)
+    @discardableResult
+    func submitReport(spot: CoolSpot, experience: CoolingExperience,
+                      helpedFeatures: Set<CoolingFeature>, stay: StayLength?, comment: String,
+                      at now: Date = .now) -> Bool {
+        guard beginVisitReport(for: spot, at: now) else { return false }
+        visitReports.insert(.init(id: UUID(), spotID: spot.id, experience: experience,
+                                  helpedFeatures: helpedFeatures, stayLength: stay,
+                                  comment: comment, submittedAt: now), at: 0)
         contributions.insert(.init(id: UUID(), title: spot.name, kind: .visitReport,
-                                   status: .published, createdAt: .now), at: 0)
+                                   status: .published, createdAt: now), at: 0)
+        return true
     }
 
     func reportCounts(for spot: CoolSpot) -> (Int, Int) {
-        let reports = visitReports.filter { $0.spotID == spot.id }
-        return (spot.coolReports + reports.filter(\.foundCool).count,
-                spot.notCoolReports + reports.filter { !$0.foundCool }.count)
+        let reports = experienceCounts(for: spot)
+        return (reports[.aLittleCooler, default: 0] + reports[.muchCooler, default: 0],
+                reports[.notCooler, default: 0])
+    }
+
+    func experienceCounts(for spot: CoolSpot) -> [CoolingExperience: Int] {
+        var result = spot.experienceReports
+        for report in visitReports where report.spotID == spot.id {
+            result[report.experience, default: 0] += 1
+        }
+        return result
+    }
+
+    func leadingExperience(for spot: CoolSpot) -> CoolingExperience? {
+        coolingEvidence(for: spot).leadingExperience
+    }
+
+    func coolingEvidence(for spot: CoolSpot) -> CoolingEvidence {
+        CoolingEvidence(counts: experienceCounts(for: spot))
+    }
+
+    func latestReportDate(for spot: CoolSpot) -> Date? {
+        var dates = visitReports.filter { $0.spotID == spot.id }.map(\.submittedAt)
+        if spot.experienceReports.values.reduce(0, +) > 0 {
+            dates.append(spot.latestReportAt)
+        }
+        return dates.max()
+    }
+
+    func experienceReportTotal(for spot: CoolSpot) -> Int {
+        experienceCounts(for: spot).values.reduce(0, +)
     }
 
     func comments(for spot: CoolSpot) -> [String] {
@@ -373,23 +501,28 @@ enum Fixtures {
     static let spots: [CoolSpot] = [
         .init(id: "library", name: "Riverside Library", address: "Tooley Street, London SE1",
               latitude: 51.5045, longitude: -0.0865, source: .gla, environment: .indoors,
-              type: .library, features: [.coolerIndoors, .ventilation, .drinkingWater],
+              type: .library,
+              features: [.airConditioning, .coolerIndoors, .drinkingWater, .ventilation,
+                         .structuralShade, .treeShade, .waterFeature],
               access: .free, seating: .available, distance: "6 min walk", presenceCount: 2,
-              coolReports: 18, notCoolReports: 3,
+              experienceReports: [.notCooler: 1, .aLittleCooler: 2, .muchCooler: 5],
+              latestReportAt: .now.addingTimeInterval(-7_200),
               stayReports: [.under30: 1, .under60: 4, .under120: 7, .over120: 2],
               comments: ["Quiet upstairs, with tables away from the windows."], isNearby: true),
         .init(id: "shade", name: "Shade beside the playground", address: "Mint Street Park, London SE1",
               latitude: 51.5030, longitude: -0.0982, source: .community, environment: .outdoors,
               type: .park, features: [.treeShade, .drinkingWater], access: .free,
               seating: .limited, distance: "11 min walk", presenceCount: 0,
-              coolReports: 9, notCoolReports: 5,
+              experienceReports: [.notCooler: 5, .aLittleCooler: 6, .muchCooler: 3],
+              latestReportAt: .now.addingTimeInterval(-18_000),
               stayReports: [.under15: 2, .under30: 5, .under60: 2],
               comments: ["The bench by the brick wall stays shaded in late afternoon."], isNearby: false),
         .init(id: "museum", name: "City Gallery Foyer", address: "Bankside, London SE1",
               latitude: 51.5074, longitude: -0.0991, source: .community, environment: .indoors,
               type: .culture, features: [.airConditioning, .coolerIndoors], access: .free,
               seating: .available, distance: "14 min walk", presenceCount: 1,
-              coolReports: 12, notCoolReports: 1,
+              experienceReports: [.notCooler: 1, .aLittleCooler: 3, .muchCooler: 9],
+              latestReportAt: .now.addingTimeInterval(-10_800),
               stayReports: [.under30: 2, .under60: 3, .under120: 1], comments: [], isNearby: false)
     ]
 

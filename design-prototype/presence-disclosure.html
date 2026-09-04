@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Cool Spot — Presence disclosure prototype</title>
+    <style>
+      :root {
+        --ink: #0d4047;
+        --ink-pressed: #092f35;
+        --mint: #c7eddb;
+        --sky-soft: #edf8fb;
+        --surface: #ffffff;
+        --canvas: #e9efee;
+        --label: #102c30;
+        --secondary: #4c6265;
+        --line: #d8e2e1;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        display: grid;
+        min-height: 100vh;
+        margin: 0;
+        place-items: center;
+        color: var(--label);
+        background: var(--canvas);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      }
+
+      button { font: inherit; }
+
+      .stage {
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+        padding: 20px;
+      }
+
+      .prototype-caption {
+        margin: 0;
+        color: #436064;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .phone {
+        position: relative;
+        width: 390px;
+        height: 844px;
+        overflow: hidden;
+        background: var(--surface);
+        border: 7px solid #172321;
+        border-radius: 44px;
+        box-shadow: 0 12px 28px rgba(17, 37, 34, 0.18);
+      }
+
+      .screen {
+        height: 100%;
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      .status-bar {
+        position: absolute;
+        z-index: 5;
+        inset: 0 0 auto;
+        display: flex;
+        height: 34px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 20px 0;
+        color: white;
+        font-size: 12px;
+        font-weight: 750;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.42);
+      }
+
+      .photo-wrap {
+        position: relative;
+        height: 144px;
+      }
+
+      .place-photo {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 48%;
+      }
+
+      .photo-nav {
+        position: absolute;
+        inset: 40px 12px auto;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .round-button {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        place-items: center;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.95);
+        border: 0;
+        border-radius: 50%;
+        font-size: 23px;
+        font-weight: 650;
+      }
+
+      .content { padding: 14px 16px 96px; }
+
+      .place-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .place-title {
+        margin: 0;
+        font-size: 27px;
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .place-meta {
+        margin: 5px 0 0;
+        color: var(--secondary);
+        font-size: 13px;
+      }
+
+      .source-badge {
+        display: inline-flex;
+        flex: none;
+        min-height: 28px;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 720;
+      }
+
+      .experience {
+        margin-top: 13px;
+        padding: 13px 14px;
+        color: white;
+        background: var(--ink);
+        border-radius: 14px;
+      }
+
+      .experience p { margin: 0; }
+      .experience-label { color: #bfe8e2; font-size: 11px; font-weight: 700; }
+      .experience strong { display: block; margin-top: 4px; font-size: 21px; line-height: 1.15; }
+      .experience-meta { margin-top: 5px !important; color: #d4e6e4; font-size: 11px; }
+
+      .features {
+        margin-top: 15px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .section-title {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.25;
+        letter-spacing: -0.012em;
+      }
+
+      .feature-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 9px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .feature-list li {
+        display: flex;
+        min-height: 32px;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        color: #234e54;
+        background: #eff7f4;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .show-all {
+        min-height: 36px;
+        padding: 0 3px;
+        color: var(--ink);
+        background: transparent;
+        border: 0;
+        font-size: 12px;
+        font-weight: 720;
+      }
+
+      .presence {
+        position: relative;
+        margin-top: 14px;
+        padding: 14px;
+        background: var(--sky-soft);
+        border-radius: 15px;
+      }
+
+      .presence-heading {
+        display: grid;
+        grid-template-columns: 35px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .presence-count {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 50%;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .presence-heading h3 {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.18;
+        letter-spacing: -0.01em;
+      }
+
+      .presence-heading p,
+      .presence-purpose,
+      .presence-meta {
+        margin: 3px 0 0;
+        color: #436267;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .presence-purpose {
+        margin-top: 10px;
+        color: #274d52;
+        font-size: 12px;
+      }
+
+      .presence-action {
+        width: 100%;
+        min-height: 46px;
+        margin-top: 11px;
+        color: white;
+        background: var(--ink);
+        border: 0;
+        border-radius: 13px;
+        font-weight: 750;
+      }
+
+      .presence-action:active { background: var(--ink-pressed); }
+
+      .presence-meta {
+        display: flex;
+        min-height: 30px;
+        align-items: end;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 2px;
+      }
+
+      .how-link {
+        min-height: 28px;
+        padding: 0;
+        color: var(--ink);
+        background: transparent;
+        border: 0;
+        font-size: 11px;
+        font-weight: 750;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .tip {
+        position: relative;
+        margin-top: 10px;
+        padding: 11px 34px 11px 12px;
+        color: #163b40;
+        background: white;
+        border-radius: 11px;
+        box-shadow: 0 3px 8px rgba(31, 79, 85, 0.15);
+      }
+
+      .tip::after {
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        background: white;
+        content: "";
+        transform: translateX(-50%) rotate(45deg);
+      }
+
+      .tip strong { display: block; font-size: 13px; }
+      .tip p { margin: 3px 0 0; font-size: 11px; line-height: 1.4; }
+
+      .tip-close {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        width: 32px;
+        height: 32px;
+        color: #49656a;
+        background: transparent;
+        border: 0;
+        font-size: 17px;
+      }
+
+      .bottom-actions {
+        position: absolute;
+        z-index: 8;
+        inset: auto 0 0;
+        display: grid;
+        grid-template-columns: 1.7fr 1fr;
+        gap: 9px;
+        padding: 10px 14px 17px;
+        background: rgba(255, 255, 255, 0.96);
+        border-top: 1px solid var(--line);
+        backdrop-filter: blur(14px);
+      }
+
+      .bottom-actions button {
+        min-height: 48px;
+        border-radius: 13px;
+        font-weight: 750;
+      }
+
+      .directions { color: white; background: var(--ink); border: 1px solid var(--ink); }
+      .save { color: var(--ink); background: white; border: 1px solid #88a1a4; }
+
+      .scrim {
+        position: absolute;
+        z-index: 20;
+        inset: 0;
+        background: rgba(8, 29, 32, 0.38);
+      }
+
+      .sheet {
+        position: absolute;
+        z-index: 21;
+        inset: auto 0 0;
+        padding: 9px 20px 26px;
+        background: white;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 14px rgba(4, 28, 31, 0.14);
+      }
+
+      .grabber {
+        width: 36px;
+        height: 5px;
+        margin: 0 auto 17px;
+        background: #b9c3c4;
+        border-radius: 99px;
+      }
+
+      .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .sheet h2 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+      .sheet-close { width: 36px; height: 36px; border: 0; border-radius: 50%; color: #38575c; background: #edf1f1; font-size: 18px; }
+
+      .sheet-list {
+        display: grid;
+        gap: 14px;
+        margin: 19px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .sheet-list li {
+        display: grid;
+        grid-template-columns: 27px 1fr;
+        gap: 10px;
+        align-items: start;
+        font-size: 14px;
+        line-height: 1.35;
+      }
+
+      .sheet-icon {
+        display: grid;
+        width: 26px;
+        height: 26px;
+        place-items: center;
+        color: var(--ink);
+        background: var(--mint);
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .switcher {
+        position: fixed;
+        z-index: 100;
+        bottom: 16px;
+        left: 50%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px;
+        color: white;
+        background: #142727;
+        border-radius: 999px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+        transform: translateX(-50%);
+      }
+
+      .switcher button {
+        min-width: 40px;
+        min-height: 40px;
+        color: inherit;
+        background: transparent;
+        border: 0;
+        border-radius: 999px;
+        font-weight: 750;
+      }
+
+      .switcher button[aria-current="true"] { color: #102c30; background: white; }
+
+      [hidden] { display: none !important; }
+
+      body.capture .stage { padding: 0; }
+      body.capture .prototype-caption,
+      body.capture .switcher { display: none; }
+      body.capture .phone { border: 0; border-radius: 0; box-shadow: none; }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { scroll-behavior: auto !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage">
+      <p class="prototype-caption" id="caption">A · Compact default</p>
+      <article class="phone" aria-label="Cool Spot place detail prototype">
+        <div class="screen">
+          <div class="status-bar"><span>9:41</span><span>● ● ● ︽</span></div>
+          <div class="photo-wrap">
+            <img class="place-photo" src="assets/riverside-library-prototype.png" alt="Riverside Library" />
+            <div class="photo-nav">
+              <button class="round-button" aria-label="Back">‹</button>
+              <button class="round-button" aria-label="More">•••</button>
+            </div>
+          </div>
+
+          <div class="content">
+            <div class="place-head">
+              <div>
+                <h1 class="place-title">Riverside Library</h1>
+                <p class="place-meta">7 min walk · Tooley Street</p>
+              </div>
+              <span class="source-badge">✓ Official</span>
+            </div>
+
+            <section class="experience" aria-label="Recent visitor experience">
+              <p class="experience-label">Most visitors said</p>
+              <strong>Much cooler than outside</strong>
+              <p class="experience-meta">8 reports in the past 7 days · Latest 2h ago</p>
+            </section>
+
+            <section class="features" aria-labelledby="features-title">
+              <h2 class="section-title" id="features-title">Why it may help you cool down</h2>
+              <ul class="feature-list">
+                <li><span aria-hidden="true">❄</span> Air conditioning</li>
+                <li><span aria-hidden="true">≈</span> Drinking water</li>
+                <li><span aria-hidden="true">⌂</span> Indoor space</li>
+              </ul>
+              <button class="show-all">Show all 7 cooling features⌄</button>
+            </section>
+
+            <section class="presence" aria-labelledby="presence-title">
+              <div class="presence-heading">
+                <span class="presence-count" aria-hidden="true">2</span>
+                <div>
+                  <h3 id="presence-title">2 people are cooling off here</h3>
+                  <p>Updated in the last 10 minutes</p>
+                </div>
+              </div>
+
+              <p class="presence-purpose" id="presencePurpose">Let others know this place is being used.</p>
+
+              <div class="tip" id="firstTip" hidden>
+                <button class="tip-close" id="tipClose" aria-label="Dismiss tip">×</button>
+                <strong>Help someone decide where to go</strong>
+                <p>Tap below to add one anonymous person to this count. It disappears after 10 minutes.</p>
+              </div>
+
+              <button class="presence-action">I’m cooling off here</button>
+              <p class="presence-meta">
+                <span>Anonymous for 10 min</span><span aria-hidden="true">·</span>
+                <button class="how-link" id="howLink">How this works</button>
+              </p>
+            </section>
+          </div>
+        </div>
+
+        <div class="bottom-actions" aria-label="Place actions">
+          <button class="directions">↗ Directions</button>
+          <button class="save">♡ Save</button>
+        </div>
+
+        <div class="scrim" id="scrim" hidden></div>
+        <section class="sheet" id="sheet" aria-modal="true" aria-labelledby="sheet-title" hidden>
+          <div class="grabber" aria-hidden="true"></div>
+          <div class="sheet-head">
+            <h2 id="sheet-title">How this works</h2>
+            <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
+          </div>
+          <ul class="sheet-list">
+            <li><span class="sheet-icon">⌖</span><span>We briefly check that you’re near this Cool Spot.</span></li>
+            <li><span class="sheet-icon">+1</span><span>The number of people cooling off here increases by one.</span></li>
+            <li><span class="sheet-icon">○</span><span>Your name and exact location aren’t shown.</span></li>
+            <li><span class="sheet-icon">10</span><span>You’re removed automatically after 10 minutes, or you can leave sooner.</span></li>
+          </ul>
+        </section>
+      </article>
+    </main>
+
+    <nav class="switcher" aria-label="Prototype variants">
+      <button data-variant="A" aria-current="true">A</button>
+      <button data-variant="B">B</button>
+      <button data-variant="C">C</button>
+    </nav>
+
+    <script>
+      const params = new URLSearchParams(location.search);
+      const requested = (params.get("variant") || "A").toUpperCase();
+      const variant = ["A", "B", "C"].includes(requested) ? requested : "A";
+      const captions = {
+        A: "A · Compact default",
+        B: "B · First-time contextual tip",
+        C: "C · ‘How this works’ bottom sheet"
+      };
+
+      const firstTip = document.getElementById("firstTip");
+      const presencePurpose = document.getElementById("presencePurpose");
+      const sheet = document.getElementById("sheet");
+      const scrim = document.getElementById("scrim");
+
+      document.getElementById("caption").textContent = captions[variant];
+      firstTip.hidden = variant !== "B";
+      presencePurpose.hidden = variant === "B";
+      sheet.hidden = variant !== "C";
+      scrim.hidden = variant !== "C";
+      document.body.classList.toggle("capture", params.get("capture") === "1");
+
+      document.querySelectorAll("[data-variant]").forEach((button) => {
+        button.setAttribute("aria-current", String(button.dataset.variant === variant));
+        button.addEventListener("click", () => {
+          const next = new URL(location.href);
+          next.searchParams.set("variant", button.dataset.variant);
+          location.href = next;
+        });
+      });
+
+      function setSheet(open) {
+        sheet.hidden = !open;
+        scrim.hidden = !open;
+      }
+
+      document.getElementById("howLink").addEventListener("click", () => setSheet(true));
+      document.getElementById("sheetClose").addEventListener("click", () => setSheet(false));
+      scrim.addEventListener("click", () => setSheet(false));
+      document.getElementById("tipClose").addEventListener("click", () => {
+        firstTip.hidden = true;
+        presencePurpose.hidden = false;
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        const order = ["A", "B", "C"];
+        const direction = event.key === "ArrowRight" ? 1 : -1;
+        const nextVariant = order[(order.indexOf(variant) + direction + order.length) % order.length];
+        const next = new URL(location.href);
+        next.searchParams.set("variant", nextVariant);
+        location.href = next;
+      });
+    </script>
+  </body>
+</html>

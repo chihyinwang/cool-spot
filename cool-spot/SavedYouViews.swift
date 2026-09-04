@@ -245,6 +245,7 @@ struct SavedDetail: View {
 
 struct YouView: View {
     @ObservedObject var store: PrototypeStore
+    @Binding var appearance: AppAppearance
     var active: [Contribution] { store.contributions.filter {
         switch $0.status { case .draft, .inReview, .actionNeeded: true; default: false }
     }}
@@ -284,7 +285,14 @@ struct YouView: View {
                     impact
                     coolHunt
                     prototypeControls
-                    Button("Settings") {}.foregroundStyle(AppStyle.brand).padding(.bottom, 20)
+                    NavigationLink {
+                        SettingsView(appearance: $appearance)
+                    } label: {
+                        Label("Settings", systemImage: "gearshape")
+                            .frame(minHeight: 44)
+                    }
+                    .foregroundStyle(AppStyle.brand)
+                    .padding(.bottom, 20)
                 }.padding(16)
             }
             .background(AppStyle.paper.opacity(0.55)).navigationTitle("You")
@@ -363,6 +371,28 @@ struct YouView: View {
                 Button("Do not publish") { store.simulate(.notPublished("This location is not legally open to the public.")) }
             }.padding(.top, 10)
         }.font(.subheadline)
+    }
+}
+
+struct SettingsView: View {
+    @Binding var appearance: AppAppearance
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Appearance", selection: $appearance) {
+                    ForEach(AppAppearance.allCases) { option in
+                        Text(option.title).tag(option)
+                    }
+                }
+                .pickerStyle(.inline)
+            } footer: {
+                Text("Match System follows your device’s light or dark appearance.")
+                    .foregroundStyle(.primary)
+            }
+        }
+        .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
