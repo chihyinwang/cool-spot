@@ -10,9 +10,9 @@ README is the public project introduction. These three files are the active agen
 
 ## Current handoff
 
-- Code baseline inspected: `3b5a8ca304da8f5dcf5ec53525ad6769c873e70b` (2026-09-08, “Third iteration targeting user flow”). The working tree was clean before this document consolidation; this change edits documentation only.
+- Code baseline inspected: `3b8bf457f39e50bdbd650efb3fd4bb2f29f71e8a` plus the 2026-09-08 working changes to ContributionView, contribution tests and these active documents. The form refinement is not committed; preserve the existing working tree and dated review evidence.
 - Owner assessment: the current version is usable enough to continue, but still needs validation. Validate journeys and resolve feedback before beginning a broad visual redesign. Follow any newer user instruction that changes this scope.
-- Start the next owner retest with **B04**, then the affected B03/B05/B06 branches. Test status, evidence and unresolved observations belong in the walkthrough, not in this file.
+- Current focus: Add cooling information now requires descriptive names and photos for unlisted-location proposals, uses consistent question labels/picker rows and submit-attempt validation. Scoped agent native checks and 48 passing tests are recorded in the walkthrough. Start the owner retest with **B04**, then affected B03/B05/B06/B10 branches; do not treat agent interaction as owner usability acceptance.
 - No app-code change, new feature, deployment, or production rewrite is authorized merely by opening a new session.
 
 ## Working with the owner

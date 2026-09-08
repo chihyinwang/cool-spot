@@ -78,6 +78,15 @@ struct PlaceContributionValues: Equatable {
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
+enum ContributionField: Hashable {
+    case location, setting, name, type, features, removalReason, photo, changes
+}
+
+struct ContributionValidationIssue: Equatable {
+    let field: ContributionField
+    let message: String
+}
+
 struct PlaceContributionDraft: Identifiable, Equatable {
     let id = UUID()
     let identity: String
@@ -123,30 +132,43 @@ struct PlaceContributionDraft: Identifiable, Equatable {
         return "Selected spot"
     }
     var needsRemovalReason: Bool { isUpdate && !original.features.isEmpty && values.features.isEmpty }
-    var canSend: Bool {
-        guard CLLocationCoordinate2DIsValid(values.coordinate), values.locationConfirmed else { return false }
+    // Ordered as the questions appear, shared by the form and store submission gate.
+    var validationIssues: [ContributionValidationIssue] {
+        var issues: [ContributionValidationIssue] = []
+        func require(_ valid: Bool, _ field: ContributionField, _ message: String) {
+            if !valid { issues.append(.init(field: field, message: message)) }
+        }
+        require(CLLocationCoordinate2DIsValid(values.coordinate) && values.locationConfirmed,
+                .location, "Confirm the location on the map.")
+        if !isUpdate || values.setting != original.setting {
+            require(values.setting != nil, .setting, "Choose indoors, outdoors or both.")
+        }
+        if !isUpdate {
+            require(!values.normalized.name.isEmpty, .name, "Give this spot a name people can recognise.")
+        }
+        if isUpdate && values.type != original.type {
+            require(values.type != nil, .type, "Choose a place type.")
+        }
+        if !isUpdate {
+            require(!values.features.isEmpty, .features, "Choose at least one cooling feature.")
+        }
+        if needsRemovalReason {
+            require(!values.normalized.removalReason.isEmpty, .removalReason,
+                    "Explain why the cooling features should be removed.")
+        }
+        if let photo = values.photo {
+            if !isUpdate || photo != original.photo {
+                require(UIImage(data: photo) != nil, .photo, "This photo couldn’t be read. Choose another image.")
+            }
+        } else if isUnlisted {
+            require(false, .photo, "Add a photo so people can find this spot.")
+        }
         if isUpdate {
-            guard !changes.isEmpty else { return false }
-            if values.setting != original.setting && values.setting == nil { return false }
-            if values.type != original.type && values.type == nil { return false }
-            if values.photo != original.photo, let photo = values.photo, UIImage(data: photo) == nil { return false }
-            return !needsRemovalReason || !values.normalized.removalReason.isEmpty
+            require(!changes.isEmpty, .changes, "Change at least one detail before sending an update.")
         }
-        guard values.setting != nil, !values.features.isEmpty else { return false }
-        if let photo = values.photo, UIImage(data: photo) == nil { return false }
-        if isExactSpot {
-            return values.photo.flatMap { UIImage(data: $0) } != nil
-        }
-        return !values.normalized.name.isEmpty
+        return issues
     }
-    var requiredHint: String {
-        if !values.locationConfirmed { return "Confirm the location to continue." }
-        if values.setting == nil { return "Choose indoors, outdoors or both." }
-        if needsRemovalReason { return "Explain why these cooling features should be removed." }
-        if !isUpdate && values.features.isEmpty { return "Choose at least one cooling feature." }
-        if isExactSpot && values.photo.flatMap({ UIImage(data: $0) }) == nil { return "Add a photo that helps people find this spot." }
-        return "Choose at least one detail to update."
-    }
+    var canSend: Bool { validationIssues.isEmpty }
     var changes: [String] {
         let values = values.normalized
         let original = original.normalized
@@ -232,6 +254,9 @@ struct ContributionFlow: View {
     @State private var visitingExpanded = false
     @State private var facilitiesExpanded = false
     @State private var correctionExpanded = false
+    @State private var validationAttempt = 0
+    @AccessibilityFocusState private var focusedError: ContributionField?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusedField: InputField?
 
     private enum InputField: Hashable {
@@ -418,6 +443,7 @@ struct ContributionFlow: View {
     }
     func apply(_ candidate: PlaceContributionDraft) {
         draft = candidate; mapValues = candidate.values
+        validationAttempt = 0; focusedError = nil
         showDetails()
     }
     func showDetails() {
@@ -426,140 +452,208 @@ struct ContributionFlow: View {
     }
 
     var details: some View {
-        Form {
-            Section {
-                VStack(alignment: .leading, spacing: 12) {
-                    if draft.isUnlisted {
-                        Map(position: .constant(.region(.init(center: draft.values.coordinate,
-                            span: .init(latitudeDelta: 0.003, longitudeDelta: 0.004)))), interactionModes: []) {
-                            Marker("Selected spot", coordinate: draft.values.coordinate).tint(AppStyle.brand)
+        ScrollViewReader { proxy in
+            Form {
+                Section {
+                    VStack(alignment: .leading, spacing: 12) {
+                        if draft.isUnlisted {
+                            Map(position: .constant(.region(.init(center: draft.values.coordinate,
+                                span: .init(latitudeDelta: 0.003, longitudeDelta: 0.004)))), interactionModes: []) {
+                                Marker("Selected spot", coordinate: draft.values.coordinate).tint(AppStyle.brand)
+                            }
+                            .mapStyle(.standard(elevation: .flat, emphasis: .muted, pointsOfInterest: .excludingAll))
+                            .frame(height: 150).clipShape(RoundedRectangle(cornerRadius: 12))
+                            .accessibilityLabel("Map of the selected location")
+                            Button {
+                                editingLocation = true; mapValues = draft.values; path.append(.location)
+                            } label: {
+                                Label("Change location", systemImage: "mappin.and.ellipse").frame(minHeight: 44)
+                            }
+                        } else {
+                            Text(draft.displayName).font(.headline).fixedSize(horizontal: false, vertical: true)
+                            Text(address(draft)).font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                            Button("Change place") { search = ""; path.append(.choose) }.frame(minHeight: 44)
                         }
-                        .mapStyle(.standard(elevation: .flat, emphasis: .muted, pointsOfInterest: .excludingAll))
-                        .frame(height: 150).clipShape(RoundedRectangle(cornerRadius: 12))
-                        .accessibilityLabel("Map of the selected location")
-                        Button {
-                            editingLocation = true; mapValues = draft.values; path.append(.location)
-                        } label: {
-                            Label("Change location", systemImage: "mappin.and.ellipse").frame(minHeight: 44)
+                        Text("Public after review. Your private saved notes stay private.")
+                            .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                        fieldError(.location)
+                    }.id(ContributionField.location)
+                } header: { sectionHeading("Location") }
+
+                Section {
+                    if draft.sourceSetting {
+                        LabeledContent("Indoors or outdoors?") {
+                            Text(draft.values.setting?.rawValue ?? "Not known")
+                                .foregroundStyle(AppStyle.supportingText)
                         }
                     } else {
-                        Text(draft.displayName).font(.headline).fixedSize(horizontal: false, vertical: true)
-                        Text(address(draft)).font(.subheadline).foregroundStyle(AppStyle.supportingText)
-                        Button("Change place") { search = ""; path.append(.choose) }.frame(minHeight: 44)
+                        environmentQuestion.id(ContributionField.setting)
                     }
-                }
-            } header: { Text("Location").foregroundStyle(AppStyle.supportingText) }
-            footer: { Text("Public after review. Your private saved notes stay private.").foregroundStyle(AppStyle.supportingText) }
-
-            Section {
-                if draft.sourceSetting {
-                    LabeledContent("Indoors or outdoors?") {
-                        Text(draft.values.setting?.rawValue ?? "Not known")
-                            .foregroundStyle(AppStyle.supportingText)
+                    if draft.isUnlisted {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ContributionFieldLabel("Place name", requirement: "Required")
+                            Text("Give it a name others can recognise.")
+                                .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                            TextField("e.g. Shade beside the playground", text: $draft.values.name,
+                                      prompt: Text("e.g. Shade beside the playground").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                                .lineLimit(1...3).focused($focusedField, equals: .name)
+                                .accessibilityLabel("Place name, required")
+                            fieldError(.name)
+                        }.id(ContributionField.name)
                     }
-                } else {
-                    environmentQuestion
-                }
-                if draft.isUnlisted {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Place name · Optional").font(.subheadline.weight(.semibold))
-                        TextField("e.g. Riverside Library", text: $draft.values.name,
-                                  prompt: Text("e.g. Riverside Library").foregroundStyle(AppStyle.supportingText))
-                            .focused($focusedField, equals: .name)
-                            .accessibilityLabel("Place name, optional")
-                        Text("Use the name people know.")
-                            .font(.footnote).foregroundStyle(AppStyle.supportingText)
-                    }.padding(.vertical, 4)
-                }
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("How to find this spot · Optional").font(.subheadline.weight(.semibold))
-                    TextField("e.g. Fourth floor, by the windows", text: $draft.values.locationDetails,
-                              prompt: Text("e.g. Fourth floor, by the windows").foregroundStyle(AppStyle.supportingText), axis: .vertical)
-                        .focused($focusedField, equals: .locationDetails)
-                        .lineLimit(1...4).accessibilityLabel("How to find this spot, optional")
-                }.padding(.vertical, 4)
-                if draft.sourceType {
-                    LabeledContent("Place type") { Text(draft.values.type?.rawValue ?? "Not known").foregroundStyle(AppStyle.supportingText) }
-                } else {
-                    Picker("Place type · Optional", selection: $draft.values.type) {
-                        Text("Not sure").tag(nil as PlaceType?)
-                        ForEach(PlaceType.allCases) { Text($0.rawValue).tag(Optional($0)) }
+                        ContributionFieldLabel("How to find this spot", requirement: "Optional")
+                        TextField("e.g. Fourth floor, by the windows", text: $draft.values.locationDetails,
+                                  prompt: Text("e.g. Fourth floor, by the windows").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                            .focused($focusedField, equals: .locationDetails)
+                            .lineLimit(1...4).accessibilityLabel("How to find this spot, optional")
                     }
-                }
-                if draft.sourceName {
-                    DisclosureGroup("Name or place type is incorrect", isExpanded: $correctionExpanded) {
-                        TextField("What should be corrected?", text: $draft.values.sourceCorrection, prompt: Text("What should be corrected?").foregroundStyle(AppStyle.supportingText), axis: .vertical).lineLimit(2...6)
-                            .focused($focusedField, equals: .correction)
-                    }.font(.subheadline)
-                }
-            } header: { Text("About the place").foregroundStyle(AppStyle.supportingText) }
+                    if draft.sourceType {
+                        LabeledContent("Place type") { Text(draft.values.type?.rawValue ?? "Not known").foregroundStyle(AppStyle.supportingText) }
+                    } else {
+                        ContributionPickerRow("Place type", selection: $draft.values.type, valueText: draft.values.type?.rawValue ?? "Not sure") {
+                            Text("Not sure").tag(nil as PlaceType?)
+                            ForEach(PlaceType.allCases) { Text($0.rawValue).tag(Optional($0)) }
+                        }
+                    }
+                    fieldError(.type).id(ContributionField.type)
+                    if draft.sourceName {
+                        DisclosureGroup("Name or place type is incorrect", isExpanded: $correctionExpanded) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                ContributionFieldLabel("Correction", requirement: "Optional")
+                                TextField("What should be corrected?", text: $draft.values.sourceCorrection,
+                                          prompt: Text("What should be corrected?").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                                    .lineLimit(2...6).focused($focusedField, equals: .correction)
+                            }
+                        }.font(.subheadline)
+                    }
+                } header: { sectionHeading("About the place") }
 
-            Section {
-                CoolingFeatureChoices(selection: $draft.values.features)
-                if draft.needsRemovalReason {
-                    TextField("What changed? Explain why the cooling features should be removed.", text: $draft.values.removalReason, prompt: Text("What changed? Explain why the cooling features should be removed.").foregroundStyle(AppStyle.supportingText), axis: .vertical).lineLimit(2...6)
-                        .focused($focusedField, equals: .removalReason)
-                }
-            } header: { Text("What helps people cool down?").foregroundStyle(AppStyle.supportingText) }
-            footer: { Text(draft.isUpdate ? "Change only what you know. Existing details are already selected." : "Choose at least one feature you can confirm.").foregroundStyle(AppStyle.supportingText) }
-
-            if draft.isExactSpot {
                 Section {
-                    ContributionPhotoField(values: $draft.values, required: true, loading: $photoLoading)
-                } header: { Text("Help people find this spot · Required").foregroundStyle(AppStyle.supportingText) }
-                footer: { Text("A photo is required for a spot without a place name. The location and photo are reviewed together.").foregroundStyle(AppStyle.supportingText) }
-            }
-
-            Section {
-                DisclosureGroup("Entry and seating", isExpanded: $visitingExpanded) {
                     VStack(alignment: .leading, spacing: 8) {
-                        entryQuestion("Who can use this spot?") { entryEligibilityPicker }
-                        Text(PlaceEntryEligibility.limitedExamples)
-                            .font(.footnote).foregroundStyle(AppStyle.supportingText)
-                            .fixedSize(horizontal: false, vertical: true)
+                        ContributionFieldLabel("What helps people cool down?", requirement: draft.isUpdate ? nil : "Required")
+                        if validationAttempt == 0 || !draft.validationIssues.contains(where: { $0.field == .features }) {
+                            Text(draft.isUpdate ? "Change only the features you can confirm." : "Choose at least one.")
+                                .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                        }
+                        fieldError(.features)
+                    }.id(ContributionField.features)
+                    CoolingFeatureChoices(selection: $draft.values.features)
+                        .labelStyle(ContributionLeadingLabelStyle())
+                    if draft.needsRemovalReason {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ContributionFieldLabel("What changed?", requirement: "Required")
+                            TextField("Why should these cooling features be removed?", text: $draft.values.removalReason,
+                                      prompt: Text("Why should these cooling features be removed?").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                                .lineLimit(2...6).focused($focusedField, equals: .removalReason)
+                                .accessibilityLabel("What changed? Required")
+                            fieldError(.removalReason)
+                        }.id(ContributionField.removalReason)
                     }
-                    entryQuestion("Cost to use") { entryCostPicker }
-                    Picker("Seating", selection: $draft.values.seating) {
-                        ForEach(SeatingType.allCases) { Text($0 == .unsure ? "Not added" : $0.rawValue).tag($0) }
-                    }
-                    factPicker("Tables", value: $draft.values.tables)
-                    PostedStayLimitPicker(value: $draft.values.stayLimit)
                 }
-                DisclosureGroup("Other facilities", isExpanded: $facilitiesExpanded) {
-                    factPicker("Toilets", value: $draft.values.toilets)
-                    factPicker("Wi-Fi", value: $draft.values.wifi)
-                    factPicker("Power outlets", value: $draft.values.power)
-                    factPicker("Laptop use allowed", value: $draft.values.laptop)
-                }
-                TextField("Anything else people should know?", text: $draft.values.note, prompt: Text("Anything else people should know?").foregroundStyle(AppStyle.supportingText), axis: .vertical).lineLimit(2...6)
-                    .focused($focusedField, equals: .note)
-            } header: { Text("More details · Optional").foregroundStyle(AppStyle.supportingText) }
-            footer: { Text("Leave anything you don’t know blank. A visit’s duration is different from a posted stay limit.").foregroundStyle(AppStyle.supportingText) }
 
-            if !draft.isExactSpot {
-                Section { ContributionPhotoField(values: $draft.values, required: false, loading: $photoLoading) }
-                header: { Text("Photo · Optional").foregroundStyle(AppStyle.supportingText) }
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ContributionFieldLabel("Photo", requirement: draft.isUnlisted ? "Required" : "Optional")
+                        Text("Show a landmark or entrance so people can find the spot.")
+                            .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                        fieldError(.photo)
+                        ContributionPhotoField(values: $draft.values, loading: $photoLoading)
+                    }.id(ContributionField.photo)
+                }
+
+                Section {
+                    DisclosureGroup("Entry and seating", isExpanded: $visitingExpanded) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ContributionPickerRow("Who can use this spot?", selection: $draft.values.entryEligibility, valueText: draft.values.entryEligibility.rawValue) {
+                                ForEach(PlaceEntryEligibility.allCases) { Text($0.rawValue).tag($0) }
+                            }
+                            if draft.values.entryEligibility == .limited {
+                                Text(PlaceEntryEligibility.limitedExamples)
+                                    .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                            }
+                        }
+                        ContributionPickerRow("Cost to use", selection: $draft.values.access, valueText: draft.values.access.rawValue) {
+                            ForEach(AccessType.allCases) { Text($0.rawValue).tag($0) }
+                        }
+                        ContributionPickerRow("Seating", selection: $draft.values.seating, valueText: draft.values.seating == .unsure ? "Not added" : draft.values.seating.rawValue) {
+                            ForEach(SeatingType.allCases) { Text($0 == .unsure ? "Not added" : $0.rawValue).tag($0) }
+                        }
+                        factPicker("Tables", value: $draft.values.tables)
+                        PostedStayLimitPicker(value: $draft.values.stayLimit)
+                    }
+                    DisclosureGroup("Other facilities", isExpanded: $facilitiesExpanded) {
+                        factPicker("Toilets", value: $draft.values.toilets)
+                        factPicker("Wi-Fi", value: $draft.values.wifi)
+                        factPicker("Power outlets", value: $draft.values.power)
+                        factPicker("Laptop use allowed", value: $draft.values.laptop)
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        ContributionFieldLabel("Anything else people should know?", requirement: "Optional")
+                        TextField("Add a useful detail", text: $draft.values.note,
+                                  prompt: Text("Add a useful detail").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                            .lineLimit(2...6).focused($focusedField, equals: .note)
+                            .accessibilityLabel("Anything else people should know? Optional")
+                    }
+                } header: { sectionHeading("More details") }
+
+                if draft.isUpdate {
+                    if !draft.changes.isEmpty {
+                        Section("Your changes") { ForEach(draft.changes, id: \.self) { Text($0).font(.subheadline) } }
+                    } else if validationAttempt > 0 {
+                        Section { fieldError(.changes) }.id(ContributionField.changes)
+                    }
+                }
+                if dynamicTypeSize.isAccessibilitySize { Section { sendBar } }
             }
-            if draft.isUpdate && !draft.changes.isEmpty {
-                Section("Your changes") { ForEach(draft.changes, id: \.self) { Text($0).font(.subheadline) } }
+            .listSectionSpacing(24)
+            .environment(\.defaultMinListRowHeight, 44)
+            // Use one row inset for custom questions and native picker wrappers.
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+            .scrollDismissesKeyboard(.immediately)
+            .onScrollPhaseChange { _, phase in
+                if phase == .interacting || phase == .decelerating { focusedField = nil }
             }
-            if dynamicTypeSize.isAccessibilitySize { Section { sendBar } }
+            .onSubmit { focusedField = nil }
+            .task(id: validationAttempt) {
+                guard validationAttempt > 0, let first = draft.validationIssues.first else { return }
+                // Let validation rows enter the Form before resolving their scroll IDs.
+                try? await Task.sleep(for: .milliseconds(150))
+                guard !Task.isCancelled else { return }
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+                    proxy.scrollTo(first.field, anchor: .top)
+                }
+                // Wait for the Form's lazy row to be visible before moving VoiceOver.
+                try? await Task.sleep(for: .milliseconds(300))
+                guard !Task.isCancelled else { return }
+                focusedError = first.field
+            }
         }
-        // End editing when leaving a field, including with a hardware keyboard.
-        // Otherwise a Picker can restore off-screen text focus and jump the Form.
-        .scrollDismissesKeyboard(.immediately)
-        .onScrollPhaseChange { _, phase in
-            if phase == .interacting || phase == .decelerating { focusedField = nil }
+    }
+    private func sectionHeading(_ title: String) -> some View {
+        Text(title).foregroundStyle(AppStyle.supportingText).textCase(nil)
+    }
+    @ViewBuilder private func fieldError(_ field: ContributionField) -> some View {
+        if validationAttempt > 0, let issue = draft.validationIssues.first(where: { $0.field == field }) {
+            Label {
+                Text(issue.message).foregroundStyle(.primary)
+            } icon: {
+                Image(systemName: "exclamationmark.circle").foregroundStyle(.red)
+            }
+                .font(.footnote)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityLabel("Error: \(issue.message)")
+                .accessibilityFocused($focusedError, equals: field)
         }
-        .onSubmit { focusedField = nil }
     }
     func factPicker(_ title: String, value: Binding<OptionalFact>) -> some View {
-        Picker(title, selection: value) { ForEach(OptionalFact.allCases) { Text($0.rawValue).tag($0) } }
+        ContributionPickerRow(title, selection: value, valueText: value.wrappedValue.rawValue) {
+            ForEach(OptionalFact.allCases) { Text($0.rawValue).tag($0) }
+        }
     }
     private var environmentQuestion: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(draft.isUpdate ? "Indoors or outdoors?" : "Indoors or outdoors? · Required")
-                .font(.subheadline.weight(.semibold))
+            ContributionFieldLabel("Indoors or outdoors?", requirement: draft.isUpdate ? nil : "Required")
             if dynamicTypeSize.isAccessibilitySize {
                 environmentOptions(vertical: true)
             } else {
@@ -568,8 +662,8 @@ struct ContributionFlow: View {
                     environmentOptions(vertical: true)
                 }
             }
+            fieldError(.setting)
         }
-        .padding(.vertical, 4)
         .accessibilityElement(children: .contain)
     }
     private func environmentOptions(vertical: Bool) -> some View {
@@ -605,55 +699,91 @@ struct ContributionFlow: View {
         }
         .accessibilityLabel("\(environment.rawValue), indoors or outdoors")
     }
-    @ViewBuilder
-    private func entryQuestion<Content: View>(_ title: String, @ViewBuilder picker: () -> Content) -> some View {
-        if dynamicTypeSize.isAccessibilitySize {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(title)
-                picker().pickerStyle(.inline).labelsHidden()
-            }
-        } else {
-            ViewThatFits(in: .horizontal) {
-                // The native picker already includes horizontal control padding.
-                HStack(spacing: 0) {
-                    Text(title).fixedSize().accessibilityHidden(true)
-                    Spacer(minLength: 0)
-                    picker().labelsHidden().fixedSize()
-                }
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(title).accessibilityHidden(true)
-                    picker().labelsHidden()
-                }
-            }
-        }
-    }
-    private var entryEligibilityPicker: some View {
-        Picker("Who can use this spot?", selection: $draft.values.entryEligibility) {
-            ForEach(PlaceEntryEligibility.allCases) {
-                Text($0.rawValue).fixedSize(horizontal: false, vertical: true).tag($0)
-            }
-        }
-    }
-    private var entryCostPicker: some View {
-        Picker("Cost to use", selection: $draft.values.access) {
-            ForEach(AccessType.allCases) {
-                Text($0.rawValue).fixedSize(horizontal: false, vertical: true).tag($0)
-            }
-        }
-    }
     var sendBar: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if photoLoading { Text("Finishing your photo…").font(.footnote).foregroundStyle(AppStyle.supportingText) }
-            else if !draft.canSend { Text(draft.requiredHint).font(.footnote).foregroundStyle(AppStyle.supportingText).fixedSize(horizontal: false, vertical: true) }
+            if photoLoading {
+                Text("Finishing your photo…").font(.footnote).foregroundStyle(AppStyle.supportingText)
+            }
             Button {
+                focusedField = nil
+                focusedError = nil
+                guard draft.canSend else { validationAttempt += 1; return }
                 if !draft.isUpdate, let existing = store.existingSpot(for: draft) {
                     duplicate = draft.reconciled(with: existing); showDuplicate = true
                 } else if store.submitPlaceContribution(draft) { sent = true; path.append(.complete) }
                 else { showFailure = true }
             } label: { Text("Send for review").frame(maxWidth: .infinity) }
-            .buttonStyle(PrimaryButtonStyle()).disabled(!draft.canSend || photoLoading)
+            .buttonStyle(PrimaryButtonStyle()).disabled(photoLoading || sent)
         }
         .padding(16).frame(maxWidth: .infinity).background(.regularMaterial)
+    }
+}
+
+// Use a stable icon column so large Dynamic Type cannot squeeze the first
+// line into the icon's space. Scoped to this form; report rendering is unchanged.
+private struct ContributionLeadingLabelStyle: LabelStyle {
+    @ScaledMetric(relativeTo: .body) private var iconWidth = 24
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            configuration.icon.frame(width: iconWidth).accessibilityHidden(true)
+            configuration.title
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+// Requirement text always belongs to a question, never a section heading.
+private struct ContributionFieldLabel: View {
+    let title: String
+    let requirement: String?
+    init(_ title: String, requirement: String? = "Optional") {
+        self.title = title; self.requirement = requirement
+    }
+    var body: some View {
+        (Text(title).font(.subheadline.weight(.semibold)) +
+         Text(requirement.map { " · \($0)" } ?? "").font(.subheadline).foregroundColor(AppStyle.supportingText))
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private struct ContributionPickerRow<Selection: Hashable, Options: View>: View {
+    let title: String
+    @Binding var selection: Selection
+    let options: Options
+    let valueText: String
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    init(_ title: String, selection: Binding<Selection>, valueText: String, @ViewBuilder options: () -> Options) {
+        self.title = title; _selection = selection; self.valueText = valueText; self.options = options()
+    }
+    var body: some View {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                stacked
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        ContributionFieldLabel(title).fixedSize().accessibilityHidden(true)
+                        Spacer(minLength: 0)
+                        picker.fixedSize()
+                    }
+                    stacked
+                }
+            }
+        }.frame(minHeight: 44)
+    }
+    private var stacked: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ContributionFieldLabel(title).accessibilityHidden(true)
+            picker
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+    private var picker: some View {
+        Picker(title, selection: $selection) { options }
+            .pickerStyle(.menu).labelsHidden()
+            .accessibilityValue(valueText)
+            .accessibilityHint("Optional")
     }
 }
 
@@ -671,16 +801,20 @@ struct PostedStayLimitPicker: View {
         value.isEmpty ? .notAdded : PostedStayLimitChoice(rawValue: value) ?? .other
     }
     var body: some View {
-        Picker("Time limit", selection: Binding(get: { choice }, set: { selection in
-            if selection == .other { writeDuration() }
-            else { value = selection == .notAdded ? "" : selection.rawValue }
-        })) {
-            ForEach(PostedStayLimitChoice.allCases) { Text($0.rawValue).tag($0) }
+        VStack(alignment: .leading, spacing: 8) {
+            ContributionPickerRow("Time limit", selection: Binding(get: { choice }, set: { selection in
+                if selection == .other { writeDuration() }
+                else { value = selection == .notAdded ? "" : selection.rawValue }
+            }), valueText: choice == .other ? value : choice.rawValue) {
+                ForEach(PostedStayLimitChoice.allCases) { Text($0.rawValue).tag($0) }
+            }
+            Text("A posted limit, not how long you stayed.")
+                .font(.footnote).foregroundStyle(AppStyle.supportingText)
         }
         if choice == .other {
-            Picker("Hours", selection: $hours) { ForEach(0...24, id: \.self) { Text("\($0)").tag($0) } }
+            ContributionPickerRow("Hours", selection: $hours, valueText: String(hours)) { ForEach(0...24, id: \.self) { Text("\($0)").tag($0) } }
                 .onChange(of: hours) { _, _ in writeDuration() }
-            Picker("Minutes", selection: $minutes) { ForEach(0...59, id: \.self) { Text("\($0)").tag($0) } }
+            ContributionPickerRow("Minutes", selection: $minutes, valueText: String(minutes)) { ForEach(0...59, id: \.self) { Text("\($0)").tag($0) } }
                 .onChange(of: minutes) { _, _ in writeDuration() }
             Text(value).font(.footnote).foregroundStyle(AppStyle.supportingText)
                 .onAppear {
@@ -756,16 +890,11 @@ struct ContributionLocationEditor: View {
 
 struct ContributionPhotoField: View {
     @Binding var values: PlaceContributionValues
-    let required: Bool
     @State private var selection: PhotosPickerItem?
     @Binding var loading: Bool
     @State private var failure = false
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if required {
-                Text("Show a landmark or entrance so someone else can find the same spot.")
-                    .font(.subheadline).foregroundStyle(AppStyle.supportingText)
-            }
             if let data = values.photo, let image = UIImage(data: data) {
                 Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 220)
                     .accessibilityLabel("Selected place photo")

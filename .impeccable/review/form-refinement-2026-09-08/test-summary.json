@@ -1,0 +1,42 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "DCA5DC08-61B1-44ED-A7A1-26BA7D07C81A",
+        "deviceName" : "Cool Spot Compact QA",
+        "modelName" : "iPhone SE (3rd generation)",
+        "osBuildNumber" : "22C150",
+        "osVersion" : "18.2",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 48,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "cool-spot · Built with macOS 26.5.2",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1788874236.157,
+  "passedTests" : 48,
+  "result" : "Passed",
+  "skippedTests" : 0,
+  "startTime" : 1788874205.997,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - cool-spot",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 48
+}

@@ -4,23 +4,88 @@
 
 ## 本輪狀態與起點
 
-**先跑 B04，約 2–3 分鐘，再接 B05；B03、B06 用來覆蓋 Pin 入口與選单焦點。** 目前沒有需要先決定的新設計方案。
+**Add cooling information 的本輪修正已實作，現在從 B04 做 owner 重測。** 新位置的名稱及照片皆必填；送出前未填完會標示缺漏並定位第一項。接著再測 B05；B03、B06、B10 覆蓋 Pin、選单焦點與照片。以下 agent 證據不代表 owner 已接受版面。
 
-| 範圍 | 已有證據 | 本輪仍需確認 |
+| 範圍 | 最新證據 | 仍需確認 |
 |---|---|---|
-| 最新 About the place | Agent 已在 iPhone SE 一般字級、iPad 最大字級深色及原 iPhone 模擬器查看；建置成功，選項與精簡欄位已實作 | 使用者認為目前可用，但明確要求繼續驗證；B03–B06 尚未取得本輪完整通過結果 |
-| Entry/cost 與焦點 | 先前有修正與原生操作紀錄 | B06 在現在版本重測，不以舊截圖代替 |
-| A、C、D、E 其餘流程 | 有先前實作／部分原生測試紀錄 | 沒有這一版全部 40 個案例的 owner 通過紀錄；按前提跑，逐項記錄 |
-| 自動測試 | 最近留存的 suite 結果為 48 passed、0 failed | 該次執行早於後續 UI 調整；本次文件整理未重跑測試 |
+| 表單、名稱／照片 | 本輪 iPhone 窄螢幕原生操作：缺名字被攔下，補齊名稱及照片後到 Sent for review；首次漏填定位成功 | Owner 的理解與閱讀舒適度；B03–B05 完整分支 |
+| Entry/cost 與大字體 | 一般字級 Cost／Seating／Tables 同高；iPad 最大字級深色的選項、時長及已知場所無照片送審已操作 | 全部選單取消／返回；iPad 橫向及 split view |
+| 更新既有場所 | 未改資料時清楚提示、不提交；單改 Seating 即可送審 | B09 還原原值、B12 全部移除的原生分支 |
+| 自動測試 | 本輪 48 passed、0 failed，包含新規則及 store 拒絕無效提案；最後 UI 建置成功 | 不代表完整 VoiceOver 或真實可用性測試 |
+| A、C、D、E 其餘流程 | 先前實作／部分原生測試紀錄 | 未改動，也未宣稱此版全部 40 個案例通過 |
+
 
 證據按需讀取：
 
-- [最新表單驗證與截圖](.impeccable/review/about-place-2026-09-08/VERIFICATION.md)
+- [較早 About the place 驗證與截圖](.impeccable/review/about-place-2026-09-08/VERIFICATION.md)
 - [Entry/cost 排列驗證](.impeccable/review/entry-layout-2026-09-08/VERIFICATION.md)
 - [先前 A–E 修正／D–E 操作紀錄](.impeccable/review/owner-feedback-2026-09-07/VERIFICATION.md)
 - [留存的 48 項測試結果](.impeccable/review/entry-copy-2026-09-07/test-summary.json)
 
 以上是各次檢查範圍的證據，不等於完整真人可用性驗證。
+
+### 2026-09-08：整體流程與資訊層級評估
+
+基準：`3b8bf457f39e50bdbd650efb3fd4bb2f29f71e8a`，檢查前 working tree clean。本輪只新增本節與原生截圖，未修改 Swift 或產品規則。依專案約定由單一 agent 做 Impeccable critique，設計判斷與工具檢查並非兩份獨立評估。
+
+Debug 建置成功（`/tmp/cool-spot-critique-build.log`）。使用隔離 Cool Spot Compact QA（iPhone SE、375 pt、iOS 18.2）及 Cool Spot Tablet QA（iOS 26.4）；未替換或操作 owner 原本停在未送出表單的 iPhone。一般字級流程以正常啟動檢查；最大字級／深色以 memory-only DEBUG routes 檢查，不能證明 production persistence。未重跑單元測試、完整 VoiceOver、實機單手操作或首次使用者計時。
+
+| 案例 | 本輪原生證據 | 仍未證明 |
+|---|---|---|
+| A01、A07 | Explore 地點列 → Riverside Library → Save；Saved 狀態與私人欄位出現。Directions 固定可見 | 未打開 Apple Maps 驗證導覽；未驗證首次使用者能在 30 秒內做決定 |
+| D01、D05 | Share how it felt → A little cooler → Publish report → 成功畫面；返回可見本輪個人回報與 You’ve shared this visit | 入口由 agent 根據已知 accessibility tree 點擊，不能算自行找到；未覆蓋 D01/D05 所有分支或重啟保存 |
+| B04、B11 | 搜尋無結果 → 地圖點選 → Use this spot → Outdoors／Tree shade；無名時提示照片，填 TEST Community Courtyard 後不用照片即能送審；實際到 Sent for review | Place type 保留 Not sure，未走 B04 的選類型分支；未完成 B11 四種來源或 You 狀態回查 |
+| B06 | 名稱輸入後往下展開 Entry and seating → Cost to use → Free to use；本次未跳回名稱欄 | 僅此選單序列；其他選單、取消與自訂時長仍待完整重測 |
+| iPad 大字級／深色 | 地點頁及 chooser → Riverside Café 表單可開啟、原生表單可向下捲動 | 不代表全部 iPad flow、橫向或 split view 通過 |
+
+點擊比較以 Explore 為起點，計入入口、欄位聚焦、選項與送出，不計鍵盤字元、捲動、選填項及成功頁 Done。最短路徑的結構計數：Directions 2 次（外部 Maps 未操作）、Save 2 次、符合資格的最簡回報 4 次、附近已知場所的最簡提案 6 次（source 推算）、有名稱的新地圖位置 9 次（包含一次選點與名稱聚焦；若先搜尋再多一次聚焦）。這是最短路徑的比較，不是自然操作的總點擊數或完成時間；完整 B04 會因搜尋及選填類型增加動作。
+
+**評估後的處理狀態：**
+
+- **P1／A01，大字級可讀區太小：** iPhone 最大字級的固定 Directions／Save 區約佔全螢幕 42%，Directions 斷成兩行；iPad 同樣有固定按鈕壓縮閱讀區。應先測試能保留字級、縮減圖示與固定區佔用的原生排列，避免直接把字縮小。
+- **A01／保留，順序取捨尚未證明有問題：** 一般窄螢幕先顯示照片、場所摘要及體感分布，AC／water 在首屏之外。先回答訪客覺得多涼有產品上的理由；沒有證據證明將設施移到體感之前較好，不列為已確認的 P2 缺陷。
+- **B04–B06／地圖保留，表單另作聚焦評估：** 表單地圖用於核對填寫位置，不是要求再選一次。沒有證據證明縮圖較好。Owner 此後明確修正 name/photo 規則（見 PRODUCT Identification），並要求處理分組間距、說明位置、必填／選填層級、選單列高度及送出回饋。
+- **P2／A03–A05，探索控制的預期不清：** source 確認 More 是空 action、Search this area 不取新資料；第二個 filter 取代第一個，文字搜尋另外讀全部 fixtures。這是現行 prototype 邊界，也會干擾可用性評估。提議讓未接通的控制有明確狀態，並先定義搜尋與篩選一致的預期；尚未完成這些分支的本輪原生操作。
+
+其他待決策限制：公開提案沒有跨重啟草稿、私人 Pin 沒有刪除入口、審核 Action needed 無補件路徑。這些見 PRODUCT，不能因為已記錄為 prototype 限制，就視為正式產品的可用性已通過。
+
+截圖：[Explore](.impeccable/review/flow-critique-2026-09-08/phone-explore.png)、[地點首屏](.impeccable/review/flow-critique-2026-09-08/phone-place-top.png)、[新增表單首屏](.impeccable/review/flow-critique-2026-09-08/phone-contribution-top.png)、[iPhone 最大字級深色](.impeccable/review/flow-critique-2026-09-08/phone-place-large-dark.png)、[iPad 地點最大字級深色](.impeccable/review/flow-critique-2026-09-08/tablet-place-large-dark.png)、[iPad 表單最大字級深色](.impeccable/review/flow-critique-2026-09-08/tablet-form-large-dark.png)。
+
+Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效力；不據此宣告無問題。全 app 根目錄未產生穩定 critique slug，因此未新增平行報告或比較歷史分數；觀察集中在本文件。本輪沒有 web overlay/server。owner 完整 B04 → B05 與 B03/B06 重測仍待進行。
+
+### 2026-09-08：Add cooling information 聚焦研究
+
+本次只查閱原始碼、唯讀查看 owner iPhone 的 Entry and seating 原生畫面及研究設計指南；未修改 Swift、未操作表單答案、未重建 App。上方舊名稱／照片通過紀錄及 9 次點擊計數，是 owner 新決定之前的版本證據。
+
+確認原因：`entryQuestion` 使用自訂 HStack／ViewThatFits 包裝 Who can use this spot? 與 Cost to use，Seating／Tables 等使用直接的原生 Picker；相同單行選單列沒有產品理由刻意不同高。`Section.footer` 的存在、行數和各列自訂 padding 共同造成區塊間距觀感不同。`sendBar` 只顯示 `requiredHint` 找到的第一項缺漏，文字不是可點擊的修正入口，且在可送出時消失。
+
+待實作方案的評估標準：section 標題與問題標籤分層；Required／Optional 跟隨對應問題，使用固定樣式；必要說明緊鄰問題，出現在作答之前；一般單行 picker 使用一致 row insets／最小觸控高度，說明或換行才增加高度；新位置的 name/photo 規則依 PRODUCT。送出回饋建議比較「停用按鈕＋明確修正入口」與「按送出後標出所有缺漏、定位第一項，全部有效才提交」，不能只刪提示而留下無法操作的灰色按鈕。這是實作前的研究紀錄；下節記錄 owner 同意下一步後的實作和限定驗證。
+
+依據：[Apple 資料輸入](https://developer.apple.com/design/human-interface-guidelines/entering-data)、[Apple 文字欄位](https://developer.apple.com/design/human-interface-guidelines/text-fields)、[NN/g 表單鄰近性](https://www.nngroup.com/articles/form-design-white-space/)、[NN/g 必填標示](https://www.nngroup.com/articles/required-fields/)、[IBM Carbon 表單](https://carbondesignsystem.com/patterns/forms-pattern/)、[GOV.UK 說明文字](https://design-system.service.gov.uk/patterns/question-pages/)、[GOV.UK 錯誤摘要](https://design-system.service.gov.uk/components/error-summary/)。原則可以支持方案，不能保證方案在本 app 的使用者測試中最佳。
+
+### 2026-09-08：Add cooling information 實作與限定驗證
+
+基準為 `3b8bf457f39e50bdbd650efb3fd4bb2f29f71e8a` 加本輪 `ContributionView.swift`、`cool_spotTests.swift` 及三份 active documents 的 working changes。保留先前未提交的文件及評估截圖；未 commit，未替換 owner 的 iPhone 17 Pro Max App，未操作其未送出表單。
+
+- 實作：未列出位置需同時有名稱與有效照片；照片位置固定。問題標籤統一 Required／Optional，移除分散 footer；必要說明緊鄰題目。Cost、Seating、Tables 共用同一 picker row；較長標籤和大字體可上下排列。Send 改為按下後標出所有缺漏、定位第一題，保留答案。一般字級仍固定在底部，大字級仍放表單末端。
+- 原生環境：隔離 Cool Spot Compact QA（iPhone SE，375 pt，iOS 18.2）；Cool Spot Form Tablet QA 18（iPad Air 11-inch M2，iOS 18.2，系統與 DEBUG 最大 Dynamic Type、深色）。iOS 26.4 的既有 Tablet QA 能顯示表單首屏，但本輪工具未穩定取得其內容控制樹／捲動，因此不宣稱完成該 runtime 的全流程。
+- 建置成功：`/tmp/cool-spot-form-build.log`。XCTest 48 passed、0 failed，含三種 unlisted kind × 三種 setting 的名稱／照片規則、缺漏恢復、store 邊界、原有 update／duplicate 測試；[結果摘要](.impeccable/review/form-refinement-2026-09-08/test-summary.json)。最後僅修正 UI 排版／錯誤文字對比，未重複執行未受影響的模型 suite。
+
+| 案例 | 本輪實際操作／結果 | 未覆蓋部分 |
+|---|---|---|
+| B03 | DEBUG Pin 入口 → Use this spot；公開名稱為空，Required 出現在名稱與照片旁；第一次按 Send 即定位到環境題，錯誤完整可見 | 從 Saved 主頁進入／返回核對原 Pin 資料尚未原生重測；私人資料不複製有模型測試 |
+| B04、B05、B11 | 搜尋 TEST Community Courtyard 無結果 → 地圖 → Use this spot；填名稱、Outdoors、Tree shade、系統照片。照片存在但清空名稱後 Send 被攔下；重新實際輸入名稱後到 Sent for review | 本次未改 Place type，也未調整既有 draft 座標；B11 未做 You 回查及四種完整來源 |
+| B06 | 窄螢幕 Cost → Free to use 不跳回名稱。Cost／Seating／Tables 標準列同為約 66 pt（44 pt 內容＋原生列 inset）；Time limit 因說明而較高。iPad 展開 Entry and seating、Other duration… → 顯示 Hours 1／Minutes 30 | 未逐一操作全部選單、取消及重新開啟；單手操作尚未真人觀察 |
+| B01 | iPad 選 Indoors、Air conditioning，自訂時長後不加照片，成功到 Sent for review | 無照片移除的完整 B10 分支未另測 |
+| B09 | iPhone 既有 Library 未修改按 Send：出現需修改一項的提示，沒有提交；改 Seating → Limited seating 後成功送審 | 原值還原由模型測試覆盖；B12 原生移除原因分支待測 |
+| B10 | QA 系統 PhotosPicker 選範例照片，圖片出現、照片缺漏消失 | 系統取消、更換、移除及讀取失敗沒有全部原生覆蓋；模型驗證包含移除與壞圖片 |
+| 大字體／輔助使用 | 最大字級深色下設施圖示固定欄寬，完整單字換行；picker accessibility 提供題目、目前答案及 Optional | 未宣稱完成 VoiceOver 朗讀、焦點次序、Reduce Motion 或實機 accessibility audit |
+
+修正過程實際發現並處理：首次顯示錯誤時要等待原生 Form 更新後再捲動；大字級原生 Label 會把設施單字切開，改為此表單專用圖示／文字排列；錯誤使用高對比正文加紅色圖示，避免小字只靠淡紅色辨認。原生檢查沒有以 web detector 代替。
+
+截圖：[名稱及錯誤定位](.impeccable/review/form-refinement-2026-09-08/phone-required-errors.png)、[欄位標籤](.impeccable/review/form-refinement-2026-09-08/phone-fields.png)、[Entry and seating](.impeccable/review/form-refinement-2026-09-08/phone-entry.png)、[iPad 最大字級設施](.impeccable/review/form-refinement-2026-09-08/tablet-features-large-dark.png)、[新位置送審成功](.impeccable/review/form-refinement-2026-09-08/phone-submitted.png)。
+
+以上 DEBUG flows 使用 memory-only store，不是正式保存／上傳／審核服务證據，也不是首次使用者的完成時間或點擊數測量。
 
 ## 怎麼跑
 
@@ -142,10 +207,12 @@
 
 ### B03｜把私人 Pin 的位置提供給別人
 
+**狀態：規則已實作；agent 限定檢查見上方，完整 owner 走查待測。**
+
 1. 關閉公開表單 → Saved → Pins → A08 的 **TEST 河邊樹蔭** → **Add cooling information**。
 2. **Confirm the spot**：確認原本 Pin 的位置 → **Use this spot**。
-3. 核對公開名稱與備註為空，不應出現私人 `TEST` 文字；名稱先留空 → Indoors or outdoors? → **Outdoors** → **Tree shade**。
-4. 往下 **Help people find this spot · Required** → **Add photo** → 選一張測試照片；不用回答進入資格也可以送審。
+3. 核對公開名稱與備註為空，不應出現私人 `TEST` 文字；自行填公開名稱 `TEST Shade beside the playground` → Indoors or outdoors? → **Outdoors** → **Tree shade**。
+4. **Add photo** → 選一張測試照片；名稱及照片皆提供後，不用回答進入資格也可以送審。Required 應使用同樣樣式，跟隨名稱及照片問題。
 5. 確認照片顯示、Send for review 可點；先不送，可接 B10。
 
 **觀察：** 先回答室內／室外，再填相鄰的名稱與找路描述是否順暢？名稱提示是否清楚歸屬輸入欄？位置只留一個 Change location，進入資格與必填照片是否分得清？
@@ -154,22 +221,26 @@
 
 ### B04｜搜尋不到，但知道有名稱的場所
 
+**狀態：規則已實作；agent 限定檢查見上方，完整 owner 走查待測。**
+
 1. Explore → ＋ → Add cooling information → 搜尋 `TEST courtyard`。
 2. 無結果 → **Choose a spot on the map** → 在地圖點選位置 → **Use this spot**。
-3. **Indoors or outdoors? · Required** 直接選 **Outdoors** → **Place name · Optional** 填 `TEST Community Courtyard` → Place type · Optional → **Square, plaza or courtyard**。
-4. 選 Tree shade → 確認可送審；先不送。
+3. **Indoors or outdoors?** 直接選 **Outdoors** → **Place name** 填 `TEST Community Courtyard`，兩題皆應標明必填 → Place type · Optional → **Square, plaza or courtyard**。
+4. 選 Tree shade → 未加照片按 Send，應定位 Photo 並要求照片、不得實際送審；Add photo → 選測試照片 → 確認符合送審條件；先不送。
 
-**觀察：** 三個室內／室外選項是否可直接選，未選時有沒有誤導性預設？是否分得清場所名稱與下方找路描述？新提示為 `Use the name people know.`／`e.g. Fourth floor, by the windows`；描述欄位不應預留多餘空白。有名稱時檢查照片仍為選填。
+**觀察：** 三個室內／室外選項是否可直接選，未選時有沒有誤導性預設？是否分得清場所名稱與找路描述？名稱應鼓勵容易辨認的描述，不必假造正式場所名稱；描述欄位不應預留多餘空白。有名稱時照片仍必填。
 
 ### B05｜室內角落、無名位置與改位置
 
-1. 接 B04 表單：清空名稱 → Indoors or outdoors? 選 **Indoors**；將之前選的 Place type 改回 **Not sure**。
+**狀態：規則已實作；agent 限定檢查見上方，完整 owner 走查待測。**
+
+1. 接 B04 表單：清空名稱 → Indoors or outdoors? 選 **Indoors**；將之前選的 Place type 改回 **Not sure**。即使已有照片，缺名稱也不得實際送審。
 2. **How to find this spot · Optional** 填 `TEST Fourth floor, corner by the windows`；加長到多行，確認欄位隨內容增高。
-3. 選至少一個降溫設施，加一張照片 → 確認可送審；切換 Outdoors／Both 也使用相同規則。
+3. 自訂容易理解的公開名稱 `TEST Fourth-floor window seating` → 選至少一個降溫設施，確認有一張照片 → 確認符合送審條件；切換 Outdoors／Both 也使用相同規則。
 4. 回表單上方 **Change location** → 調整地圖位置 → **Use this spot** → 答案保留。
 5. 關閉本次測試表單。若從 Saved Pin 進入，核對原 Pin 的位置與私人文字沒被改動。
 
-**檢查：** 名稱和未確認的類型皆可留空，不必替角落創造名稱。無名位置仍用照片幫助辨識；與室內／戶外無關。場所分類和進入資格都可以留 Not sure。
+**檢查：** 沒有正式名稱的位置也需要自訂易懂名稱及照片。場所分類和進入資格可以留 Not sure；照片不能替代名稱，名稱也不能免除照片。
 
 ### B06｜選填資料在同頁完成
 
@@ -181,7 +252,7 @@
 
 **重點回饋：** Who can use this spot? 有 Everyone／Limited access／Not sure，皆不擋送審。Cost to use 有 Free to use／Purchase required／Entry fee／Not sure。沒有 Who is it limited to? 或 Tickets and booking 填寫區塊。Time limit 是場所公告限制，不是這次造訪待了多久。
 
-**重測錄影中的跳位：** 點一下上方 Place name（可留空）→ 往下滑 → Entry and seating → Cost to use／Seating／Time limit，分別開啟、取消及選值。開選單時背景應停在原位，不跳回名稱區。
+**重測錄影中的跳位：** 點一下上方 Place name → 往下滑 → Entry and seating → Cost to use／Seating／Time limit，分別開啟、取消及選值。開選單時背景應停在原位，不跳回名稱區；這項測試不需要送審。
 
 ### B07｜返回與改選場所
 
@@ -204,24 +275,26 @@
 ### B09｜只修正既有 Cool Spot 的一項資料
 
 1. Explore → Riverside Library → **Suggest an edit** → 確認標題 Update place details、既有設施已選好。
-2. 先不修改，觀察 Send for review 不可用。
+2. 先不修改 → 按 Send for review；應顯示 Change at least one detail before sending an update，不建立提案。
 3. Entry and seating → Seating → 選與原值不同的項目 → 讀 **Your changes**。
-4. 改回原值 → 確認若沒有其他改動，Send 再次不可用；再改一次，留給 B11 送審。
+4. 改回原值 → 再按 Send，若無其他改動應提示需修改一項、不提交；再改一次，留給 B11 送審。
 
 **其他入口：** Saved → Places → 已收藏的 Riverside Library → Suggest an edit；或 Explore → ＋ → Add cooling information → Riverside Library。都應開既有資料的修正表單。
 
 ### B10｜照片：選取、取消、更換、移除
 
-1. 在 B03 無名戶外表單 → Add photo → 先取消系統選擇器；其他答案应保留。
+**狀態：新位置一律需要照片已實作；完整系統照片分支待 owner 重測。**
+
+1. 在 B03 自訂名稱戶外表單 → Add photo → 先取消系統選擇器；其他答案應保留。
 2. 再 Add photo → 選一張測試照片 → 等待載入 → 確認無須另勾「能辨識地點」開關。
 3. **Replace photo** → 選另一張 → **Remove photo**。
-4. 無名戶外點移除照片後應不能送審；再加入照片。另在有名稱的表單試一次移除選填照片，確認不會因此新增必填限制。
+4. 新地圖位置即使有名稱，移除照片後也不得實際送審；再加入照片。另在 B01 已由搜尋選到的 Riverside Café 表單，試一次移除選填照片，確認此分支沒有新增照片要求。
 
 **若自然遇到錯誤：** Photo couldn’t be loaded → **OK** → 重新 Add photo。不要刻意找壞檔案或清空相簿；這項不是每次都能重現。照片不會真的上傳。
 
 ### B11｜送審與找回結果
 
-**完整覆蓋時分別送四筆測試資料：** B01 的已知場所、B03 的無名戶外位置、B04 的有名新場所、B09 的既有 Cool Spot 修正。每筆都用下方同一組步驟核對。送出前完成要保留的返回／照片測試。
+**完整覆蓋時分別送四筆測試資料：** B01 的已知場所、B03 的自訂名稱戶外位置、B04 的有名新場所、B09 的既有 Cool Spot 修正。每筆都用下方同一組步驟核對。送出前完成要保留的返回／照片測試。
 
 1. 在一份已填好的測試提案／修正中 → **Send for review**。
 2. **Sent for review** → 讀說明 → **Done**；若回到 Saved／地點的父頁，先按 Done／× 回主畫面。
@@ -234,7 +307,7 @@
 
 1. Riverside Library → Suggest an edit → **Name or place type is incorrect** → 填 `TEST the place name has changed` → 核對 Your changes。
 2. 在同一修正表單，取消全部原有降溫設施。
-3. 應出現原因欄位與不能送審的提示 → 填 `TEST the cooling facilities are no longer available` → 核對可送審及 Your changes。
+3. 應出現 Required 的原因欄位；先按 Send，應定位原因欄並提示、不能實際提交 → 填 `TEST the cooling facilities are no longer available` → 核對可送審及 Your changes。
 4. 這是驗證分支，最後 Close → Discard and close 即可。
 
 **目前行為：** 名稱／來源類型不是在主欄位直接覆寫，而是送出更正說明。如果這不符合你的預期，記下來討論。

@@ -488,57 +488,78 @@ final class ApprovedContributionTests: XCTestCase {
         draft.values.type = .food
         XCTAssertTrue(draft.canSend)
     }
-    func testMissingPlaceRequiresNamePointTypeSettingAndFeature() {
-        var draft = PlaceContributionDraft(kind: .missing, anchor: .init(latitude: 51.5, longitude: -0.1))
-        draft.values.setting = .both; draft.values.features = [.treeShade]; draft.values.type = .square
-        XCTAssertFalse(draft.canSend)
-        draft.values.name = "A real place"
-        XCTAssertFalse(draft.canSend)
-        draft.values.locationConfirmed = true
-        XCTAssertTrue(draft.canSend)
-        draft.values.name = " \n "
-        XCTAssertFalse(draft.canSend)
-    }
-    func testExactSpotRequiresValidPhotoButAllowsEveryEntryAnswer() {
-        var draft = PlaceContributionDraft(kind: .exact, anchor: .init(latitude: 51.5, longitude: -0.1))
-        draft.values.locationConfirmed = true; draft.values.features = [.treeShade]
-        draft.values.photo = Data([1, 2, 3])
-        XCTAssertFalse(draft.canSend)
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 2, height: 2))
-        draft.values.photo = renderer.pngData { context in UIColor.green.setFill(); context.fill(CGRect(x: 0, y: 0, width: 2, height: 2)) }
-        XCTAssertTrue(draft.canSend)
-        for answer in PlaceEntryEligibility.allCases {
-            draft.values.entryEligibility = answer
-            XCTAssertTrue(draft.canSend, "Entry eligibility is optional, including Not sure and limited access")
+    private func placePhoto() -> Data {
+        UIGraphicsImageRenderer(size: CGSize(width: 2, height: 2)).pngData { context in
+            UIColor.green.setFill(); context.fill(CGRect(x: 0, y: 0, width: 2, height: 2))
         }
-        draft.values.photo = nil; XCTAssertFalse(draft.canSend)
     }
-    func testIndoorOutdoorAndBothAllowUnnamedSpotsAndOptionalType() {
+
+    func testUnlistedPlacesAlwaysNeedBothNameAndPhotoWithOptionalType() {
+        for kind in [PlaceContributionKind.unlisted, .missing, .exact] {
+            for setting in PlaceEnvironment.allCases {
+                var draft = PlaceContributionDraft(kind: kind, anchor: .init(latitude: 51.6, longitude: -0.2))
+                draft.values.locationConfirmed = true
+                draft.values.setting = setting
+                draft.values.features = [.treeShade]
+                draft.values.name = "Shade beside the playground"
+                XCTAssertFalse(draft.canSend, "A name must not waive the photo requirement")
+                XCTAssertEqual(draft.validationIssues.map(\.field), [.photo])
+                draft.values.photo = Data([1, 2, 3])
+                XCTAssertFalse(draft.canSend)
+                draft.values.photo = placePhoto()
+                XCTAssertTrue(draft.canSend)
+                XCTAssertNil(draft.values.type, "Place type is still optional")
+                for blank in ["", " \n "] {
+                    draft.values.name = blank
+                    XCTAssertFalse(draft.canSend, "A photo must not substitute for a descriptive name")
+                    XCTAssertEqual(draft.validationIssues.map(\.field), [.name])
+                }
+                draft.values.name = "Shade beside the playground"
+                for answer in PlaceEntryEligibility.allCases {
+                    draft.values.entryEligibility = answer
+                    XCTAssertTrue(draft.canSend, "All entry eligibility answers permit review")
+                }
+            }
+        }
+    }
+
+    func testValidationReportsAllMissingAnswersAndRecoversWithoutLosingOtherAnswers() {
         var draft = PlaceContributionDraft(kind: .unlisted, anchor: .init(latitude: 51.6, longitude: -0.2))
         draft.values.locationConfirmed = true
-        draft.values.features = [.treeShade]
-        XCTAssertTrue(draft.isExactSpot)
-        XCTAssertFalse(draft.canSend)
+        draft.values.locationDetails = "By the east gate"
+        draft.values.tables = .yes
+        XCTAssertEqual(draft.validationIssues.map(\.field), [.setting, .name, .features, .photo])
         draft.values.setting = .outdoors
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 2, height: 2))
-        draft.values.photo = renderer.pngData { context in UIColor.green.setFill(); context.fill(CGRect(x: 0, y: 0, width: 2, height: 2)) }
+        draft.values.name = "Shade by the east gate"
+        draft.values.features = [.treeShade]
+        draft.values.photo = placePhoto()
+        XCTAssertTrue(draft.validationIssues.isEmpty)
         XCTAssertTrue(draft.canSend)
-        draft.values.name = "Public courtyard"
-        XCTAssertFalse(draft.isExactSpot)
-        XCTAssertTrue(draft.canSend)
-        draft.values.type = .square
-        XCTAssertTrue(draft.canSend)
-        XCTAssertEqual(draft.values.features, [.treeShade])
+        XCTAssertEqual(draft.values.locationDetails, "By the east gate")
+        XCTAssertEqual(draft.values.tables, .yes)
+        draft.values.photo = nil
+        XCTAssertEqual(draft.validationIssues.map(\.field), [.photo])
+        XCTAssertFalse(draft.canSend)
+    }
+
+    func testStoreRejectsIncompleteIdentificationAndAcceptsCompleteUnlistedProposalOnce() {
+        let store = PrototypeStore()
+        var draft = PlaceContributionDraft(kind: .unlisted, anchor: .init(latitude: 51.6, longitude: -0.2))
+        draft.values.locationConfirmed = true
+        draft.values.setting = .outdoors
+        draft.values.features = [.treeShade]
+        draft.values.name = "Shade beside the playground"
+        let initialCount = store.contributions.count
+        XCTAssertFalse(store.submitPlaceContribution(draft))
+        draft.values.photo = placePhoto()
         draft.values.name = " "
-        XCTAssertTrue(draft.isExactSpot)
-        XCTAssertTrue(draft.canSend)
-        for setting in PlaceEnvironment.allCases {
-            draft.values.setting = setting
-            draft.values.type = nil
-            draft.values.locationDetails = "School library, fourth floor, corner by the windows"
-            XCTAssertTrue(draft.canSend)
-            XCTAssertEqual(draft.displayName, draft.values.locationDetails)
-        }
+        XCTAssertFalse(store.submitPlaceContribution(draft))
+        XCTAssertEqual(store.contributions.count, initialCount)
+        draft.values.name = "Shade beside the playground"
+        XCTAssertTrue(store.submitPlaceContribution(draft))
+        XCTAssertEqual(store.contributions.first?.placeDraft?.values, draft.values)
+        XCTAssertFalse(store.submitPlaceContribution(draft))
+        XCTAssertEqual(store.contributions.count, initialCount + 1)
     }
 
     func testUpdateOnlyNeedsARealChangeAndCanRevertToNoChanges() throws {
@@ -702,6 +723,8 @@ final class ApprovedContributionTests: XCTestCase {
         draft.values.name = spot.name; draft.values.locationConfirmed = true
         draft.values.setting = .both; draft.values.type = spot.type; draft.values.features = [.drinkingWater]
         draft.values.note = "Please check access"
+        draft.values.photo = placePhoto()
+        XCTAssertTrue(draft.canSend)
         XCTAssertFalse(store.submitPlaceContribution(draft))
         let update = draft.reconciled(with: spot)
         XCTAssertTrue(update.isUpdate)
