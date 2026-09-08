@@ -1,0 +1,19 @@
+{
+  "cool-spot/ExploreView.swift": "a577dba92a941c560712e115cf688ead2fac7ad07b2c0651386f7d5eb6903e53",
+  "cool-spot/PrototypeSharedViews.swift": "f44b37ae98850e134b7621cb0b34932c59f8038959607047b34e15ac916a3ecf",
+  "cool-spot/VisitorReportsView.swift": "b9168150be1617d9ab0ea5fa8c674b841512b8b994e455bbdbca53521f9fb2fe",
+  "cool-spot/SavedYouViews.swift": "fc0bde98301c44776012bdb2269b480422b9bca118b16897af3a19148d0a3785",
+  "cool-spot/PrototypeModels.swift": "698b0feea5fc50f81948df40b0ca20599a6d56ade57f4d1db4cb9e2979020fbf",
+  "cool-spot/ContributionView.swift": "27e7cf350764fe280c35b5ff9f24598b1b5a4d690341a52f6781bd9904bf92b9",
+  "cool-spot/PlaceDetailView.swift": "16727d72173b7bf395f73186dca742b379081371463454581478bb87e4b7fdfc",
+  "cool-spot/ContentView.swift": "11a384757c5b1c7ec6d58de43971f537062a75dfb1eac9e94f132731cddf8730",
+  "cool-spot/cool_spotApp.swift": "d5ef122d95e16e29e9bd51cd2c047091a06abc6421610a1899261a99b35bebf1",
+  "cool-spotTests/cool_spotTests.swift": "5672f2249bf90d3d17a93d5a7fc855b7b40437e963febf3e00f24725bd7ec78a",
+  "PRODUCT.md": "78e23b8dde261477f89147a1c5f60aac64f42b0992cc29791d1af247dbcef363",
+  "CONTEXT.md": "d68aa3a6a7732c39ba9184359f35795d026cae0717eb98d3973aea8cf582ef6a",
+  "PROTOTYPE-BRIEF.md": "a3e8615896b1c1396ae4d4b9b7d27943139bf43cd1747cc56fdff8de1f8f1869",
+  "PROTOTYPE-FINDINGS.md": "1fa10f3f9012407b5f679b922b4d720d217279f425f7eed38fed70d3d0e68949",
+  "PROTOTYPE-JOURNEYS.md": "68f76549c378881fcffa4371ebe7f8a467d150e00a21a71497a0de1dacf5bc00",
+  "PROTOTYPE-TEST-GUIDE.md": "6fbabddaccf8ffbac52739d4e57355d030a3a5d53830a2d54f7e0273e4e1dfec",
+  "cool-spot.xcodeproj/project.pbxproj": "a702ae69f7d9e7a2fb3354a7f410c1b942886be21811eed857c724ad2af48aba"
+}

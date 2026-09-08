@@ -314,4 +314,64 @@ The owner found the current information generally understandable but described t
 
 Developer verification: 14 existing tests passed; native iPhone Light/Dark and iPad captures; expanded features; independent report opens with no preselection and does not change the people count; presence success still reveals the optional three-way question; maximum Dynamic Type retains the remote-disabled explanation and How this works route. These are implementation checks, not proof of improved usability or a complete accessibility audit.
 
+## Return-to-report journeys — 4 September 2026
+
+Owner feedback exposed a distinction between having a reporting rule and offering a usable path through it. The owner questioned the misaligned Culture label, the frustration of reporting after leaving, and how first-time users would discover the prerequisite without a tutorial. A source-based walkthrough found that 24-hour eligibility existed, but answers and eligibility disappeared on relaunch, Cancel did not explain continuation, and Saved opened a reduced detail without the report entry.
+
+Implemented repair:
+
+- Align source and place type without squeezing the source badge; long combinations stack. The detail uses **Museum or cultural venue** instead of the ambiguous **Culture** category shorthand.
+- **Finish later** retains all answers privately. Changes also survive dismissing the sheet and relaunching the app. The place page and **You → Your visits** expose the same deadline and return path; no sign-in or saved-place prerequisite is introduced.
+- Saved Cool Spots open the full place page. Saving ordinary places/coordinates remains private and does not establish report eligibility; those items keep their existing contribution paths.
+- Expired answers can be viewed or removed, and cannot silently publish as a new visit. A fresh visit requires explicitly starting a new report. The same confirmation cannot be published twice.
+- Reported visit time is separate from submission time and controls freshness. The form lets the person correct the visit time, so a late report does not imply a new visit.
+- The report rule is visible while the person is nearby and can act. Ineligible people can open **Why can’t I share?**. There is no new launch tutorial and no passive visit tracking.
+- Local presence now expires after ten minutes without revoking the 24-hour reporting window. Reporting itself never starts presence.
+- Prototype controls can simulate leaving/arriving and expiry, so these journeys can be exercised without real GPS.
+
+This is an implementation review, not participant validation. The detailed walkthrough, evidence and remaining gaps are in **PROTOTYPE-JOURNEYS.md**. The unresolved case is a genuine visitor who did nothing in the app while there: they still cannot submit after leaving. Location permission/accuracy recovery, editing a published report, and recognition of multiple separate visits within one day remain future design decisions.
+
 Next: let first-time users run the same 30-second decision task and observe whether they can find evidence with less reading/search effort. Do not remove protected explanation text merely to make the page shorter.
+
+## 2026-09-05 — Your reports wireframe decision and native implementation
+
+The owner found that a Your reports row followed by a Continue report preview looked like two unrelated features, and asked what happens with three unfinished reports. They selected the simpler entry: Your reports plus the unfinished count, with every Continue report action inside the report list. This is owner feedback, not a first-time-participant finding.
+
+The native implementation preserves the three tabs and separates actual unfinished/published visit reports from place additions/updates. Cool Hunt and account content move behind their own entries; prototype controls move into Settings. Started reports no longer have a completion deadline; presence-only confirmations still have the existing 24-hour start window, and saving does not grant report eligibility. Existing appearance preferences are preserved, with Light as the unset default.
+
+No popsicle reactions, all-visitors report feed or presence animation were implemented in this pass. Native verification and remaining limits are recorded in `.impeccable/review/reports/VERIFICATION.md`.
+
+## 2026-09-05 — Implementing the remaining accepted concepts
+
+After reviewing native You/Your reports screenshots, the owner requested implementation of the settled decisions following the Saved-versus-reports boundary, without another unnecessary design round. The follow-up keeps that boundary, the three tabs and the information-first place hierarchy.
+
+- Saved now separates Places and Pins. Save a pin here explains finding the point again, privacy and the fact that it does not start a report. Existing saved items and names are retained.
+- Place quotes link to the full available individual-report list. The fixture only has aggregate counts plus a few unattributed comments, so the list labels example comments and unavailable metadata rather than fabricating per-visitor records.
+- A locally persisted popsicle-thanks prototype supports first-use explanation, sending, one per report, Undo and prevention of self-thanks. It does not affect cooling evidence or current-use counts. Sending is explicitly a demo, not delivery. A received example belongs to its published report and can be triggered in Prototype controls; it does not create another You section.
+- How this works includes a schematic map count changing from 2 to 3, with Replay and Reduce Motion support. This is an illustration, not a location action.
+
+Automated tests cover reaction uniqueness, Undo, persistence, self-thanks rejection, unchanged cooling/presence counts and not inventing metadata, alongside the previous reporting journeys. First-time comprehension and genuine social usefulness remain participant-test questions; real delivery, author identity, abuse prevention and account sync are not implemented.
+
+## 2026-09-05 — Approved minimum-first contribution flows
+
+**Status: owner-approved shape translated to native SwiftUI; not a participant test.**
+
+Source inspection confirmed capped yellow-dot presence encoding, saved-coordinate matching using current location, implicit Indoors defaults, read-only review rows that resembled editable controls, and private quick tags before a deliberate public contribution. These implementation issues motivated the approved revision.
+
+The owner accepted person/count markers, one clear visitor preview, Required → Ready → Optional for both contribution types, retained visit time, change-only existing-place validation and discard confirmation for place drafts. The implementation keeps public place facts, private pin memory, personal experience and short-lived presence separate. Exact unnamed locations have a genuine local image gate; selecting a photo does not mean a review service has accepted it.
+
+The first native inspection identified a narrow material background behind the publish button, wrapping Change at maximum text size, and a presence badge overlapping the place icon. One grouped correction gives the action area full width, stacks edit affordances at accessibility sizes, and gives the marker badge its own layout space. Final evidence and the independent finish verdict are recorded in `.impeccable/review/implementation-2026-09-05/VERIFICATION.md`.
+
+No claim is made that fewer required questions improve completion rates until the targeted participant retest runs. Real GPS, exhaustive provider search, reviewer decisions and backend submission are still outside this prototype.
+
+Independent finish review found and corrected two data-integrity gaps: whitespace/bookkeeping could enable a place update, and duplicate reconciliation copied untouched optional defaults over known facts. Updates now use normalized meaningful differences and validate edited required fields; duplicates rebase only proposed changes and retain conflicting type/setting for comparison. Regression tests cover these paths. The redundant small private-pin label was also removed; navigation and the privacy explanation retain that meaning.
+
+## 2026-09-06 — Owner test feedback: reading and contribution friction
+
+The owner explicitly liked Saved Places/Pins and the simple public contribution forms. They reported that repeated optional-detail navigation might reduce willingness to contribute, found own/example report presentation inconsistent, and were confused by duplicated place-selection fallbacks and internal terminology. They requested an actual map and modest arrival motion in the presence illustration, removal of the wheelchair row for MVP, and discussion of public correction meaning, section order, child Close, and the identifying-photo toggle.
+
+This bounded revision unifies report presentation without manufacturing missing facts, uses MapKit plus shared-badge arrival motion, removes the wheelchair row, and gives public-form children contextual titles and Back instead of whole-form Close. Actual reports, private Saved data, appearance and submission semantics remain protected. Optional inline disclosure, a unified search/map route, photo-switch removal, and the broader section/correction order remain explicit discussion proposals. See `.impeccable/review/feedback-2026-09-06/DECISIONS.md` for rationale and current decision status; this is owner feedback and implementation verification, not a population-level usability finding.
+
+## Human-centred revision — 6 September 2026
+
+Owner feedback identified internal place categories, duplicate chooser routes, repeated minimum/ready screens, ownership-biased previews, incomplete peer fixtures and generic trip-planning copy as avoidable effort. The implemented revision uses a unified chooser, context-preserving entry, one public form and inline report answers. The latest owner correction wins: preview newest by visit date, regardless of author. Complete peer examples are explicitly synthetic with fixed dates; aggregate counts never manufacture individual reports. The generic Before you go section is removed and Suggest an edit is secondary to reading. Native and regression evidence is in .impeccable/review/human-centred-2026-09-06/VERIFICATION.md. These are implementation checks, not measured conversion or usability outcomes.

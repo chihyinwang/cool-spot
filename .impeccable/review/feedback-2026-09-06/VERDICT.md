@@ -1,0 +1,15 @@
+## verdict
+
+- **Resolved — review fix 2, child navigation:** `phone-note-child.png` shows the contextual Note title, native Back and no whole-flow Close; `phone-close-confirmation.png` shows the retained Both setting and the root discard confirmation. The shared page-title/toolbar implementation matches these captures. Keyboard Note → Back retention and Setting → Back → Close were exercised in the recorded verification.
+- **Resolved — review fix 3, report evidence:** `phone-reports-light.png` shows actual and example comments using the same reading treatment, with response facts grouped before provenance and the thank-you action separated below the example. “Visit date and response details unavailable” makes the incomplete fixture explicit. The two maximum-type dark captures show full wrapping of feeling, help, stay and visit metadata; `tablet-reports-dark.png` preserves the same example hierarchy. `VisitorReportContent` is shared by both item types and supplies no invented answers or dates.
+- **Resolved — review fix 4, count example:** light phone and dark tablet captures show loaded native map tiles, visible Apple Maps attribution and the shared marker labelled Example Cool Spot. Frames 00, 05, 06 and 09 show 2 → 3 with a small badge scale/tilt/lift that settles while the map and geographic marker remain fixed. Pause visibly becomes Resume at 3; the actual Reduce Motion capture shows static 3 with equivalent explanatory text. Loop restart remains explicitly distinct from ten-minute expiry.
+- **Resolved at the executed scope — review fix 5, wheelchair row:** `phone-place-light.png` shows Before you go without the wheelchair-uncertainty row, retains brief opening-hours guidance and preserves Directions/Save priority. Broader section ordering and the correction action’s placement were explicitly retained for discussion in DECISIONS.md and are not scored as implemented here.
+- **Regressions introduced by the scored batch:** none visible in the eleven required native captures or the sampled motion frames. All eleven required captures exist and are valid for their named states; the tablet black surround is the native sheet backdrop, not missing map content.
+
+## remaining
+
+- **Clear for the four executed fixes.** Ship covers the scored fixes, not the whole surface.
+- **Pending discussion, outside this disposition:** review fixes 1, 6 and 7—merged place selection, inline optional visitor details and removal of the photo-confirmation switch—await the owner’s three unanswered preferences. The broader place-section ordering and correction-action proposal also remain open. None is represented as completed or as a gate on this bounded batch.
+- **Verification limit:** the new UIKit attempted-dismiss callback is source-reviewed but not runtime-certified; the attempted CUA swipe did not trigger it. The existing dirty-dismiss guard and explicit root Close path remain. This verdict does not certify physical-device swipe behavior or a complete VoiceOver audit. The recorded build and 38 passing tests support the implementation but do not replace that missing interaction evidence.
+
+disposition: ship

@@ -78,14 +78,14 @@ struct ExploreView: View {
     var searchedSpots: [CoolSpot] {
         guard !search.isEmpty else { return [] }
         return store.spots.filter { $0.name.localizedCaseInsensitiveContains(search) ||
-            $0.type.rawValue.localizedCaseInsensitiveContains(search) }
+            $0.type.rawValue.localizedCaseInsensitiveContains(search) || $0.address.localizedCaseInsensitiveContains(search) }
     }
 
     var searchedPlaces: [RecognisedPlace] {
         guard !search.isEmpty else { return [] }
         let matches = store.recognisedPlaces.filter { $0.name.localizedCaseInsensitiveContains(search) ||
-            $0.type.rawValue.localizedCaseInsensitiveContains(search) }
-        return matches.isEmpty ? store.recognisedPlaces : matches
+            $0.type.rawValue.localizedCaseInsensitiveContains(search) || $0.address.localizedCaseInsensitiveContains(search) }
+        return matches
     }
 
     var body: some View {
@@ -100,7 +100,7 @@ struct ExploreView: View {
                     ForEach(filteredSpots) { spot in
                         Annotation(spot.name, coordinate: spot.coordinate, anchor: .bottom) {
                             Button { selection = .coolSpot(spot.id) } label: {
-                                CoolSpotPin(type: spot.type, isGLA: spot.source == .gla,
+                                CoolSpotPin(type: spot.type,
                                             count: store.presence(for: spot))
                             }
                             .buttonStyle(.plain)
@@ -123,9 +123,10 @@ struct ExploreView: View {
                     filterBar
 
                     if !search.isEmpty {
-                        SearchResultsPanel(coolSpots: searchedSpots, places: searchedPlaces,
+                        SearchResultsPanel(query: search, coolSpots: searchedSpots, places: searchedPlaces,
                                            chooseSpot: { selection = .coolSpot($0.id) },
-                                           choosePlace: { selection = .recognisedPlace($0.id) })
+                                           choosePlace: { selection = .recognisedPlace($0.id) },
+                                           addLocation: { showContribution = true })
                             .padding(.horizontal, 16)
                     } else if showSearchArea {
                         Button { showSearchArea = false } label: {
@@ -157,7 +158,7 @@ struct ExploreView: View {
                         Menu {
                             Button {
                                 requestLocation(for: .saveCurrentLocation)
-                            } label: { Label("Save current location", systemImage: "location.fill") }
+                            } label: { Label("Save a pin here", systemImage: "mappin.and.ellipse") }
                             Button { showContribution = true } label: {
                                 Label("Add cooling information", systemImage: "plus.bubble.fill")
                             }
@@ -279,15 +280,17 @@ struct CurrentLocationSavePrompt: View {
             HStack(spacing: 10) {
                 Image(systemName: "location.fill").foregroundStyle(.blue)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Save this current location?").font(.headline)
-                    Text("Near Southwark Street · Estimated accuracy 25 m")
+                    Text("Save a pin here?").font(.headline)
+                    Text("Find this point again in Saved → Pins. Only you can see it; no report is started.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text("Prototype location · Near Southwark Street · Estimated accuracy 25 m")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
             HStack {
                 Button("Cancel", action: cancel).buttonStyle(.bordered)
                 Spacer()
-                Button("Save location", action: save)
+                Button("Save pin", action: save)
                     .buttonStyle(.borderedProminent).tint(AppStyle.ink)
             }
         }
@@ -336,40 +339,60 @@ struct FilterChip: View {
 
 struct CoolSpotPin: View {
     let type: PlaceType
-    let isGLA: Bool
     let count: Int
+    var arrivalPhase: Int = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .body) private var diameter = 42.0
+    @ScaledMetric(relativeTo: .caption) private var badgeSpace = 32.0
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 4) {
             if count > 0 {
-                HStack(spacing: 2) {
-                    ForEach(0..<min(count, 3), id: \.self) { _ in
-                        Circle().fill(AppStyle.sun).frame(width: 7, height: 7)
-                    }
-                }
-                .padding(.horizontal, 6).padding(.vertical, 4).background(AppStyle.controlSurface, in: Capsule())
-                .shadow(color: .black.opacity(0.12), radius: 3, y: 1)
+                Label("\(count)", systemImage: "person.fill")
+                    .font(.caption.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 7).padding(.vertical, 4)
+                    .background(AppStyle.controlSurface, in: Capsule())
+                    .overlay(Capsule().stroke(AppStyle.subtleBorder))
+                    .fixedSize()
+                    .contentTransition(.numericText())
+                    .scaleEffect(reduceMotion ? 1 : arrivalPhase == 1 ? 1.18 : arrivalPhase == 2 ? 1.06 : 1)
+                    .rotationEffect(.degrees(reduceMotion ? 0 : arrivalPhase == 1 ? -5 : arrivalPhase == 2 ? 4 : 0))
+                    .offset(y: reduceMotion ? 0 : arrivalPhase == 1 ? -3 : arrivalPhase == 2 ? -1 : 0)
+                    .animation(reduceMotion ? nil : .spring(duration: 0.24, bounce: 0.3), value: arrivalPhase)
             }
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: type.symbol).font(.system(size: 17, weight: .bold)).foregroundStyle(.white)
-                    .frame(width: 42, height: 42).background(AppStyle.ink, in: Circle())
-                    .overlay(Circle().stroke(.white, lineWidth: 3))
-                    .shadow(color: .black.opacity(0.24), radius: 4, y: 2)
-                if isGLA {
-                    Circle().fill(AppStyle.sun).frame(width: 13, height: 13)
-                        .overlay(Circle().stroke(.white, lineWidth: 2))
-                }
-            }
+            Image(systemName: type.symbol)
+                .font(.body.weight(.bold)).foregroundStyle(.white)
+                .frame(width: diameter, height: diameter).background(AppStyle.ink, in: Circle())
+                .overlay(Circle().stroke(.white, lineWidth: 2))
         }
+        // Stable bottom anchor in the map, including when the badge disappears.
+        .frame(minHeight: diameter + badgeSpace, alignment: .bottom)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(type.rawValue). \(count > 0 ? "\(count) people shared they’re cooling off here in the last 10 minutes" : "No active shared presence")")
     }
 }
 
 struct SearchResultsPanel: View {
+    let query: String
     let coolSpots: [CoolSpot]
     let places: [RecognisedPlace]
     let chooseSpot: (CoolSpot) -> Void
     let choosePlace: (RecognisedPlace) -> Void
+    let addLocation: () -> Void
     var body: some View {
         VStack(spacing: 0) {
+            if coolSpots.isEmpty && places.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("No places found").font(.headline)
+                    Text("No matches for “\(query)”. Try another name or address.")
+                        .font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Add cooling information at a location", action: addLocation)
+                        .frame(minHeight: 44)
+                    Text("Search covers example places in this prototype.")
+                        .font(.caption).foregroundStyle(AppStyle.supportingText)
+                }.frame(maxWidth: .infinity, alignment: .leading).padding(16)
+            }
             ForEach(coolSpots.prefix(2)) { spot in
                 Button { chooseSpot(spot) } label: {
                     SearchResultRow(symbol: spot.type.symbol, title: spot.name,
@@ -455,11 +478,11 @@ struct SavedToast: View {
         HStack(spacing: 12) {
             Image(systemName: "bookmark.fill").foregroundStyle(AppStyle.brand)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Current location saved").font(.subheadline.weight(.semibold))
-                Text("No form needed. Add details later from Saved.").font(.caption).foregroundStyle(.secondary)
+                Text("Private pin saved").font(.subheadline.weight(.semibold))
+                Text("Find it in Saved → Pins. Only you can see it.").font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Button("View", action: view).font(.caption.weight(.bold))
+            Button("View pin", action: view).font(.caption.weight(.bold)).frame(minHeight: 44)
         }
         .padding(14).background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.16), radius: 10, y: 4)

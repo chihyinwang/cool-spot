@@ -1,0 +1,105 @@
+--- before/ContributionView.swift
++++ cool-spot/ContributionView.swift
+@@ -452,6 +452,14 @@
+             footer: { Text("Public after review. Your private saved notes stay private.").foregroundStyle(AppStyle.supportingText) }
+ 
+             Section {
++                if draft.sourceSetting {
++                    LabeledContent("Indoors or outdoors?") {
++                        Text(draft.values.setting?.rawValue ?? "Not known")
++                            .foregroundStyle(AppStyle.supportingText)
++                    }
++                } else {
++                    environmentQuestion
++                }
+                 if draft.isUnlisted {
+                     VStack(alignment: .leading, spacing: 8) {
+                         Text("Place name · Optional").font(.subheadline.weight(.semibold))
+@@ -459,27 +467,17 @@
+                                   prompt: Text("e.g. Riverside Library").foregroundStyle(AppStyle.supportingText))
+                             .focused($focusedField, equals: .name)
+                             .accessibilityLabel("Place name, optional")
+-                        Text("Use the name people know. Leave blank if this spot has no name.")
++                        Text("Use the name people know.")
+                             .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                     }.padding(.vertical, 4)
+                 }
+                 VStack(alignment: .leading, spacing: 8) {
+                     Text("How to find this spot · Optional").font(.subheadline.weight(.semibold))
+-                    TextField("e.g. Library, fourth floor, corner by the windows", text: $draft.values.locationDetails,
+-                              prompt: Text("e.g. Library, fourth floor, corner by the windows").foregroundStyle(AppStyle.supportingText), axis: .vertical)
++                    TextField("e.g. Fourth floor, by the windows", text: $draft.values.locationDetails,
++                              prompt: Text("e.g. Fourth floor, by the windows").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                         .focused($focusedField, equals: .locationDetails)
+-                        .lineLimit(2...4).accessibilityLabel("How to find this spot, optional")
+-                    Text("Add the floor, entrance or nearest landmark.")
+-                        .font(.footnote).foregroundStyle(AppStyle.supportingText)
++                        .lineLimit(1...4).accessibilityLabel("How to find this spot, optional")
+                 }.padding(.vertical, 4)
+-                if draft.sourceSetting {
+-                    LabeledContent("Setting") { Text(draft.values.setting?.rawValue ?? "Not known").foregroundStyle(AppStyle.supportingText) }
+-                } else {
+-                    Picker("Setting", selection: $draft.values.setting) {
+-                        Text("Choose…").tag(nil as PlaceEnvironment?)
+-                        ForEach(PlaceEnvironment.allCases) { Text($0.rawValue).tag(Optional($0)) }
+-                    }
+-                }
+                 if draft.sourceType {
+                     LabeledContent("Place type") { Text(draft.values.type?.rawValue ?? "Not known").foregroundStyle(AppStyle.supportingText) }
+                 } else {
+@@ -557,6 +555,55 @@
+     }
+     func factPicker(_ title: String, value: Binding<OptionalFact>) -> some View {
+         Picker(title, selection: value) { ForEach(OptionalFact.allCases) { Text($0.rawValue).tag($0) } }
++    }
++    private var environmentQuestion: some View {
++        VStack(alignment: .leading, spacing: 8) {
++            Text(draft.isUpdate ? "Indoors or outdoors?" : "Indoors or outdoors? · Required")
++                .font(.subheadline.weight(.semibold))
++            if dynamicTypeSize.isAccessibilitySize {
++                environmentOptions(vertical: true)
++            } else {
++                ViewThatFits(in: .horizontal) {
++                    environmentOptions(vertical: false)
++                    environmentOptions(vertical: true)
++                }
++            }
++        }
++        .padding(.vertical, 4)
++        .accessibilityElement(children: .contain)
++    }
++    private func environmentOptions(vertical: Bool) -> some View {
++        let layout = vertical ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
++        return layout {
++            ForEach(PlaceEnvironment.allCases) { environment in
++                let selected = draft.values.setting == environment
++                // Buttons allow an unanswered question without adding a fourth
++                // placeholder option or assigning a default on the user's behalf.
++                Group {
++                    if selected {
++                        environmentButton(environment, vertical: vertical)
++                            .buttonStyle(.borderedProminent)
++                    } else {
++                        environmentButton(environment, vertical: vertical)
++                            .buttonStyle(.bordered)
++                    }
++                }
++                .accessibilityAddTraits(selected ? .isSelected : [])
++            }
++        }
++    }
++    private func environmentButton(_ environment: PlaceEnvironment, vertical: Bool) -> some View {
++        Button {
++            focusedField = nil
++            draft.values.setting = environment
++        } label: {
++            Text(environment.rawValue)
++                .foregroundStyle(draft.values.setting == environment
++                    ? Color(uiColor: .systemBackground) : AppStyle.brand)
++                .fixedSize(horizontal: !vertical, vertical: true)
++                .frame(maxWidth: .infinity, minHeight: 44)
++        }
++        .accessibilityLabel("\(environment.rawValue), indoors or outdoors")
+     }
+     @ViewBuilder
+     private func entryQuestion<Content: View>(_ title: String, @ViewBuilder picker: () -> Content) -> some View {

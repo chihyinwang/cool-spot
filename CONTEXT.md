@@ -37,5 +37,5 @@ A proximity-checked, anonymous indication that a person is currently using a Coo
 _Avoid_: availability, current conditions, verified cool
 
 **Visit Confirmation**:
-A private, time-limited record that a device was near a specific Cool Spot when its user deliberately shared Live Presence or began a Visit Report. It can permit the Visit Report to be completed later, but does not prove that the person entered the place.
+A private record that a device was near a specific Cool Spot when its user deliberately shared Live Presence or began a Visit Report. It remains valid when report answers are discarded and permits that visit’s report to be started or completed without a deadline, but does not prove that the person entered the place.
 _Avoid_: verified visit, location history
