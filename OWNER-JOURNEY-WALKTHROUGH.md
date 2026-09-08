@@ -1,14 +1,30 @@
 # Cool Spot：完整點擊走查
 
-2026-09-08 更新：移除 **Who is it limited to?** 與 **Tickets and booking** 填寫區塊。保留兩題 **Who can use this spot?／Cost to use** 與已確認選項。移除費用說明，資格只留一行例子；兩題在寬度足夠時同列排列，窄版／大字級自動調整。先重測 B06。
+本文件只負責測試步驟、預期結果與驗證狀態。現行功能定義見 [PRODUCT.md](PRODUCT.md)，程式版本與工作方式見 [AGENTS.md](AGENTS.md)。下面的「應看到」是待檢查的預期，不表示已通過。
 
-版本：2026-09-07，依 A／B／C 走查回饋修訂。已移除回報的 24 小時開始期限；名稱、地點類型、位置摘要與停留時間選項已改入 App。D／E 的本輪測試結果另見 [測試紀錄](.impeccable/review/owner-feedback-2026-09-07/VERIFICATION.md)。
+## 本輪狀態與起點
 
-本日後續更新：進入資格改為三項選填，修正點開選單時跳回名稱區的問題；重測 B03／B05／B06 即可。[進入資格與焦點測試](.impeccable/review/entry-focus-2026-09-07/VERIFICATION.md)
+**先跑 B04，約 2–3 分鐘，再接 B05；B03、B06 用來覆蓋 Pin 入口與選单焦點。** 目前沒有需要先決定的新設計方案。
 
-**先做 A01，約 2 分鐘。每次做一小組，回覆編號即可。** 全部主線與分支分成五輪，含記錄約 75–110 分鐘；不用一次跑完。十分鐘人數到期可在做其他項目時等待。
+| 範圍 | 已有證據 | 本輪仍需確認 |
+|---|---|---|
+| 最新 About the place | Agent 已在 iPhone SE 一般字級、iPad 最大字級深色及原 iPhone 模擬器查看；建置成功，選項與精簡欄位已實作 | 使用者認為目前可用，但明確要求繼續驗證；B03–B06 尚未取得本輪完整通過結果 |
+| Entry/cost 與焦點 | 先前有修正與原生操作紀錄 | B06 在現在版本重測，不以舊截圖代替 |
+| A、C、D、E 其餘流程 | 有先前實作／部分原生測試紀錄 | 沒有這一版全部 40 個案例的 owner 通過紀錄；按前提跑，逐項記錄 |
+| 自動測試 | 最近留存的 suite 結果為 48 passed、0 failed | 該次執行早於後續 UI 調整；本次文件整理未重跑測試 |
 
-| 輪次 | 任務 | 編號 | 約需時間 |
+證據按需讀取：
+
+- [最新表單驗證與截圖](.impeccable/review/about-place-2026-09-08/VERIFICATION.md)
+- [Entry/cost 排列驗證](.impeccable/review/entry-layout-2026-09-08/VERIFICATION.md)
+- [先前 A–E 修正／D–E 操作紀錄](.impeccable/review/owner-feedback-2026-09-07/VERIFICATION.md)
+- [留存的 48 項測試結果](.impeccable/review/entry-copy-2026-09-07/test-summary.json)
+
+以上是各次檢查範圍的證據，不等於完整真人可用性驗證。
+
+## 怎麼跑
+
+| 輪次 | 任務 | 固定編號 | 含簡短記錄的估計時間 |
 |---|---|---|---|
 | A | 找地點、閱讀、私人儲存 | A01–A09 | 15–20 分鐘 |
 | B | 新增／修正公開場所資訊 | B01–B12 | 25–35 分鐘 |
@@ -16,26 +32,20 @@
 | D | 開始、續填、發布與閱讀回報 | D01–D08 | 15–25 分鐘 |
 | E | 審核狀態、感謝、帳戶與設定 | E01–E05 | 10–15 分鐘 |
 
-## 怎麼使用
+1. 一次只跑一個編號；卡住約 30 秒就截圖，記下原本預期。先查範例資料是否符合前提，找不到測試狀態不等於功能通過或失敗。
+2. 這份有點擊提示的走查用於覆蓋功能。找第一次使用的人做可用性測試時，先只給標題情境與目標，隱藏點擊步驟；記錄他是否自行找到、猶豫在哪裡，以及能否解釋公開／私人結果。提示後完成要另記，不能算自行找到。
+3. 輸入本輪資料時加 `TEST`。取消收藏／丟棄只處理本輪測試資料；保留原有回報、備註與 Pin。資料不足請用隔離 QA 裝置，不清空原本裝置。
+4. 除非写「接上一項」，開始前退出目前表單／地點。公開測試表單用 Close → Discard and close；個人回報用 Finish later。分清兩種草稿的保存範圍，見 PRODUCT。
+5. 每次修正後只重測受影響編號；記錄版本、日期與結果。沒有實際測試就填「待測」，不要沿用舊版的通過狀態。
 
-1. 只跑目前那個編號。卡住約 30 秒就截圖，不必猜到成功。
-2. 每個編號記 **順／卡／找不到／不適用**，加上「我原本以為會……」。可用手機／模擬器截圖檔名附編號。
-3. 本輪先確認流程、用詞、資訊是否足夠，以及下一步是否清楚。影響理解的間距也算流程問題；純外觀偏好另外記，達成共識後再做視覺改版。
-4. 如需輸入測試內容，加上 `TEST`。自己的舊回報、私人備註不用清空；涉及取消收藏／丟棄時，只處理本輪測試資料。
-5. 每輪回饋後先確認問題與修正，再繼續下一輪；若修正改變後面的按鈕或路徑，同步更新本文件。
-
-**讀法：** `→` 是下一個點擊或動作；「返回」指左上角返回箭頭；「關閉地點」指地點頁右上角 ×。分頁是底部 Explore／Saved／You，Places／Pins 是 Saved 內的分類。
-
-除非寫「接上一項」，新情境開始前先退出目前的表單／地點頁，再走該項第一步。未送出的公開測試答案可用 Close → Discard and close 離開；個人回報用 Finish later 保留。不要丟棄自己的舊草稿。
-
-**目前的環境：** 地點搜尋和定位使用示範資料。Saved、私人回報草稿、已發布回報、感謝紀錄與外觀會保存在這台裝置；公開場所提案／審核狀態、登入與 Cool Hunt 部分進度仍是當次使用的示範，不要用重新啟動來期待它們永久保存。
+`→` 是下一個點擊或動作；「返回」是左上角返回；「關閉地點」是 ×。Explore／Saved／You 是底部分頁，Places／Pins 是 Saved 內的分類。下面地點均為 prototype fixture；GPS、搜尋、審核等限制見 PRODUCT。
 
 ## A：找地點、閱讀、私人儲存
 
 ### A01｜很熱，想判斷去哪裡
 
 1. Explore → 底部 **Cool Spots nearby** → **Riverside Library**。同一地點也能直接點地圖標記。
-2. 往下讀：場所名稱、Entry／Seating、Opening hours、體感摘要與三種回報數。
+2. 往下讀：場所名稱、費用／座位、已知的進入資格、Opening hours、體感摘要與三種回報數。
 3. **Show all 7 cooling features** → **Show fewer cooling features**。
 4. 往下 → **How long people stayed** → 再點一次收合。
 
@@ -138,7 +148,7 @@
 4. 往下 **Help people find this spot · Required** → **Add photo** → 選一張測試照片；不用回答進入資格也可以送審。
 5. 確認照片顯示、Send for review 可點；先不送，可接 B10。
 
-**重點回饋：** 名稱與提示在同一列；位置摘要只有一個 Change location。Who can use this spot? 位於 Entry and seating 選填區，與照片要求分開。
+**觀察：** 先回答室內／室外，再填相鄰的名稱與找路描述是否順暢？名稱提示是否清楚歸屬輸入欄？位置只留一個 Change location，進入資格與必填照片是否分得清？
 
 **也測 Pin 對應到已知場所：** 完成本項與 B10 後，Close → Discard and close → 從同一 Pin 再進 Add cooling information → Confirm the spot → **Search nearby places** → **Riverside Café**。應改為為 Café 填資料；退出後，原私人 Pin 的名稱、備註和位置都應保留。
 
@@ -146,20 +156,20 @@
 
 1. Explore → ＋ → Add cooling information → 搜尋 `TEST courtyard`。
 2. 無結果 → **Choose a spot on the map** → 在地圖點選位置 → **Use this spot**。
-3. **Place name · Optional** 填 `TEST Community Courtyard` → Indoors or outdoors? → Outdoors → Place type · Optional → **Square, plaza or courtyard**。
+3. **Indoors or outdoors? · Required** 直接選 **Outdoors** → **Place name · Optional** 填 `TEST Community Courtyard` → Place type · Optional → **Square, plaza or courtyard**。
 4. 選 Tree shade → 確認可送審；先不送。
 
-**觀察：** 是否理解這裡要填公眾使用的名字，而非私人暱稱？有名稱時照片目前是選填；新增位置還沒有成為公開 Cool Spot。
+**觀察：** 三個室內／室外選項是否可直接選，未選時有沒有誤導性預設？是否分得清場所名稱與下方找路描述？新提示為 `Use the name people know.`／`e.g. Fourth floor, by the windows`；描述欄位不應預留多餘空白。有名稱時檢查照片仍為選填。
 
 ### B05｜室內角落、無名位置與改位置
 
-1. 在 B04 表單清空名稱 → Indoors or outdoors? 選 **Indoors**，Place type 留 **Not sure**。
-2. **How to find this spot · Optional** 填 `TEST School library, fourth floor, corner by the windows`。
+1. 接 B04 表單：清空名稱 → Indoors or outdoors? 選 **Indoors**；將之前選的 Place type 改回 **Not sure**。
+2. **How to find this spot · Optional** 填 `TEST Fourth floor, corner by the windows`；加長到多行，確認欄位隨內容增高。
 3. 選至少一個降溫設施，加一張照片 → 確認可送審；切換 Outdoors／Both 也使用相同規則。
 4. 回表單上方 **Change location** → 調整地圖位置 → **Use this spot** → 答案保留。
 5. 關閉本次測試表單。若從 Saved Pin 進入，核對原 Pin 的位置與私人文字沒被改動。
 
-**目前規則：** 名稱和未確認的類型皆可留空，不必替角落創造名稱。無名位置仍用照片幫助辨識；與室內／戶外無關。場所分類和進入資格都可以留 Not sure。
+**檢查：** 名稱和未確認的類型皆可留空，不必替角落創造名稱。無名位置仍用照片幫助辨識；與室內／戶外無關。場所分類和進入資格都可以留 Not sure。
 
 ### B06｜選填資料在同頁完成
 
@@ -259,7 +269,7 @@
 3. You → Settings → Prototype controls → **Simulate a visit 7 days ago** → 返回 Your reports。
 4. 日期應變成七天前，**Share how it felt 仍可用**。點進去應保留該造訪日期；Finish later 可留下草稿。
 
-**新規則：** 確認過的到訪沒有開始／完成期限。此控制會修改本機示範日期，不是實際等待七天的測試；不改既有草稿與已發布回報。
+**檢查：** 確認過的到訪沒有開始／完成期限。此控制會修改本機示範日期，不是實際等待七天的測試；不改既有草稿與已發布回報。
 
 ### C04｜離開前什麼都沒做／只有收藏
 
@@ -350,7 +360,7 @@
 3. 核對 Visit、Published、体感與選填答案；Unfinished 應少一份，Gallery 的測試草稿仍在。
 4. 返回 Explore → Shade → 應看到 **You’ve shared this visit**；檢查人數沒有因發布回報而增加。
 
-**目前止點：** Published 裡可閱讀，但不能編輯或刪除已發布內容。再次到場可在場所頁明確點 **Share a new visit**，它不會覆寫舊回報。
+**也測另一次到訪：** 模擬在 Shade 附近 → 該場所頁 → **Share a new visit** → 選體感 → Finish later。確認舊回報仍在 Published、新草稿單獨存在，人數沒有增加。Published 沒有編輯／刪除入口。
 
 ### D08｜最新預覽、全部回報、自己的與範例格式
 
@@ -396,7 +406,7 @@
 2. **Simulate receiving a popsicle** → 返回 You → Your reports → Published → 開對應地點的最新指定報告。
 3. 查看收到感謝的 Example 說明；可重啟後檢查紀錄仍在。
 
-**目前入口更正：** 這個按鈕就在 Settings，不是在 Prototype controls 裡。尚未發布任何回報時，只會看到先發布的提示。
+**前提：** 這個按鈕就在 Settings，不是在 Prototype controls 裡。尚未發布任何回報時，只會看到先發布的提示。
 
 ### E04｜帳戶、Cool Hunt 與回到任務
 
@@ -427,35 +437,30 @@
 | 個人回報發布失敗 | Report wasn’t published → Keep editing → 確認 Visit time 再 Publish report | 沒有固定 UI 開關可觸發；不可把沒有遇到寫成已通過失敗復原。 |
 | 完全空白資料狀態 | Saved 的 Nothing saved yet／You 的 No reports yet／無場所提案 | 目前有預設 Pin 與提案，沒有安全的一鍵清空測試控制；保留真實舊資料，若需要再另備隔離測試環境。 |
 
-## 文案／輸入決策（已實作，2026-09-07）
+## 記錄回饋
 
-這一節記錄目前判斷。室內角落也可以沒有正式名稱；照片要求依是否有名稱，而非室內／戶外。
-
-| 問題 | 建議 | 理由與界線 |
-|---|---|---|
-| About the place → Name this place？place 還是 Cool Spot？ | 保留分區 **About the place**；輸入欄位放持續可見的 **Place name**，提示如 `e.g. Riverside Library`。緊接同一欄位放 `Use the name people know.`，欄位與提示之間不放分隔線。 | 分區也包含室內／室外與 Place type，不能只叫命名。Name this place 容易被理解為「創造一個名字」。填地點資訊不代表已成為公開、已審核的 Cool Spot；place 是描述對象，Cool Spot 用於產品名稱與已有公開資訊的地點。這是產品用語決策，不是 Apple 強制規定。 |
-| No name? Outdoor spots need a photo… 的歸屬 | 名稱欄位旁只解釋名稱如何填／何時可留空；照片放在自己的 Required 分組；進入資格放在 Entry and seating 選填區。 | 原本的分隔線切斷了「輸入欄位 → 說明」的關係。現已把名稱和提示放在同一列，照片要求不再依室內／戶外區分。 |
-| 進入資格與必填限制 | 改問 **Who can use this spot?**，選 **Everyone／Limited access／Not sure**；Limited access 直接附學生、會員、住戶例子，不另外要求填寫。 | 三種答案皆可送審；名稱有無不影響規則。Cost to use 分開記錄費用；免費不代表所有人都可以進入。已關閉／不再開放屬場所狀態，本次未新增關閉回報功能。 |
-| Posted stay limit, if known | 改為 **Time limit** 的選擇：`Not sure`、`No stated limit`、常用時長（30 分鐘／1 小時／2 小時）、`Other duration…`。其他時長用小時＋分鐘選擇器，例如 90 分鐘，不要求寫句子。 | 同意移除主要自由輸入，但不建議只給整點或時長區間。公告 90 分鐘不能被迫選 1–2 小時；不知道、沒看到公告限制與已知時長也不能混成一個值。私人 Visit Report 的 Time here 仍是「這次待多久」。 |
-
-Apple 的文字欄位指引提醒：placeholder 會在輸入後消失，獨立標籤有助於保留用途；標籤與欄位的對應需清楚。上述具體英文與分組方式是這個產品的設計建議，並非 Apple 指定文案。[Apple Text fields](https://developer.apple.com/design/human-interface-guidelines/text-fields?changes=_7)
-
-## 回饋格式與共識
-
-複製一次即可，不必寫長篇：
+本輪先檢查入口、用詞、資訊分組、成功回饋與中斷／接續；影響理解的間距也算流程問題。純視覺偏好另外記，先不推導成已核准的改版。
 
 ```text
-編號：B03
-結果：順／卡／找不到／不適用
-我想做：
-我原本以為：
+編號／版本／日期：
+結果：通過／卡住／找不到／不適用／待測
+完成方式：自行找到／看步驟或提示後完成
+我想做／我原本以為：
 實際發生／截圖：
 ```
 
-每輪確認「保留什麼、改什麼、為什麼」後，只重測受影響的編號。流程共識包括：入口找得到、知道在為哪個地點填什麼、知道誰會看見、能返回／中斷／接續、能看懂成功與受限狀態。完成這些，再開始下一輪 UI 美觀調整。
+| 尚待驗證的重點 | 相關編號 |
+|---|---|
+| 能否快速決定去不去，區分涼度證據、人數與座位；也允許因資訊不足而不去 | A01–A04、C01 |
+| 收藏是否清楚私人；公開表單、名稱／角落／照片與選填分類是否直覺 | A05–A09、B01–B10 |
+| 保存後是否找到返回入口；真的去過但缺乏確認時是否失望 | C02–C05、D01–D07 |
+| 最新回報預覽、範例格式、審核結果與感謝是否被正確理解 | D08、E01–E04 |
+| 大字、深色、減少動態、返回／滑動與選單焦點是否穩定 | B05、B06、B08、E05 |
 
-## 核對範圍
+### 本輪結果紀錄
 
-已逐項比對 ExploreView、SavedYouViews、ContributionView、PlaceDetailView、VisitorReportsView、PrototypeModels 與 ContentView 的目前可達導覽。包含五組共 **40 個走查編號**，以及上表五個條件／資料限制分支。未把未接通按鈕、不可達舊 View 或新提案寫成可完成的功能；本輪已修改並建置原型；走查使用獨立模擬器，不操作使用者的舊紀錄。
+目前只有上方列出的歷次證據與 owner「可用、仍需驗證」的總評，沒有新增逐項通過紀錄。收到實際回饋後在此記錄，不新增另一份 findings 文件。
 
-最新建置與原生走查證據見本輪 VERIFICATION.md；先前 9 月 6 日的視覺審核保留為歷史紀錄，不代表本次所有介面均已完成真人可用性驗證。
+| 日期／版本 | 編號 | 觀察與完成方式 | 決定／修正 | 復測結果 |
+|---|---|---|---|---|
+| 待本輪回饋 | B04 | 尚未記錄 | — | 待測 |
