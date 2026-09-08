@@ -1,26 +1,19 @@
 # Cool Spot
 
-Cool Spot is a native iOS prototype for finding places in London where people could cool down. It explores how a map can combine place information, visitor experiences and a short-lived indication that someone is cooling off there.
+**Find a place to cool down.**
 
-## Features
+![An illustrated London street with a shaded bench beneath a leafy tree and a welcoming library.](docs/images/cool-spot-cover.jpg)
 
-- Explore example places and read their cooling features and visitor reports.
-- Save places or private map pins, with personal names and notes.
-- Contribute cooling information through a review flow.
-- Share a visit report or a temporary anonymous presence count.
+## Why Cool Spot?
 
-## Prototype status
+Londoners need somewhere to cool down on hot days, but scattered information about how places feel, who can use them and what they cost leaves people guessing.
 
-The app uses example London places, simulated search/proximity and review outcomes. It is not a live cooling-place directory. Accounts and moderation are demonstrations; there is no backend or cross-device sync.
+## See the app
 
-MapKit displays real map tiles. Directions open an external Apple Maps walking link. Photo selection works locally, but photos are not uploaded. Saved items and visit reports can persist on the device; public place proposals currently last only for the running session.
+[![Explore nearby cooling spots on a map of London.](docs/images/explore-preview.png)](docs/images/explore.png) [![Check a spot's facilities, entry conditions and visitor experiences.](docs/images/place-preview.png)](docs/images/place.png) [![Share how much cooler a visit felt compared with outside.](docs/images/report-preview.png)](docs/images/report.png)
 
-## Run locally
+*Screens show example places and reports.*
 
-1. Open `cool-spot.xcodeproj` in Xcode.
-2. Select the `cool-spot` scheme and an iPhone or iPad simulator with iOS 18 or later.
-3. Run the app.
-
-The project uses SwiftUI, MapKit and PhotosUI. Unit tests are in the `cool_spotTests` target and can be run with Xcode's Test action.
-
-See [PRODUCT.md](PRODUCT.md) for the product concepts and current prototype scope.
+- **Find your next cooling spot.** Explore indoor spaces and outdoor shade; filter for AC, water or free use.
+- **Decide before you go.** Check facilities, entry conditions and visitor experiences. Save a place or open walking directions in Apple Maps.
+- **Help the next visitor.** Share how a visit felt, or propose a missing spot—even a patch of shade beside a playground.

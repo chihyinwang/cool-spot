@@ -1,0 +1,10 @@
+Generated with the built-in image_gen tool, 2026-09-08.
+Illustrative cover artwork; not a photograph of an actual listed place.
+The JPEG is a format-optimized copy of the generated PNG; composition is unchanged.
+
+Use case: illustration-story
+Asset type: wide cover illustration for the GitHub README of Cool Spot, a native iOS prototype about finding places to cool down in London.
+Primary request: one beautiful, calm, editorial illustration that immediately communicates finding respite from city heat. A continuous London neighbourhood streetscape: a broad leafy plane tree casting a clearly visible generous patch of shade over a simple public bench, beside a small welcoming public library with books visible inside. Two small, naturally proportioned adults resting in these cool spaces. Quiet brick townhouses set back in the distance, a hot pale apricot sun, warm pavement transitioning into deep cool mint shadows. The tree and shaded bench are the main visual focus; library secondary.
+Style/medium: sophisticated flat editorial illustration, crisp confident silhouettes, restrained subtle paper grain, geometric architecture, botanical shapes with character. Warm and humane, calm rather than cartoonish. Deep teal and fresh mint predominate, cream negative space and a little sun-warmed terracotta. Complement native system UI screenshots that will appear separately below this image.
+Composition/framing: wide panoramic banner, approximately 3:1 aspect ratio. Intentional breathing room, one coherent scene, readable at GitHub content width and on a phone. Keep all significant elements comfortably inside the image edges. No text is needed inside this artwork.
+Constraints: illustration of the product's purpose only. No invented app UI, no phones, no device mockups, no brand logos, no heat or temperature measurements, no medical symbols, no safety claims, no text, no lettering, no watermarks. No detailed tourist landmarks or busy crowd. Finished visual suitable for the README cover.
