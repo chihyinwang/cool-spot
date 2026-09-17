@@ -1,9 +1,277 @@
 import XCTest
 import SwiftUI
+import MapKit
 @testable import cool_spot
 
 @MainActor
 final class CoolSpotTests: XCTestCase {
+    func testSearchContactDetailsAndCategorySurviveEncodingAndOlderPlacesStillDecode() throws {
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: .init(latitude: 51.49, longitude: 0.07)))
+        item.name = "Tesco Extra"
+        item.pointOfInterestCategory = .foodMarket
+        item.phoneNumber = "+44 20 1234 5678"
+        item.url = URL(string: "https://example.com/store")
+        let place = try XCTUnwrap(RecognisedPlace(mapItem: item))
+        let restored = try JSONDecoder().decode(RecognisedPlace.self, from: JSONEncoder().encode(place))
+        XCTAssertEqual(restored.type, .shop)
+        XCTAssertEqual(restored.categoryLabel, "Food market")
+        XCTAssertEqual(restored.phoneURL?.absoluteString, "tel:+442012345678")
+        XCTAssertEqual(restored.websiteURL, item.url)
+        var old = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(place)) as? [String: Any])
+        for key in ["sourceCategory", "phoneNumber", "websiteURL"] { old.removeValue(forKey: key) }
+        let legacy = try JSONDecoder().decode(RecognisedPlace.self, from: JSONSerialization.data(withJSONObject: old))
+        XCTAssertEqual(legacy.id, place.id)
+        XCTAssertEqual(legacy.categoryLabel, "Shop")
+        XCTAssertNil(legacy.phoneURL)
+        XCTAssertNil(legacy.websiteURL)
+    }
+
+    func testNameAndTypeCorrectionsAreReviewedWithoutChangingThePublishedPlace() throws {
+        let store = PrototypeStore()
+        let spot = try XCTUnwrap(store.spots.first)
+        var draft = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        draft.values.name = "   "
+        XCTAssertTrue(draft.validationIssues.contains { $0.field == .name })
+        draft.values.name = "Updated library name"
+        draft.values.type = .publicService
+        XCTAssertTrue(draft.changes.contains("Name: \(spot.name) → Updated library name"))
+        XCTAssertTrue(store.submitPlaceContribution(draft))
+        let submitted = try XCTUnwrap(store.contributions.first?.placeDraft)
+        XCTAssertEqual(submitted.values.name, "Updated library name")
+        XCTAssertEqual(submitted.values.type, .publicService)
+        XCTAssertEqual(submitted.original.name, spot.name)
+        XCTAssertEqual(store.spot(spot.id)?.name, spot.name)
+        XCTAssertEqual(store.spot(spot.id)?.type, spot.type)
+        XCTAssertEqual(draft.reconciled(with: spot).values.name, "Updated library name")
+    }
+
+    func testDebouncedSearchOnlyRequestsLatestQueryAndCancelsWhenHidden() {
+        var scheduled: [() -> Void] = []
+        var requests: [String] = []
+        var cancellations = 0
+        let search = PlaceSearchModel(schedule: { action in
+            scheduled.append(action)
+            return { cancellations += 1 }
+        }, search: { query, _, _ in
+            requests.append(query)
+            return {}
+        })
+        search.update(query: "B", region: .init())
+        search.update(query: "British Library", region: .init())
+        XCTAssertTrue(requests.isEmpty)
+        scheduled[0]()
+        XCTAssertTrue(requests.isEmpty)
+        scheduled[1]()
+        XCTAssertEqual(requests, ["British Library"])
+        search.update(query: "Museum", region: .init())
+        search.cancel()
+        scheduled[2]()
+        XCTAssertEqual(requests, ["British Library"])
+        XCTAssertEqual(cancellations, 3)
+        XCTAssertEqual(search.state, .idle)
+    }
+
+    func testSearchFailureCanRetryAndEmptySuccessIsNotAnError() {
+        var completions: [(Result<[RecognisedPlace], Error>) -> Void] = []
+        let search = PlaceSearchModel { _, _, completion in
+            completions.append(completion)
+            return {}
+        }
+        search.update(query: "Library", region: .init(), debounce: false)
+        completions[0](.success(Fixtures.places))
+        XCTAssertFalse(search.places.isEmpty)
+        search.update(query: "Museum", region: .init(), debounce: false)
+        XCTAssertTrue(search.places.isEmpty)
+        completions[1](.failure(URLError(.notConnectedToInternet)))
+        XCTAssertEqual(search.state, .failed)
+        search.update(query: "Museum", region: .init(), debounce: false)
+        XCTAssertEqual(search.state, .loading)
+        completions[2](.success([]))
+        XCTAssertEqual(search.state, .loaded)
+        XCTAssertTrue(search.places.isEmpty)
+    }
+
+    func testSearchDeallocationCancelsRequestWithoutBeingRetainedByCompletion() {
+        var completion: ((Result<[RecognisedPlace], Error>) -> Void)?
+        var cancelled = false
+        var search: PlaceSearchModel? = PlaceSearchModel { _, _, callback in
+            completion = callback
+            return { cancelled = true }
+        }
+        weak var weakSearch = search
+        search?.update(query: "Library", region: .init(), debounce: false)
+        search = nil
+        XCTAssertNil(weakSearch)
+        XCTAssertTrue(cancelled)
+        completion?(.success(Fixtures.places))
+    }
+
+    func testMapKitRequestSearchesAddressesAndPlacesInTheRequestedRegion() {
+        let region = MKCoordinateRegion(center: .init(latitude: 51.5, longitude: -0.12),
+                                        span: .init(latitudeDelta: 0.03, longitudeDelta: 0.02))
+        let request = MapKitPlaceSearch.request(query: "SW1A 1AA", region: region)
+        XCTAssertEqual(request.naturalLanguageQuery, "SW1A 1AA")
+        XCTAssertEqual(request.resultTypes, [.address, .pointOfInterest])
+        XCTAssertEqual(request.region.center.latitude, 51.5)
+        XCTAssertEqual(request.region.span.longitudeDelta, 0.02)
+    }
+
+    func testMapKitResultsKeepStableIdentityAndNeverInventCoolingOrIndoorEvidence() throws {
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: .init(latitude: 51.5299, longitude: -0.1278),
+                                                  addressDictionary: ["Street": "96 Euston Road", "City": "London"]))
+        item.name = "British Library"
+        item.pointOfInterestCategory = .library
+        let place = try XCTUnwrap(RecognisedPlace(mapItem: item))
+        XCTAssertEqual(place.id, RecognisedPlace(mapItem: item)?.id)
+        XCTAssertTrue(place.id.hasPrefix("apple-maps:"))
+        XCTAssertEqual(place.name, "British Library")
+        XCTAssertTrue(place.address.contains("Euston Road"))
+        XCTAssertEqual(place.latitude, 51.5299)
+        XCTAssertEqual(place.longitude, -0.1278)
+        XCTAssertEqual(place.type, .library)
+        XCTAssertTrue(place.hasTrustedType)
+        XCTAssertNil(place.trustedSetting)
+        XCTAssertNil(place.coolSpotID)
+        XCTAssertTrue(place.distance.isEmpty)
+        let store = PrototypeStore()
+        XCTAssertNil(store.existingSpot(for: place))
+        let draft = PlaceContributionDraft(kind: .recognised, anchor: place.coordinate, place: place)
+        XCTAssertEqual(draft.values.name, "British Library")
+        XCTAssertNil(draft.values.setting)
+        XCTAssertTrue(draft.values.features.isEmpty)
+        XCTAssertFalse(draft.isUnlisted)
+        XCTAssertFalse(draft.isUpdate)
+    }
+
+    func testUnknownMapKitCategoryStaysOptionalAndInvalidLocationsAreExcluded() throws {
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: .init(latitude: 51.5, longitude: -0.1)))
+        item.name = "A named place"
+        let place = try XCTUnwrap(RecognisedPlace(mapItem: item))
+        XCTAssertFalse(place.hasTrustedType)
+        let draft = PlaceContributionDraft(kind: .recognised, anchor: place.coordinate, place: place)
+        XCTAssertNil(draft.values.type)
+        let invalid = MKMapItem(placemark: MKPlacemark(coordinate: .init(latitude: 100, longitude: 200)))
+        invalid.name = "Invalid location"
+        XCTAssertNil(RecognisedPlace(mapItem: invalid))
+    }
+
+    func testMapKitNoMatchIsEmptyButNetworkFailureIsNotMasked() throws {
+        let empty = try MapKitPlaceSearch.result(items: nil, error: MKError(.placemarkNotFound)).get()
+        XCTAssertTrue(empty.isEmpty)
+        XCTAssertThrowsError(try MapKitPlaceSearch.result(items: nil, error: URLError(.notConnectedToInternet)).get())
+        XCTAssertThrowsError(try MapKitPlaceSearch.result(items: nil, error: nil).get())
+    }
+
+    func testSearchResultsDeduplicateByIdentityWithoutMergingNearbyDifferentPlaces() {
+        let first = Fixtures.places[0]
+        let neighbour = RecognisedPlace(id: "different-place", name: first.name, address: first.address,
+                                       latitude: first.latitude, longitude: first.longitude, type: first.type, distance: "")
+        XCTAssertEqual(PlaceSearchResults.unique([first, first, neighbour]).map(\.id), [first.id, neighbour.id])
+        XCTAssertEqual(PlaceSearchResults.matching([first], query: "  \(first.name.lowercased())\n").map(\.id), [first.id])
+        XCTAssertTrue(PlaceSearchResults.matching([first], query: " ").isEmpty)
+    }
+
+    func testExistingJourneyWithoutSearchedPlaceDetailsStillRestoresOwnerData() throws {
+        let suite = "PlaceSearchMigration.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = PrototypeStore(reportDefaults: defaults)
+        let pin = store.saveCurrentLocation()
+        store.updateSaved(pin.id, title: "My private pin", note: "Keep this note")
+        let key = "prototype.reportJourneys.v1"
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(defaults.data(forKey: key))) as? [String: Any])
+        json.removeValue(forKey: "savedPlaceDetails")
+        defaults.set(try JSONSerialization.data(withJSONObject: json), forKey: key)
+
+        let restored = PrototypeStore(reportDefaults: defaults)
+        XCTAssertEqual(restored.savedLocations.first { $0.id == pin.id }?.title, "My private pin")
+        XCTAssertEqual(restored.savedLocations.first { $0.id == pin.id }?.note, "Keep this note")
+        XCTAssertEqual(restored.place(Fixtures.places[0].id)?.name, Fixtures.places[0].name)
+    }
+
+    func testClearingSearchCancelsWorkAndIgnoresLateFailureWithoutRequestingWhitespace() {
+        var requests: [String] = []
+        var completion: ((Result<[RecognisedPlace], Error>) -> Void)?
+        var cancellationCount = 0
+        let search = PlaceSearchModel { query, _, callback in
+            requests.append(query)
+            completion = callback
+            return { cancellationCount += 1 }
+        }
+        search.update(query: "Library", region: .init(), debounce: false)
+        let oldCompletion = completion
+        search.update(query: " \n ", region: .init(), debounce: false)
+        oldCompletion?(.failure(URLError(.notConnectedToInternet)))
+        XCTAssertEqual(requests, ["Library"])
+        XCTAssertEqual(cancellationCount, 1)
+        XCTAssertEqual(search.state, .idle)
+        XCTAssertTrue(search.places.isEmpty)
+    }
+
+    func testSearchCancelsReplacedRequestAndOnlyDisplaysLatestResults() {
+        var completions: [(Result<[RecognisedPlace], Error>) -> Void] = []
+        var cancelled: [String] = []
+        let search = PlaceSearchModel { query, _, completion in
+            completions.append(completion)
+            return { cancelled.append(query) }
+        }
+        search.update(query: "Old", region: .init(), debounce: false)
+        XCTAssertEqual(search.state, .loading)
+        search.update(query: "New", region: .init(), debounce: false)
+        XCTAssertEqual(cancelled, ["Old"])
+        completions[1](.success([Fixtures.places[1]]))
+        completions[0](.success([Fixtures.places[0]]))
+        XCTAssertEqual(search.state, .loaded)
+        XCTAssertEqual(search.places.map(\.id), [Fixtures.places[1].id])
+    }
+
+    func testSearchTrimsQueryAndUsesTheRequestedMapRegion() {
+        var requests: [(String, MKCoordinateRegion)] = []
+        let search = PlaceSearchModel { query, region, _ in
+            requests.append((query, region))
+            return {}
+        }
+        let region = MKCoordinateRegion(center: .init(latitude: 51.53, longitude: -0.12),
+                                        span: .init(latitudeDelta: 0.04, longitudeDelta: 0.03))
+        search.update(query: "  British Library\n", region: region, debounce: false)
+        XCTAssertEqual(requests.map(\.0), ["British Library"])
+        XCTAssertEqual(requests.first?.1.center.latitude, 51.53)
+        XCTAssertEqual(requests.first?.1.span.longitudeDelta, 0.03)
+    }
+
+    func testSavingSearchedPlaceRestoresItsDetailsWithoutLosingPrivateNotesOrReports() throws {
+        let suite = "PlaceSearch.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = PrototypeStore(reportDefaults: defaults)
+        let spot = try XCTUnwrap(store.spot("library"))
+        XCTAssertTrue(store.submitReport(spot: spot, experience: .notCooler,
+                                        helpedFeatures: [], stay: nil, comment: "Existing report"))
+        let place = RecognisedPlace(id: "apple-maps:test-library", name: "British Library",
+                                    address: "96 Euston Road, London", latitude: 51.5299,
+                                    longitude: -0.1278, type: .library, distance: "",
+                                    hasTrustedType: true)
+        XCTAssertTrue(store.toggleSaved(place))
+        let saved = try XCTUnwrap(store.savedLocations.first { $0.kind == .recognisedPlace(place.id) })
+        store.updateSaved(saved.id, title: "My library", note: "Private note")
+
+        let restored = PrototypeStore(reportDefaults: defaults)
+        let restoredPlace = try XCTUnwrap(restored.place(place.id))
+        XCTAssertEqual(restoredPlace.name, place.name)
+        XCTAssertEqual(restoredPlace.address, place.address)
+        XCTAssertEqual(restoredPlace.latitude, place.latitude)
+        XCTAssertEqual(restoredPlace.longitude, place.longitude)
+        XCTAssertEqual(restoredPlace.type, .library)
+        XCTAssertNil(restoredPlace.trustedSetting)
+        XCTAssertNil(restored.existingSpot(for: restoredPlace))
+        XCTAssertEqual(restored.savedLocations.first { $0.id == saved.id }?.title, "My library")
+        XCTAssertEqual(restored.savedLocations.first { $0.id == saved.id }?.note, "Private note")
+        XCTAssertEqual(restored.visitReports.first?.comment, "Existing report")
+        XCTAssertFalse(restored.toggleSaved(restoredPlace))
+        XCTAssertFalse(PrototypeStore(reportDefaults: defaults).isSaved(placeID: place.id))
+        XCTAssertEqual(PrototypeStore(reportDefaults: defaults).visitReports.count, 1)
+    }
+
     func testPopsicleIsUniqueUndoableAndNeverChangesCoolingEvidence() throws {
         let store = PrototypeStore()
         let spot = try XCTUnwrap(store.spot("library"))

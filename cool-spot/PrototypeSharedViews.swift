@@ -1,5 +1,16 @@
 import SwiftUI
 
+// Proximity follows meaning: metadata, related content, then distinct sections.
+enum LayoutSpacing {
+    static let metadata: CGFloat = 4
+    static let text: CGFloat = 8
+    static let related: CGFloat = 12
+    static let group: CGFloat = 16
+    static let section: CGFloat = 24
+    static let majorSection: CGFloat = 32
+    static let page: CGFloat = 20
+}
+
 struct SourceBadge: View {
     let source: SpotSource
     var body: some View {
@@ -84,13 +95,13 @@ struct SelectionCard: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 14) {
+            HStack(spacing: LayoutSpacing.related) {
                 Image(systemName: symbol)
                     .font(.title3)
                     .foregroundStyle(selected ? .white : AppStyle.brand)
                     .frame(width: 44, height: 44)
                     .background(selected ? AppStyle.ink : AppStyle.blue, in: Circle())
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                     Text(title).font(.headline)
                     if let subtitle {
                         Text(subtitle).font(.caption).foregroundStyle(.secondary)
@@ -100,7 +111,7 @@ struct SelectionCard: View {
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(selected ? AppStyle.brand : Color.secondary)
             }
-            .padding(14)
+            .padding(LayoutSpacing.group)
             .background(Color.secondary.opacity(selected ? 0.12 : 0.06),
                         in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16)
@@ -113,6 +124,7 @@ struct SelectionCard: View {
 struct PlaceCover: View {
     let type: PlaceType
     let environment: PlaceEnvironment
+    var isIllustration = false
 
     var body: some View {
         ZStack {
@@ -127,7 +139,8 @@ struct PlaceCover: View {
             VStack {
                 Spacer()
                 HStack {
-                    Label("Community photo", systemImage: "photo.fill")
+                    Label(isIllustration ? "Place illustration" : "Community photo",
+                          systemImage: isIllustration ? "building.2" : "photo.fill")
                         .font(.caption.weight(.semibold))
                         .padding(.horizontal, 10).padding(.vertical, 7)
                         .background(.ultraThinMaterial, in: Capsule())
@@ -137,7 +150,7 @@ struct PlaceCover: View {
             }
         }
         .clipped()
-        .accessibilityLabel("Photo that helps people find this cooling place")
+        .accessibilityLabel(isIllustration ? "Place illustration" : "Photo that helps people find this cooling place")
     }
 }
 
@@ -147,7 +160,7 @@ struct DetailAction: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 7) {
+            VStack(spacing: LayoutSpacing.text) {
                 Image(systemName: symbol).font(.title3).frame(width: 46, height: 46)
                     .background(AppStyle.blue, in: Circle())
                 Text(title).font(.caption.weight(.medium)).lineLimit(1)

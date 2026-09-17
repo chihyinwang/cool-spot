@@ -1,36 +1,14 @@
+import MapKit
 import SwiftUI
-import TipKit
-
-struct LivePresenceTip: Tip {
-    var title: Text {
-        Text("Help others decide whether to come here")
-    }
-
-    var message: Text? {
-        Text("Let others know you’re here to cool down. For 10 minutes, they’ll see one more person here—not your name.")
-    }
-
-    var image: Image? {
-        Image(systemName: "person.2.fill")
-    }
-}
-
 private struct VisitReportPresentation: Identifiable {
     let id = UUID()
     let initialExperience: CoolingExperience?
 }
 
-// Local reading rhythm, not a new app-wide design system. Keep copy and flow intact.
-private enum PlaceDetailRhythm {
-    static let relatedText: CGFloat = 8
-    static let sectionContent: CGFloat = 16
-    static let relatedSections: CGFloat = 24
-    static let sectionBreak: CGFloat = 32
-}
-
 struct CoolSpotDetailView: View {
     @ObservedObject var store: PrototypeStore
     let spot: CoolSpot
+    var distanceContext: String? = nil
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -43,34 +21,29 @@ struct CoolSpotDetailView: View {
     @State private var showReportUnavailable = false
     @State private var showReportingHelp = false
 
-    private let livePresenceTip = LivePresenceTip()
-
     var body: some View {
         NavigationStack {
             ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    PlacePhoto(spot: spot)
-                        .frame(height: 184)
-                        .clipped()
-                    VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionBreak) {
-                        VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedSections) {
-                            header
-                            experienceSummary
+                    VStack(alignment: .leading, spacing: LayoutSpacing.majorSection) {
+                        header
+                        recentExperience.id("visitorReports")
+                        VStack(alignment: .leading, spacing: LayoutSpacing.group) {
+                            CurrentUseSummary(count: store.presence(for: spot))
+                            livePresence
                         }
-                        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
-                            coolingFeatures
+                        VStack(alignment: .leading, spacing: LayoutSpacing.group) {
+                            PlacePhoto(spot: spot)
+                            ApplePlaceInformationView(coordinate: spot.coordinate, isExample: true).id(spot.id)
                             Button { showContribution = true } label: {
                                 Label("Suggest an edit", systemImage: "square.and.pencil")
                                     .font(.subheadline).frame(minHeight: 44)
                             }
                             .tint(AppStyle.brand)
-                            CurrentUseSummary(count: store.presence(for: spot))
                         }
-                        recentExperience.id("visitorReports")
-                        livePresence
                         if let saved = store.savedLocations.first(where: { $0.kind == .coolSpot(spot.id) }) {
-                            SavedPrivateDetails(store: store, saved: saved).id(saved.id)
+                            SavedNoteSummary(store: store, saved: saved).id(saved.id)
                         }
                         Button { showProblem = true } label: {
                             Text("Report a problem")
@@ -85,7 +58,6 @@ struct CoolSpotDetailView: View {
                     .padding(.bottom, 24)
                 }
             }
-            .ignoresSafeArea(edges: .top)
             .overlay(alignment: .topTrailing) { closeButton }
             .safeAreaInset(edge: .bottom) { actionBar }
             .task {
@@ -102,7 +74,7 @@ struct CoolSpotDetailView: View {
         .alert("Report a problem", isPresented: $showProblem) {
             Button("Done", role: .cancel) {}
         } message: {
-            Text("Problem reporting isn’t connected in this prototype. In the finished app, this is where you’ll flag an incorrect location or inappropriate content.")
+            Text("Problem reporting is currently unavailable.")
         }
         .alert("Start your report while you’re here", isPresented: $showReportUnavailable) {
             Button("OK", role: .cancel) {}
@@ -127,38 +99,30 @@ struct CoolSpotDetailView: View {
     }
 
     var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(spot.name).font(.title.bold())
-                .accessibilityAddTraits(.isHeader)
-            Text("\(spot.distance) · \(spot.address)").font(.subheadline).foregroundStyle(.secondary)
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .center, spacing: 8) { sourceAndType }
-                    .fixedSize(horizontal: true, vertical: false)
-                VStack(alignment: .leading, spacing: 8) { sourceAndType }
+        VStack(alignment: .leading, spacing: LayoutSpacing.group) {
+            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                Text(spot.name).font(.title.bold())
+                    .padding(.trailing, 44)
+                    .accessibilityAddTraits(.isHeader)
+                Text("\(distanceContext ?? spot.distance) · \(spot.address)")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                Text("\(spot.type.shortName) · Example")
+                    .font(.caption).foregroundStyle(.secondary)
             }
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(spot.access.summary) · \(spot.seating == .unsure ? "Seating not confirmed" : spot.seating.rawValue)")
-                    .font(.subheadline.weight(.medium))
-                if let entrySummary = spot.entrySummary {
-                    Text(entrySummary).font(.subheadline)
+            VStack(alignment: .leading, spacing: LayoutSpacing.related) {
+                coolingFeatures
+                VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                    Text("\(spot.access.summary) · \(spot.seating == .unsure ? "Seating not confirmed" : spot.seating.displayName)")
+                        .font(.subheadline.weight(.medium))
+                    if let entrySummary = spot.entrySummary { Text(entrySummary).font(.subheadline) }
+                    if !spot.entryInformation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text(spot.entryInformation).font(.subheadline)
+                    }
+                    Text("Opening hours unavailable").font(.subheadline).foregroundStyle(.secondary)
                 }
-                if !spot.entryInformation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text(spot.entryInformation).font(.subheadline)
-                }
-                Text("Opening hours not verified")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             }
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 4)
         }
-    }
-
-    @ViewBuilder private var sourceAndType: some View {
-        SourceBadge(source: spot.source)
-        Text(spot.type == .culture ? spot.type.rawValue : spot.type.shortName)
-            .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
     }
 
     var actionBar: some View {
@@ -182,16 +146,9 @@ struct CoolSpotDetailView: View {
         }
         .buttonStyle(PrimaryButtonStyle())
 
-        Button {
-            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
-                _ = store.toggleSaved(spot)
-            }
-        } label: {
-            Label(store.isSaved(spotID: spot.id) ? "Saved" : "Save",
-                  systemImage: store.isSaved(spotID: spot.id) ? "bookmark.fill" : "bookmark")
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(SecondaryButtonStyle())
+        PlaceSaveButton(store: store,
+                        saved: store.savedLocations.first { $0.kind == .coolSpot(spot.id) },
+                        toggle: { _ = store.toggleSaved(spot) })
     }
 
     var directionsURL: URL {
@@ -200,40 +157,19 @@ struct CoolSpotDetailView: View {
 
     var experienceSummary: some View {
         let evidence = store.coolingEvidence(for: spot)
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
             if evidence.total > 0 {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(evidence.attribution)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.78))
-                    Text(evidence.headline)
-                        .font(.title2.bold())
-                        .foregroundStyle(.white)
-                    if let latest = store.latestReportDate(for: spot) {
-                        Text("Latest reported visit \(latest.formatted(.relative(presentation: .numeric)))")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.82))
-                    }
+                Text("\(evidence.attribution) \(evidence.headline.lowercased())")
+                    .font(.subheadline.weight(.semibold))
+                if let latest = store.latestReportDate(for: spot) {
+                    Text("Latest reported visit \(latest.formatted(.relative(presentation: .numeric)))")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .background(AppStyle.ink, in: RoundedRectangle(cornerRadius: 16))
-                .accessibilityElement(children: .combine)
-                ExperienceDistribution(reports: evidence.counts)
-                Text("Visitor experiences, not a guarantee of current conditions")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(evidence.headline).font(.headline)
-                    Text("We don’t yet know how it felt to visitors. Use the cooling features and entry information to help you decide.")
-                        .font(.subheadline).foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .background(AppStyle.controlSurface, in: RoundedRectangle(cornerRadius: 16))
+                Text("No visitor experiences yet").font(.subheadline.weight(.semibold))
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     var livePresence: some View {
@@ -242,14 +178,12 @@ struct CoolSpotDetailView: View {
                          presenceDeadline: store.presenceEndsAt,
                          canShareReport: store.canReportVisit(for: spot),
                          hasUnfinishedReport: store.hasUnfinishedReport(for: spot.id),
-                         tip: livePresenceTip,
                          action: {
             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
                 if store.isSharingPresence(for: spot) {
                     store.activePresenceSpotID = nil
                 } else {
                     store.checkIn(spot)
-                    livePresenceTip.invalidate(reason: .actionPerformed)
                 }
             }
         }, showExplanation: {
@@ -267,86 +201,92 @@ struct CoolSpotDetailView: View {
         visitReportPresentation = VisitReportPresentation(initialExperience: initialExperience)
     }
 
+    private var orderedFeatures: [CoolingFeature] {
+        let priority: [CoolingFeature] = [.airConditioning, .drinkingWater, .treeShade,
+                                         .structuralShade, .ventilation, .coolerIndoors, .waterFeature]
+        return priority.filter { spot.features.contains($0) }
+    }
+
     var coolingFeatures: some View {
-        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
-            VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedText) {
-                Text("Why it may help you cool down").font(.title3.bold())
-                    .accessibilityAddTraits(.isHeader)
-                Text(spot.source == .gla ? "Place information from the Greater London Authority"
-                                        : "Community-submitted place information, reviewed before publication")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                FlowLayout(spacing: 8) {
-                    ForEach(expandFeatures ? spot.features : Array(spot.features.prefix(3))) {
-                        InfoPill(feature: $0)
-                    }
-                }
-                if spot.features.count > 3 {
-                    Button {
-                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { expandFeatures.toggle() }
-                    } label: {
-                        Label(expandFeatures ? "Show fewer cooling features"
-                                             : "Show all \(spot.features.count) cooling features",
-                              systemImage: expandFeatures ? "chevron.up" : "chevron.down")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(minHeight: 44)
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(AppStyle.brand)
+        VStack(alignment: .leading, spacing: 4) {
+            FlowLayout(spacing: 8) {
+                ForEach(expandFeatures ? orderedFeatures : Array(orderedFeatures.prefix(2))) {
+                    InfoPill(feature: $0)
                 }
             }
-            if !spot.features.contains(.airConditioning) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Air conditioning not confirmed", systemImage: "questionmark.circle")
-                        .font(.subheadline).foregroundStyle(.secondary)
+            if spot.features.count > 2 {
+                Button {
+                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { expandFeatures.toggle() }
+                } label: {
+                    Label(expandFeatures ? "Show fewer cooling features"
+                                         : "Show all \(spot.features.count) cooling features",
+                          systemImage: expandFeatures ? "chevron.up" : "chevron.down")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(minHeight: 44)
                 }
+                .buttonStyle(.plain).foregroundStyle(AppStyle.brand)
             }
         }
     }
 
     var recentExperience: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ViewThatFits(in: .horizontal) {
-                HStack { Text("Visitor reports").font(.headline).accessibilityAddTraits(.isHeader); Spacer(); viewAllReports }
-                VStack(alignment: .leading) { Text("Visitor reports").font(.headline).accessibilityAddTraits(.isHeader); viewAllReports }
-            }
-            if let item = store.visitorReportItems(for: spot).first {
-                NavigationLink { VisitorReportsView(store: store, spot: spot) } label: {
-                    VStack(alignment: .leading, spacing: 8) {
-                        if let report = item.report {
-                            Label(report.experience.summary, systemImage: report.experience.symbol)
-                                .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
-                        }
-                        if !item.comment.isEmpty { Text("“\(item.comment)”").font(.body).foregroundStyle(.primary) }
-                        if let report = item.report {
-                            Text("\(item.sourceLabel) · \(report.visitedAt.formatted(date: .abbreviated, time: .shortened))")
-                                .font(.caption).foregroundStyle(AppStyle.supportingText)
-                        } else {
-                            Text("\(item.sourceLabel) · Visit date unavailable").font(.caption).foregroundStyle(AppStyle.supportingText)
-                        }
-                    }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        VStack(alignment: .leading, spacing: LayoutSpacing.majorSection) {
+            VStack(alignment: .leading, spacing: LayoutSpacing.group) {
+                VStack(alignment: .leading, spacing: LayoutSpacing.related) {
+                    Text("How it felt").font(.headline).accessibilityAddTraits(.isHeader)
+                    experienceSummary
+                    if store.experienceReportTotal(for: spot) > 0 {
+                        ExperienceDistribution(reports: store.coolingEvidence(for: spot).counts)
+                    }
                 }
-                .buttonStyle(.plain)
-            } else { Text("No individual reports to read yet").foregroundStyle(.secondary) }
-            visitorDetails.padding(.top, 12)
-            TimelineView(.periodic(from: .now, by: 15)) { context in
-                reportEntry(at: context.date).padding(.top, 8)
+                visitorDetails
+            }
+            VStack(alignment: .leading, spacing: LayoutSpacing.group) {
+                VStack(alignment: .leading, spacing: LayoutSpacing.related) {
+                    Text("Visitor reports").font(.headline).accessibilityAddTraits(.isHeader)
+                    if let item = store.visitorReportItems(for: spot).first {
+                        VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                            if let report = item.report {
+                                Label(report.experience.summary, systemImage: report.experience.symbol)
+                                    .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
+                            }
+                            if !item.comment.isEmpty { Text("“\(item.comment)”").font(.body).foregroundStyle(.primary) }
+                            if let report = item.report {
+                                Text("\(item.sourceLabel) · \(report.visitedAt.formatted(date: .abbreviated, time: .shortened))")
+                                    .font(.caption).foregroundStyle(AppStyle.supportingText)
+                            } else {
+                                Text("\(item.sourceLabel) · Visit date unavailable").font(.caption).foregroundStyle(AppStyle.supportingText)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        readAllReports
+                    } else {
+                        Text("No individual reports to read yet").foregroundStyle(.secondary)
+                    }
+                }
+                TimelineView(.periodic(from: .now, by: 15)) { context in
+                    reportEntry(at: context.date)
+                }
             }
         }
     }
-    @ViewBuilder var viewAllReports: some View {
-        if !store.visitorReportItems(for: spot).isEmpty {
-            NavigationLink { VisitorReportsView(store: store, spot: spot) } label: {
-                Text("View all").font(.subheadline.weight(.semibold)).frame(minHeight: 44)
-            }.accessibilityLabel("View all visitor reports")
-        }
+
+    var readAllReports: some View {
+        NavigationLink { VisitorReportsView(store: store, spot: spot) } label: {
+            HStack {
+                Text("Read all reports")
+                Spacer()
+                Image(systemName: "chevron.right").font(.caption.weight(.semibold))
+            }
+            .font(.subheadline.weight(.semibold))
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }.accessibilityLabel("Read all visitor reports")
     }
 
     private func reportEntry(at now: Date) -> some View {
         let isCurrent = store.hasCurrentConfirmation(for: spot, at: now) || store.hasUnfinishedReport(for: spot.id)
-        return VStack(alignment: .leading, spacing: PlaceDetailRhythm.relatedText) {
+        return VStack(alignment: .leading, spacing: LayoutSpacing.text) {
             if isCurrent, store.publishedReport(for: spot.id) != nil {
                 Label("You’ve shared this visit", systemImage: "checkmark.circle")
                     .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
@@ -364,19 +304,8 @@ struct CoolSpotDetailView: View {
                 .disabled(!store.canReportVisit(for: spot, at: now))
                 .accessibilityIdentifier("independentVisitReport")
                 if store.hasUnfinishedReport(for: spot.id) {
-                    Text("Your answers are private. Continue here or in You → Your reports, even after leaving.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                } else if isCurrent {
-                    Text("You can share this visit whenever you’re ready, here or in You → Your reports.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                } else if spot.isNearby {
-                    Text("Start while you’re here. You can finish later in You → Your reports, even after leaving.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                } else {
-                    Text(store.visitConfirmedAt[spot.id] == nil
-                         ? "Start while you’re here. You can finish later, even after leaving."
-                         : "There’s no started report for this visit. Start one when you’re here again.")
-                        .font(.footnote).foregroundStyle(.secondary)
+                    Text("Draft saved").font(.footnote).foregroundStyle(.secondary)
+                } else if !isCurrent && !spot.isNearby {
                     Button { showReportingHelp = true } label: {
                         Text("Why can’t I share?").font(.subheadline.weight(.semibold))
                             .frame(minHeight: 44).contentShape(Rectangle())
@@ -411,19 +340,15 @@ struct PlacePhoto: View {
     let spot: CoolSpot
 
     var body: some View {
-        Group {
-            if spot.id == "library",
-               let url = Bundle.main.url(forResource: "RiversideLibraryPrototype", withExtension: "png"),
-               let image = UIImage(contentsOfFile: url.path) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .accessibilityLabel("Riverside Library entrance")
-            } else {
-                PlaceCover(type: spot.type, environment: spot.environment)
-            }
+        if spot.id == "library",
+           let url = Bundle.main.url(forResource: "RiversideLibraryPrototype", withExtension: "png"),
+           let image = UIImage(contentsOfFile: url.path) {
+            Image(uiImage: image)
+                .resizable().scaledToFill()
+                .frame(height: 184).clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .accessibilityLabel("Riverside Library example photo")
         }
-        .clipped()
     }
 }
 
@@ -460,16 +385,15 @@ struct LivePresenceCard: View {
     let presenceDeadline: Date?
     let canShareReport: Bool
     let hasUnfinishedReport: Bool
-    let tip: LivePresenceTip
     let action: () -> Void
     let showExplanation: () -> Void
     let report: (CoolingExperience) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PlaceDetailRhythm.sectionContent) {
+        VStack(alignment: .leading, spacing: LayoutSpacing.group) {
             if isCheckedIn {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("Others can now see one more person here",
+                    Label("You’re sharing that you’re here",
                           systemImage: "checkmark.circle.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(AppStyle.brand)
@@ -484,20 +408,10 @@ struct LivePresenceCard: View {
                 Divider()
 
                 if canShareReport || hasUnfinishedReport {
-                VStack(alignment: .leading, spacing: 9) {
+                VStack(alignment: .leading, spacing: LayoutSpacing.text) {
                     Text("How did it feel compared with outside?")
                         .font(.headline)
-                    Text("Optional. This is separate from letting people know you’re here.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                     QuickExperienceChoices(action: report)
-                    if hasUnfinishedReport {
-                        Text("Your report is started. You can finish it later in You → Your reports.")
-                            .font(.footnote).foregroundStyle(.secondary)
-                    } else if canShareReport {
-                        Text("Share this visit whenever you’re ready in You → Your reports. There’s no time limit.")
-                            .font(.footnote).foregroundStyle(.secondary)
-                    }
                 }
                 } else {
                     Label("You’ve shared this visit", systemImage: "checkmark.circle")
@@ -506,29 +420,20 @@ struct LivePresenceCard: View {
             } else {
                 Text("Here to cool down?").font(.headline).accessibilityAddTraits(.isHeader)
                 if isNearby {
-                    TipView(tip, arrowEdge: .bottom)
                     shareActionButton
                 } else {
-                    Text("You can share this when you’re near this Cool Spot.")
+                    Text("Available when you’re nearby")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     shareActionButton
                         .disabled(true)
                 }
 
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 5) {
-                        Text("Others see the number, not your name")
-                        Text("·")
-                        explanationButton
-                    }
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Others see the number, not your name")
-                        explanationButton
-                    }
+                HStack(spacing: LayoutSpacing.text) {
+                    Text("Anonymous · 10 minutes").font(.caption).foregroundStyle(.secondary)
+                    Spacer(minLength: 8)
+                    explanationButton
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
             }
         }
         .padding(20)
@@ -564,8 +469,6 @@ struct ReportingHelpSheet: View {
                     Text("Confirm a visit while you’re nearby").font(.title2.bold())
                     Text("Start a report or share that you’re cooling off here while nearby. You can then start or finish that visit’s report whenever you’re ready, even after leaving.")
                     Text("Already left? Any visit you confirmed is in You → Your reports. There is no deadline. Saving a place alone doesn’t confirm a visit.")
-                    Text("Being nearby doesn’t prove someone went inside or felt cool.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }.padding(20)
             }
             .navigationTitle("Sharing a visit").navigationBarTitleDisplayMode(.inline)
@@ -742,61 +645,249 @@ struct StayDistribution: View {
 struct RecognisedPlaceDetailView: View {
     @ObservedObject var store: PrototypeStore
     let place: RecognisedPlace
+    var findNearby: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showContribution = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    PlaceCover(type: place.type, environment: .indoors)
-                        .frame(height: 210).padding(.horizontal, -20).padding(.top, -20)
-                    VStack(alignment: .leading, spacing: 7) {
-                        Text(place.name).font(.largeTitle.bold())
-                        Text("\(place.distance) · \(place.address)").font(.subheadline).foregroundStyle(.secondary)
-                    }
-                    HStack(spacing: 0) {
-                        Link(destination: URL(string: "https://maps.apple.com/?daddr=\(place.latitude),\(place.longitude)&dirflg=w")!) {
-                            VStack(spacing: 7) {
-                                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                                    .font(.title3).frame(width: 46, height: 46)
-                                    .background(AppStyle.blue, in: Circle())
-                                Text("Directions").font(.caption.weight(.medium))
-                            }.foregroundStyle(AppStyle.brand).frame(maxWidth: .infinity, minHeight: 44)
+                VStack(alignment: .leading, spacing: LayoutSpacing.section) {
+                    VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                        Text(place.name).font(.title.bold()).padding(.trailing, 44)
+                            .accessibilityAddTraits(.isHeader)
+                        if let category = place.categoryLabel {
+                            Text(category).font(.subheadline.weight(.medium))
+                                .foregroundStyle(AppStyle.brand)
                         }
-                        DetailAction(symbol: store.isSaved(placeID: place.id) ? "bookmark.fill" : "bookmark",
-                                     title: store.isSaved(placeID: place.id) ? "Saved" : "Save") {
-                            _ = store.toggleSaved(place)
-                        }
-                    }
-                    VStack(alignment: .leading, spacing: 10) {
-                        Label("No cooling information yet", systemImage: "thermometer.sun.fill").font(.headline)
-                        Text("This place has no reviewed cooling information yet. Saving it is private.")
+                        Text([place.distance, place.address].filter { !$0.isEmpty }.joined(separator: " · "))
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
-                    .padding(16).background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
+                    VStack(alignment: .leading, spacing: LayoutSpacing.related) {
+                        Label("No cooling information yet", systemImage: "thermometer.sun.fill")
+                            .font(.headline)
+                        if let findNearby {
+                            Button(action: findNearby) {
+                                Label("Find nearby Cool Spots", systemImage: "map")
+                                    .frame(maxWidth: .infinity)
+                            }.buttonStyle(PrimaryButtonStyle())
+                        }
+                    }
+                    VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                        if place.websiteURL != nil || place.phoneURL != nil {
+                            HStack(spacing: 24) {
+                                if let url = place.phoneURL {
+                                    Link(destination: url) { Label("Call", systemImage: "phone") }
+                                        .frame(minHeight: 44)
+                                }
+                                if let url = place.websiteURL {
+                                    Link(destination: url) { Label("Website", systemImage: "safari") }
+                                        .frame(minHeight: 44)
+                                }
+                            }
+                            .font(.subheadline.weight(.semibold))
+                        }
+                        ApplePlaceInformationView(coordinate: place.coordinate,
+                                                  placeIdentifier: place.appleMapItemIdentifier,
+                                                  isExample: !place.id.hasPrefix("apple-maps:"))
+                            .id(place.id)
+                    }
                     Button { showContribution = true } label: {
                         Text("Add cooling information").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(PrimaryButtonStyle())
-                    Text("Cooling information will be reviewed before this place can appear on the public map.")
-                        .font(.caption).foregroundStyle(AppStyle.supportingText)
+                    .buttonStyle(SecondaryButtonStyle())
                     if let saved = store.savedLocations.first(where: { $0.kind == .recognisedPlace(place.id) }) {
-                        SavedPrivateDetails(store: store, saved: saved).id(saved.id)
+                        SavedNoteSummary(store: store, saved: saved).id(saved.id)
                     }
                 }
                 .padding(20)
             }
-            .ignoresSafeArea(edges: .top)
+            .safeAreaInset(edge: .bottom) {
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        VStack(spacing: 12) { placeActions }
+                    } else {
+                        HStack(spacing: 12) { placeActions }
+                    }
+                }
+                .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 8)
+                .background(.bar)
+            }
             .overlay(alignment: .topTrailing) {
                 Button { dismiss() } label: {
-                    Image(systemName: "xmark").frame(width: 36, height: 36)
+                    Image(systemName: "xmark").frame(width: 44, height: 44)
                         .background(.ultraThickMaterial, in: Circle())
-                }.buttonStyle(.plain).padding(16)
+                }.buttonStyle(.plain).accessibilityLabel("Close").padding(12)
             }
         }
+        .tint(AppStyle.brand)
         .sheet(isPresented: $showContribution) {
             ContributionFlow(store: store, source: .recognisedPlace(place))
+        }
+    }
+
+    @ViewBuilder private var placeActions: some View {
+        Link(destination: URL(string: "https://maps.apple.com/?daddr=\(place.latitude),\(place.longitude)&dirflg=w")!) {
+            Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(PrimaryButtonStyle())
+        PlaceSaveButton(store: store,
+                        saved: store.savedLocations.first { $0.kind == .recognisedPlace(place.id) },
+                        toggle: { _ = store.toggleSaved(place) })
+    }
+}
+
+private struct ApplePlaceInformationView: View {
+    let coordinate: CLLocationCoordinate2D
+    var placeIdentifier: MKMapItem.Identifier? = nil
+    var isExample = false
+    @State private var scene: MKLookAroundScene?
+    @State private var sceneRequest: MKLookAroundSceneRequest?
+    @State private var sceneItemRequest: MKMapItemRequest?
+    @State private var showStreetView = false
+    @State private var loadingScene = true
+    @State private var sceneFailed = false
+    @State private var sceneAttempt = 0
+    @State private var mapItem: MKMapItem?
+    @State private var detailRequest: MKMapItemRequest?
+    @State private var detailAttempt = 0
+    @State private var loadingDetails = false
+    @State private var showDetails = false
+    @State private var showDetailError = false
+
+    private var sceneKey: String { "\(coordinate.latitude),\(coordinate.longitude):\(sceneAttempt)" }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if placeIdentifier != nil {
+                Button {
+                    if mapItem != nil { showDetails = true }
+                    else { detailAttempt += 1 }
+                } label: {
+                    HStack(spacing: 10) {
+                        if loadingDetails { ProgressView() }
+                        Label("Opening hours & place details", systemImage: "clock")
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.caption.weight(.semibold))
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain).foregroundStyle(AppStyle.brand)
+                .disabled(loadingDetails)
+            }
+            DisclosureGroup(isExpanded: $showStreetView) {
+                if showStreetView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        if let scene {
+                            LookAroundPreview(initialScene: scene, pointsOfInterest: .excludingAll)
+                                .frame(height: 200)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            Text(isExample ? "Near the example location" : "Nearby streets")
+                                .font(.caption).foregroundStyle(AppStyle.supportingText)
+                        } else if loadingScene {
+                            HStack(spacing: 10) {
+                                ProgressView()
+                                Text("Loading street view…").font(.subheadline)
+                            }
+                            .frame(minHeight: 44)
+                        } else if sceneFailed {
+                            Text("Street view couldn’t load.")
+                                .font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                            Button("Try street view again") { sceneAttempt += 1 }.frame(minHeight: 44)
+                        } else {
+                            Text("Street view isn’t available here.")
+                                .font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                        }
+                    }
+                    .padding(.top, 8)
+                    .task(id: sceneKey) { await loadScene() }
+                    .onDisappear {
+                        sceneRequest?.cancel()
+                        sceneItemRequest?.cancel()
+                    }
+                }
+            } label: {
+                Text("View nearby streets").frame(minHeight: 44)
+            }
+            .font(.subheadline.weight(.semibold))
+        }
+        .task(id: detailAttempt) {
+            guard detailAttempt > 0, mapItem == nil else { return }
+            await loadDetails()
+        }
+        .onDisappear {
+            sceneRequest?.cancel()
+            sceneItemRequest?.cancel()
+            detailRequest?.cancel()
+        }
+        .mapItemDetailSheet(isPresented: $showDetails, item: mapItem)
+        .alert("Couldn’t load place details", isPresented: $showDetailError) {
+            Button("Try again") { detailAttempt += 1 }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Check your connection and try again.")
+        }
+    }
+
+    @MainActor private func loadScene() async {
+        guard scene == nil else { return }
+        sceneRequest?.cancel()
+        sceneItemRequest?.cancel()
+        scene = nil
+        loadingScene = true
+        sceneFailed = false
+        defer {
+            if !Task.isCancelled {
+                loadingScene = false
+                sceneRequest = nil
+                sceneItemRequest = nil
+            }
+        }
+        do {
+            if mapItem == nil, let placeIdentifier {
+                let itemRequest = MKMapItemRequest(mapItemIdentifier: placeIdentifier)
+                sceneItemRequest = itemRequest
+                let item = try await itemRequest.mapItem
+                try Task.checkCancellation()
+                mapItem = item
+            }
+            let request: MKLookAroundSceneRequest
+            if let mapItem {
+                // Preserve the place identity instead of treating its coordinate as an entrance.
+                request = MKLookAroundSceneRequest(mapItem: mapItem)
+            } else {
+                request = MKLookAroundSceneRequest(coordinate: coordinate)
+            }
+            sceneRequest = request
+            let result = try await request.scene
+            guard !Task.isCancelled else { return }
+            scene = result
+        } catch {
+            guard !Task.isCancelled else { return }
+            sceneFailed = true
+        }
+    }
+
+    @MainActor private func loadDetails() async {
+        guard let placeIdentifier else { return }
+        loadingDetails = true
+        let request = MKMapItemRequest(mapItemIdentifier: placeIdentifier)
+        detailRequest = request
+        defer {
+            if !Task.isCancelled { loadingDetails = false; detailRequest = nil }
+        }
+        do {
+            let result = try await request.mapItem
+            guard !Task.isCancelled else { return }
+            mapItem = result
+            showDetails = true
+        } catch {
+            guard !Task.isCancelled else { return }
+            showDetailError = true
         }
     }
 }
@@ -825,7 +916,7 @@ struct VisitReportFlow: View {
                     VStack(alignment: .leading, spacing: 20) {
                         Image(systemName: "checkmark.circle.fill").font(.largeTitle).foregroundStyle(AppStyle.brand)
                         Text("Thanks for the update").font(.largeTitle.bold())
-                        Text("Your report is now shown with this place’s visitor reports on this device. This prototype does not upload it.")
+                        Text("Report saved on this device.")
                         Button("Done") { dismiss() }.buttonStyle(PrimaryButtonStyle())
                     }.padding(24)
                 }
@@ -842,7 +933,6 @@ struct VisitReportFlow: View {
                                    in: ...Date.now,
                                    displayedComponents: [.date, .hourAndMinute])
                     } header: { Text(spot.name).textCase(nil).foregroundStyle(AppStyle.supportingText) }
-                    footer: { Text("This one answer is enough to publish a report.").foregroundStyle(AppStyle.supportingText) }
 
                     Section {
                         DisclosureGroup(isExpanded: $helpedExpanded) {
@@ -861,10 +951,13 @@ struct VisitReportFlow: View {
                             Text("Not added").tag(nil as StayLength?)
                             ForEach(StayLength.allCases) { Text($0.rawValue).tag(Optional($0)) }
                         }
-                        TextField("What would help someone decide?", text: $draft.comment, prompt: Text("What would help someone decide?").foregroundStyle(AppStyle.supportingText), axis: .vertical)
-                            .lineLimit(3...8).accessibilityLabel("Comment, optional")
+                        VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                            Text("Comment").font(.subheadline.weight(.semibold))
+                            TextField("What would help someone decide?", text: $draft.comment, axis: .vertical)
+                                .lineLimit(3...8).accessibilityLabel("Comment, optional")
+                        }
                     } header: { Text("More about your visit · Optional").foregroundStyle(AppStyle.supportingText) }
-                    footer: { Text("Finish later keeps your answers private in You → Your reports. Your visit time stays the same.").foregroundStyle(AppStyle.supportingText) }
+                    footer: { Text("Your draft is saved until you publish.").foregroundStyle(AppStyle.supportingText) }
                     Section { Button("Discard answers", role: .destructive) { showDiscardConfirmation = true } }
                     if dynamicTypeSize.isAccessibilitySize { Section { publishBar } }
                 }

@@ -3,7 +3,9 @@ import SwiftUI
 
 struct SavedView: View {
     @ObservedObject var store: PrototypeStore
+    var findNearby: ((RecognisedPlace) -> Void)? = nil
     @State private var selected: SavedLocation?
+    @State private var pendingNearbyPlace: RecognisedPlace?
     @State private var lastSavedLocation: SavedLocation?
     @State private var showToast = false
     @State private var showPinPrompt = false
@@ -33,7 +35,7 @@ struct SavedView: View {
                                         .buttonStyle(.plain)
                                 }
                             } header: { Text("Pins") }
-                            footer: { Text("Private points you marked to find again. Saving a pin doesn’t start a report.") }
+                            footer: { Text("Only you can see your pins.") }
                             }
                     }.listStyle(.insetGrouped)
                 }
@@ -60,13 +62,21 @@ struct SavedView: View {
             Button("Cancel", role: .cancel) {}
             Button("Save pin") { lastSavedLocation = store.saveCurrentLocation(); showToast = true }
         } message: {
-            Text("Mark where you are so you can find it again in Saved → Pins. Only you can see it. This doesn’t start a report. Location is simulated in this prototype.")
+            Text("Save this location to your private pins?")
         }
-        .sheet(item: $selected) { saved in
+        .sheet(item: $selected, onDismiss: {
+            if let place = pendingNearbyPlace {
+                pendingNearbyPlace = nil
+                findNearby?(place)
+            }
+        }) { saved in
             if case .coolSpot(let id) = saved.kind, let spot = store.spot(id) {
                 CoolSpotDetailView(store: store, spot: spot)
             } else if case .recognisedPlace(let id) = saved.kind, let place = store.place(id) {
-                RecognisedPlaceDetailView(store: store, place: place)
+                RecognisedPlaceDetailView(store: store, place: place, findNearby: findNearby == nil ? nil : {
+                    pendingNearbyPlace = place
+                    selected = nil
+                })
             } else {
                 SavedDetail(store: store, savedID: saved.id)
             }
@@ -83,17 +93,17 @@ struct SavedCard: View {
     var isCoordinate: Bool { if case .coordinate = saved.kind { true } else { false } }
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: LayoutSpacing.related) {
             Image(systemName: coolSpot?.type.symbol ?? (isCoordinate ? "mappin.and.ellipse" : "building.2.fill"))
                 .font(.title3).foregroundStyle(.white).frame(width: 48, height: 48)
                 .background(coolSpot == nil ? Color.secondary : AppStyle.ink,
                             in: RoundedRectangle(cornerRadius: 13))
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                 Text(saved.title).font(.headline)
                 Text(saved.subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
                 if let spot = coolSpot {
-                    VStack(alignment: .leading, spacing: 5) {
-                        SourceBadge(source: spot.source)
+                    VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                        Text("\(spot.type.shortName) · Example").font(.caption).foregroundStyle(.secondary)
                         Text(spot.features.first?.rawValue ?? "").font(.caption).foregroundStyle(.secondary)
                     }
                 } else {
@@ -104,7 +114,7 @@ struct SavedCard: View {
             Spacer()
             Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, LayoutSpacing.text)
     }
 }
 
@@ -112,9 +122,8 @@ struct SavedDetail: View {
     @ObservedObject var store: PrototypeStore
     let savedID: UUID
     @Environment(\.dismiss) private var dismiss
-    @State private var title = ""
-    @State private var note = ""
     @State private var showContribution = false
+    @State private var showEditor = false
 
     var saved: SavedLocation? { store.savedLocations.first { $0.id == savedID } }
     var coolSpot: CoolSpot? {
@@ -130,8 +139,8 @@ struct SavedDetail: View {
         NavigationStack {
             ScrollView {
                 if let saved {
-                    VStack(alignment: .leading, spacing: 22) {
-                        VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: LayoutSpacing.section) {
+                        VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                             Text(saved.title).font(.largeTitle.bold())
                             Text(saved.subtitle).font(.subheadline).foregroundStyle(.secondary)
                             Text("Saved \(saved.savedAt.formatted(date: .abbreviated, time: .shortened))")
@@ -149,7 +158,7 @@ struct SavedDetail: View {
                             if !spot.entryInformation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                 FactRow(symbol: "ticket", title: spot.entryInformation)
                             }
-                            FactRow(symbol: "chair.lounge.fill", title: spot.seating.rawValue)
+                            FactRow(symbol: "chair.lounge.fill", title: spot.seating.displayName)
                             Button { showContribution = true } label: {
                                 Text("Suggest an edit").frame(maxWidth: .infinity)
                             }.buttonStyle(PrimaryButtonStyle())
@@ -159,8 +168,6 @@ struct SavedDetail: View {
                                 Label("No cooling information yet",
                                       systemImage: "building.2")
                                     .font(.headline)
-                                Text("Your bookmark stays private. You can choose to add cooling information for review.")
-                                    .font(.subheadline).foregroundStyle(Color.primary.opacity(0.78))
                             }
                             .padding(16)
                             .background(AppStyle.blue, in: RoundedRectangle(cornerRadius: 16))
@@ -175,15 +182,21 @@ struct SavedDetail: View {
                             privateDetails
                             shareCoordinateOptions
                         }
-                        Text("Saving stays private. Cooling information is a separate contribution and is reviewed before becoming public.")
-                            .font(.caption).foregroundStyle(.secondary)
                     }
                     .padding(20)
-                    .onAppear { title = saved.title; note = saved.note }
                 }
             }
             .navigationTitle(saved?.kind == .coordinate ? "Saved pin" : "Saved place").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Edit") { showEditor = true }
+                        .accessibilityLabel(saved?.kind == .coordinate ? "Edit saved pin" : "Edit saved place")
+                }
+                ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } }
+            }
+        }
+        .sheet(isPresented: $showEditor) {
+            if let saved { SavedPlaceEditor(store: store, saved: saved) }
         }
         .sheet(isPresented: $showContribution) {
             if let saved {
@@ -209,8 +222,6 @@ struct SavedDetail: View {
                     .frame(height: 180)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
 
-                Text("Only you can see this saved pin.")
-                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
     }
@@ -226,52 +237,145 @@ struct SavedDetail: View {
     }
 
     @ViewBuilder var privateDetails: some View {
-        if let saved { SavedPrivateDetails(store: store, saved: saved).id(saved.id) }
+        if let saved {
+            SavedNoteSummary(store: store, saved: saved, allowsEditing: false)
+        }
     }
 }
 
-// The same private-note controls belong to every saved place and pin.
-struct SavedPrivateDetails: View {
+// Saving is one action; editing a bookmark is a separate, explicit task.
+struct PlaceSaveButton: View {
+    @ObservedObject var store: PrototypeStore
+    let saved: SavedLocation?
+    let toggle: () -> Void
+    @State private var showEditor = false
+    @State private var confirmRemoval = false
+
+    var body: some View {
+        Group {
+            if let saved {
+                Menu {
+                    Button("Edit saved place", systemImage: "square.and.pencil") { showEditor = true }
+                    Button("Remove from Saved", systemImage: "bookmark.slash", role: .destructive) {
+                        if saved.note.isEmpty { toggle() }
+                        else { confirmRemoval = true }
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Label("Saved", systemImage: "bookmark.fill")
+                        Image(systemName: "chevron.down").font(.caption.weight(.semibold))
+                    }.frame(maxWidth: .infinity)
+                }
+            } else {
+                Button(action: toggle) {
+                    Label("Save", systemImage: "bookmark").frame(maxWidth: .infinity)
+                }
+            }
+        }
+        .buttonStyle(SecondaryButtonStyle())
+        .sheet(isPresented: $showEditor) {
+            if let saved { SavedPlaceEditor(store: store, saved: saved) }
+        }
+        .confirmationDialog("Remove this saved place and its note?", isPresented: $confirmRemoval,
+                            titleVisibility: .visible) {
+            Button("Remove from Saved", role: .destructive, action: toggle)
+        }
+    }
+}
+
+struct SavedNoteSummary: View {
     @ObservedObject var store: PrototypeStore
     let saved: SavedLocation
+    var allowsEditing = true
+    @State private var showEditor = false
+
+    var body: some View {
+        if !saved.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                HStack {
+                    Label("Your note", systemImage: "lock").font(.headline)
+                    Spacer()
+                    if allowsEditing {
+                        Button("Edit") { showEditor = true }.frame(minHeight: 44)
+                    }
+                }
+                Text(saved.note).font(.body)
+            }
+            .sheet(isPresented: $showEditor) { SavedPlaceEditor(store: store, saved: saved) }
+        }
+    }
+}
+
+struct SavedPlaceEditor: View {
+    @ObservedObject var store: PrototypeStore
+    let saved: SavedLocation
+    @Environment(\.dismiss) private var dismiss
     @State private var title: String
     @State private var note: String
-    @State private var didSave = false
-    @FocusState private var editing: Bool
+    @State private var confirmDiscard = false
 
     init(store: PrototypeStore, saved: SavedLocation) {
-        self.store = store; self.saved = saved
+        self.store = store
+        self.saved = saved
         _title = State(initialValue: saved.title)
         _note = State(initialValue: saved.note)
     }
+
+    private var placeName: String {
+        switch saved.kind {
+        case .coolSpot(let id): store.spot(id)?.name ?? saved.title
+        case .recognisedPlace(let id): store.place(id)?.name ?? saved.title
+        case .coordinate: "Saved pin"
+        }
+    }
+
+    private var changed: Bool { title != saved.title || note != saved.note }
+    private var validTitle: Bool { !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("Private details", systemImage: "lock").font(.headline)
-            Text("Only you can see these. They don’t change the place’s public information.")
-                .font(.footnote).foregroundStyle(AppStyle.supportingText)
-            TextField("Name to help you remember", text: $title)
-                .textFieldStyle(.roundedBorder).focused($editing)
-            TextField("Private note", text: $note, axis: .vertical)
-                .textFieldStyle(.roundedBorder).lineLimit(2...4).focused($editing)
-            if didSave {
-                Label("Private details saved", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
-                    .frame(minHeight: 44)
-                Text("Saved on this device. Only you can see it.")
-                    .font(.footnote).foregroundStyle(AppStyle.supportingText)
-            } else {
-                Button {
-                    store.updateSaved(saved.id, title: title, note: note)
-                    didSave = true; editing = false
-                    UIAccessibility.post(notification: .announcement, argument: "Private details saved")
-                } label: {
-                    Label("Save private details", systemImage: "square.and.arrow.down").frame(minHeight: 44)
+        NavigationStack {
+            Form {
+                Section {
+                    VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                        Text(placeName).font(.headline)
+                        Text(saved.subtitle).font(.subheadline).foregroundStyle(.secondary)
+                    }.padding(.vertical, LayoutSpacing.metadata)
                 }
-                .buttonStyle(.borderedProminent).tint(AppStyle.brand)
+                Section {
+                    TextField("Name in Saved", text: $title, axis: .vertical)
+                        .lineLimit(1...3)
+                    if !validTitle { Text("Enter a name.").font(.footnote).foregroundStyle(.red) }
+                } header: { Text("Name in Saved") }
+                Section {
+                    TextField("Add a note", text: $note, axis: .vertical).lineLimit(4...8)
+                        .accessibilityLabel("Your note")
+                } header: { Text("Your note") }
+                footer: { Text("Only you can see this.") }
+            }
+            .listSectionSpacing(LayoutSpacing.section)
+            .navigationTitle(saved.kind == .coordinate ? "Edit saved pin" : "Edit saved place")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        if changed { confirmDiscard = true } else { dismiss() }
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save changes") {
+                        store.updateSaved(saved.id, title: title.trimmingCharacters(in: .whitespacesAndNewlines), note: note)
+                        UIAccessibility.post(notification: .announcement, argument: "Changes saved")
+                        dismiss()
+                    }.disabled(!changed || !validTitle)
+                }
             }
         }
-        .onChange(of: title) { _, _ in didSave = false }
-        .onChange(of: note) { _, _ in didSave = false }
+        .tint(AppStyle.brand)
+        .interactiveDismissDisabled(changed)
+        .confirmationDialog("Discard changes?", isPresented: $confirmDiscard, titleVisibility: .visible) {
+            Button("Discard changes", role: .destructive) { dismiss() }
+            Button("Keep editing", role: .cancel) {}
+        }
     }
 }
 
@@ -293,7 +397,7 @@ struct YouView: View {
                     NavigationLink {
                         YourReportsView(store: store)
                     } label: {
-                        VStack(alignment: .leading, spacing: 5) {
+                        VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                             Text("Your reports")
                             let count = store.unfinishedReportSpots.count
                             if count > 0 {
@@ -306,7 +410,7 @@ struct YouView: View {
                     NavigationLink {
                         PlaceContributionsView(store: store)
                     } label: {
-                        VStack(alignment: .leading, spacing: 5) {
+                        VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                             Text("Places you’ve added or updated")
                             let count = store.contributions.filter {
                                 if case .actionNeeded = $0.status { return $0.kind != .visitReport }
@@ -352,7 +456,7 @@ struct YourReportsView: View {
                 if !unfinished.isEmpty {
                     Section {
                         ForEach(unfinished) { spot in
-                            VStack(alignment: .leading, spacing: 6) {
+                            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                                 Text(spot.name).font(.headline)
                                 if let draft = store.reportDrafts[spot.id] {
                                     Text("Visit: \(draft.visitedAt.formatted(date: .abbreviated, time: .shortened))")
@@ -373,7 +477,7 @@ struct YourReportsView: View {
                 if !notStarted.isEmpty {
                     Section {
                         ForEach(notStarted) { spot in
-                            VStack(alignment: .leading, spacing: 6) {
+                            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                                 Text(spot.name).font(.headline)
                                 if let visit = store.visitConfirmedAt[spot.id] {
                                     Text("Visit: \(visit.formatted(date: .abbreviated, time: .shortened))")
@@ -383,7 +487,6 @@ struct YourReportsView: View {
                             }.padding(.vertical, 4)
                         }
                     } header: { Text("Visits you can report") }
-                    footer: { Text("These visits are ready to share whenever you are. There is no deadline to start or finish a report.").foregroundStyle(AppStyle.supportingText) }
                 }
                 if !store.visitReports.isEmpty {
                     Section("Published") {
@@ -391,7 +494,7 @@ struct YourReportsView: View {
                             NavigationLink {
                                 PublishedVisitReportView(store: store, report: report)
                             } label: {
-                                VStack(alignment: .leading, spacing: 5) {
+                                VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                                     Text(store.spot(report.spotID)?.name ?? "Cool Spot").font(.headline)
                                     Text("Visit: \(report.visitedAt.formatted(date: .abbreviated, time: .shortened))")
                                         .font(.subheadline).foregroundStyle(.secondary)
@@ -451,7 +554,7 @@ struct PlaceContributionsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text("Prototype review outcomes. These examples don’t update the map; follow-up editing isn’t connected yet.")
+                Text("Review preview")
                     .font(.subheadline).foregroundStyle(AppStyle.supportingText)
                 ContributionSection(title: "Needs your attention", items: items.filter {
                     if case .actionNeeded = $0.status { true } else { false }
@@ -466,7 +569,7 @@ struct PlaceContributionsView: View {
                     ContentUnavailableView("No place updates yet", systemImage: "mappin.and.ellipse",
                         description: Text("Places you add and details you update will appear here."))
                 }
-            }.padding(16)
+            }.padding(LayoutSpacing.page)
         }
         .background(AppStyle.paper.opacity(0.55))
         .navigationTitle("Places you’ve added or updated").navigationBarTitleDisplayMode(.inline)
@@ -480,7 +583,7 @@ struct AccountView: View {
             if store.isSignedIn {
                 VStack(alignment: .leading, spacing: 12) {
                     Label("London explorer", systemImage: "person.crop.circle.fill").font(.headline)
-                    Text("Account preview. Sign-in and cross-device syncing aren’t connected yet.")
+                    Text("Account preview · Sync unavailable")
                         .font(.subheadline).foregroundStyle(AppStyle.supportingText)
                 }.padding(20)
             } else {
@@ -497,14 +600,14 @@ struct CoolHuntView: View {
     @ObservedObject var store: PrototypeStore
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) { coolHunt; impact }.padding(16)
+            VStack(alignment: .leading, spacing: LayoutSpacing.majorSection) { coolHunt; impact }.padding(LayoutSpacing.page)
         }
         .background(AppStyle.paper.opacity(0.55))
         .navigationTitle("Cool Hunt").navigationBarTitleDisplayMode(.inline)
     }
     var impact: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                 Text("Your help").font(.title2.bold())
                 Text("Contributions you’ve made to the shared map")
                     .font(.caption).foregroundStyle(.secondary)
@@ -514,13 +617,13 @@ struct CoolHuntView: View {
                 ImpactStat(value: 2, label: "Place details improved")
                 ImpactStat(value: 7 + store.visitReports.count, label: "Visits shared")
             }
-            Text("Example progress. Some totals are fixed in this prototype.")
+            Text("Example progress")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }
     var coolHunt: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                 Text("Cool Hunt").font(.title2.bold())
                 Text("Small exploration goals, unlocked by nearby check-ins")
                     .font(.caption).foregroundStyle(.secondary)
@@ -601,9 +704,6 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.inline)
-            } footer: {
-                Text("Match System follows your device’s light or dark appearance.")
-                    .foregroundStyle(.primary)
             }
             Section("Popsicle thank-you example") {
                 if let report = store.visitReports.first {
@@ -628,12 +728,12 @@ struct SignInCard: View {
     let action: () -> Void
 
     var detail: String {
-        "Saved places and reports currently stay on this device. Sign-in and cross-device syncing aren’t connected yet."
+        "Saved on this device. Account sync isn’t available yet."
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Keep what’s on this phone", systemImage: "person.crop.circle.badge.plus")
+            Label("Your account", systemImage: "person.crop.circle.badge.plus")
                 .font(.headline)
             Text(detail).font(.subheadline).foregroundStyle(Color.primary.opacity(0.78))
             Button("Preview account", action: action).buttonStyle(.borderedProminent).tint(AppStyle.ink)
@@ -721,6 +821,6 @@ struct ContributionRow: View {
             }
             Spacer()
         }
-        .padding(14).background(.background, in: RoundedRectangle(cornerRadius: 16))
+        .padding(LayoutSpacing.group).background(.background, in: RoundedRectangle(cornerRadius: 16))
     }
 }

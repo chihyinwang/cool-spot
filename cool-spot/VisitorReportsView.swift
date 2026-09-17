@@ -41,7 +41,7 @@ struct VisitorReportsView: View {
 struct VisitorReportContent: View {
     let item: VisitorReportItem
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: LayoutSpacing.related) {
             if let report = item.report {
                 Label(report.experience.summary, systemImage: report.experience.symbol)
                     .font(.headline).foregroundStyle(AppStyle.brand)
@@ -77,9 +77,8 @@ struct VisitorReportContent: View {
                 } else {
                     Text("Visit date unavailable").font(.caption)
                 }
-                if item.isExample { Text("Illustrative answers and date").font(.caption) }
             }.foregroundStyle(AppStyle.supportingText)
-        }.padding(.vertical, 8)
+        }
         .frame(maxWidth: .infinity, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -106,8 +105,6 @@ struct PopsicleThanksButton: View {
                 Label { Text("Popsicle sent · Demo") } icon: { PopsicleMark() }
                     .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
                 Button("Undo") { store.undoPopsicle(to: reportID) }.frame(minHeight: 44)
-                Text("Saved on this device only. No one has been notified.")
-                    .font(.caption).foregroundStyle(AppStyle.supportingText)
             } else {
                 Button {
                     if store.hasSeenPopsicleExplanation { store.sendPopsicle(to: reportID) }
@@ -117,26 +114,23 @@ struct PopsicleThanksButton: View {
                         .frame(minHeight: 44)
                 }
                 .buttonStyle(.borderless)
-                Text("A little thank-you for this report · Demo")
-                    .font(.caption).foregroundStyle(AppStyle.supportingText)
             }
         }
         .alert("Send a little thank-you?", isPresented: $showExplanation) {
             Button("Cancel", role: .cancel) {}
             Button("Send a popsicle") { store.sendPopsicle(to: reportID) }
         } message: {
-            Text("A popsicle is a free, virtual thank-you—not a rating of how cool this place is. You can undo it. In this prototype, it stays on your device and isn’t delivered to anyone.")
+            Text("A free, virtual thank-you. This demo stays on your device.")
         }
     }
 }
 
 struct ReceivedPopsicleExample: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Label { Text("You received a popsicle!") } icon: { PopsicleMark() }
+        VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+            Label { Text("Popsicle received · Example") } icon: { PopsicleMark() }
                 .font(.headline).foregroundStyle(AppStyle.brand)
             Text("A little thank-you for sharing this report.").font(.subheadline)
-            Text("Example only — no real person sent this.").font(.caption).foregroundStyle(AppStyle.supportingText)
         }.padding(.vertical, 4)
     }
 }
@@ -169,19 +163,12 @@ struct PresenceMapExample: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Example: two people before sharing, three after. Only the number is public, not your name.")
             Text("When you share, others see 2 → 3 people. They don’t see your name.")
-            if reduceMotion {
-                Text("Reduce Motion: the completed example is shown without animation.")
-                    .font(.subheadline).foregroundStyle(.secondary)
-            } else {
+            if !reduceMotion {
                 Button(paused ? "Resume example" : "Pause example") { paused.toggle() }
                     .frame(minHeight: 44)
                 Text(elapsed < 6 ? "Example restarts at 2" : "One more person: 3")
                     .font(.caption).foregroundStyle(.secondary).accessibilityHidden(true)
             }
-            Text("Illustration only. The loop restarts; it does not show the ten-minute expiry or change the real count.")
-                .font(.caption).foregroundStyle(.secondary)
-            Text("People shared they’re cooling off here in the last 10 minutes. This is not a seat count, capacity or temperature reading.")
-                .font(.subheadline)
         }
         .task(id: runs) {
             guard runs else { return }

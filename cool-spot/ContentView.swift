@@ -4,6 +4,7 @@ struct ContentView: View {
     @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .light
     @StateObject private var store: PrototypeStore
     @State private var selectedTab: Int
+    @State private var nearbyPlaceRequest: RecognisedPlace?
     @State private var showDetailPreview: Bool
     @State private var showContributionPreview: Bool
     private let detailPreviewSpotID: String
@@ -63,11 +64,14 @@ struct ContentView: View {
 
     var mainApp: some View {
         TabView(selection: $selectedTab) {
-            ExploreView(store: store)
+            ExploreView(store: store, nearbyPlaceRequest: $nearbyPlaceRequest)
                 .tabItem { Label("Explore", systemImage: "map") }
                 .tag(0)
 
-            SavedView(store: store)
+            SavedView(store: store, findNearby: { place in
+                nearbyPlaceRequest = place
+                selectedTab = 0
+            })
                 .tabItem { Label("Saved", systemImage: "bookmark") }
                 .tag(1)
 

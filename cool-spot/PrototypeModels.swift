@@ -73,14 +73,14 @@ enum SpotSource: String {
     case community = "Community Cool Spot"
 }
 
-enum PlaceEnvironment: String, CaseIterable, Identifiable {
+enum PlaceEnvironment: String, CaseIterable, Identifiable, Codable {
     case indoors = "Indoors"
     case outdoors = "Outdoors"
     case both = "Both"
     var id: String { rawValue }
 }
 
-enum PlaceType: String, CaseIterable, Identifiable, Hashable {
+enum PlaceType: String, CaseIterable, Identifiable, Hashable, Codable {
     case library = "Library or learning space"
     case publicService = "Community or public service"
     case faith = "Faith or worship space"
@@ -209,6 +209,8 @@ enum SeatingType: String, CaseIterable, Identifiable {
     case none = "No seating"
     case unsure = "Not sure"
     var id: String { rawValue }
+    // Keep stored values compatible; this describes seating, not vacant seats.
+    var displayName: String { self == .available ? "Seating provided" : rawValue }
 }
 
 enum StayLength: String, CaseIterable, Identifiable, Codable {
@@ -257,7 +259,7 @@ struct CoolSpot: Identifiable {
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
-struct RecognisedPlace: Identifiable {
+struct RecognisedPlace: Identifiable, Codable {
     let id: String
     let name: String
     let address: String
@@ -269,6 +271,9 @@ struct RecognisedPlace: Identifiable {
     var trustedSetting: PlaceEnvironment? = nil
     var hasTrustedType = true
     var coolSpotID: String? = nil
+    var sourceCategory: String? = nil
+    var phoneNumber: String? = nil
+    var websiteURL: URL? = nil
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
@@ -403,6 +408,8 @@ private struct ReportJourneySnapshot: Codable {
     var nearbySpotIDs: [String]
     var activePresenceSpotID: String?
     var presenceEndsAt: Date?
+    // Optional so existing v1 journeys still decode without losing owner data.
+    var savedPlaceDetails: [RecognisedPlace]? = nil
 }
 
 struct CoolingEvidence: Equatable {
@@ -447,7 +454,8 @@ final class PrototypeStore: ObservableObject {
     @Published private var popsicles = PopsicleSnapshot()
     var hasSeenPopsicleExplanation: Bool { popsicles.explanationSeen }
 
-    let recognisedPlaces = Fixtures.places
+    @Published private var selectedPlaces: [RecognisedPlace] = []
+    var recognisedPlaces: [RecognisedPlace] { Fixtures.places + selectedPlaces }
     let currentCoordinate = CLLocationCoordinate2D(latitude: 51.5059, longitude: -0.0906)
     private let reportDefaults: UserDefaults?
     private var isRestoringJourneys = true
@@ -466,6 +474,7 @@ final class PrototypeStore: ObservableObject {
             reportDrafts = snapshot.drafts
             visitReports = snapshot.reports
             savedLocations = snapshot.savedLocations
+            selectedPlaces = snapshot.savedPlaceDetails ?? []
             if let end = snapshot.presenceEndsAt, end > .now {
                 activePresenceSpotID = snapshot.activePresenceSpotID
                 presenceEndsAt = end
@@ -486,7 +495,8 @@ final class PrototypeStore: ObservableObject {
         let snapshot = ReportJourneySnapshot(confirmations: visitConfirmedAt, drafts: reportDrafts,
                                              reports: visitReports, savedLocations: savedLocations,
                                              nearbySpotIDs: spots.filter(\.isNearby).map(\.id),
-                                             activePresenceSpotID: activePresenceSpotID, presenceEndsAt: presenceEndsAt)
+                                             activePresenceSpotID: activePresenceSpotID, presenceEndsAt: presenceEndsAt,
+                                             savedPlaceDetails: selectedPlaces.filter { isSaved(placeID: $0.id) })
         if let data = try? JSONEncoder().encode(snapshot) {
             reportDefaults.set(data, forKey: Self.journeyKey)
         }
@@ -507,6 +517,14 @@ final class PrototypeStore: ObservableObject {
 
     func spot(_ id: String) -> CoolSpot? { spots.first { $0.id == id } }
     func place(_ id: String) -> RecognisedPlace? { recognisedPlaces.first { $0.id == id } }
+    func remember(_ place: RecognisedPlace) {
+        guard !Fixtures.places.contains(where: { $0.id == place.id }) else { return }
+        if let index = selectedPlaces.firstIndex(where: { $0.id == place.id }) {
+            selectedPlaces[index] = place
+        } else {
+            selectedPlaces.append(place)
+        }
+    }
     func isSaved(spotID: String) -> Bool { savedLocations.contains { $0.kind == .coolSpot(spotID) } }
     func isSaved(placeID: String) -> Bool { savedLocations.contains { $0.kind == .recognisedPlace(placeID) } }
 
@@ -524,6 +542,7 @@ final class PrototypeStore: ObservableObject {
         if let index = savedLocations.firstIndex(where: { $0.kind == .recognisedPlace(place.id) }) {
             savedLocations.remove(at: index); return false
         }
+        remember(place)
         savedLocations.insert(.init(id: UUID(), title: place.name, subtitle: place.address, savedAt: .now,
                                     latitude: place.latitude, longitude: place.longitude,
                                     kind: .recognisedPlace(place.id), note: ""), at: 0)

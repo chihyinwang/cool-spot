@@ -143,7 +143,7 @@ struct PlaceContributionDraft: Identifiable, Equatable {
         if !isUpdate || values.setting != original.setting {
             require(values.setting != nil, .setting, "Choose indoors, outdoors or both.")
         }
-        if !isUpdate {
+        if !isUpdate || values.normalized.name != original.normalized.name {
             require(!values.normalized.name.isEmpty, .name, "Give this spot a name people can recognise.")
         }
         if isUpdate && values.type != original.type {
@@ -173,13 +173,14 @@ struct PlaceContributionDraft: Identifiable, Equatable {
         let values = values.normalized
         let original = original.normalized
         var result: [String] = []
+        if values.name != original.name { result.append("Name: \(original.name) → \(values.name)") }
         if values.setting != original.setting { result.append("Setting: \(original.setting?.rawValue ?? "Unknown") → \(values.setting?.rawValue ?? "Unknown")") }
         if values.type != original.type { result.append("Type: \(original.type?.rawValue ?? "Unknown") → \(values.type?.rawValue ?? "Unknown")") }
         if values.features != original.features { result.append("Cooling features: \(Self.featureText(original.features)) → \(Self.featureText(values.features))") }
         if values.access != original.access { result.append("Cost to use: \(original.access.rawValue) → \(values.access.rawValue)") }
         if values.entryEligibility != original.entryEligibility { result.append("Who can use it: \(values.entryEligibility.rawValue)") }
         if values.entryRequirement != original.entryRequirement { result.append("Who it is limited to: \(values.entryRequirement.isEmpty ? "Not added" : values.entryRequirement)") }
-        if values.seating != original.seating { result.append("Seating: \(original.seating.rawValue) → \(values.seating.rawValue)") }
+        if values.seating != original.seating { result.append("Seating: \(original.seating.displayName) → \(values.seating.displayName)") }
         if values.tables != original.tables { result.append("Tables: \(values.tables.rawValue)") }
         if values.stayLimit != original.stayLimit { result.append("Time limit: \(values.stayLimit.isEmpty ? "Not added" : values.stayLimit)") }
         if values.accessibility != original.accessibility { result.append("Tickets and booking: \(values.accessibility.isEmpty ? "Not added" : values.accessibility)") }
@@ -204,6 +205,7 @@ struct PlaceContributionDraft: Identifiable, Equatable {
                 update.values[keyPath: key] = proposed[keyPath: key]
             }
         }
+        apply(\.name)
         apply(\.setting)
         apply(\.type)
         apply(\.features)
@@ -250,6 +252,7 @@ struct ContributionFlow: View {
     @State private var showFailure = false
     @State private var showDuplicate = false
     @State private var search = ""
+    @StateObject private var placeSearch = PlaceSearchModel()
     @State private var sent = false
     @State private var visitingExpanded = false
     @State private var facilitiesExpanded = false
@@ -352,7 +355,7 @@ struct ContributionFlow: View {
                     Text("Thanks for helping others find a cool spot").font(.title2.bold())
                     Text("Your information is waiting for review. It isn’t public yet.")
                     Text("Follow it in You → Places you’ve added or updated.")
-                    Text("Prototype: saved for this session. No real review service is connected.")
+                    Text("Review preview · This session only")
                         .font(.footnote).foregroundStyle(AppStyle.supportingText)
                     Button("Done") { dismiss() }.buttonStyle(PrimaryButtonStyle())
                 }.padding(24)
@@ -368,16 +371,19 @@ struct ContributionFlow: View {
                     TextField("Place name or address", text: $search, prompt: Text("Place name or address").foregroundStyle(AppStyle.supportingText)).autocorrectionDisabled()
                         .focused($focusedField, equals: .search)
                         .accessibilityLabel("Search places")
+                        .submitLabel(.search)
+                        .onSubmit { focusedField = nil; searchPlaces(debounce: false) }
                 }
                 Button { openMap() } label: { Label("Choose a spot on the map", systemImage: "mappin.and.ellipse") }
                     .frame(minHeight: 44)
-            } footer: {
-                Text("Choose where you want to add cooling information.").foregroundStyle(AppStyle.supportingText)
             }
             Section {
+                if !search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    PlaceSearchStatus(state: placeSearch.state, retry: { searchPlaces(debounce: false) })
+                }
                 ForEach(candidates, id: \.identity) { candidate in
                     Button { select(candidate) } label: {
-                        VStack(alignment: .leading, spacing: 5) {
+                        VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                             Text(candidate.displayName).font(.body).foregroundStyle(.primary)
                             Text(candidate.isUpdate ? "Already on Cool Spot · Update information" : "Add cooling information")
                                 .font(.subheadline).foregroundStyle(AppStyle.supportingText)
@@ -386,27 +392,45 @@ struct ContributionFlow: View {
                         }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                 }
-                if candidates.isEmpty {
+                if candidates.isEmpty && placeSearch.state == .loaded {
                     ContentUnavailableView.search(text: search)
                     Text("Try another name or choose the location on the map above.").font(.subheadline)
                 }
             } header: { Text(search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Nearby places" : "Search results").foregroundStyle(AppStyle.supportingText) }
-            footer: { Text("Prototype example places. Nearby does not mean this is a confirmed cooling place.").foregroundStyle(AppStyle.supportingText) }
+
         }
         .scrollDismissesKeyboard(.interactively)
+        .onAppear { searchPlaces() }
+        .onChange(of: search) { _, _ in searchPlaces() }
+        .onDisappear { placeSearch.cancel() }
     }
+
+    func searchPlaces(debounce: Bool = true) {
+        let region = MKCoordinateRegion(center: anchor, latitudinalMeters: 10_000, longitudinalMeters: 10_000)
+        placeSearch.update(query: search, region: region, debounce: debounce)
+    }
+
+    var candidatePlaces: [RecognisedPlace] {
+        let query = search.trimmingCharacters(in: .whitespacesAndNewlines)
+        let local = query.isEmpty ? Fixtures.places : PlaceSearchResults.matching(store.recognisedPlaces, query: query)
+        return PlaceSearchResults.unique(local + placeSearch.places)
+    }
+
     var candidates: [PlaceContributionDraft] {
-        let known = store.recognisedPlaces.filter { store.existingSpot(for: $0) == nil }.map {
+        let known = candidatePlaces.filter { store.existingSpot(for: $0) == nil }.map {
             PlaceContributionDraft(kind: .recognised, anchor: $0.coordinate, place: $0)
         }
-        let all = known + store.spots.map { PlaceContributionDraft(kind: .update, anchor: $0.coordinate, spot: $0) }
         let query = search.trimmingCharacters(in: .whitespacesAndNewlines)
-        return all.filter { query.isEmpty || $0.displayName.localizedCaseInsensitiveContains(query) || address($0).localizedCaseInsensitiveContains(query) }
+        let spots = store.spots.filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) ||
+            $0.address.localizedCaseInsensitiveContains(query) || $0.type.rawValue.localizedCaseInsensitiveContains(query) }
+            .map { PlaceContributionDraft(kind: .update, anchor: $0.coordinate, spot: $0) }
+        return (known + spots)
             .sorted { metres($0.values.coordinate) < metres($1.values.coordinate) }
     }
     func address(_ candidate: PlaceContributionDraft) -> String {
         if let id = candidate.spotID { return store.spot(id)?.address ?? "" }
-        return store.recognisedPlaces.first { "place:\($0.id)" == candidate.identity }?.address ?? ""
+        return (store.recognisedPlaces + placeSearch.places)
+            .first { "place:\($0.id)" == candidate.identity }?.address ?? ""
     }
     func metres(_ coordinate: CLLocationCoordinate2D) -> Double {
         CLLocation(latitude: anchor.latitude, longitude: anchor.longitude)
@@ -414,8 +438,14 @@ struct ContributionFlow: View {
     }
     func distance(_ candidate: PlaceContributionDraft) -> String {
         let value = metres(candidate.values.coordinate)
+        let origin: String
+        switch source {
+        case .savedCoordinate, .exactSavedCoordinate: origin = " from your pin"
+        case .recognisedPlace, .existingCoolSpot: origin = " from selected place"
+        case .currentLocation: origin = " from example location"
+        }
         return (value < 1000 ? "\(Int(value.rounded())) m" : String(format: "%.1f km", value / 1000)) +
-            (source.isSavedPin ? " from your pin" : " from example location")
+            origin
     }
     func openMap() {
         editingLocation = false
@@ -437,6 +467,9 @@ struct ContributionFlow: View {
         }
     }
     func select(_ candidate: PlaceContributionDraft) {
+        if let place = candidatePlaces.first(where: { "place:\($0.id)" == candidate.identity }) {
+            store.remember(place)
+        }
         if candidate.identity == draft.identity { showDetails(); return }
         if draft.isDirty { pending = candidate; showChange = true }
         else { apply(candidate) }
@@ -470,12 +503,12 @@ struct ContributionFlow: View {
                                 Label("Change location", systemImage: "mappin.and.ellipse").frame(minHeight: 44)
                             }
                         } else {
-                            Text(draft.displayName).font(.headline).fixedSize(horizontal: false, vertical: true)
-                            Text(address(draft)).font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                                Text(draft.displayName).font(.headline).fixedSize(horizontal: false, vertical: true)
+                                Text(address(draft)).font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                            }
                             Button("Change place") { search = ""; path.append(.choose) }.frame(minHeight: 44)
                         }
-                        Text("Public after review. Your private saved notes stay private.")
-                            .font(.footnote).foregroundStyle(AppStyle.supportingText)
                         fieldError(.location)
                     }.id(ContributionField.location)
                 } header: { sectionHeading("Location") }
@@ -492,8 +525,6 @@ struct ContributionFlow: View {
                     if draft.isUnlisted {
                         VStack(alignment: .leading, spacing: 8) {
                             ContributionFieldLabel("Place name", requirement: "Required")
-                            Text("Give it a name others can recognise.")
-                                .font(.footnote).foregroundStyle(AppStyle.supportingText)
                             TextField("e.g. Shade beside the playground", text: $draft.values.name,
                                       prompt: Text("e.g. Shade beside the playground").foregroundStyle(AppStyle.supportingText), axis: .vertical)
                                 .lineLimit(1...3).focused($focusedField, equals: .name)
@@ -519,10 +550,24 @@ struct ContributionFlow: View {
                     fieldError(.type).id(ContributionField.type)
                     if draft.sourceName {
                         DisclosureGroup("Name or place type is incorrect", isExpanded: $correctionExpanded) {
+                            Text("Suggest a correction for Cool Spot.")
+                                .font(.footnote).foregroundStyle(AppStyle.supportingText)
                             VStack(alignment: .leading, spacing: 8) {
-                                ContributionFieldLabel("Correction", requirement: "Optional")
-                                TextField("What should be corrected?", text: $draft.values.sourceCorrection,
-                                          prompt: Text("What should be corrected?").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                                ContributionFieldLabel("Suggested name", requirement: nil)
+                                TextField("Suggested name", text: $draft.values.name, axis: .vertical)
+                                    .lineLimit(1...3).focused($focusedField, equals: .name)
+                                fieldError(.name)
+                            }.id(ContributionField.name)
+                            if draft.sourceType {
+                                ContributionPickerRow("Suggested place type", selection: $draft.values.type,
+                                                      valueText: draft.values.type?.rawValue ?? "Choose a type") {
+                                    ForEach(PlaceType.allCases) { Text($0.rawValue).tag(Optional($0)) }
+                                }
+                            }
+                            VStack(alignment: .leading, spacing: 8) {
+                                ContributionFieldLabel("Additional details", requirement: "Optional")
+                                TextField("e.g. The sign outside uses this name", text: $draft.values.sourceCorrection,
+                                          prompt: Text("e.g. The sign outside uses this name").foregroundStyle(AppStyle.supportingText), axis: .vertical)
                                     .lineLimit(2...6).focused($focusedField, equals: .correction)
                             }
                         }.font(.subheadline)
@@ -576,8 +621,8 @@ struct ContributionFlow: View {
                         ContributionPickerRow("Cost to use", selection: $draft.values.access, valueText: draft.values.access.rawValue) {
                             ForEach(AccessType.allCases) { Text($0.rawValue).tag($0) }
                         }
-                        ContributionPickerRow("Seating", selection: $draft.values.seating, valueText: draft.values.seating == .unsure ? "Not added" : draft.values.seating.rawValue) {
-                            ForEach(SeatingType.allCases) { Text($0 == .unsure ? "Not added" : $0.rawValue).tag($0) }
+                        ContributionPickerRow("Seating", selection: $draft.values.seating, valueText: draft.values.seating == .unsure ? "Not added" : draft.values.seating.displayName) {
+                            ForEach(SeatingType.allCases) { Text($0 == .unsure ? "Not added" : $0.displayName).tag($0) }
                         }
                         factPicker("Tables", value: $draft.values.tables)
                         PostedStayLimitPicker(value: $draft.values.stayLimit)
@@ -606,7 +651,7 @@ struct ContributionFlow: View {
                 }
                 if dynamicTypeSize.isAccessibilitySize { Section { sendBar } }
             }
-            .listSectionSpacing(24)
+            .listSectionSpacing(LayoutSpacing.section)
             .environment(\.defaultMinListRowHeight, 44)
             // Use one row inset for custom questions and native picker wrappers.
             .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
@@ -617,6 +662,7 @@ struct ContributionFlow: View {
             .onSubmit { focusedField = nil }
             .task(id: validationAttempt) {
                 guard validationAttempt > 0, let first = draft.validationIssues.first else { return }
+                if first.field == .name && draft.sourceName { correctionExpanded = true }
                 // Let validation rows enter the Form before resolving their scroll IDs.
                 try? await Task.sleep(for: .milliseconds(150))
                 guard !Task.isCancelled else { return }
@@ -802,14 +848,12 @@ struct PostedStayLimitPicker: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ContributionPickerRow("Time limit", selection: Binding(get: { choice }, set: { selection in
+            ContributionPickerRow("Posted time limit", selection: Binding(get: { choice }, set: { selection in
                 if selection == .other { writeDuration() }
                 else { value = selection == .notAdded ? "" : selection.rawValue }
             }), valueText: choice == .other ? value : choice.rawValue) {
                 ForEach(PostedStayLimitChoice.allCases) { Text($0.rawValue).tag($0) }
             }
-            Text("A posted limit, not how long you stayed.")
-                .font(.footnote).foregroundStyle(AppStyle.supportingText)
         }
         if choice == .other {
             ContributionPickerRow("Hours", selection: $hours, valueText: String(hours)) { ForEach(0...24, id: \.self) { Text("\($0)").tag($0) } }
@@ -865,8 +909,10 @@ struct ContributionLocationEditor: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text(savedPin ? "Start with your saved pin" : "Where is the spot?").font(.title2.bold())
-                Text("Move around the map, then tap the exact spot you want to share.")
+                VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                    Text(savedPin ? "Start with your saved pin" : "Where is the spot?").font(.title2.bold())
+                    Text("Tap the exact spot on the map.").font(.subheadline).foregroundStyle(.secondary)
+                }
                     .font(.subheadline).foregroundStyle(AppStyle.supportingText)
                 MapReader { proxy in
                     Map(initialPosition: .region(.init(center: values.coordinate, span: .init(latitudeDelta: 0.004, longitudeDelta: 0.004)))) {
@@ -882,7 +928,6 @@ struct ContributionLocationEditor: View {
                     Text("Use this spot").frame(maxWidth: .infinity)
                 }.buttonStyle(PrimaryButtonStyle())
                 Button("Search nearby places", action: onSearch).frame(minHeight: 44)
-                if savedPin { Text("Your original saved pin and private notes stay unchanged.").font(.footnote).foregroundStyle(AppStyle.supportingText) }
             }.padding(20)
         }
     }

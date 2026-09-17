@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6D011D632C000001001D0001 /* PlaceSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D622C000001001D0001 /* PlaceSearch.swift */; };
 		6D011D612C000001001D0001 /* VisitorReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D602C000001001D0001 /* VisitorReportsView.swift */; };
 		6D011D2F2C000001001D0001 /* cool_spotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D2E2C000001001D0001 /* cool_spotApp.swift */; };
 		6D011D312C000001001D0001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D302C000001001D0001 /* ContentView.swift */; };
@@ -31,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6D011D622C000001001D0001 /* PlaceSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSearch.swift; sourceTree = "<group>"; };
 		6D011D602C000001001D0001 /* VisitorReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitorReportsView.swift; sourceTree = "<group>"; };
 		6D011D292C000001001D0001 /* cool-spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cool-spot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D011D2E2C000001001D0001 /* cool_spotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cool_spotApp.swift; sourceTree = "<group>"; };
@@ -90,6 +92,7 @@
 				6D011D502C000001001D0001 /* PrototypeModels.swift */,
 				6D011D522C000001001D0001 /* PrototypeSharedViews.swift */,
 				6D011D542C000001001D0001 /* ExploreView.swift */,
+				6D011D622C000001001D0001 /* PlaceSearch.swift */,
 				6D011D562C000001001D0001 /* PlaceDetailView.swift */,
 				6D011D582C000001001D0001 /* ContributionView.swift */,
 				6D011D5A2C000001001D0001 /* SavedYouViews.swift */,
@@ -212,6 +215,7 @@
 				6D011D512C000001001D0001 /* PrototypeModels.swift in Sources */,
 				6D011D532C000001001D0001 /* PrototypeSharedViews.swift in Sources */,
 				6D011D552C000001001D0001 /* ExploreView.swift in Sources */,
+				6D011D632C000001001D0001 /* PlaceSearch.swift in Sources */,
 				6D011D572C000001001D0001 /* PlaceDetailView.swift in Sources */,
 				6D011D592C000001001D0001 /* ContributionView.swift in Sources */,
 				6D011D5B2C000001001D0001 /* SavedYouViews.swift in Sources */,
