@@ -73,10 +73,14 @@ struct SavedView: View {
             if case .coolSpot(let id) = saved.kind, let spot = store.spot(id) {
                 CoolSpotDetailView(store: store, spot: spot)
             } else if case .recognisedPlace(let id) = saved.kind, let place = store.place(id) {
-                RecognisedPlaceDetailView(store: store, place: place, findNearby: findNearby == nil ? nil : {
-                    pendingNearbyPlace = place
-                    selected = nil
-                })
+                if let spot = store.existingSpot(for: place) {
+                    CoolSpotDetailView(store: store, spot: spot)
+                } else {
+                    RecognisedPlaceDetailView(store: store, place: place, findNearby: findNearby == nil ? nil : {
+                        pendingNearbyPlace = place
+                        selected = nil
+                    })
+                }
             } else {
                 SavedDetail(store: store, savedID: saved.id)
             }
@@ -88,7 +92,9 @@ struct SavedCard: View {
     @ObservedObject var store: PrototypeStore
     let saved: SavedLocation
     var coolSpot: CoolSpot? {
-        if case .coolSpot(let id) = saved.kind { store.spot(id) } else { nil }
+        if case .coolSpot(let id) = saved.kind { return store.spot(id) }
+        if case .recognisedPlace(let id) = saved.kind, let place = store.place(id) { return store.existingSpot(for: place) }
+        return nil
     }
     var isCoordinate: Bool { if case .coordinate = saved.kind { true } else { false } }
 
@@ -103,7 +109,7 @@ struct SavedCard: View {
                 Text(saved.subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
                 if let spot = coolSpot {
                     VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
-                        Text("\(spot.type.shortName) · Example").font(.caption).foregroundStyle(.secondary)
+                        Text(spot.metadataLabel).font(.caption).foregroundStyle(.secondary)
                         Text(spot.features.first?.rawValue ?? "").font(.caption).foregroundStyle(.secondary)
                     }
                 } else {

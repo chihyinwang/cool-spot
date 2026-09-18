@@ -86,7 +86,7 @@ struct ExploreView: View {
     var filteredSpots: [CoolSpot] {
         store.spots.filter { spot in
             switch filter {
-            case .indoor: spot.environment != .outdoors
+            case .indoor: spot.environment == .indoors || spot.environment == .both
             case .shade: spot.features.contains(.treeShade) || spot.features.contains(.structuralShade)
             case .airConditioning: spot.features.contains(.airConditioning)
             case .free: spot.access == .free
@@ -98,8 +98,7 @@ struct ExploreView: View {
 
     var searchedSpots: [CoolSpot] {
         guard !query.isEmpty else { return [] }
-        return store.spots.filter { $0.name.localizedCaseInsensitiveContains(query) ||
-            $0.type.rawValue.localizedCaseInsensitiveContains(query) || $0.address.localizedCaseInsensitiveContains(query) }
+        return store.searchCoolSpots(query: query, including: placeSearch.places)
     }
 
     private var mapSpots: [CoolSpot] {
@@ -110,7 +109,7 @@ struct ExploreView: View {
     }
 
     var searchedPlaces: [RecognisedPlace] {
-        PlaceSearchResults.unique(PlaceSearchResults.matching(store.recognisedPlaces, query: query) + placeSearch.places)
+        PlaceSearchResults.unique(placeSearch.places + PlaceSearchResults.matching(store.recognisedPlaces, query: query))
             .filter { store.existingSpot(for: $0) == nil }
     }
 
@@ -194,6 +193,9 @@ struct ExploreView: View {
                     SearchBar(text: $search, submit: { searchPlaces(debounce: false) },
                               focusChanged: { searchFocused = $0 })
                     filterBar
+                    if let message = store.catalogError {
+                        Text(message).font(.subheadline).padding(12).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    }
 
                     if !query.isEmpty {
                         SearchResultsPanel(query: query, coolSpots: searchedSpots, places: searchedPlaces,
@@ -332,6 +334,7 @@ struct ExploreView: View {
     }
 
     private func select(_ place: RecognisedPlace) {
+        if let spot = store.existingSpot(for: place) { select(spot); return }
         store.remember(place)
         focusedPlace = place
         focusMap(on: place.coordinate)
@@ -483,7 +486,7 @@ private struct NearbyCoolSpotsPanel: View {
                                     Text([result.spot.features.first?.rawValue, result.spot.access.summary]
                                         .compactMap { $0 }.joined(separator: " · "))
                                         .font(.subheadline)
-                                    Text("Example place").font(.caption).foregroundStyle(.secondary)
+                                    Text(result.spot.sourceLabel).font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.right").font(.caption)
@@ -661,7 +664,7 @@ struct SearchResultsPanel: View {
             ForEach(coolSpots) { spot in
                 Button { chooseSpot(spot) } label: {
                     SearchResultRow(symbol: spot.type.symbol, title: spot.name,
-                                    subtitle: "\(spot.source.rawValue) · \(spot.distance)", isCoolSpot: true)
+                                    subtitle: "\(spot.sourceLabel) · \(spot.address)", isCoolSpot: true)
                 }.buttonStyle(.plain)
             }
             ForEach(places) { place in
@@ -708,7 +711,7 @@ struct NearbyPanel: View {
             Capsule().fill(.tertiary).frame(width: 38, height: 5).frame(maxWidth: .infinity)
             HStack {
                 VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
-                    Text("Cool Spots nearby").font(.headline)
+                    Text("Cool Spots").font(.headline)
                 }
                 Spacer()
                 Text("\(spots.count) places").font(.caption.weight(.semibold)).foregroundStyle(AppStyle.brand)
@@ -722,7 +725,7 @@ struct NearbyPanel: View {
                                     .frame(width: 34, height: 34).background(AppStyle.ink, in: Circle())
                                 VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                                     Text(spot.name).font(.subheadline.weight(.semibold)).lineLimit(1)
-                                    Text("\(spot.distance) · \(spot.features.first?.rawValue ?? spot.type.shortName)")
+                                    Text([spot.isExample ? spot.sourceLabel : spot.distance, spot.features.first?.rawValue ?? spot.type.shortName].filter { !$0.isEmpty }.joined(separator: " · "))
                                         .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                                 }
                             }

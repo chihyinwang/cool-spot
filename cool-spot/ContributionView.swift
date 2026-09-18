@@ -47,6 +47,8 @@ struct PlaceContributionValues: Equatable {
     var accessibility = ""
     var seating: SeatingType = .unsure
     var tables: OptionalFact = .unknown
+    var wheelchairAccess: OptionalFact = .unknown
+    var staffedWhenOpen: OptionalFact = .unknown
     var stayLimit = ""
     var toilets: OptionalFact = .unknown
     var wifi: OptionalFact = .unknown
@@ -114,6 +116,14 @@ struct PlaceContributionDraft: Identifiable, Equatable {
             initial.entryEligibility = spot.entryEligibility
             initial.entryRequirement = spot.entryEligibility == .limited ? spot.entryRequirement : ""
             initial.accessibility = spot.entryInformation
+            // "Nearby toilets" does not establish toilets inside the venue.
+            initial.toilets = spot.information.toilets == .onSite ? .yes
+                : spot.information.toilets == .none ? .no : .unknown
+            initial.wheelchairAccess = spot.information.wheelchairAccessible.map { $0 ? .yes : .no } ?? .unknown
+            initial.staffedWhenOpen = spot.information.staffedWhenOpen.map { $0 ? .yes : .no } ?? .unknown
+            initial.tables = spot.information.tables.map { $0 ? .yes : .no } ?? .unknown
+            initial.locationDetails = spot.information.instructions ?? ""
+            initial.stayLimit = spot.information.postedStayLimitMinutes.map { "\($0) minutes" } ?? ""
             initial.locationConfirmed = true
         } else if let place {
             initial.name = place.name; initial.latitude = place.latitude; initial.longitude = place.longitude
@@ -182,6 +192,8 @@ struct PlaceContributionDraft: Identifiable, Equatable {
         if values.entryRequirement != original.entryRequirement { result.append("Who it is limited to: \(values.entryRequirement.isEmpty ? "Not added" : values.entryRequirement)") }
         if values.seating != original.seating { result.append("Seating: \(original.seating.displayName) → \(values.seating.displayName)") }
         if values.tables != original.tables { result.append("Tables: \(values.tables.rawValue)") }
+        if values.wheelchairAccess != original.wheelchairAccess { result.append("Wheelchair accessible: \(values.wheelchairAccess.rawValue)") }
+        if values.staffedWhenOpen != original.staffedWhenOpen { result.append("Staff on site when open: \(values.staffedWhenOpen.rawValue)") }
         if values.stayLimit != original.stayLimit { result.append("Time limit: \(values.stayLimit.isEmpty ? "Not added" : values.stayLimit)") }
         if values.accessibility != original.accessibility { result.append("Tickets and booking: \(values.accessibility.isEmpty ? "Not added" : values.accessibility)") }
         if values.toilets != original.toilets { result.append("Toilets: \(values.toilets.rawValue)") }
@@ -189,7 +201,7 @@ struct PlaceContributionDraft: Identifiable, Equatable {
         if values.power != original.power { result.append("Power outlets: \(values.power.rawValue)") }
         if values.laptop != original.laptop { result.append("Laptop use welcome / allowed: \(values.laptop.rawValue)") }
         if values.photo != original.photo { result.append("Photo added") }
-        if values.locationDetails != original.locationDetails { result.append("How to find it: \(values.locationDetails)") }
+        if values.locationDetails != original.locationDetails { result.append("Cooling area: \(values.locationDetails)") }
         if values.note != original.note { result.append("Note: \(values.note)") }
         if values.sourceCorrection != original.sourceCorrection { result.append("Source correction: \(values.sourceCorrection)") }
         return result
@@ -215,6 +227,8 @@ struct PlaceContributionDraft: Identifiable, Equatable {
         apply(\.accessibility)
         apply(\.seating)
         apply(\.tables)
+        apply(\.wheelchairAccess)
+        apply(\.staffedWhenOpen)
         apply(\.stayLimit)
         apply(\.toilets)
         apply(\.wifi)
@@ -256,6 +270,7 @@ struct ContributionFlow: View {
     @State private var sent = false
     @State private var visitingExpanded = false
     @State private var facilitiesExpanded = false
+    @State private var areaExpanded = false
     @State private var correctionExpanded = false
     @State private var validationAttempt = 0
     @AccessibilityFocusState private var focusedError: ContributionField?
@@ -284,6 +299,7 @@ struct ContributionFlow: View {
         case .currentLocation:
             initial = .init(kind: .unlisted, anchor: anchor); first = .choose
         }
+        _areaExpanded = State(initialValue: initial.isUnlisted || !initial.values.locationDetails.isEmpty)
         _draft = State(initialValue: initial)
         _mapValues = State(initialValue: initial.values)
         _rootPage = State(initialValue: first)
@@ -412,8 +428,8 @@ struct ContributionFlow: View {
 
     var candidatePlaces: [RecognisedPlace] {
         let query = search.trimmingCharacters(in: .whitespacesAndNewlines)
-        let local = query.isEmpty ? Fixtures.places : PlaceSearchResults.matching(store.recognisedPlaces, query: query)
-        return PlaceSearchResults.unique(local + placeSearch.places)
+        let local = query.isEmpty ? store.recognisedPlaces : PlaceSearchResults.matching(store.recognisedPlaces, query: query)
+        return PlaceSearchResults.unique(placeSearch.places + local)
     }
 
     var candidates: [PlaceContributionDraft] {
@@ -421,8 +437,7 @@ struct ContributionFlow: View {
             PlaceContributionDraft(kind: .recognised, anchor: $0.coordinate, place: $0)
         }
         let query = search.trimmingCharacters(in: .whitespacesAndNewlines)
-        let spots = store.spots.filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) ||
-            $0.address.localizedCaseInsensitiveContains(query) || $0.type.rawValue.localizedCaseInsensitiveContains(query) }
+        let spots = (query.isEmpty ? store.spots : store.searchCoolSpots(query: query, including: candidatePlaces))
             .map { PlaceContributionDraft(kind: .update, anchor: $0.coordinate, spot: $0) }
         return (known + spots)
             .sorted { metres($0.values.coordinate) < metres($1.values.coordinate) }
@@ -476,6 +491,7 @@ struct ContributionFlow: View {
     }
     func apply(_ candidate: PlaceContributionDraft) {
         draft = candidate; mapValues = candidate.values
+        areaExpanded = candidate.isUnlisted || !candidate.values.locationDetails.isEmpty
         validationAttempt = 0; focusedError = nil
         showDetails()
     }
@@ -532,12 +548,11 @@ struct ContributionFlow: View {
                             fieldError(.name)
                         }.id(ContributionField.name)
                     }
-                    VStack(alignment: .leading, spacing: 8) {
-                        ContributionFieldLabel("How to find this spot", requirement: "Optional")
-                        TextField("e.g. Fourth floor, by the windows", text: $draft.values.locationDetails,
-                                  prompt: Text("e.g. Fourth floor, by the windows").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                    DisclosureGroup("Specific area · Optional", isExpanded: $areaExpanded) {
+                        TextField("e.g. Reading room on the fourth floor", text: $draft.values.locationDetails,
+                                  prompt: Text("e.g. Reading room on the fourth floor").foregroundStyle(AppStyle.supportingText), axis: .vertical)
                             .focused($focusedField, equals: .locationDetails)
-                            .lineLimit(1...4).accessibilityLabel("How to find this spot, optional")
+                            .lineLimit(1...4).accessibilityLabel("Specific cooling area, optional")
                     }
                     if draft.sourceType {
                         LabeledContent("Place type") { Text(draft.values.type?.rawValue ?? "Not known").foregroundStyle(AppStyle.supportingText) }
@@ -624,14 +639,13 @@ struct ContributionFlow: View {
                         ContributionPickerRow("Seating", selection: $draft.values.seating, valueText: draft.values.seating == .unsure ? "Not added" : draft.values.seating.displayName) {
                             ForEach(SeatingType.allCases) { Text($0 == .unsure ? "Not added" : $0.displayName).tag($0) }
                         }
-                        factPicker("Tables", value: $draft.values.tables)
+                        factPicker("Wheelchair accessible", value: $draft.values.wheelchairAccess)
                         PostedStayLimitPicker(value: $draft.values.stayLimit)
                     }
-                    DisclosureGroup("Other facilities", isExpanded: $facilitiesExpanded) {
-                        factPicker("Toilets", value: $draft.values.toilets)
-                        factPicker("Wi-Fi", value: $draft.values.wifi)
-                        factPicker("Power outlets", value: $draft.values.power)
-                        factPicker("Laptop use allowed", value: $draft.values.laptop)
+                    DisclosureGroup("Facilities", isExpanded: $facilitiesExpanded) {
+                        factPicker("Toilets on site", value: $draft.values.toilets)
+                        factPicker("Staff on site when open", value: $draft.values.staffedWhenOpen)
+                        factPicker("Tables", value: $draft.values.tables)
                     }
                     VStack(alignment: .leading, spacing: 8) {
                         ContributionFieldLabel("Anything else people should know?", requirement: "Optional")
@@ -715,7 +729,7 @@ struct ContributionFlow: View {
     private func environmentOptions(vertical: Bool) -> some View {
         let layout = vertical ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
         return layout {
-            ForEach(PlaceEnvironment.allCases) { environment in
+            ForEach(PlaceEnvironment.allCases.filter { $0 != .unknown }) { environment in
                 let selected = draft.values.setting == environment
                 // Buttons allow an unanswered question without adding a fourth
                 // placeholder option or assigning a default on the user's behalf.

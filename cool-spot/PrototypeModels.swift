@@ -77,6 +77,7 @@ enum PlaceEnvironment: String, CaseIterable, Identifiable, Codable {
     case indoors = "Indoors"
     case outdoors = "Outdoors"
     case both = "Both"
+    case unknown = "Not sure"
     var id: String { rawValue }
 }
 
@@ -131,6 +132,7 @@ enum PlaceType: String, CaseIterable, Identifiable, Hashable, Codable {
 
 enum CoolingFeature: String, CaseIterable, Identifiable, Hashable, Codable {
     case airConditioning = "Air conditioning"
+    case fans = "Fans"
     case coolerIndoors = "Cooler indoor space"
     case treeShade = "Tree shade"
     case structuralShade = "Structural shade"
@@ -141,6 +143,7 @@ enum CoolingFeature: String, CaseIterable, Identifiable, Hashable, Codable {
     var symbol: String {
         switch self {
         case .airConditioning: "snowflake"
+        case .fans: "fan"
         case .coolerIndoors: "house.fill"
         case .treeShade: "tree.fill"
         case .structuralShade: "umbrella.fill"
@@ -233,6 +236,41 @@ enum StayLength: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+// Shared place facts. The view uses available fields, regardless of their source.
+struct PlaceInformation {
+    struct Source {
+        let label: String
+        var url: URL? = nil
+        var isExample = false
+    }
+
+    enum Toilets: String {
+        case onSite = "on_site", nearby, none, unknown
+        var label: String? {
+            switch self {
+            case .onSite: "Toilets on site"
+            case .nearby: "Toilets nearby"
+            case .none: "No toilets"
+            case .unknown: nil
+            }
+        }
+    }
+
+    var source = Source(label: "Example", isExample: true)
+    var coolingDetails: String? = nil
+    var hours: String? = nil
+    var toilets: Toilets = .unknown
+    var wheelchairAccessible: Bool? = nil
+    var staffedWhenOpen: Bool? = nil
+    var tables: Bool? = nil
+    var instructions: String? = nil
+    var postedStayLimitMinutes: Int? = nil
+
+    var hasFacilities: Bool {
+        toilets != .unknown || staffedWhenOpen != nil || tables != nil
+    }
+}
+
 struct CoolSpot: Identifiable {
     let id: String
     let name: String
@@ -255,6 +293,11 @@ struct CoolSpot: Identifiable {
     var entryEligibility: PlaceEntryEligibility = .unknown
     var entryRequirement = ""
     var entryInformation = ""
+    var information = PlaceInformation()
+    var applePlaceID: String? = nil
+    var isExample: Bool { information.source.isExample }
+    var sourceLabel: String { information.source.label }
+    var metadataLabel: String { "\(type.shortName) · \(sourceLabel)" }
     var entrySummary: String? { entryEligibility.summary(requirement: entryRequirement) }
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
@@ -274,6 +317,7 @@ struct RecognisedPlace: Identifiable, Codable {
     var sourceCategory: String? = nil
     var phoneNumber: String? = nil
     var websiteURL: URL? = nil
+    var alternateApplePlaceIDs: [String]? = nil
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
@@ -440,7 +484,9 @@ struct CoolingEvidence: Equatable {
 
 @MainActor
 final class PrototypeStore: ObservableObject {
-    @Published var spots = Fixtures.spots
+    @Published var spots: [CoolSpot]
+    @Published var catalogError: String?
+    let usesCatalog: Bool
     @Published var savedLocations = Fixtures.saved { didSet { persistJourneys() } }
     @Published var contributions = Fixtures.contributions
     @Published var visitReports: [VisitReport] = []
@@ -455,15 +501,22 @@ final class PrototypeStore: ObservableObject {
     var hasSeenPopsicleExplanation: Bool { popsicles.explanationSeen }
 
     @Published private var selectedPlaces: [RecognisedPlace] = []
-    var recognisedPlaces: [RecognisedPlace] { Fixtures.places + selectedPlaces }
+    var recognisedPlaces: [RecognisedPlace] { (usesCatalog ? [] : Fixtures.places) + selectedPlaces }
     let currentCoordinate = CLLocationCoordinate2D(latitude: 51.5059, longitude: -0.0906)
     private let reportDefaults: UserDefaults?
     private var isRestoringJourneys = true
     private static let journeyKey = "prototype.reportJourneys.v1"
 
     // Tests use memory-only stores unless they explicitly exercise relaunch recovery.
-    init(reportDefaults: UserDefaults? = nil) {
+    init(reportDefaults: UserDefaults? = nil, catalogSpots: [CoolSpot]? = nil) {
         self.reportDefaults = reportDefaults
+        usesCatalog = catalogSpots != nil
+        spots = catalogSpots ?? Fixtures.spots
+        if usesCatalog {
+            savedLocations = []
+            contributions = []
+            unlockedTypes = []
+        }
         if let data = reportDefaults?.data(forKey: "prototype.popsicles.v1"),
            let saved = try? JSONDecoder().decode(PopsicleSnapshot.self, from: data) {
             popsicles = saved
@@ -515,8 +568,9 @@ final class PrototypeStore: ObservableObject {
         simulateNearbySpot(nil)
     }
 
-    func spot(_ id: String) -> CoolSpot? { spots.first { $0.id == id } }
-    func place(_ id: String) -> RecognisedPlace? { recognisedPlaces.first { $0.id == id } }
+    // Legacy example bookmarks/reports remain readable, outside the live catalogue.
+    func spot(_ id: String) -> CoolSpot? { spots.first { $0.id == id } ?? Fixtures.spots.first { $0.id == id } }
+    func place(_ id: String) -> RecognisedPlace? { recognisedPlaces.first { $0.id == id } ?? Fixtures.places.first { $0.id == id } }
     func remember(_ place: RecognisedPlace) {
         guard !Fixtures.places.contains(where: { $0.id == place.id }) else { return }
         if let index = selectedPlaces.firstIndex(where: { $0.id == place.id }) {
@@ -529,7 +583,7 @@ final class PrototypeStore: ObservableObject {
     func isSaved(placeID: String) -> Bool { savedLocations.contains { $0.kind == .recognisedPlace(placeID) } }
 
     @discardableResult func toggleSaved(_ spot: CoolSpot) -> Bool {
-        if let index = savedLocations.firstIndex(where: { $0.kind == .coolSpot(spot.id) }) {
+        if let saved = savedLocation(for: spot), let index = savedLocations.firstIndex(where: { $0.id == saved.id }) {
             savedLocations.remove(at: index); return false
         }
         savedLocations.insert(.init(id: UUID(), title: spot.name, subtitle: spot.address, savedAt: .now,
@@ -539,6 +593,7 @@ final class PrototypeStore: ObservableObject {
     }
 
     @discardableResult func toggleSaved(_ place: RecognisedPlace) -> Bool {
+        if let spot = existingSpot(for: place) { return toggleSaved(spot) }
         if let index = savedLocations.firstIndex(where: { $0.kind == .recognisedPlace(place.id) }) {
             savedLocations.remove(at: index); return false
         }
@@ -667,7 +722,27 @@ final class PrototypeStore: ObservableObject {
     }
 
     func existingSpot(for place: RecognisedPlace) -> CoolSpot? {
-        spot(place.coolSpotID ?? place.id)
+        if let direct = spot(place.coolSpotID ?? place.id) { return direct }
+        let ids = Set(([place.appleMapItemIdentifier?.rawValue].compactMap { $0 }) + (place.alternateApplePlaceIDs ?? []))
+        return spots.first { $0.applePlaceID.map(ids.contains) ?? false }
+    }
+
+    func searchCoolSpots(query: String, including places: [RecognisedPlace]) -> [CoolSpot] {
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return [] }
+        let linkedIDs = Set(places.compactMap { existingSpot(for: $0)?.id })
+        return spots.filter { linkedIDs.contains($0.id) || $0.name.localizedCaseInsensitiveContains(query) ||
+            $0.address.localizedCaseInsensitiveContains(query) || $0.type.rawValue.localizedCaseInsensitiveContains(query) }
+    }
+
+    func savedLocation(for spot: CoolSpot) -> SavedLocation? {
+        savedLocations.first { saved in
+            if saved.kind == .coolSpot(spot.id) { return true }
+            if case .recognisedPlace(let id) = saved.kind, let place = place(id) {
+                return existingSpot(for: place)?.id == spot.id
+            }
+            return false
+        }
     }
 
     // An exact identity match is a duplicate; proximity alone cannot identify a venue.
@@ -754,7 +829,8 @@ final class PrototypeStore: ObservableObject {
     func visitorReportItems(for spot: CoolSpot) -> [VisitorReportItem] {
         let own = visitReports.filter { $0.spotID == spot.id }
             .map { VisitorReportItem(id: $0.id.uuidString, comment: $0.comment, report: $0, provenance: .own) }
-        let examples = Fixtures.visitorReports.filter { $0.report?.spotID == spot.id }
+        let examples = (Fixtures.visitorReports + PrototypeComparisonPlaces.visitorReports)
+            .filter { $0.report?.spotID == spot.id }
         return VisitorReportItem.newestFirst(own + examples)
     }
 

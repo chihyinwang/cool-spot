@@ -170,7 +170,8 @@ extension RecognisedPlace {
                   longitude: coordinate.longitude, type: type ?? .other, distance: "",
                   hasTrustedType: type != nil, sourceCategory: category,
                   phoneNumber: mapItem.phoneNumber?.trimmingCharacters(in: .whitespacesAndNewlines),
-                  websiteURL: mapItem.url.flatMap { ["http", "https"].contains($0.scheme?.lowercased() ?? "") ? $0 : nil })
+                  websiteURL: mapItem.url.flatMap { ["http", "https"].contains($0.scheme?.lowercased() ?? "") ? $0 : nil },
+                  alternateApplePlaceIDs: mapItem.alternateIdentifiers.map(\.rawValue))
     }
 
     var searchSubtitle: String {

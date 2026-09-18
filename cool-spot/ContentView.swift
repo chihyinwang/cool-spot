@@ -17,7 +17,10 @@ struct ContentView: View {
         #else
         usesReportExamples = false
         #endif
-        let initialStore = PrototypeStore(reportDefaults: usesReportExamples || arguments.contains("--shape-preview") ? nil : .standard)
+        let usesExamples = usesReportExamples || arguments.contains("--shape-preview") || arguments.contains("--example-catalog")
+        let initialStore = usesExamples
+            ? PrototypeStore(reportDefaults: nil)
+            : PrototypeStore.catalogStore(reportDefaults: .standard)
         if usesReportExamples {
             // Isolated, memory-only examples: never overwrite saved places or real local reports.
             for (index, fixture) in initialStore.spots.enumerated() {

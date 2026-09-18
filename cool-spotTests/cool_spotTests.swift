@@ -5,6 +5,187 @@ import MapKit
 
 @MainActor
 final class CoolSpotTests: XCTestCase {
+
+    func testCatalogMakesAllThreePlaceStatesSearchableAndLinksCommunityIdentity() throws {
+        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let gla = try XCTUnwrap(store.searchCoolSpots(query: "Canning Town Library", including: []).first)
+        let community = try XCTUnwrap(store.searchCoolSpots(query: "Tate Modern", including: []).first)
+        let ordinary = try XCTUnwrap(PlaceSearchResults.matching(store.recognisedPlaces, query: "British Museum").first)
+        XCTAssertEqual(store.spots.count, 13)
+        XCTAssertFalse(gla.isExample)
+        XCTAssertNotNil(gla.information.hours)
+        XCTAssertTrue(community.isExample)
+        XCTAssertEqual(community.source, .community)
+        XCTAssertNil(community.information.hours)
+        XCTAssertTrue(community.information.hasFacilities)
+        XCTAssertNil(store.existingSpot(for: ordinary))
+        let apple = RecognisedPlace(id: "apple-maps:\(try XCTUnwrap(community.applePlaceID))",
+                                    name: "Tate Modern", address: community.address,
+                                    latitude: community.latitude, longitude: community.longitude,
+                                    type: .culture, distance: "")
+        XCTAssertEqual(store.existingSpot(for: apple)?.id, community.id)
+        XCTAssertEqual(store.searchCoolSpots(query: "Tate Modern", including: [apple]).count, 1)
+        XCTAssertEqual(store.visitorReportItems(for: community).count, 3)
+    }
+
+    func testCommunityExamplesKeepPublishedFactsAndVisitorEvidenceSeparateFromPersonalData() throws {
+        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let examples = store.spots.filter(\.isExample)
+        XCTAssertEqual(examples.count, 3)
+        for spot in examples {
+            let items = store.visitorReportItems(for: spot)
+            XCTAssertTrue(items.allSatisfy(\.isExample))
+            XCTAssertEqual(store.experienceReportTotal(for: spot), items.count)
+            XCTAssertEqual(store.latestReportDate(for: spot), items.compactMap { $0.report?.visitedAt }.max())
+            for experience in CoolingExperience.allCases {
+                XCTAssertEqual(store.experienceCounts(for: spot)[experience, default: 0],
+                               items.filter { $0.report?.experience == experience }.count)
+            }
+            XCTAssertFalse(spot.isNearby, "Example reports must not confirm that the current user is nearby.")
+        }
+        let room = try XCTUnwrap(examples.first { $0.name == "Example Community Room" })
+        XCTAssertEqual(room.information.toilets, .none)
+        XCTAssertEqual(room.information.wheelchairAccessible, false)
+        let garden = try XCTUnwrap(examples.first { $0.name == "Example Shaded Garden" })
+        XCTAssertEqual(garden.information.toilets, .unknown)
+        XCTAssertNil(garden.information.tables)
+        XCTAssertEqual(garden.information.staffedWhenOpen, false)
+        XCTAssertTrue(store.visitReports.isEmpty)
+        XCTAssertTrue(store.reportDrafts.isEmpty)
+        XCTAssertTrue(store.visitConfirmedAt.isEmpty)
+        XCTAssertTrue(store.savedLocations.isEmpty)
+        XCTAssertTrue(store.contributions.isEmpty)
+    }
+
+    func testCatalogPresenceChangesOnlyAfterNearbySharingAndExpires() throws {
+        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        var spot = try XCTUnwrap(store.searchCoolSpots(query: "Tate Modern", including: []).first)
+        let start = Date(timeIntervalSince1970: 1_000_000)
+        XCTAssertEqual(store.presence(for: spot, at: start), 0)
+        store.checkIn(spot, at: start)
+        XCTAssertEqual(store.presence(for: spot, at: start), 0)
+        spot.isNearby = true
+        store.checkIn(spot, at: start)
+        XCTAssertEqual(store.presence(for: spot, at: start), 1)
+        XCTAssertEqual(store.presence(for: spot, at: start.addingTimeInterval(599)), 1)
+        store.endExpiredPresence(at: start.addingTimeInterval(600))
+        XCTAssertEqual(store.presence(for: spot, at: start.addingTimeInterval(600)), 0)
+        XCTAssertEqual(store.experienceReportTotal(for: spot), 3, "Sharing presence must not add a visit report.")
+    }
+
+    func testOptionalFacilitiesDecodeWithoutInventingMissingOrFutureValues() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpotCatalog.prototype", withExtension: "json"))
+        var response = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        var items = try XCTUnwrap(response["items"] as? [[String: Any]])
+        let sourceAccess = try XCTUnwrap(items[0]["access"] as? [String: Any])
+        let cases: [(String?, Bool?)] = [(nil, nil), ("unknown", nil), ("future_code", nil), ("yes", true), ("no", false)]
+        for (value, expected) in cases {
+            var access = sourceAccess
+            access["staffedWhenOpen"] = value
+            items[0]["access"] = access
+            response["items"] = items
+            let catalog = try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response))
+            XCTAssertEqual(catalog.items[0].makeSpot().information.staffedWhenOpen, expected)
+        }
+    }
+
+    func testPlaceFactCorrectionsPreserveSourceFactsUntilReview() throws {
+        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let spot = try XCTUnwrap(store.searchCoolSpots(query: "John Harvard Library", including: []).first)
+        var draft = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        XCTAssertEqual(draft.values.wheelchairAccess, .yes)
+        XCTAssertEqual(draft.values.staffedWhenOpen, .yes)
+        XCTAssertEqual(draft.values.toilets, .yes)
+        XCTAssertFalse(draft.isDirty)
+        draft.values.staffedWhenOpen = .no
+        XCTAssertTrue(draft.canSend)
+        XCTAssertTrue(store.submitPlaceContribution(draft))
+        XCTAssertEqual(store.contributions.first?.status, .inReview)
+        XCTAssertEqual(store.contributions.first?.placeDraft?.values.staffedWhenOpen, .no)
+        XCTAssertEqual(store.spot(spot.id)?.information.staffedWhenOpen, true)
+        XCTAssertEqual(store.spot(spot.id)?.information.hours, spot.information.hours)
+        XCTAssertTrue(store.visitorReportItems(for: spot).isEmpty)
+
+        var proposal = PlaceContributionDraft(kind: .recognised, anchor: spot.coordinate)
+        proposal.values.wheelchairAccess = .no
+        let reconciled = proposal.reconciled(with: spot)
+        XCTAssertEqual(reconciled.values.wheelchairAccess, .no)
+        XCTAssertEqual(reconciled.values.staffedWhenOpen, .yes)
+        XCTAssertEqual(reconciled.values.toilets, .yes)
+    }
+
+    func testCatalogLoadsTenSourcePlacesWithoutFabricatingVisitorEvidence() throws {
+        let catalog = try PrototypeCatalog.bundled()
+        let store = PrototypeStore(catalogSpots: catalog.items.map { $0.makeSpot() })
+        XCTAssertEqual(store.spots.count, 10)
+        XCTAssertEqual(Set(store.spots.map(\.id)).count, 10)
+        XCTAssertTrue(store.spots.allSatisfy { !$0.isExample && !$0.features.isEmpty })
+        for spot in store.spots {
+            XCTAssertEqual(store.experienceReportTotal(for: spot), 0)
+            XCTAssertEqual(store.presence(for: spot), 0)
+            XCTAssertNil(store.latestReportDate(for: spot))
+            XCTAssertTrue(store.visitorReportItems(for: spot).isEmpty)
+        }
+        XCTAssertNotNil(store.spot("library"), "Previously saved examples remain readable.")
+        XCTAssertFalse(store.spots.contains { $0.id == "library" })
+    }
+
+    func testCatalogResolvesAppleAliasesOnceWithoutMergingByProximityOrName() throws {
+        let item = try XCTUnwrap(PrototypeCatalog.bundled().items.first)
+        let store = PrototypeStore(catalogSpots: [item.makeSpot()])
+        var apple = RecognisedPlace(id: "apple-maps:different-id", name: "Provider alias", address: "",
+                                    latitude: item.location.latitude, longitude: item.location.longitude,
+                                    type: .library, distance: "")
+        XCTAssertNil(store.existingSpot(for: apple))
+        apple.alternateApplePlaceIDs = [try XCTUnwrap(item.matchedAppleID)]
+        XCTAssertEqual(store.existingSpot(for: apple)?.id, item.id)
+        XCTAssertEqual(store.searchCoolSpots(query: "Provider alias", including: [apple, apple]).map(\.id), [item.id])
+    }
+
+    func testCatalogUnknownCodesStayUnknownAndUnsupportedVersionsFail() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpotCatalog.prototype", withExtension: "json"))
+        var response = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        var items = try XCTUnwrap(response["items"] as? [[String: Any]])
+        var access = try XCTUnwrap(items[0]["access"] as? [String: Any])
+        access["seating"] = "new_unknown_code"
+        items[0]["access"] = access
+        items[0]["coolingFeatures"] = ["new_cooling_feature"]
+        response["items"] = items
+        let catalog = try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response))
+        XCTAssertEqual(catalog.items[0].makeSpot().seating, .unsure)
+        XCTAssertEqual(catalog.items[0].makeSpot().features, [.drinkingWater])
+        response["schemaVersion"] = 2
+        XCTAssertThrowsError(try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response)))
+    }
+
+    func testCatalogPreservesAnExistingAppleBookmarkAndKeepsReportsOnOurIdentity() throws {
+        let suite = "catalog-test-\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let item = try XCTUnwrap(PrototypeCatalog.bundled().items.first)
+        let apple = RecognisedPlace(id: "apple-maps:\(try XCTUnwrap(item.matchedAppleID))", name: item.name,
+                                    address: item.address.display, latitude: item.location.latitude,
+                                    longitude: item.location.longitude, type: .library, distance: "")
+        let old = PrototypeStore(reportDefaults: defaults, catalogSpots: [])
+        XCTAssertTrue(old.toggleSaved(apple))
+        let saved = try XCTUnwrap(old.savedLocations.first)
+        old.updateSaved(saved.id, title: "Private title", note: "Private note")
+
+        let current = PrototypeStore(reportDefaults: defaults, catalogSpots: [item.makeSpot()])
+        let spot = try XCTUnwrap(current.spots.first)
+        XCTAssertEqual(current.savedLocation(for: spot)?.id, saved.id)
+        XCTAssertEqual(current.savedLocation(for: spot)?.note, "Private note")
+        current.simulateNearbySpot(spot.id)
+        let nearby = try XCTUnwrap(current.spot(spot.id))
+        XCTAssertTrue(current.submitReport(spot: nearby, experience: .muchCooler,
+                                           helpedFeatures: [.airConditioning], stay: nil, comment: "Test visit"))
+        let restored = PrototypeStore(reportDefaults: defaults, catalogSpots: [item.makeSpot()])
+        XCTAssertEqual(restored.visitReports.first?.spotID, item.id)
+        XCTAssertEqual(restored.experienceReportTotal(for: spot), 1)
+        XCTAssertEqual(restored.savedLocations.count, 1)
+        XCTAssertEqual(restored.savedLocation(for: spot)?.title, "Private title")
+    }
+
     func testSearchContactDetailsAndCategorySurviveEncodingAndOlderPlacesStillDecode() throws {
         let item = MKMapItem(placemark: MKPlacemark(coordinate: .init(latitude: 51.49, longitude: 0.07)))
         item.name = "Tesco Extra"

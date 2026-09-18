@@ -1,0 +1,504 @@
+{
+  "schemaVersion": 1,
+  "catalogID": "gla-2025-prototype-10",
+  "source": {
+    "provider": "gla",
+    "dataset": "Cool Space Data 2025",
+    "url": "https://data.london.gov.uk/download/2z19p/blw/CoolSpaceSites_2025.json",
+    "retrievedOn": "2026-09-18"
+  },
+  "items": [
+    {
+      "id": "244e6c13-f305-4aab-ae17-af70fe562470",
+      "name": "John Harvard Library",
+      "location": {
+        "latitude": 51.5017686472,
+        "longitude": -0.0919084043
+      },
+      "address": {
+        "line1": "211 Borough High St",
+        "line2": null,
+        "borough": "Southwark",
+        "postalCode": "SE1 1JA"
+      },
+      "placeType": "library",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "air_conditioning"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "9am - 7pm Monday - Friday; Saturday 9am - 5pm",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "100",
+        "objectID": 65,
+        "tier": "Tier 1",
+        "runtime": "20250527"
+      },
+      "appleMatch": {
+        "placeID": "I7F69B3C551A18196",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": null,
+        "reviewNote": "Name, address and coordinates checked against the MapKit search result; street abbreviations accepted.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "aa8a726b-29cb-4daf-87b0-7c1265044015",
+      "name": "Southwark Cathedral",
+      "location": {
+        "latitude": 51.5061670002,
+        "longitude": -0.0891739999
+      },
+      "address": {
+        "line1": "London Bridge",
+        "line2": null,
+        "borough": "Southwark",
+        "postalCode": null
+      },
+      "placeType": "faith",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "natural_ventilation"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "9am - 6pm daily",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "72",
+        "objectID": 41,
+        "tier": "Tier 1",
+        "runtime": "20250527"
+      },
+      "appleMatch": {
+        "placeID": "ICD9A7B8B1E203C50",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": null,
+        "reviewNote": "Name, address and coordinates checked against the MapKit search result; street abbreviations accepted.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "ad83ed32-c840-4210-b8d7-985aecbd0980",
+      "name": "Unicorn Theatre",
+      "location": {
+        "latitude": 51.5039014744,
+        "longitude": -0.0807065868
+      },
+      "address": {
+        "line1": "147 Tooley Street",
+        "line2": null,
+        "borough": "Southwark",
+        "postalCode": "SE1 2HZ"
+      },
+      "placeType": "culture",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "air_conditioning",
+        "natural_ventilation"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Mon: Closed Tue-Thu: 11am-2pm  Fri-Sun: Closed",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "685",
+        "objectID": 269,
+        "tier": "Tier 2",
+        "runtime": "20250716"
+      },
+      "appleMatch": {
+        "placeID": "I37C96CAA1E486C3B",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": null,
+        "reviewNote": "Name, address and coordinates checked against the MapKit search result; street abbreviations accepted.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "b0cc4dcc-6976-4143-b173-6f9c0253d6d2",
+      "name": "The London LGBTQ+ Community Centre",
+      "location": {
+        "latitude": 51.5081921058,
+        "longitude": -0.1009348572
+      },
+      "address": {
+        "line1": "60-62 Hopton Street",
+        "line2": null,
+        "borough": "Southwark",
+        "postalCode": "SE1 9JH"
+      },
+      "placeType": "community",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "fans",
+        "natural_ventilation"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Wed - 09:30 - 18:00 Thu-Sun - 11:00am - 20:00",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "128",
+        "objectID": 85,
+        "tier": "Tier 2",
+        "runtime": "20250527"
+      },
+      "appleMatch": {
+        "placeID": "I9E367724D6F291AD",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": null,
+        "reviewNote": "Name, address and coordinates checked against the MapKit search result; street abbreviations accepted.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "a46d6f9a-4d40-4ba8-af00-a162fb35242f",
+      "name": "All Hallows by the Tower",
+      "location": {
+        "latitude": 51.5093306063,
+        "longitude": -0.0791843314
+      },
+      "address": {
+        "line1": "Byward Street",
+        "line2": "London",
+        "borough": "City of London",
+        "postalCode": "EC3R 5BJ"
+      },
+      "placeType": "faith",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "natural_ventilation"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "nearby",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Monday, Tuesday, Thursday, Friday: 8am - 5pm Wednesday: 8am - 7pm Saturday: 10am - 5pm Sunday: 11am - 5pm Bank Holidays: closed apart from services",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "683",
+        "objectID": 267,
+        "tier": "Tier 1",
+        "runtime": "20250709"
+      },
+      "appleMatch": {
+        "placeID": "IE0F2E76CE77B5156",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": null,
+        "reviewNote": "Name, address and coordinates checked against the MapKit search result; street abbreviations accepted.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "00d4622c-a2a8-42f4-94fd-7d4fe9b1da62",
+      "name": "Guildhall Art Gallery & London's Roman Amphitheatre",
+      "location": {
+        "latitude": 51.5152757338,
+        "longitude": -0.0919058573
+      },
+      "address": {
+        "line1": "Guildhall Yard",
+        "line2": null,
+        "borough": "City of London",
+        "postalCode": "EC2V 5AE"
+      },
+      "placeType": "culture",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "air_conditioning"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Monday-Sunday: 10am to 5pm",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "725",
+        "objectID": 308,
+        "tier": "Tier 1",
+        "runtime": "20250919"
+      },
+      "appleMatch": {
+        "placeID": "I905788AF4306FF37",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": "https://www.cityoflondon.gov.uk/things-to-do/attractions-museums-entertainment/guildhall-art-gallery/visit-guildhall-art-gallery",
+        "reviewNote": "Official venue address checked alongside name and coordinates.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "9b4eeed3-e42a-4d6b-a7af-67b9102c43ba",
+      "name": "The London Centre",
+      "location": {
+        "latitude": 51.5155680725,
+        "longitude": -0.0916341987
+      },
+      "address": {
+        "line1": "3 Aldermanbury",
+        "line2": null,
+        "borough": "City of London",
+        "postalCode": "EC2V 7HH"
+      },
+      "placeType": "culture",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "air_conditioning"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Monday: Closed  Tuesdays-Saturdays: 11am-5pm Sunday: Closed",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "714",
+        "objectID": 297,
+        "tier": "Tier 2",
+        "runtime": "20250808"
+      },
+      "appleMatch": {
+        "placeID": "IFA86DF6398C33C6C",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": "https://www.nla.london/index.php/events/nla-lates-unlocking-east-londons-potential",
+        "reviewNote": "Official venue address checked alongside name and coordinates.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "a0a0f4e7-5346-477f-a7fa-9721aad1df02",
+      "name": "City Wall at Vine Street museum",
+      "location": {
+        "latitude": 51.5118839924,
+        "longitude": -0.0769583059
+      },
+      "address": {
+        "line1": "12 Jewry Street",
+        "line2": null,
+        "borough": "City of London",
+        "postalCode": "EC3N 2HT"
+      },
+      "placeType": "culture",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "natural_ventilation"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Mon-Sun 10-5pm Closed Bank Holidays",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "702",
+        "objectID": 285,
+        "tier": "Tier 1",
+        "runtime": "20250724"
+      },
+      "appleMatch": {
+        "placeID": "I308C4C6692010220",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": null,
+        "reviewNote": "Name, address and coordinates checked against the MapKit search result; street abbreviations accepted.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "154f1093-4f04-4c7f-8c09-59a3da147dee",
+      "name": "Shoe Lane Library",
+      "location": {
+        "latitude": 51.51562,
+        "longitude": -0.1068
+      },
+      "address": {
+        "line1": "1 Little New Street",
+        "line2": null,
+        "borough": "City of London",
+        "postalCode": "EC4A 3JR"
+      },
+      "placeType": "library",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "air_conditioning"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "none",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Mon/Wed/Thurs/Fri- 9.30-5.30, Tue 9.30-6.30",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "116",
+        "objectID": 75,
+        "tier": "Tier 2",
+        "runtime": "20250527"
+      },
+      "appleMatch": {
+        "placeID": "IC877845548385D2F",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": null,
+        "reviewNote": "Name, address and coordinates checked against the MapKit search result; street abbreviations accepted.",
+        "reviewedOn": "2026-09-18"
+      }
+    },
+    {
+      "id": "5873b0cb-25d4-43a8-93a8-d9ced4c8d3ab",
+      "name": "Canning Town Library",
+      "location": {
+        "latitude": 51.516829995,
+        "longitude": 0.010439996
+      },
+      "address": {
+        "line1": "18 Rathbone Market",
+        "line2": null,
+        "borough": "Newham",
+        "postalCode": null
+      },
+      "placeType": "library",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "air_conditioning"
+      ],
+      "coolingDetails": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "instructions": null,
+        "postedStayLimitMinutes": null,
+        "staffedWhenOpen": "yes"
+      },
+      "hours": {
+        "text": "Monday - Saturday -9am-8pm, Sunday closed, Public Holidays - Closed",
+        "timeZone": "Europe/London"
+      },
+      "sourceRecord": {
+        "siteID": "18",
+        "objectID": 147,
+        "tier": "Tier 1",
+        "runtime": "20250530"
+      },
+      "appleMatch": {
+        "placeID": "I7E8561E6022ED614",
+        "status": "matched",
+        "relationship": "same_place",
+        "evidence": "https://libraries.newham.gov.uk/digital-content/libraries/find-a-library/canning-town-library",
+        "reviewNote": "Official venue address checked alongside name and coordinates.",
+        "reviewedOn": "2026-09-18"
+      }
+    }
+  ]
+}
