@@ -14,7 +14,6 @@ struct CoolSpotDetailView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showContribution = false
     @State private var showPresenceExplanation = false
-    @State private var showProblem = false
     @State private var expandFeatures = false
     @State private var expandStays = false
     @State private var expandFacilities = false
@@ -27,35 +26,24 @@ struct CoolSpotDetailView: View {
             ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    VStack(alignment: .leading, spacing: LayoutSpacing.majorSection) {
+                    VStack(alignment: .leading, spacing: LayoutSpacing.group) {
                         header
+                        Divider()
                         recentExperience.id("visitorReports")
+                        Divider()
                         VStack(alignment: .leading, spacing: LayoutSpacing.group) {
                             CurrentUseSummary(count: store.presence(for: spot))
                             livePresence
                         }
-                        VStack(alignment: .leading, spacing: LayoutSpacing.group) {
-                            PlacePhoto(spot: spot)
-                            ApplePlaceInformationView(coordinate: spot.coordinate,
-                                                      placeIdentifier: spot.applePlaceID.flatMap(MKMapItem.Identifier.init(rawValue:)),
-                                                      isExample: spot.applePlaceID == nil && spot.isExample,
-                                                      showsPlaceDetails: false).id(spot.id)
-                            Button { showContribution = true } label: {
-                                Label("Suggest an edit", systemImage: "square.and.pencil")
-                                    .font(.subheadline).frame(minHeight: 44)
-                            }
-                            .tint(AppStyle.brand)
+                        if let image = PlacePhoto.image(for: spot) {
+                            Divider()
+                            PlacePhoto(image: image)
                         }
-                        if let saved = store.savedLocation(for: spot) {
+                        if let saved = store.savedLocation(for: spot),
+                           !saved.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Divider()
                             SavedNoteSummary(store: store, saved: saved).id(saved.id)
                         }
-                        Button { showProblem = true } label: {
-                            Text("Report a problem")
-                                .frame(maxWidth: .infinity, minHeight: 44)
-                                .contentShape(Rectangle())
-                        }
-                        .font(.subheadline)
-                        .foregroundStyle(.red)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 16)
@@ -75,11 +63,6 @@ struct CoolSpotDetailView: View {
             }
         }
         .tint(AppStyle.brand)
-        .alert("Report a problem", isPresented: $showProblem) {
-            Button("Done", role: .cancel) {}
-        } message: {
-            Text("Problem reporting is currently unavailable.")
-        }
         .alert("Start your report while you’re here", isPresented: $showReportUnavailable) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -117,10 +100,19 @@ struct CoolSpotDetailView: View {
             visitingInformation
             VStack(alignment: .leading, spacing: 0) {
                 facilities
-                if let identifier = spot.applePlaceID.flatMap(MKMapItem.Identifier.init(rawValue:)) {
-                    ApplePlaceInformationView(coordinate: spot.coordinate, placeIdentifier: identifier,
-                                              showsPlaceDetails: true, showsNearbyStreets: false).id(spot.id)
+                ApplePlaceInformationView(coordinate: spot.coordinate,
+                                          placeIdentifier: spot.applePlaceID.flatMap(MKMapItem.Identifier.init(rawValue:)),
+                                          isExample: spot.applePlaceID == nil && spot.isExample).id(spot.id)
+                Button { showContribution = true } label: {
+                    Label("Suggest an edit", systemImage: "square.and.pencil")
+                        .labelStyle(PlaceActionLabelStyle())
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .foregroundStyle(AppStyle.brand)
+                .padding(.top, LayoutSpacing.metadata)
             }
         }
     }
@@ -233,7 +225,7 @@ struct CoolSpotDetailView: View {
     }
 
     var livePresence: some View {
-        LivePresenceCard(isCheckedIn: store.isSharingPresence(for: spot),
+        LivePresenceActions(isCheckedIn: store.isSharingPresence(for: spot),
                          isNearby: spot.isNearby,
                          presenceDeadline: store.presenceEndsAt,
                          canShareReport: store.canReportVisit(for: spot),
@@ -391,18 +383,20 @@ struct CoolSpotDetailView: View {
 }
 
 struct PlacePhoto: View {
-    let spot: CoolSpot
+    let image: UIImage
+
+    static func image(for spot: CoolSpot) -> UIImage? {
+        guard spot.id == "library",
+              let url = Bundle.main.url(forResource: "RiversideLibraryPrototype", withExtension: "png") else { return nil }
+        return UIImage(contentsOfFile: url.path)
+    }
 
     var body: some View {
-        if spot.id == "library",
-           let url = Bundle.main.url(forResource: "RiversideLibraryPrototype", withExtension: "png"),
-           let image = UIImage(contentsOfFile: url.path) {
-            Image(uiImage: image)
-                .resizable().scaledToFill()
-                .frame(height: 184).clipped()
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .accessibilityLabel("Riverside Library example photo")
-        }
+        Image(uiImage: image)
+            .resizable().scaledToFill()
+            .frame(height: 184).clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .accessibilityLabel("Riverside Library example photo")
     }
 }
 
@@ -433,7 +427,7 @@ struct CurrentUseSummary: View {
     }
 }
 
-struct LivePresenceCard: View {
+struct LivePresenceActions: View {
     let isCheckedIn: Bool
     let isNearby: Bool
     let presenceDeadline: Date?
@@ -458,8 +452,6 @@ struct LivePresenceCard: View {
                         .font(.subheadline.weight(.semibold))
                         .frame(minHeight: 44)
                 }
-
-                Divider()
 
                 if canShareReport || hasUnfinishedReport {
                 VStack(alignment: .leading, spacing: LayoutSpacing.text) {
@@ -490,8 +482,6 @@ struct LivePresenceCard: View {
                 }
             }
         }
-        .padding(20)
-        .background(AppStyle.blue, in: RoundedRectangle(cornerRadius: 16))
         .accessibilityElement(children: .contain)
     }
 
@@ -707,29 +697,34 @@ struct RecognisedPlaceDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: LayoutSpacing.section) {
-                    PlaceIdentityHeader(name: place.name,
-                                        address: [place.distance, place.address].filter { !$0.isEmpty }.joined(separator: " · "),
-                                        category: place.categoryLabel)
-                    VStack(alignment: .leading, spacing: LayoutSpacing.related) {
-                        Label("No cooling information yet", systemImage: "thermometer.sun.fill")
-                            .font(.headline)
-                        if let findNearby {
-                            Button(action: findNearby) {
-                                Label("Find nearby Cool Spots", systemImage: "map")
-                                    .frame(maxWidth: .infinity)
-                            }.buttonStyle(PrimaryButtonStyle())
+                VStack(alignment: .leading, spacing: LayoutSpacing.group) {
+                    VStack(alignment: .leading, spacing: LayoutSpacing.group) {
+                        PlaceIdentityHeader(name: place.name,
+                                            address: [place.distance, place.address].filter { !$0.isEmpty }.joined(separator: " · "),
+                                            category: place.categoryLabel)
+                        VStack(alignment: .leading, spacing: LayoutSpacing.related) {
+                            Label("No cooling information yet", systemImage: "thermometer.sun.fill")
+                                .font(.headline)
+                            if let findNearby {
+                                Button(action: findNearby) {
+                                    Label("Find nearby Cool Spots", systemImage: "map")
+                                        .frame(maxWidth: .infinity)
+                                }.buttonStyle(PrimaryButtonStyle())
+                            }
                         }
+                        ApplePlaceInformationView(coordinate: place.coordinate,
+                                                  placeIdentifier: place.appleMapItemIdentifier,
+                                                  isExample: !place.id.hasPrefix("apple-maps:"))
+                            .id(place.id)
                     }
-                    ApplePlaceInformationView(coordinate: place.coordinate,
-                                              placeIdentifier: place.appleMapItemIdentifier,
-                                              isExample: !place.id.hasPrefix("apple-maps:"))
-                        .id(place.id)
+                    Divider()
                     Button { showContribution = true } label: {
                         Text("Add cooling information").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(SecondaryButtonStyle())
-                    if let saved = store.savedLocations.first(where: { $0.kind == .recognisedPlace(place.id) }) {
+                    if let saved = store.savedLocations.first(where: { $0.kind == .recognisedPlace(place.id) }),
+                       !saved.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Divider()
                         SavedNoteSummary(store: store, saved: saved).id(saved.id)
                     }
                 }
@@ -807,7 +802,7 @@ private struct ApplePlaceInformationView: View {
     private var sceneKey: String { "\(coordinate.latitude),\(coordinate.longitude):\(sceneAttempt)" }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             if showsPlaceDetails, placeIdentifier != nil {
                 Button {
                     if mapItem != nil { showDetails = true }
@@ -860,7 +855,10 @@ private struct ApplePlaceInformationView: View {
                         }
                     }
                 } label: {
-                    Text("View nearby streets").frame(minHeight: 44)
+                    Label("View nearby streets", systemImage: "binoculars")
+                        .labelStyle(PlaceActionLabelStyle())
+                        .foregroundStyle(AppStyle.brand)
+                        .frame(minHeight: 44)
                 }
                 .font(.subheadline.weight(.semibold))
             }
