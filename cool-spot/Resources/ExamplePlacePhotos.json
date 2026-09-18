@@ -1,0 +1,41 @@
+[
+  {
+    "id": "example-community-photo-1",
+    "thumbnailURL": "bundle://CommunityPhoto1.jpg",
+    "imageURL": "bundle://CommunityPhoto1.jpg",
+    "width": 1448,
+    "height": 1086,
+    "caption": "Shaded entrance",
+    "capturedAt": null,
+    "publishedAt": null,
+    "attribution": "Illustrative image \u00b7 Example Community Room",
+    "source": "illustration",
+    "contributionID": null
+  },
+  {
+    "id": "example-community-photo-2",
+    "thumbnailURL": "bundle://CommunityPhoto2.jpg",
+    "imageURL": "bundle://CommunityPhoto2.jpg",
+    "width": 1448,
+    "height": 1086,
+    "caption": "Indoor seating",
+    "capturedAt": null,
+    "publishedAt": null,
+    "attribution": "Illustrative image \u00b7 Example Community Room",
+    "source": "illustration",
+    "contributionID": null
+  },
+  {
+    "id": "example-community-photo-3",
+    "thumbnailURL": "bundle://CommunityPhoto3.jpg",
+    "imageURL": "bundle://CommunityPhoto3.jpg",
+    "width": 1448,
+    "height": 1086,
+    "caption": "Drinking water",
+    "capturedAt": null,
+    "publishedAt": null,
+    "attribution": "Illustrative image \u00b7 Example Community Room",
+    "source": "illustration",
+    "contributionID": null
+  }
+]

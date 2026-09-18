@@ -1,0 +1,72 @@
+[
+  {
+    "siteID": "100",
+    "placeID": "I7F69B3C551A18196",
+    "latitude": 51.5017686472,
+    "longitude": -0.0919084043,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "72",
+    "placeID": "ICD9A7B8B1E203C50",
+    "latitude": 51.5061670002,
+    "longitude": -0.0891739999,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "685",
+    "placeID": "I37C96CAA1E486C3B",
+    "latitude": 51.5039014744,
+    "longitude": -0.0807065868,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "128",
+    "placeID": "I9E367724D6F291AD",
+    "latitude": 51.5081921058,
+    "longitude": -0.1009348572,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "683",
+    "placeID": "IE0F2E76CE77B5156",
+    "latitude": 51.5093306063,
+    "longitude": -0.0791843314,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "725",
+    "placeID": "I905788AF4306FF37",
+    "latitude": 51.5152757338,
+    "longitude": -0.0919058573,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "714",
+    "placeID": "IFA86DF6398C33C6C",
+    "latitude": 51.5155680725,
+    "longitude": -0.0916341987,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "702",
+    "placeID": "I308C4C6692010220",
+    "latitude": 51.5118839924,
+    "longitude": -0.0769583059,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "116",
+    "placeID": "IC877845548385D2F",
+    "latitude": 51.51562,
+    "longitude": -0.1068,
+    "previousSourceCommit": "8674c98"
+  },
+  {
+    "siteID": "18",
+    "placeID": "I7E8561E6022ED614",
+    "latitude": 51.516829995,
+    "longitude": 0.010439996,
+    "previousSourceCommit": "8674c98"
+  }
+]

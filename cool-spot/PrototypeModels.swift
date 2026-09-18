@@ -71,6 +71,7 @@ enum AppStyle {
 enum SpotSource: String {
     case gla = "Official Cool Space"
     case community = "Community Cool Spot"
+    case unknown = "Cool Spot"
 }
 
 enum PlaceEnvironment: String, CaseIterable, Identifiable, Codable {
@@ -295,6 +296,7 @@ struct CoolSpot: Identifiable {
     var entryInformation = ""
     var information = PlaceInformation()
     var applePlaceID: String? = nil
+    var photos: [PlacePhotoAsset] = []
     var isExample: Bool { information.source.isExample }
     var sourceLabel: String { information.source.label }
     var metadataLabel: String { "\(type.shortName) · \(sourceLabel)" }
@@ -920,7 +922,8 @@ enum Fixtures {
               experienceReports: [.notCooler: 1, .aLittleCooler: 2, .muchCooler: 5],
               latestReportAt: .now.addingTimeInterval(-7_200),
               stayReports: [.under30: 1, .under60: 4, .under120: 7, .over120: 2],
-              comments: ["Quiet upstairs, with tables away from the windows."], isNearby: true),
+              comments: ["Quiet upstairs, with tables away from the windows."], isNearby: true,
+              photos: PlacePhotoAsset.legacyLibrary),
         .init(id: "shade", name: "Shade beside the playground", address: "Mint Street Park, London SE1",
               latitude: 51.5030, longitude: -0.0982, source: .community, environment: .outdoors,
               type: .park, features: [.treeShade, .drinkingWater], access: .free,

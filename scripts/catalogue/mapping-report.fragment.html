@@ -1,0 +1,81 @@
+<div id="coolspot-mapping-review">
+  <style>
+    #coolspot-mapping-review .mapping-bar { display:flex; gap:3px; height:28px; margin:12px 0; }
+    #coolspot-mapping-review .mapping-bar span { min-width:2px; }
+    #coolspot-mapping-review .mapping-legend { display:flex; flex-wrap:wrap; gap:8px 18px; margin-bottom:20px; }
+    #coolspot-mapping-review .mapping-swatch { display:inline-block; width:10px; height:10px; margin-right:6px; }
+    #coolspot-mapping-review .mapping-detail { margin-top:20px; }
+    #coolspot-mapping-review .mapping-evidence { display:flex; flex-wrap:wrap; gap:8px 16px; margin:12px 0; }
+    #coolspot-mapping-review code { overflow-wrap:anywhere; }
+    #coolspot-mapping-review .mapping-pagination { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; }
+  </style>
+  <h2>GLA → Cool Spot → Apple 地點</h2>
+  <div class="viz-row"><strong>Cool Spot 匯入 250 / 250</strong><span id="mapping-linked"></span></div>
+  <div id="mapping-bar" class="mapping-bar" role="img"></div>
+  <div id="mapping-legend" class="mapping-legend"></div>
+  <div class="text-small text-muted" id="mapping-completed"></div>
+  <hr>
+  <div class="viz-controls">
+    <label class="form-label">搜尋地點或行政區<input id="mapping-search" class="form-control" type="search" placeholder="Canning Town Library"></label>
+    <label class="form-label">配對狀態<select id="mapping-filter" class="form-select"><option value="all">全部 250 個</option><option value="linked">已有 Apple 連結</option><option value="pending">需要後續處理</option><option value="auto_matched">自動接受</option><option value="reviewed_matched">另查官方資料核對</option><option value="needs_review">候選待判定</option><option value="no_candidate">查無候選</option></select></label>
+  </div>
+  <div class="table-responsive"><table class="table table-sm"><thead><tr><th scope="col">GLA 地點</th><th scope="col">Apple 候選</th><th scope="col">狀態</th></tr></thead><tbody id="mapping-rows"></tbody></table></div>
+  <div class="mapping-pagination"><button class="btn" id="mapping-prev" type="button">上一頁</button><span id="mapping-page" aria-live="polite"></span><button class="btn" id="mapping-next" type="button">下一頁</button></div>
+  <div id="mapping-detail" class="mapping-detail" aria-live="polite"></div>
+  <script type="application/json" id="mapping-data">__MAPPING_DATA__</script>
+  <script>
+    (() => {
+      const root=document.getElementById('coolspot-mapping-review');
+      const payload=JSON.parse(root.querySelector('#mapping-data').textContent);
+      const rows=payload.rows, summary=payload.summary;
+      const statuses={auto_matched:'自動接受',reviewed_matched:'官方資料已核對',needs_review:'候選待判定',no_candidate:'查無候選',lookup_failed:'查詢失敗',not_checked:'尚未查詢'};
+      const colors={auto_matched:'var(--viz-series-1)',reviewed_matched:'var(--viz-series-2)',needs_review:'var(--viz-series-3)',no_candidate:'var(--viz-series-4)',lookup_failed:'var(--viz-series-5)',not_checked:'var(--muted)'};
+      const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const linked=r=>['auto_matched','reviewed_matched'].includes(r.status);
+      root.querySelector('#mapping-linked').textContent=`Apple 已連結 ${rows.filter(linked).length} / ${rows.length}`;
+      root.querySelector('#mapping-completed').textContent=`GLA 2025 · 查詢完成 ${summary.lookupsCompleted}/250 · 查詢失敗 ${summary.byStatus.lookup_failed||0} · 欄位待補 ${summary.recordsWithDataWarnings} 筆`;
+      for(const [status,label] of Object.entries(statuses)){
+        const count=summary.byStatus[status]||0;if(!count)continue;
+        const part=document.createElement('span');part.style.width=`${count/rows.length*100}%`;part.style.background=colors[status];
+        root.querySelector('#mapping-bar').append(part);
+        const legend=document.createElement('span');legend.innerHTML=`<span class="mapping-swatch" style="background:${colors[status]}"></span>${label} ${count}`;
+        root.querySelector('#mapping-legend').append(legend);
+      }
+      root.querySelector('#mapping-bar').setAttribute('aria-label',Object.entries(summary.byStatus).map(([s,n])=>`${statuses[s]} ${n}`).join('；'));
+      let page=0, selected='18';
+      const search=root.querySelector('#mapping-search'),filter=root.querySelector('#mapping-filter');
+      function save(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{selectedSourceRecordID:selected,filter:filter.value,query:search.value},privateContent:{page}}).catch(()=>{});}
+      function detail(){
+        const r=rows.find(r=>r.sourceRecordID===selected);if(!r)return;
+        const d=root.querySelector('#mapping-detail');
+        const reason=r.status==='auto_matched'?'唯一候選同時符合名稱、地址與 150 m 內距離；仍屬自動判定。':r.status==='no_candidate'?'本輪查詢未取得候選；不能因此斷定 Apple 沒有這個場所。':r.status==='reviewed_matched'?r.review.reason:'候選尚不足以確認為同一場所，保留 GLA 座標，不發佈 Apple 連結。';
+        d.innerHTML=`<hr><h3>${escape(r.sourceName)}</h3><div>${escape(r.sourceAddress)} · ${escape(r.borough)}</div><div class="text-small text-muted">GLA #${escape(r.sourceRecordID)} · ${escape(statuses[r.status])}</div><p>${escape(reason)}</p><div class="text-small">Cool Spot ID <code>${escape(r.coolSpotID)}</code></div>`;
+        if(r.review)d.insertAdjacentHTML('beforeend',`<div class="text-small">核對者：Codex · ${escape(r.review.reviewedAt.slice(0,10))} · ${r.review.evidenceURLs.map((u,i)=>`<a href="${escape(u)}" target="_blank" rel="noopener noreferrer">官方來源 ${i+1}</a>`).join(' · ')}</div>`);
+        for(const c of r.candidates){
+          const e=c.evidence;
+          const flags=[`距離 ${c.distanceMetres} m`,e.exactName?'名稱相同':`名稱近似 ${Math.round(e.nameSimilarity*100)}%`,e.postcodeAgrees?'郵遞區號相同':e.postcodeConflicts?'郵遞區號衝突':'郵遞區號未能比對',e.streetAgrees?'街道相符':'街道未相符',e.streetNumberConflicts?'門牌衝突':null].filter(Boolean);
+          d.insertAdjacentHTML('beforeend',`<hr><strong>${escape(c.name)}</strong>${r.selectedPlaceID===c.placeID?' <span class="viz-badge">已採用</span>':''}<div>${escape(c.address)} ${escape(c.postalCode)}</div><div class="mapping-evidence text-small">${flags.map(f=>`<span>${escape(f)}</span>`).join('')}</div><div class="text-small text-muted">Apple ID <code>${escape(c.placeID||'未提供')}</code></div>`);
+        }
+        if(r.candidateCount>r.candidates.length)d.insertAdjacentHTML('beforeend',`<div class="text-small text-muted">顯示前 ${r.candidates.length} 個候選；完整 JSON 保留全部 ${r.candidateCount} 個。</div>`);
+        if(r.dataWarnings.length)d.insertAdjacentHTML('beforeend',`<hr><div class="text-small">欄位待補：${r.dataWarnings.map(escape).join('；')}</div>`);
+        d.insertAdjacentHTML('beforeend',`<details><summary>查詢紀錄 · ${r.attempts.length} 次</summary>${r.attempts.map(a=>`<p class="text-small">${escape(a.query)}<br><span class="text-muted">${escape(a.queriedAt)}${a.error?' · '+escape(a.error.domain)+' '+escape(a.error.code):''}</span></p>`).join('')}</details>`);
+      }
+      function render(){
+        const q=search.value.trim().toLowerCase(),status=filter.value;
+        const result=rows.filter(r=>(status==='all'||status==='linked'&&linked(r)||status==='pending'&&!linked(r)||r.status===status)&&`${r.sourceName} ${r.borough} ${r.sourceAddress}`.toLowerCase().includes(q));
+        page=Math.max(0,Math.min(page,Math.ceil(result.length/8)-1));
+        if(result.length&&!result.some(r=>r.sourceRecordID===selected))selected=result[0].sourceRecordID;
+        const visible=result.slice(page*8,page*8+8);
+        root.querySelector('#mapping-rows').innerHTML=visible.map(r=>{const c=r.candidates.find(c=>c.placeID===r.selectedPlaceID)||r.candidates[0];return `<tr><td><button class="btn btn-ghost" type="button" data-id="${escape(r.sourceRecordID)}" aria-pressed="${selected===r.sourceRecordID}">${escape(r.sourceName)}</button><div class="text-small text-muted">${escape(r.borough)} · GLA #${escape(r.sourceRecordID)}</div></td><td>${c?escape(c.name):'—'}${c?`<div class="text-small text-muted">${c.distanceMetres} m</div>`:''}</td><td>${escape(statuses[r.status])}</td></tr>`}).join('')||'<tr><td colspan="3">沒有符合的地點</td></tr>';
+        root.querySelector('#mapping-page').textContent=result.length?`${page*8+1}–${Math.min(page*8+8,result.length)} / ${result.length}`:'0 個';
+        root.querySelector('#mapping-prev').disabled=page===0;root.querySelector('#mapping-next').disabled=(page+1)*8>=result.length;
+        root.querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.id;render();save();}));
+        if(result.length)detail();else root.querySelector('#mapping-detail').innerHTML='';
+      }
+      search.addEventListener('input',()=>{page=0;render();save();});filter.addEventListener('change',()=>{page=0;render();save();});
+      root.querySelector('#mapping-prev').addEventListener('click',()=>{page--;render();save();});root.querySelector('#mapping-next').addEventListener('click',()=>{page++;render();save();});
+      function restore(s){if(s?.modelContent){selected=s.modelContent.selectedSourceRecordID||'18';filter.value=s.modelContent.filter||'all';search.value=s.modelContent.query||'';page=Number.isInteger(s.privateContent?.page)?s.privateContent.page:0;}render();}
+      restore(window.openai?.widgetState);window.addEventListener('openai:set_globals',e=>{if(e.detail?.globals?.widgetState)restore(e.detail.globals.widgetState);});
+    })();
+  </script>
+</div>

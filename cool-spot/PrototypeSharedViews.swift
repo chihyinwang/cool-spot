@@ -14,7 +14,7 @@ enum LayoutSpacing {
 struct SourceBadge: View {
     let source: SpotSource
     var body: some View {
-        Label(source.rawValue, systemImage: source == .gla ? "checkmark.seal.fill" : "person.2.fill")
+        Label(source.rawValue, systemImage: source == .gla ? "checkmark.seal.fill" : source == .community ? "person.2.fill" : "mappin")
             .font(.caption.weight(.bold))
             .foregroundStyle(.primary)
             .padding(.horizontal, 10)

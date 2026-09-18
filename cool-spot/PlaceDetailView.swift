@@ -35,10 +35,6 @@ struct CoolSpotDetailView: View {
                             CurrentUseSummary(count: store.presence(for: spot))
                             livePresence
                         }
-                        if let image = PlacePhoto.image(for: spot) {
-                            Divider()
-                            PlacePhoto(image: image)
-                        }
                         if let saved = store.savedLocation(for: spot),
                            !saved.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             Divider()
@@ -98,6 +94,7 @@ struct CoolSpotDetailView: View {
                 }
             }
             visitingInformation
+            PlacePhotoStrip(photos: spot.photos, placeName: spot.name)
             VStack(alignment: .leading, spacing: 0) {
                 facilities
                 ApplePlaceInformationView(coordinate: spot.coordinate,
@@ -379,24 +376,6 @@ struct CoolSpotDetailView: View {
                 .background(.ultraThickMaterial, in: Circle())
         }
         .buttonStyle(.plain).padding(16)
-    }
-}
-
-struct PlacePhoto: View {
-    let image: UIImage
-
-    static func image(for spot: CoolSpot) -> UIImage? {
-        guard spot.id == "library",
-              let url = Bundle.main.url(forResource: "RiversideLibraryPrototype", withExtension: "png") else { return nil }
-        return UIImage(contentsOfFile: url.path)
-    }
-
-    var body: some View {
-        Image(uiImage: image)
-            .resizable().scaledToFill()
-            .frame(height: 184).clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .accessibilityLabel("Riverside Library example photo")
     }
 }
 

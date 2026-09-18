@@ -1,0 +1,182 @@
+[
+  {
+    "candidates" : [
+      {
+        "address" : " 211   Borough High St",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 32,
+        "latitude" : 51.501843100000002,
+        "locality" : "London",
+        "longitude" : -0.092355000000000007,
+        "name" : "John Harvard Library",
+        "placeID" : "I7F69B3C551A18196",
+        "postalCode" : "SE1 1JA"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:07Z",
+    "query" : "Place ID: I7F69B3C551A18196",
+    "siteID" : "100"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "London Bridge",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 29,
+        "latitude" : 51.506134799999998,
+        "locality" : "London",
+        "longitude" : -0.089585799999999993,
+        "name" : "Southwark Cathedral",
+        "placeID" : "ICD9A7B8B1E203C50",
+        "postalCode" : "SE1 9DA"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:09Z",
+    "query" : "Place ID: ICD9A7B8B1E203C50",
+    "siteID" : "72"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "147 Tooley St",
+        "category" : "MKPOICategoryTheater",
+        "distanceMetres" : 16,
+        "latitude" : 51.503942500000001,
+        "locality" : "London",
+        "longitude" : -0.080921400000000004,
+        "name" : "Unicorn Theatre",
+        "placeID" : "I37C96CAA1E486C3B",
+        "postalCode" : "SE1 2HZ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:10Z",
+    "query" : "Place ID: I37C96CAA1E486C3B",
+    "siteID" : "685"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "60-62 Hopton Street",
+        "category" : "",
+        "distanceMetres" : 107,
+        "latitude" : 51.508342499999998,
+        "locality" : "London",
+        "longitude" : -0.1024612,
+        "name" : "London LGBTQ+ Community Centre",
+        "placeID" : "I9E367724D6F291AD",
+        "postalCode" : "SE1 9JH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:11Z",
+    "query" : "Place ID: I9E367724D6F291AD",
+    "siteID" : "128"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Byward St",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 8,
+        "latitude" : 51.509350099999999,
+        "locality" : "London",
+        "longitude" : -0.079302200000000003,
+        "name" : "All Hallows by the Tower",
+        "placeID" : "IE0F2E76CE77B5156",
+        "postalCode" : "EC3R 5BJ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:12Z",
+    "query" : "Place ID: IE0F2E76CE77B5156",
+    "siteID" : "683"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Guildhall Yard",
+        "category" : "",
+        "distanceMetres" : 37,
+        "latitude" : 51.515556400000001,
+        "locality" : "London",
+        "longitude" : -0.091618900000000003,
+        "name" : "Guildhall Art Gallery",
+        "placeID" : "I905788AF4306FF37",
+        "postalCode" : "EC2V 5AE"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:14Z",
+    "query" : "Place ID: I905788AF4306FF37",
+    "siteID" : "725"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Aldermanbury",
+        "category" : "MKPOICategoryConventionCenter",
+        "distanceMetres" : 80,
+        "latitude" : 51.515649699999997,
+        "locality" : "London",
+        "longitude" : -0.0927838,
+        "name" : "The London Centre",
+        "placeID" : "IFA86DF6398C33C6C",
+        "postalCode" : "EC2P"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:15Z",
+    "query" : "Place ID: IFA86DF6398C33C6C",
+    "siteID" : "714"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "12 Jewry Street",
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 46,
+        "latitude" : 51.512218599999997,
+        "locality" : "London",
+        "longitude" : -0.0765792,
+        "name" : "The City Wall at Vine Street",
+        "placeID" : "I308C4C6692010220",
+        "postalCode" : "EC3N 2HT"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:16Z",
+    "query" : "Place ID: I308C4C6692010220",
+    "siteID" : "702"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1 Little New St",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 23,
+        "latitude" : 51.515486299999999,
+        "locality" : "London",
+        "longitude" : -0.10655679999999999,
+        "name" : "Shoe Lane Library",
+        "placeID" : "IC877845548385D2F",
+        "postalCode" : "EC4A 3JR"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:17Z",
+    "query" : "Place ID: IC877845548385D2F",
+    "siteID" : "116"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "18 Barking Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 78,
+        "latitude" : 51.517349000000003,
+        "locality" : "Canning Town",
+        "longitude" : 0.0112009,
+        "name" : "Canning Town Library",
+        "placeID" : "I7E8561E6022ED614",
+        "postalCode" : "E16 1EH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:33:19Z",
+    "query" : "Place ID: I7E8561E6022ED614",
+    "siteID" : "18"
+  }
+]

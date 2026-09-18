@@ -1,0 +1,598 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coolspot.example/schemas/catalogue-v2.json",
+  "title": "Cool Spot prototype catalogue response v2",
+  "description": "Read representation, not a database schema or write request. Only published photos and accepted same-place map links are returned. Candidate reconciliation lives in a separate audit export. Unknown facts are explicit, and omitted future fields must not break readers.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "catalogID": {
+      "type": "string"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "dataset": {
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "downloadURL": {
+            "type": "string",
+            "format": "uri"
+          },
+          "retrievedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceUpdatedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "id",
+          "provider",
+          "label"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/coolSpot"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "catalogID",
+    "generatedAt",
+    "sources",
+    "items"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "coolSpot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Cool Spot identity owned by this service, independent of GLA/Apple IDs.",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "venue",
+                "specific_area",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "latitude",
+            "longitude",
+            "scope"
+          ],
+          "additionalProperties": true
+        },
+        "address": {
+          "type": "object",
+          "properties": {
+            "line1": {
+              "type": "string"
+            },
+            "line2": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "locality": {
+              "type": "string"
+            },
+            "borough": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "postalCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "countryCode": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$"
+            }
+          },
+          "required": [
+            "line1",
+            "line2",
+            "locality",
+            "borough",
+            "postalCode",
+            "countryCode"
+          ],
+          "additionalProperties": true
+        },
+        "placeType": {
+          "type": "string",
+          "enum": [
+            "library",
+            "community",
+            "faith",
+            "culture",
+            "leisure",
+            "shop",
+            "food",
+            "park",
+            "square",
+            "waterside",
+            "transport",
+            "unknown"
+          ]
+        },
+        "setting": {
+          "type": "string",
+          "enum": [
+            "indoors",
+            "outdoors",
+            "both",
+            "unknown"
+          ]
+        },
+        "coolingFeatures": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "air_conditioning",
+              "fans",
+              "natural_ventilation",
+              "tree_shade",
+              "structural_shade",
+              "cooler_indoors"
+            ]
+          }
+        },
+        "coolingDetails": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "access": {
+          "type": "object",
+          "properties": {
+            "cost": {
+              "type": "string",
+              "enum": [
+                "free",
+                "purchase_required",
+                "entry_fee",
+                "unknown"
+              ]
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "everyone",
+                "limited",
+                "unknown"
+              ]
+            },
+            "eligibilityDetails": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "seating": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ]
+            },
+            "drinkingWater": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ]
+            },
+            "toilets": {
+              "type": "string",
+              "enum": [
+                "on_site",
+                "nearby",
+                "none",
+                "unknown"
+              ]
+            },
+            "wheelchairAccess": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ]
+            },
+            "staffedWhenOpen": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ]
+            },
+            "tables": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ]
+            },
+            "instructions": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "Specific area identification, not turn-by-turn directions."
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "postedStayLimitMinutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "cost",
+            "eligibility",
+            "eligibilityDetails",
+            "seating",
+            "drinkingWater",
+            "toilets",
+            "wheelchairAccess",
+            "staffedWhenOpen",
+            "tables",
+            "instructions",
+            "postedStayLimitMinutes"
+          ],
+          "additionalProperties": true
+        },
+        "hours": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "timeZone": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "text",
+                "timeZone"
+              ],
+              "additionalProperties": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "photos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/photo"
+          }
+        },
+        "sourceReferences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceID": {
+                "type": "string"
+              },
+              "recordID": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "sourceID",
+              "recordID"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceID": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "imported",
+                  "dataset_context",
+                  "name_rule",
+                  "reviewed_contribution"
+                ]
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "JSON Pointer to the field whose evidence this describes."
+                }
+              }
+            },
+            "required": [
+              "sourceID",
+              "method",
+              "fields"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "mapReferences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "apple_maps"
+                ]
+              },
+              "placeID": {
+                "type": "string",
+                "minLength": 1
+              },
+              "relationship": {
+                "type": "string",
+                "enum": [
+                  "same_place"
+                ]
+              },
+              "verification": {
+                "type": "string",
+                "enum": [
+                  "automatic",
+                  "reviewed"
+                ]
+              },
+              "checkedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "provider",
+              "placeID",
+              "relationship",
+              "verification",
+              "checkedAt"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "location",
+        "address",
+        "placeType",
+        "setting",
+        "coolingFeatures",
+        "coolingDetails",
+        "access",
+        "hours",
+        "photos",
+        "sourceReferences",
+        "provenance",
+        "mapReferences"
+      ],
+      "additionalProperties": true
+    },
+    "photo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable photo resource ID; not a URL.",
+          "minLength": 1
+        },
+        "thumbnailURL": {
+          "type": "string",
+          "format": "uri"
+        },
+        "imageURL": {
+          "type": "string",
+          "format": "uri"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "capturedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Known capture time; never substitute upload time.",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publishedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attribution": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "community",
+            "provider",
+            "illustration"
+          ]
+        },
+        "contributionID": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Related reviewed place-information contribution, if any."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "thumbnailURL",
+        "imageURL",
+        "width",
+        "height",
+        "caption",
+        "capturedAt",
+        "publishedAt",
+        "attribution",
+        "source",
+        "contributionID"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

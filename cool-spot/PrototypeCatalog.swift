@@ -91,8 +91,16 @@ enum CatalogToilets: String, CatalogCode {
 struct PrototypeCatalog: Decodable {
     let schemaVersion: Int
     let catalogID: String
-    let source: Source
+    let source: Source?
+    let sources: [CatalogueSource]?
     let items: [Item]
+
+    struct CatalogueSource: Decodable {
+        let id: String
+        let provider: String
+        let label: String
+        let url: URL?
+    }
 
     struct Source: Decodable {
         let provider: String
@@ -112,8 +120,19 @@ struct PrototypeCatalog: Decodable {
         let coolingDetails: String?
         let access: Access
         let hours: Hours?
-        let sourceRecord: SourceRecord
+        let sourceRecord: SourceRecord?
         let appleMatch: AppleMatch?
+        let sourceReferences: [SourceReference]?
+        let mapReferences: [MapReference]?
+        let photos: [PlacePhotoAsset]?
+
+        struct SourceReference: Decodable { let sourceID: String; let recordID: String }
+        struct MapReference: Decodable {
+            let provider: String
+            let placeID: String
+            let relationship: String
+            let verification: String
+        }
 
         struct Location: Decodable {
             let latitude: Double
@@ -123,10 +142,12 @@ struct PrototypeCatalog: Decodable {
         struct Address: Decodable {
             let line1: String
             let line2: String?
-            let borough: String
+            let borough: String?
+            let locality: String?
+            let countryCode: String?
             let postalCode: String?
             var display: String {
-                [line1, line2, "London", postalCode].compactMap { $0 }
+                [line1, line2, locality ?? "London", postalCode].compactMap { $0 }
                     .filter { !$0.isEmpty }.joined(separator: ", ")
             }
         }
@@ -138,6 +159,8 @@ struct PrototypeCatalog: Decodable {
             let toilets: CatalogToilets
             let wheelchairAccess: CatalogAvailability
             let staffedWhenOpen: CatalogAvailability?
+            let tables: CatalogAvailability?
+            let eligibilityDetails: String?
             let instructions: String?
             let postedStayLimitMinutes: Int?
         }
@@ -161,12 +184,21 @@ struct PrototypeCatalog: Decodable {
             let reviewNote: String
         }
         var matchedAppleID: String? {
+            if let match = mapReferences?.first(where: {
+                $0.provider == "apple_maps" && $0.relationship == "same_place" &&
+                ["automatic", "reviewed"].contains($0.verification) && !$0.placeID.isEmpty
+            }) { return match.placeID }
             guard let appleMatch, appleMatch.status == "matched",
                   appleMatch.relationship == "same_place", !appleMatch.placeID.isEmpty else { return nil }
             return appleMatch.placeID
         }
 
-        func makeSpot() -> CoolSpot {
+        func makeSpot(catalogueSource: CatalogueSource? = nil) -> CoolSpot {
+            let sourceKind: SpotSource = switch catalogueSource?.provider {
+            case "gla": .gla
+            case "community": .community
+            default: sourceRecord == nil ? .unknown : .gla
+            }
             var features = coolingFeatures.compactMap(\.feature)
             if access.drinkingWater == .yes { features.append(.drinkingWater) }
             let seating: SeatingType = switch access.seating {
@@ -176,19 +208,23 @@ struct PrototypeCatalog: Decodable {
             }
             var spot = CoolSpot(id: id, name: name, address: address.display,
                                 latitude: location.latitude, longitude: location.longitude,
-                                source: .gla, environment: setting.environment, type: placeType.type,
+                                source: sourceKind, environment: setting.environment, type: placeType.type,
                                 features: features, access: access.cost.access, seating: seating,
                                 distance: "", presenceCount: 0, experienceReports: [:],
                                 latestReportAt: .distantPast, stayReports: [:], comments: [], isNearby: false)
             spot.entryEligibility = access.eligibility == "everyone" ? .everyone
                 : access.eligibility == "limited" ? .limited : .unknown
             spot.applePlaceID = matchedAppleID
+            spot.photos = (photos ?? []).filter(\.isDisplayable)
+            spot.entryRequirement = access.eligibilityDetails ?? ""
             spot.information = PlaceInformation(
-                source: .init(label: "GLA · 2025", url: URL(string: "https://data.london.gov.uk/dataset/cool-space-data-2025-2z19p")),
+                source: .init(label: catalogueSource?.label ?? (sourceKind == .gla ? "GLA · 2025" : sourceKind.rawValue),
+                              url: catalogueSource?.url),
                 coolingDetails: coolingDetails, hours: hours?.text,
                 toilets: .init(rawValue: access.toilets.rawValue) ?? .unknown,
                 wheelchairAccessible: access.wheelchairAccess == .unknown ? nil : access.wheelchairAccess == .yes,
                 staffedWhenOpen: access.staffedWhenOpen == .yes ? true : access.staffedWhenOpen == .no ? false : nil,
+                tables: access.tables == .yes ? true : access.tables == .no ? false : nil,
                 instructions: access.instructions, postedStayLimitMinutes: access.postedStayLimitMinutes)
             return spot
         }
@@ -198,7 +234,7 @@ struct PrototypeCatalog: Decodable {
 
     static func decode(_ data: Data) throws -> Self {
         let response = try JSONDecoder().decode(Self.self, from: data)
-        guard response.schemaVersion == 1 else { throw LoadError.unsupportedVersion }
+        guard [1, 2].contains(response.schemaVersion) else { throw LoadError.unsupportedVersion }
         guard Set(response.items.map(\.id)).count == response.items.count,
               response.items.allSatisfy({ UUID(uuidString: $0.id) != nil &&
                   !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -221,8 +257,12 @@ extension PrototypeStore {
     static func catalogStore(reportDefaults: UserDefaults?) -> PrototypeStore {
         do {
             let response = try PrototypeCatalog.bundled()
+            let imported = response.items.map { item in
+                let source = response.sources?.first { $0.id == item.sourceReferences?.first?.sourceID }
+                return item.makeSpot(catalogueSource: source)
+            }
             let store = PrototypeStore(reportDefaults: reportDefaults,
-                                       catalogSpots: response.items.map { $0.makeSpot() } + PrototypeComparisonPlaces.communitySpots)
+                                       catalogSpots: imported + PrototypeComparisonPlaces.communitySpots)
             // Keep the ordinary-place case searchable without waiting for a network result.
             // Existing saved metadata takes precedence over this comparison seed.
             if store.place(PrototypeComparisonPlaces.ordinaryPlace.id) == nil {
@@ -257,10 +297,12 @@ enum PrototypeComparisonPlaces {
     }
 
     private static var communityRoom: CoolSpot {
-        makeSpot(id: roomID, name: "Example Community Room", address: "Southwark, London",
+        var spot = makeSpot(id: roomID, name: "Example Community Room", address: "Southwark, London",
                  latitude: 51.5056, longitude: -0.0950, environment: .indoors,
                  type: .publicService, features: [.fans, .drinkingWater], presence: 2,
                  toilets: .none, wheelchair: false, staffed: true, tables: true)
+        spot.photos = PlacePhotoAsset.examples
+        return spot
     }
 
     private static var shadedGarden: CoolSpot {

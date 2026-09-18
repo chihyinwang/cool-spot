@@ -1,0 +1,2365 @@
+[
+  {
+    "candidates" : [
+      {
+        "address" : "18 Barking Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 78,
+        "latitude" : 51.517349000000003,
+        "locality" : "Canning Town",
+        "longitude" : 0.0112009,
+        "name" : "Canning Town Library",
+        "placeID" : "I7E8561E6022ED614",
+        "postalCode" : "E16 1EH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:08Z",
+    "query" : "Canning Town Library 18 Rathbone Market London",
+    "siteID" : "18",
+    "sourceAddress" : "18 Rathbone Market",
+    "sourceName" : "Canning Town Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1 Kingsford Way",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 41,
+        "latitude" : 51.514963799999997,
+        "locality" : "London",
+        "longitude" : 0.055576500000000001,
+        "name" : "Beckton Globe Library",
+        "placeID" : "IB58D044B3FE1218C",
+        "postalCode" : "E6 5JQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:10Z",
+    "query" : "Beckton Library 1 Kingsford Way London",
+    "siteID" : "12",
+    "sourceAddress" : "1 Kingsford Way",
+    "sourceName" : "Beckton Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "7 Green Street",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1132,
+        "latitude" : 51.546312299999997,
+        "locality" : "London",
+        "longitude" : 0.031597100000000003,
+        "name" : "Green Street Library",
+        "placeID" : "IF48DE22405773257",
+        "postalCode" : "E7 8DA"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:11Z",
+    "query" : "Green Street Library 337 - 341 Green Street London",
+    "siteID" : "11",
+    "sourceAddress" : "337 - 341 Green Street",
+    "sourceName" : "Green Street Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "73 Dartmouth Road",
+        "category" : "",
+        "distanceMetres" : 19,
+        "latitude" : 51.436101800000003,
+        "locality" : "London",
+        "longitude" : -0.055490699999999997,
+        "name" : "Forest Hill Pools",
+        "placeID" : "I85BFCBEE8906FE2B",
+        "postalCode" : "SE23 3HT"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:13Z",
+    "query" : "Forest Hill Pools Darmouth Road London",
+    "siteID" : "87",
+    "sourceAddress" : "Darmouth Road",
+    "sourceName" : "Forest Hill Pools"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "101 Queen Victoria Street",
+        "category" : "",
+        "distanceMetres" : 60,
+        "latitude" : 51.511664199999998,
+        "locality" : "London",
+        "longitude" : -0.098210500000000006,
+        "name" : "The Salvation Army International - Headquaters",
+        "placeID" : "I58D6E872BFAA8202",
+        "postalCode" : "EC4V 4EH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:14Z",
+    "query" : "The Salvation Army 101 Queen Victoria Street London",
+    "siteID" : "681",
+    "sourceAddress" : "101 Queen Victoria Street",
+    "sourceName" : "The Salvation Army"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "106 North Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 9,
+        "latitude" : 51.4765084,
+        "locality" : "Richmond",
+        "longitude" : -0.28463450000000001,
+        "name" : "Kew Branch Library",
+        "placeID" : "IAC689126EF187392",
+        "postalCode" : "TW9 4HJ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:16Z",
+    "query" : "Kew Library 106 North Road London",
+    "siteID" : "48",
+    "sourceAddress" : "106 North Road",
+    "sourceName" : "Kew Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "44 York St",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 39,
+        "latitude" : 51.447539800000001,
+        "locality" : "Twickenham",
+        "longitude" : -0.32788040000000002,
+        "name" : "Twickenham Library",
+        "placeID" : "I504CBD9A35509996",
+        "postalCode" : "TW1 3BZ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:17Z",
+    "query" : "Twickenham Library Garfield Road London",
+    "siteID" : "49",
+    "sourceAddress" : "Garfield Road",
+    "sourceName" : "Twickenham Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Ham St",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3,
+        "latitude" : 51.437878400000002,
+        "locality" : "Richmond",
+        "longitude" : -0.31326589999999999,
+        "name" : "Ham Library",
+        "placeID" : "I12FAFA373E0E5590",
+        "postalCode" : "TW10 7HR"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:19Z",
+    "query" : "Ham Library   Ham Street London",
+    "siteID" : "51",
+    "sourceAddress" : " Ham Street",
+    "sourceName" : "Ham Library "
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "68 High St",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 19,
+        "latitude" : 51.426530499999998,
+        "locality" : "Hampton",
+        "longitude" : -0.35582170000000002,
+        "name" : "Hampton Hill Library",
+        "placeID" : "I8C06733D1D7C4FB7",
+        "postalCode" : "TW12 1NY"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:20Z",
+    "query" : "Hampton Hill Library  68 High Street London",
+    "siteID" : "55",
+    "sourceAddress" : "68 High Street",
+    "sourceName" : "Hampton Hill Library "
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:22Z",
+    "query" : "Jazz Cafe , Broadwater Farm Community Centre Adams Road London",
+    "siteID" : "630",
+    "sourceAddress" : "Adams Road",
+    "sourceName" : "Jazz Cafe , Broadwater Farm Community Centre"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:23Z",
+    "query" : "Museum of the Royal Pharmaceutical Society 66-68 East Smithfield London",
+    "siteID" : "629",
+    "sourceAddress" : "66-68 East Smithfield",
+    "sourceName" : "Museum of the Royal Pharmaceutical Society"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "80 Mortimer Street",
+        "category" : "",
+        "distanceMetres" : 4,
+        "latitude" : 51.517560000000003,
+        "locality" : "London",
+        "longitude" : -0.14246200000000001,
+        "name" : "London National Park City",
+        "placeID" : "I52F1FC2044E5B7F6",
+        "postalCode" : "W1W 7FE"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:24Z",
+    "query" : "London National Park City - Lobby 80 Mortimer Street London",
+    "siteID" : "635",
+    "sourceAddress" : "80 Mortimer Street",
+    "sourceName" : "London National Park City - Lobby"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Lyncroft Gardens",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 9,
+        "latitude" : 51.552675100000002,
+        "locality" : "London",
+        "longitude" : -0.19252130000000001,
+        "name" : "Church of England",
+        "placeID" : "I40FDCADD6D558D6B",
+        "postalCode" : "NW6 1JU"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:26Z",
+    "query" : "Emmanuel Church Lyncroft Gardens London",
+    "siteID" : "626",
+    "sourceAddress" : "Lyncroft Gardens",
+    "sourceName" : "Emmanuel Church"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "26 Store Street",
+        "category" : "",
+        "distanceMetres" : 18,
+        "latitude" : 51.519535900000001,
+        "locality" : "London",
+        "longitude" : -0.1317441,
+        "name" : "Building Centre",
+        "placeID" : "IE15D0CF9B45BB7FE",
+        "postalCode" : "WC1E 7BT"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:27Z",
+    "query" : "Building Centre 26 Store Street London",
+    "siteID" : "624",
+    "sourceAddress" : "26 Store Street",
+    "sourceName" : "Building Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Lavender Hill",
+        "category" : "MKPOICategoryTheater",
+        "distanceMetres" : 41,
+        "latitude" : 51.464802800000001,
+        "locality" : "London",
+        "longitude" : -0.16072449999999999,
+        "name" : "Battersea Arts Centre",
+        "placeID" : "I197611EA59D795D0",
+        "postalCode" : "SW11 5RW"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:28Z",
+    "query" : "Battersea Arts Centre Battersea Arts Centre London",
+    "siteID" : "638",
+    "sourceAddress" : "Battersea Arts Centre",
+    "sourceName" : "Battersea Arts Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "76 Hornfair Road",
+        "category" : "",
+        "distanceMetres" : 237,
+        "latitude" : 51.479922000000002,
+        "locality" : "London",
+        "longitude" : 0.036565199999999999,
+        "name" : "The Greenwich Carers Centre",
+        "placeID" : "IE01E74353A0BCF69",
+        "postalCode" : "SE7 7BD"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:30Z",
+    "query" : "Greenwich Carers Centre 76 Hornfair Road London",
+    "siteID" : "634",
+    "sourceAddress" : "76 Hornfair Road",
+    "sourceName" : "Greenwich Carers Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "149 Canterbury Road",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 6,
+        "latitude" : 51.575112599999997,
+        "locality" : "London",
+        "longitude" : -0.0020116999999999999,
+        "name" : "The Corner Stone",
+        "placeID" : "I5520D94571A40DB",
+        "postalCode" : "E10 6EH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:31Z",
+    "query" : "Cornerstone Church 149 Canterbury Road London",
+    "siteID" : "633",
+    "sourceAddress" : "149 Canterbury Road",
+    "sourceName" : "Cornerstone Church"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:33Z",
+    "query" : "IVO Tottenham Community  Hub 123 London",
+    "siteID" : "636",
+    "sourceAddress" : "123",
+    "sourceName" : "IVO Tottenham Community  Hub"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:34Z",
+    "query" : "Greenwich Homeless Project - Day Centre 360 Middle Park Avenue London",
+    "siteID" : "641",
+    "sourceAddress" : "360 Middle Park Avenue",
+    "sourceName" : "Greenwich Homeless Project - Day Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Endymion Road",
+        "category" : "MKPOICategoryCafe",
+        "distanceMetres" : 24,
+        "latitude" : 51.570023599999999,
+        "locality" : "London",
+        "longitude" : -0.1034684,
+        "name" : "Finsbury Park Cafe",
+        "placeID" : "I34F4330E7CA405CD",
+        "postalCode" : "N4 2NQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:35Z",
+    "query" : "Finsbury Park Cafe Finsbury Park, Hornsey Gate London",
+    "siteID" : "642",
+    "sourceAddress" : "Finsbury Park, Hornsey Gate",
+    "sourceName" : "Finsbury Park Cafe"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "458 Hoe St",
+        "category" : "MKPOICategoryCafe",
+        "distanceMetres" : 42,
+        "latitude" : 51.575980800000004,
+        "locality" : "Walthamstow",
+        "longitude" : -0.0151781,
+        "name" : "The Hornbeam",
+        "placeID" : "I3B55B6A9C82AA8F",
+        "postalCode" : "E17 9AH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:37Z",
+    "query" : "The Hornbeam Centre 458 Hoe Street London",
+    "siteID" : "643",
+    "sourceAddress" : "458 Hoe Street",
+    "sourceName" : "The Hornbeam Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Hyde Park Crescent",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 5,
+        "latitude" : 51.515489600000002,
+        "locality" : "London",
+        "longitude" : -0.1681772,
+        "name" : "St John's",
+        "placeID" : "IA5F546E62AEA7C59",
+        "postalCode" : "W2 2QD"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:38Z",
+    "query" : "St John's Hyde Park Hyde Park Crescent London",
+    "siteID" : "656",
+    "sourceAddress" : "Hyde Park Crescent",
+    "sourceName" : "St John's Hyde Park"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:40Z",
+    "query" : "Al-Manaar The Muslim Cultural Heritage Centre 244 Acklam Road London",
+    "siteID" : "131",
+    "sourceAddress" : "244 Acklam Road",
+    "sourceName" : "Al-Manaar The Muslim Cultural Heritage Centre"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:41Z",
+    "query" : "OSO The Theatre on Barnes Pond 49 station rd London",
+    "siteID" : "657",
+    "sourceAddress" : "49 station rd",
+    "sourceName" : "OSO The Theatre on Barnes Pond"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:43Z",
+    "query" : "Place of Welcome St Michael and All Angels Church London",
+    "siteID" : "664",
+    "sourceAddress" : "St Michael and All Angels Church",
+    "sourceName" : "Place of Welcome"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1 Gladstone Pl",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4,
+        "latitude" : 51.532605400000001,
+        "locality" : "London",
+        "longitude" : -0.029893400000000001,
+        "name" : "Idea Store Bow",
+        "placeID" : "I6E8E4610FE43B05D",
+        "postalCode" : "E3 5ES"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:44Z",
+    "query" : "Idea Store Bow 1 Gladstone Place London",
+    "siteID" : "663",
+    "sourceAddress" : "1 Gladstone Place",
+    "sourceName" : "Idea Store Bow"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Civic Centre",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 117,
+        "latitude" : 51.543696199999999,
+        "locality" : "Uxbridge",
+        "longitude" : -0.4752767,
+        "name" : "Hillingdon Libraries",
+        "placeID" : "I2525580DEDF9AC56",
+        "postalCode" : "UB8 1UW"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:45Z",
+    "query" : "Uxbridge Library Civic Centre, High Street, Uxbridge London",
+    "siteID" : "645",
+    "sourceAddress" : "Civic Centre, High Street, Uxbridge",
+    "sourceName" : "Uxbridge Library"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:28:47Z",
+    "query" : "Porchester Centre, Spa & Hall Queensway London",
+    "siteID" : "304",
+    "sourceAddress" : "Queensway",
+    "sourceName" : "Porchester Centre, Spa & Hall"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Lancefield Street",
+        "category" : "",
+        "distanceMetres" : 54,
+        "latitude" : 51.528907699999998,
+        "locality" : "London",
+        "longitude" : -0.2059829,
+        "name" : "Jubilee Community Leisure Centre",
+        "placeID" : "I63987936A7B24C5E",
+        "postalCode" : "W10"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:48Z",
+    "query" : "Jubilee Community Leisure Centre Lancefield St London",
+    "siteID" : "307",
+    "sourceAddress" : "Lancefield St",
+    "sourceName" : "Jubilee Community Leisure Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Silk Street",
+        "category" : "",
+        "distanceMetres" : 69,
+        "latitude" : 51.520516800000003,
+        "locality" : "London",
+        "longitude" : -0.093678800000000007,
+        "name" : "Barbican Art Gallery",
+        "placeID" : "IBE5CDCD230186C80",
+        "postalCode" : "EC2Y"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:50Z",
+    "query" : "Barbican Art Centre Silk Street London",
+    "siteID" : "680",
+    "sourceAddress" : "Silk Street",
+    "sourceName" : "Barbican Art Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Church Fields",
+        "category" : "MKPOICategoryTheater",
+        "distanceMetres" : 198,
+        "latitude" : 51.598672200000003,
+        "locality" : "London",
+        "longitude" : 0.022540899999999999,
+        "name" : "Redbridge Drama Centre",
+        "placeID" : "IFD499F31E5206EF5",
+        "postalCode" : "E18 2RB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:51Z",
+    "query" : "Redbridge Drama Centre Churchfields London",
+    "siteID" : "667",
+    "sourceAddress" : "Churchfields",
+    "sourceName" : "Redbridge Drama Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "103 Torridon Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 256,
+        "latitude" : 51.442382500000001,
+        "locality" : "London",
+        "longitude" : -0.0016682999999999999,
+        "name" : "Corbett Community Library",
+        "placeID" : "I3832BC544ECA3D4C",
+        "postalCode" : "SE6 1RQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:52Z",
+    "query" : "Corbett Community Library 103 Torridon Road London",
+    "siteID" : "679",
+    "sourceAddress" : "103 Torridon Road",
+    "sourceName" : "Corbett Community Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "321 Whitechapel Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 35,
+        "latitude" : 51.5199894,
+        "locality" : "London",
+        "longitude" : -0.0576353,
+        "name" : "Idea Store",
+        "placeID" : "I5E81B70133F0F8B1",
+        "postalCode" : "E1 1BU"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:54Z",
+    "query" : "Idea Store Whitechapel 321 Whitechapel Road London",
+    "siteID" : "671",
+    "sourceAddress" : "321 Whitechapel Road",
+    "sourceName" : "Idea Store Whitechapel"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "7-11 Coppermill Lane",
+        "category" : "",
+        "distanceMetres" : 23,
+        "latitude" : 51.581401200000002,
+        "locality" : "London",
+        "longitude" : -0.034562299999999997,
+        "name" : "The Mill On Coppermill Lane",
+        "placeID" : "I9CC0C72038F8386A",
+        "postalCode" : "E17 7HA"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:55Z",
+    "query" : "The Mill 7 - 11 Coppermill Lane London",
+    "siteID" : "672",
+    "sourceAddress" : "7 - 11 Coppermill Lane",
+    "sourceName" : "The Mill"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1 Cranfield Walk, Halton Court",
+        "category" : "MKPOICategoryCafe",
+        "distanceMetres" : 51,
+        "latitude" : 51.461683999999998,
+        "locality" : "London",
+        "longitude" : 0.024150000000000001,
+        "name" : "Artfix",
+        "placeID" : "I4215E7766DAC2748",
+        "postalCode" : "SE3 9EX"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:57Z",
+    "query" : "Artfix 1 Cranfield Walk London",
+    "siteID" : "650",
+    "sourceAddress" : "1 Cranfield Walk",
+    "sourceName" : "Artfix"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "80 Eastway",
+        "category" : "MKPOICategorySpa",
+        "distanceMetres" : 22,
+        "latitude" : 51.547182399999997,
+        "locality" : "London",
+        "longitude" : -0.0294828,
+        "name" : "Community Sauna Baths",
+        "placeID" : "I1D54E5A6CFC388A1",
+        "postalCode" : "E9 5JH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:58Z",
+    "query" : "The Baths 80 Eastway London",
+    "siteID" : "29",
+    "sourceAddress" : "80 Eastway",
+    "sourceName" : "The Baths"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1-3 Inwood House",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 3,
+        "latitude" : 51.536785199999997,
+        "locality" : "London",
+        "longitude" : -0.1006959,
+        "name" : "Chabad Lubavitch Islington",
+        "placeID" : "I4C334FFC8BCC4BE",
+        "postalCode" : "N1 8HX"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:28:59Z",
+    "query" : "Chabad Lubavitch of Islington 1-3 Elliott's Place London",
+    "siteID" : "30",
+    "sourceAddress" : "1-3 Elliott's Place",
+    "sourceName" : "Chabad Lubavitch of Islington"
+  },
+  {
+    "error" : {
+      "code" : 2,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 2.)"
+    },
+    "queriedAt" : "2026-09-18T14:29:01Z",
+    "query" : "Glass Mill Leisure Centre 41 Loampit Vale London",
+    "siteID" : "2",
+    "sourceAddress" : "41 Loampit Vale",
+    "sourceName" : "Glass Mill Leisure Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "s\/n Praça Santos Dumont",
+        "category" : "MKPOICategoryAirport",
+        "distanceMetres" : 7471424,
+        "latitude" : -5.0634740999999996,
+        "locality" : "Teresina",
+        "longitude" : -42.821236599999999,
+        "name" : "Teresina Airport",
+        "placeID" : "I34DC6D02ED70A362",
+        "postalCode" : "64006"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:16Z",
+    "query" : "The Mall Wood Green - Guest Lounge 159 High Road London",
+    "siteID" : "6",
+    "sourceAddress" : "159 High Road",
+    "sourceName" : "The Mall Wood Green - Guest Lounge"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "57 Newington Green",
+        "category" : "MKPOICategoryPark",
+        "distanceMetres" : 76,
+        "latitude" : 51.551500300000001,
+        "locality" : "London",
+        "longitude" : -0.085195199999999999,
+        "name" : "Newington Green",
+        "placeID" : "I6EB096860A019493",
+        "postalCode" : "N16 9PX"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:18Z",
+    "query" : "Newington Green Meeting House 39a Newington Green London",
+    "siteID" : "8",
+    "sourceAddress" : "39a Newington Green",
+    "sourceName" : "Newington Green Meeting House"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "5 Pier Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 11,
+        "latitude" : 51.501032500000001,
+        "locality" : "London",
+        "longitude" : 0.062736899999999998,
+        "name" : "North Woolwich Library",
+        "placeID" : "I837329E316B46191",
+        "postalCode" : "E16 2LJ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:19Z",
+    "query" : "North Woolwich Library 5 Pier Parade London",
+    "siteID" : "15",
+    "sourceAddress" : "5 Pier Parade",
+    "sourceName" : "North Woolwich Library"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:29:20Z",
+    "query" : "RCCT Community Hub Kenmore Park Hall London",
+    "siteID" : "653",
+    "sourceAddress" : "Kenmore Park Hall",
+    "sourceName" : "RCCT Community Hub"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "6-8 Woodgrange Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 349,
+        "latitude" : 51.546917000000001,
+        "locality" : "London",
+        "longitude" : 0.025753999999999999,
+        "name" : "Forest Gate Library",
+        "placeID" : "I54F4207E944C6BD8",
+        "postalCode" : "E7 0QH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:22Z",
+    "query" : "Forest Gate Library 6-8 Woodgrange Road London",
+    "siteID" : "9",
+    "sourceAddress" : "6-8 Woodgrange Road",
+    "sourceName" : "Forest Gate Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Lebus St",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 25,
+        "latitude" : 51.589889399999997,
+        "locality" : "Tottenham Hale",
+        "longitude" : -0.057206199999999999,
+        "name" : "The Engine Room",
+        "placeID" : "I5661F0961356ADCF",
+        "postalCode" : "N17 9FU"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:23Z",
+    "query" : "The Engine Room Unit A, Lebus Street, Hale Village London",
+    "siteID" : "21",
+    "sourceAddress" : "Unit A, Lebus Street, Hale Village",
+    "sourceName" : "The Engine Room"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:29:24Z",
+    "query" : "Ascension Church Parish Coffee 23 Malwood Road, Balham London",
+    "siteID" : "22",
+    "sourceAddress" : "23 Malwood Road, Balham",
+    "sourceName" : "Ascension Church Parish Coffee"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "105 Powis Street",
+        "category" : "",
+        "distanceMetres" : 27,
+        "latitude" : 51.4917558,
+        "locality" : "London",
+        "longitude" : 0.064542000000000002,
+        "name" : "Woolwich Front Room",
+        "placeID" : "IFD5FAD7F38538298",
+        "postalCode" : "SE18 6JB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:26Z",
+    "query" : "Woolwich Front Room 105 Powys Street London",
+    "siteID" : "25",
+    "sourceAddress" : "105 Powys Street",
+    "sourceName" : "Woolwich Front Room"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:29:27Z",
+    "query" : "Public cafe at The National Archives The National Archives, Bessant Drive London",
+    "siteID" : "26",
+    "sourceAddress" : "The National Archives, Bessant Drive",
+    "sourceName" : "Public cafe at The National Archives"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "100 London Road",
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 22,
+        "latitude" : 51.441031700000003,
+        "locality" : "London",
+        "longitude" : -0.061031000000000002,
+        "name" : "Horniman Museum and Gardens",
+        "placeID" : "I3B375AF4BC7A4AE7",
+        "postalCode" : "SE23 3PQ"
+      },
+      {
+        "address" : "100 London Road",
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 126,
+        "latitude" : 51.441402799999999,
+        "locality" : "London",
+        "longitude" : -0.0625169,
+        "name" : "Horniman Museum and Gardens",
+        "placeID" : "I16810C798E2BE309",
+        "postalCode" : "SE23 3PQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:28Z",
+    "query" : "Horniman Museum 100 London Rd London",
+    "siteID" : "33",
+    "sourceAddress" : "100 London Rd",
+    "sourceName" : "Horniman Museum"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Royal Hospital Road",
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 30,
+        "latitude" : 51.486496500000001,
+        "locality" : "Chelsea",
+        "longitude" : -0.16045980000000001,
+        "name" : "National Army Museum",
+        "placeID" : "ID3D2A7732D4B9AAC",
+        "postalCode" : "SW3 4HT"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:30Z",
+    "query" : "National Army Museum Royal Hospital Road, Chelsea London",
+    "siteID" : "32",
+    "sourceAddress" : "Royal Hospital Road, Chelsea",
+    "sourceName" : "National Army Museum"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "34 Lavender Road",
+        "category" : "MKPOICategoryPark",
+        "distanceMetres" : 160,
+        "latitude" : 51.466554000000002,
+        "locality" : "London",
+        "longitude" : -0.17719750000000001,
+        "name" : "York Gardens",
+        "placeID" : "I9F1A3C4429FA9F6F",
+        "postalCode" : "SW11 2UG"
+      },
+      {
+        "address" : "34 Lavender Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 180,
+        "latitude" : 51.467224100000003,
+        "locality" : "London",
+        "longitude" : -0.17772019999999999,
+        "name" : "York Gardens Library & Community Centre",
+        "placeID" : "ICFDBF4C9FFE85768",
+        "postalCode" : "SW11 2UG"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:31Z",
+    "query" : "York Gardens Library 34 Lavender Road London",
+    "siteID" : "35",
+    "sourceAddress" : "34 Lavender Road",
+    "sourceName" : "York Gardens Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "9 Courthouse Way",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 38,
+        "latitude" : 51.455899700000003,
+        "locality" : "London",
+        "longitude" : -0.1922249,
+        "name" : "Wandsworth Town Library",
+        "placeID" : "I4E5B4E0464AFDF29",
+        "postalCode" : "SW18"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:32Z",
+    "query" : "Wandsworth Town Library 11 Garratt Lane London",
+    "siteID" : "36",
+    "sourceAddress" : "11 Garratt Lane",
+    "sourceName" : "Wandsworth Town Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "300 Southfields Library",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2,
+        "latitude" : 51.443548499999999,
+        "locality" : "London",
+        "longitude" : -0.2087096,
+        "name" : "Southfields Library",
+        "placeID" : "IE5FF34F950091859",
+        "postalCode" : "SW19 6NL"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:34Z",
+    "query" : "Southfields Library 300 Wimbledon Park Road London",
+    "siteID" : "37",
+    "sourceAddress" : "300 Wimbledon Park Road",
+    "sourceName" : "Southfields Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "115B High Street",
+        "category" : "",
+        "distanceMetres" : 240,
+        "latitude" : 51.449972500000001,
+        "locality" : "Twickenham",
+        "longitude" : -0.35754599999999997,
+        "name" : "Transit Community Support",
+        "placeID" : "I346A38C9CBA7E836",
+        "postalCode" : "TW2 7LG"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:35Z",
+    "query" : "Transit Community Support CIC 115B High Street Whitton London",
+    "siteID" : "44",
+    "sourceAddress" : "115B High Street Whitton",
+    "sourceName" : "Transit Community Support CIC"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:29:36Z",
+    "query" : "Whittington Park Lounge  YERBURY ROAD London",
+    "siteID" : "43",
+    "sourceAddress" : "YERBURY ROAD",
+    "sourceName" : "Whittington Park Lounge "
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "35 Wimbledon Hill Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2,
+        "latitude" : 51.422243999999999,
+        "locality" : "London",
+        "longitude" : -0.20837530000000001,
+        "name" : "Wimbledon Library",
+        "placeID" : "IC1A3F9699C9809D",
+        "postalCode" : "SW19 7NB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:38Z",
+    "query" : "Wimbledon Library 16 Wimbledon Hill Road London",
+    "siteID" : "61",
+    "sourceAddress" : "16 Wimbledon Hill Road",
+    "sourceName" : "Wimbledon Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "269A Archway Road",
+        "category" : "MKPOICategoryTheater",
+        "distanceMetres" : 15,
+        "latitude" : 51.576706999999999,
+        "locality" : "London",
+        "longitude" : -0.14522470000000001,
+        "name" : "Jacksons Lane",
+        "placeID" : "I2AC58888D71DD3B4",
+        "postalCode" : "N6 5AA"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:39Z",
+    "query" : "Jacksons Lane Jacksons Lane, 269A Archway Road London",
+    "siteID" : "70",
+    "sourceAddress" : "Jacksons Lane, 269A Archway Road",
+    "sourceName" : "Jacksons Lane"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Westwood Hill",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 47,
+        "latitude" : 51.427939000000002,
+        "locality" : "Sydenham",
+        "longitude" : -0.058123500000000002,
+        "name" : "St Bartholomew's",
+        "placeID" : "I3D372476CB7722F4",
+        "postalCode" : "SE26 6QR"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:41Z",
+    "query" : "St Bartholomew's Church, Sydenham 12 Westwood Hill London",
+    "siteID" : "66",
+    "sourceAddress" : "12 Westwood Hill",
+    "sourceName" : "St Bartholomew's Church, Sydenham"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "9 The Crossway",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 59,
+        "latitude" : 51.5947733,
+        "locality" : "London",
+        "longitude" : -0.1084257,
+        "name" : "The RecordShop",
+        "placeID" : "IB9348E025A22087A",
+        "postalCode" : "N22 5QS"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:42Z",
+    "query" : "The RecordShop Unit 17A The Mall London",
+    "siteID" : "63",
+    "sourceAddress" : "Unit 17A The Mall",
+    "sourceName" : "The RecordShop"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Eynsham Drive",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 47,
+        "latitude" : 51.493760000000002,
+        "locality" : "London",
+        "longitude" : 0.110167,
+        "name" : "Abbey Wood Library",
+        "placeID" : "I8E39C36778710ED",
+        "postalCode" : "SE2 9PT"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:43Z",
+    "query" : "Abbey Wood Library Eysham Drive London",
+    "siteID" : "79",
+    "sourceAddress" : "Eysham Drive",
+    "sourceName" : "Abbey Wood Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "William Barefoot Drive",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 576,
+        "latitude" : 51.4304044,
+        "locality" : "London",
+        "longitude" : 0.057359300000000002,
+        "name" : "Coldharbour Library",
+        "placeID" : "I461076B4368AFFBF",
+        "postalCode" : "SE9 3AY"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:45Z",
+    "query" : "Coldharbour Library William Barefoot Drive London",
+    "siteID" : "82",
+    "sourceAddress" : "William Barefoot Drive",
+    "sourceName" : "Coldharbour Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "12 Lambarde Square",
+        "category" : "",
+        "distanceMetres" : 99,
+        "latitude" : 51.485503600000001,
+        "locality" : "London",
+        "longitude" : 0.0086528000000000004,
+        "name" : "The Greenwich Centre Library",
+        "placeID" : "IB8C2875C881BDD7B",
+        "postalCode" : "SE10 9GB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:46Z",
+    "query" : "Greenwich Centre Library 12 Lambarde Square London",
+    "siteID" : "74",
+    "sourceAddress" : "12 Lambarde Square",
+    "sourceName" : "Greenwich Centre Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "232 Plumstead High Street",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 30,
+        "latitude" : 51.486370100000002,
+        "locality" : "London",
+        "longitude" : 0.096284599999999998,
+        "name" : "Plumstead Library",
+        "placeID" : "I13B4DC03F3427FD9",
+        "postalCode" : "SE18 1JL"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:47Z",
+    "query" : "Plumstead Centre Library 232 Plumstead High Street London",
+    "siteID" : "75",
+    "sourceAddress" : "232 Plumstead High Street",
+    "sourceName" : "Plumstead Centre Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "35 Wellington Street",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 17,
+        "latitude" : 51.489400000000003,
+        "locality" : "London",
+        "longitude" : 0.065586000000000005,
+        "name" : "Woolwich Centre Library",
+        "placeID" : "I4533C73AA90FC385",
+        "postalCode" : "SE18 6HQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:49Z",
+    "query" : "Woolwich Library 35 Wellington Street London",
+    "siteID" : "78",
+    "sourceAddress" : "35 Wellington Street",
+    "sourceName" : "Woolwich Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Erindale",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 28,
+        "latitude" : 51.478820800000001,
+        "locality" : "London",
+        "longitude" : 0.085227200000000003,
+        "name" : "Slade Centre Library",
+        "placeID" : "IB1F7B7E8D27687B",
+        "postalCode" : "SE18 2QQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:50Z",
+    "query" : "Slade Centre Library Erindale, Plumstead London",
+    "siteID" : "76",
+    "sourceAddress" : "Erindale, Plumstead",
+    "sourceName" : "Slade Centre Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "",
+        "category" : "MKPOICategoryParking",
+        "distanceMetres" : 31,
+        "latitude" : 51.427253999999998,
+        "locality" : "London",
+        "longitude" : -0.010762000000000001,
+        "name" : "Green Man Community Hub",
+        "placeID" : "",
+        "postalCode" : "SE6 2RP"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:52Z",
+    "query" : "the Green Man Hub 355 Bromley Road London",
+    "siteID" : "88",
+    "sourceAddress" : "355 Bromley Road",
+    "sourceName" : "the Green Man Hub"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "The Boltons",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 54,
+        "latitude" : 51.489111200000004,
+        "locality" : "London",
+        "longitude" : -0.18418399999999999,
+        "name" : "St Mary The Boltons",
+        "placeID" : "IBA2D3990D028E5B",
+        "postalCode" : "SW10 9TB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:53Z",
+    "query" : "St Mary The Boltons St Mary's Church London",
+    "siteID" : "86",
+    "sourceAddress" : "St Mary's Church",
+    "sourceName" : "St Mary The Boltons"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:29:54Z",
+    "query" : "Jim's Community Cafe 71 East Barnet Road London",
+    "siteID" : "89",
+    "sourceAddress" : "71 East Barnet Road",
+    "sourceName" : "Jim's Community Cafe"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "273 High Road Leyton",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 28,
+        "latitude" : 51.558508799999998,
+        "locality" : "London",
+        "longitude" : -0.0072509999999999996,
+        "name" : "Leyton Library",
+        "placeID" : "I1CC9382EFE27DEB2",
+        "postalCode" : "E10 5QH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:56Z",
+    "query" : "Leyton Library High Road  London",
+    "siteID" : "90",
+    "sourceAddress" : "High Road ",
+    "sourceName" : "Leyton Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "7-9 Blackfen Parade",
+        "category" : "MKPOICategoryRestaurant",
+        "distanceMetres" : 24,
+        "latitude" : 51.450277999999997,
+        "locality" : "Blackfen",
+        "longitude" : 0.1044186,
+        "name" : "Blackfen Community Library",
+        "placeID" : "I17A5513FFED41A14",
+        "postalCode" : "DA15 9LU"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:57Z",
+    "query" : "Blackfen Community Library 7-9 Blackfen Road London",
+    "siteID" : "96",
+    "sourceAddress" : "7-9 Blackfen Road",
+    "sourceName" : "Blackfen Community Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1 Artizan St",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 28,
+        "latitude" : 51.5156499,
+        "locality" : "London",
+        "longitude" : -0.076855999999999994,
+        "name" : "Artizan Street Library",
+        "placeID" : "I3DB5506089D603A2",
+        "postalCode" : "E1 7AF"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:29:59Z",
+    "query" : "Artizan Street Library & Community Centre 1 Artizan Street London",
+    "siteID" : "117",
+    "sourceAddress" : "1 Artizan Street",
+    "sourceName" : "Artizan Street Library & Community Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Northwold Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 376,
+        "latitude" : 51.562686200000002,
+        "locality" : "London",
+        "longitude" : -0.059741299999999997,
+        "name" : "Clapton Library",
+        "placeID" : "I3C3A0B207361B0EE",
+        "postalCode" : "E5 8RA"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:00Z",
+    "query" : "Clapton Library Northwold Road London",
+    "siteID" : "119",
+    "sourceAddress" : "Northwold Road",
+    "sourceName" : "Clapton Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "51 Philbeach Gardens",
+        "category" : "",
+        "distanceMetres" : 189,
+        "latitude" : 51.491475700000002,
+        "locality" : "London",
+        "longitude" : -0.2010151,
+        "name" : "Refettorio Felix",
+        "placeID" : "ID0CDCDD972EDFFA7",
+        "postalCode" : "SW5 9EB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:01Z",
+    "query" : "Refettorio Felix at St Cuthbert's 51 Philbeach gardens London",
+    "siteID" : "127",
+    "sourceAddress" : "51 Philbeach gardens",
+    "sourceName" : "Refettorio Felix at St Cuthbert's"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "60-62 Hopton Street",
+        "category" : "",
+        "distanceMetres" : 107,
+        "latitude" : 51.508342499999998,
+        "locality" : "London",
+        "longitude" : -0.1024612,
+        "name" : "London LGBTQ+ Community Centre",
+        "placeID" : "I9E367724D6F291AD",
+        "postalCode" : "SE1 9JH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:03Z",
+    "query" : "The London LGBTQ+ Community Centre 60-62 Hopton Street London",
+    "siteID" : "128",
+    "sourceAddress" : "60-62 Hopton Street",
+    "sourceName" : "The London LGBTQ+ Community Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "20 Widmore Road and Glades Place",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 77,
+        "latitude" : 51.405762000000003,
+        "locality" : "Bromley",
+        "longitude" : 0.016962999999999999,
+        "name" : "Bromley URC Church",
+        "placeID" : "IBC038E2A8ABE08",
+        "postalCode" : "BR1 1RY"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:04Z",
+    "query" : "Bromley United Reformed Church 20 Widmore Road London",
+    "siteID" : "139",
+    "sourceAddress" : "20 Widmore Road",
+    "sourceName" : "Bromley United Reformed Church"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:06Z",
+    "query" : "BYEP free open space AX107 Selby centre London",
+    "siteID" : "142",
+    "sourceAddress" : "AX107 Selby centre",
+    "sourceName" : "BYEP free open space"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Brixton Oval",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 5,
+        "latitude" : 51.461127500000003,
+        "locality" : "London",
+        "longitude" : -0.1146605,
+        "name" : "Tate Library",
+        "placeID" : "IED1061201AC9D451",
+        "postalCode" : "SW2 1JQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:07Z",
+    "query" : "Brixton Tate Library Brixton Oval London",
+    "siteID" : "147",
+    "sourceAddress" : "Brixton Oval",
+    "sourceName" : "Brixton Tate Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1 Lawton Road",
+        "category" : "",
+        "distanceMetres" : 8,
+        "latitude" : 51.652879200000001,
+        "locality" : "Barnet",
+        "longitude" : -0.1691194,
+        "name" : "Better Leisure Centres",
+        "placeID" : "I9A5D1CA71113FDD5",
+        "postalCode" : "EN4 9BS"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:08Z",
+    "query" : "New Barnet Library Victoria Recreation Ground London",
+    "siteID" : "572",
+    "sourceAddress" : "Victoria Recreation Ground",
+    "sourceName" : "New Barnet Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Buckingham Palace Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 69,
+        "latitude" : 51.492899199999997,
+        "locality" : "London",
+        "longitude" : -0.14806559999999999,
+        "name" : "Victoria Library",
+        "placeID" : "IB58ACCD7923BC899",
+        "postalCode" : "SW1W 9UD"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:10Z",
+    "query" : "Victoria Library Mini Hub 160 Buckingham Palace Rd, London London",
+    "siteID" : "586",
+    "sourceAddress" : "160 Buckingham Palace Rd, London",
+    "sourceName" : "Victoria Library Mini Hub"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "61 Ernest Harriss House",
+        "category" : "MKPOICategoryCafe",
+        "distanceMetres" : 37,
+        "latitude" : 51.525668899999999,
+        "locality" : "London",
+        "longitude" : -0.19655149999999999,
+        "name" : "Roots Café at The Exchange",
+        "placeID" : "I4189B082051573D6",
+        "postalCode" : "W9 2BX"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:11Z",
+    "query" : "The Exchange at Ernest Harriss House 61-63 Elgin Avenue London",
+    "siteID" : "587",
+    "sourceAddress" : "61-63 Elgin Avenue",
+    "sourceName" : "The Exchange at Ernest Harriss House"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "7 Windsor Street",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 29,
+        "latitude" : 51.545953400000002,
+        "locality" : "Uxbridge",
+        "longitude" : -0.47964119999999999,
+        "name" : "St Margaret's Church",
+        "placeID" : "I72894EA9548FF3CE",
+        "postalCode" : "UB8 1AB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:13Z",
+    "query" : "St Margaret's Church Uxbridge Windsor Street London",
+    "siteID" : "573",
+    "sourceAddress" : "Windsor Street",
+    "sourceName" : "St Margaret's Church Uxbridge"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "No. 1 Warehouse",
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 47,
+        "latitude" : 51.507792100000003,
+        "locality" : "London",
+        "longitude" : -0.023828800000000001,
+        "name" : "Museum of London Docklands",
+        "placeID" : "I928B190838EA6616",
+        "postalCode" : "E14 4AL"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:14Z",
+    "query" : "London Museum Docklands No. 1, West India Quay London",
+    "siteID" : "575",
+    "sourceAddress" : "No. 1, West India Quay",
+    "sourceName" : "London Museum Docklands"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:16Z",
+    "query" : "CRATE Walthamstow 17 & central, 45 selborne walk London",
+    "siteID" : "581",
+    "sourceAddress" : "17 & central, 45 selborne walk",
+    "sourceName" : "CRATE Walthamstow"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:17Z",
+    "query" : "Trimble Lounge Whitton Community Centre London",
+    "siteID" : "592",
+    "sourceAddress" : "Whitton Community Centre",
+    "sourceName" : "Trimble Lounge"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "9-11 New Cavendish Street",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2,
+        "latitude" : 51.518920999999999,
+        "locality" : "Westminster",
+        "longitude" : -0.15062999999999999,
+        "name" : "Marylebone Library",
+        "placeID" : "I8BB5772CF3FB4C63",
+        "postalCode" : "W1G 8UQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:19Z",
+    "query" : "Marylebone library 9-11 New Cavendish St, London W1G 9UQ London",
+    "siteID" : "599",
+    "sourceAddress" : "9-11 New Cavendish St, London W1G 9UQ",
+    "sourceName" : "Marylebone library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "s\/n Praça Santos Dumont",
+        "category" : "MKPOICategoryAirport",
+        "distanceMetres" : 7472368,
+        "latitude" : -5.0634740999999996,
+        "locality" : "Teresina",
+        "longitude" : -42.821236599999999,
+        "name" : "Teresina Airport",
+        "placeID" : "I34DC6D02ED70A362",
+        "postalCode" : "64006"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:20Z",
+    "query" : "The Woolwich Service Users Project 107 Brookhill Road London",
+    "siteID" : "606",
+    "sourceAddress" : "107 Brookhill Road",
+    "sourceName" : "The Woolwich Service Users Project"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "King's Road",
+        "category" : "",
+        "distanceMetres" : 9,
+        "latitude" : 51.487465999999998,
+        "locality" : "London",
+        "longitude" : -0.168297,
+        "name" : "Chelsea Old Town Hall",
+        "placeID" : "I696801BF2129DA17",
+        "postalCode" : "SW3 5EE"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:21Z",
+    "query" : "Chelsea Library Old Town Hall King's Road London",
+    "siteID" : "608",
+    "sourceAddress" : "Old Town Hall King's Road",
+    "sourceName" : "Chelsea Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Holland Road",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 49,
+        "latitude" : 51.503225100000002,
+        "locality" : "London",
+        "longitude" : -0.21423300000000001,
+        "name" : "St John the Baptist Church",
+        "placeID" : "I97B7ED00CB6B666",
+        "postalCode" : "W14 8AH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:23Z",
+    "query" : "St John the Baptist, Holland Road Holland Road London",
+    "siteID" : "617",
+    "sourceAddress" : "Holland Road",
+    "sourceName" : "St John the Baptist, Holland Road"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "150 Ossulston Street",
+        "category" : "",
+        "distanceMetres" : 12,
+        "latitude" : 51.531951999999997,
+        "locality" : "London",
+        "longitude" : -0.13072500000000001,
+        "name" : "Somers Town Community Association",
+        "placeID" : "I2E904F15F0D5E2A6",
+        "postalCode" : "NW1 1EE"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:24Z",
+    "query" : "Somers Town Community Centre 150 Ossulston Street London",
+    "siteID" : "619",
+    "sourceAddress" : "150 Ossulston Street",
+    "sourceName" : "Somers Town Community Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "103A Wornington Road",
+        "category" : "",
+        "distanceMetres" : 108,
+        "latitude" : 51.522817199999999,
+        "locality" : "London",
+        "longitude" : -0.20978189999999999,
+        "name" : "Venture Community Association",
+        "placeID" : "I9399F567C239B3BE",
+        "postalCode" : "W10 5YB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:25Z",
+    "query" : "Venture Centre 103a Wornington Road London",
+    "siteID" : "621",
+    "sourceAddress" : "103a Wornington Road",
+    "sourceName" : "Venture Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "",
+        "category" : "",
+        "distanceMetres" : 65,
+        "latitude" : 51.480758199999997,
+        "locality" : "",
+        "longitude" : -0.1781576,
+        "name" : "Flashpoint Play Centre",
+        "placeID" : "I64BC5324FFE040A7",
+        "postalCode" : ""
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:27Z",
+    "query" : "Flashpoint Centre Worlds End Estate London",
+    "siteID" : "622",
+    "sourceAddress" : "Worlds End Estate",
+    "sourceName" : "Flashpoint Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "146 Park Road",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 20,
+        "latitude" : 51.528829000000002,
+        "locality" : "London",
+        "longitude" : -0.16479099999999999,
+        "name" : "London Central Mosque Trust & The Islamic Cultural Centre",
+        "placeID" : "IE9C130AD022B5952",
+        "postalCode" : "NW8 7RG"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:28Z",
+    "query" : "London Central Mosque 146 Park Road London",
+    "siteID" : "673",
+    "sourceAddress" : "146 Park Road",
+    "sourceName" : "London Central Mosque"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Holborn Viaduct",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 32,
+        "latitude" : 51.516634699999997,
+        "locality" : "London",
+        "longitude" : -0.1021117,
+        "name" : "Holy Sepulchre London",
+        "placeID" : "I2690C9FE4F6DBDD7",
+        "postalCode" : "EC1A 2DQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:30Z",
+    "query" : "Holy Sepulchre Church Holborn viaduct London",
+    "siteID" : "676",
+    "sourceAddress" : "Holborn viaduct",
+    "sourceName" : "Holy Sepulchre Church"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "14-16 Little Somerset Street",
+        "category" : "",
+        "distanceMetres" : 75,
+        "latitude" : 51.513363599999998,
+        "locality" : "London",
+        "longitude" : -0.073924000000000004,
+        "name" : "Portsoken Community Centre",
+        "placeID" : "IF102B39D6AB16C82",
+        "postalCode" : "E1 8AH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:31Z",
+    "query" : "Portsoken Community Centre 20 LIttle Somerset Street London",
+    "siteID" : "675",
+    "sourceAddress" : "20 LIttle Somerset Street",
+    "sourceName" : "Portsoken Community Centre"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:32Z",
+    "query" : "Peppys Community Hub Deptford Royal Dockyard London",
+    "siteID" : "677",
+    "sourceAddress" : "Deptford Royal Dockyard",
+    "sourceName" : "Peppys Community Hub"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "s\/n Praça Santos Dumont",
+        "category" : "MKPOICategoryAirport",
+        "distanceMetres" : 7446008,
+        "latitude" : -5.0634740999999996,
+        "locality" : "Teresina",
+        "longitude" : -42.821236599999999,
+        "name" : "Teresina Airport",
+        "placeID" : "I34DC6D02ED70A362",
+        "postalCode" : "64006"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:34Z",
+    "query" : "The Red Lian Kitchen Tolworth Hospital,  Red Lion Road London",
+    "siteID" : "682",
+    "sourceAddress" : "Tolworth Hospital,  Red Lion Road",
+    "sourceName" : "The Red Lian Kitchen"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "",
+        "category" : "",
+        "distanceMetres" : 23,
+        "latitude" : 51.516677899999998,
+        "locality" : "London",
+        "longitude" : -0.081397499999999998,
+        "name" : "St Boltophs-without-bishopsgate",
+        "placeID" : "IE2BBAB5929FCFAB9",
+        "postalCode" : "EC2M 3TL"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:35Z",
+    "query" : "St Botolph without Bishopsgate Church Bishopsgate London",
+    "siteID" : "684",
+    "sourceAddress" : "Bishopsgate",
+    "sourceName" : "St Botolph without Bishopsgate Church"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Westcroft Road",
+        "category" : "",
+        "distanceMetres" : 166,
+        "latitude" : 51.367954300000001,
+        "locality" : "Carshalton",
+        "longitude" : -0.1581169,
+        "name" : "Westcroft Leisure Centre",
+        "placeID" : "I1940C438F2E703FC",
+        "postalCode" : "SM5 2TG"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:37Z",
+    "query" : "Westcroft Leisure Centre Westcroft Rd, Carshalton London",
+    "siteID" : "691",
+    "sourceAddress" : "Westcroft Rd, Carshalton",
+    "sourceName" : "Westcroft Leisure Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "177 Mollison Drive",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3,
+        "latitude" : 51.353228899999998,
+        "locality" : "Wallington",
+        "longitude" : -0.1332971,
+        "name" : "Phoenix Leisure Centre and Library",
+        "placeID" : "I8ACAF344BD88E2B4",
+        "postalCode" : "SM6 9RB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:38Z",
+    "query" : "Phoenix Leisure Centre Mollison Dr, Wallington SM6 9NZ London",
+    "siteID" : "690",
+    "sourceAddress" : "Mollison Dr, Wallington SM6 9NZ",
+    "sourceName" : "Phoenix Leisure Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "15-17 Fetter Lane",
+        "category" : "MKPOICategoryRestaurant",
+        "distanceMetres" : 17,
+        "latitude" : 51.515833499999999,
+        "locality" : "London",
+        "longitude" : -0.1086724,
+        "name" : "Natural Kitchen",
+        "placeID" : "ICD2380788A1E6222",
+        "postalCode" : "EC4A 3AP"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:39Z",
+    "query" : "Natural Kitchen 15-17 New Square Street London",
+    "siteID" : "693",
+    "sourceAddress" : "15-17 New Square Street",
+    "sourceName" : "Natural Kitchen"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "17 Curzon Street",
+        "category" : "",
+        "distanceMetres" : 9974,
+        "latitude" : 51.506588499999999,
+        "locality" : "London",
+        "longitude" : -0.1487396,
+        "name" : "Felda Marketing Services",
+        "placeID" : "I52B10852BBC057E4",
+        "postalCode" : "W1J 5HR"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:41Z",
+    "query" : "Feldy Centre 18 Aberfeldy Square London",
+    "siteID" : "687",
+    "sourceAddress" : "18 Aberfeldy Square",
+    "sourceName" : "Feldy Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1-3 Norton Folgate",
+        "category" : "",
+        "distanceMetres" : 34,
+        "latitude" : 51.5205719,
+        "locality" : "London",
+        "longitude" : -0.078614000000000003,
+        "name" : "Art Play",
+        "placeID" : "I9AE101DEB94DF43A",
+        "postalCode" : "E1 6DB"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:42Z",
+    "query" : "Art Play London 3 Norton Folgate London",
+    "siteID" : "695",
+    "sourceAddress" : "3 Norton Folgate",
+    "sourceName" : "Art Play London"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:43Z",
+    "query" : "Hounslow House Community Hub and Library Hounslow House London",
+    "siteID" : "704",
+    "sourceAddress" : "Hounslow House",
+    "sourceName" : "Hounslow House Community Hub and Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "High Street",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4,
+        "latitude" : 51.446337900000003,
+        "locality" : "Feltham",
+        "longitude" : -0.41110750000000001,
+        "name" : "Feltham Library",
+        "placeID" : "I730DD562CFA976B9",
+        "postalCode" : "TW13 4GU"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:45Z",
+    "query" : "Feltham Community Hub and Library 210 The Centre, High Street London",
+    "siteID" : "705",
+    "sourceAddress" : "210 The Centre, High Street",
+    "sourceName" : "Feltham Community Hub and Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "390 Streatham High Road",
+        "category" : "",
+        "distanceMetres" : 23,
+        "latitude" : 51.424219600000001,
+        "locality" : "London",
+        "longitude" : -0.1307952,
+        "name" : "Streatham Ice and Leisure Centre",
+        "placeID" : "I469799177B7DF2F3",
+        "postalCode" : "SW16 6HX"
+      },
+      {
+        "address" : "390 Streatham High Road",
+        "category" : "MKPOICategoryRestroom",
+        "distanceMetres" : 38,
+        "latitude" : 51.424042,
+        "locality" : "London",
+        "longitude" : -0.130688,
+        "name" : "Streatham Ice Rink Toilets",
+        "placeID" : "I94EE3AF7D3D3BFE6",
+        "postalCode" : "SW16 6HX"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:46Z",
+    "query" : "Streatham Ice Rink lobby 390 Streatham High Road London",
+    "siteID" : "707",
+    "sourceAddress" : "390 Streatham High Road",
+    "sourceName" : "Streatham Ice Rink lobby"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:48Z",
+    "query" : "Worcester Park Baptist Church Hub Cafe 2 The Avenue, Worcester Park London",
+    "siteID" : "700",
+    "sourceAddress" : "2 The Avenue, Worcester Park",
+    "sourceName" : "Worcester Park Baptist Church Hub Cafe"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:49Z",
+    "query" : "City Wall at Vine Street museum 12 Jewry Street London",
+    "siteID" : "702",
+    "sourceAddress" : "12 Jewry Street",
+    "sourceName" : "City Wall at Vine Street museum"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Uxbridge Road",
+        "category" : "",
+        "distanceMetres" : 184,
+        "latitude" : 51.441234399999999,
+        "locality" : "Feltham",
+        "longitude" : -0.39223839999999999,
+        "name" : "Hanworth Air Park Leisure Centre And Library",
+        "placeID" : "I131A75C55517D9D0",
+        "postalCode" : "TW13 5EG"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:50Z",
+    "query" : "Hanworth Air Park Leisure Centre and Library Uxbridge Road London",
+    "siteID" : "706",
+    "sourceAddress" : "Uxbridge Road",
+    "sourceName" : "Hanworth Air Park Leisure Centre and Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Mary Ann Gardens",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 22803,
+        "latitude" : 51.479976399999998,
+        "locality" : "London",
+        "longitude" : -0.025026,
+        "name" : "The Salvation Army",
+        "placeID" : "I93238D45FDABC8CA",
+        "postalCode" : "SE8 3DP"
+      },
+      {
+        "address" : "275 Oxford St",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 28157,
+        "latitude" : 51.514995499999998,
+        "locality" : "London",
+        "longitude" : -0.1432213,
+        "name" : "The Salvation Army",
+        "placeID" : "I1E712E68EB5033B9",
+        "postalCode" : "W1C 2DJ"
+      },
+      {
+        "address" : "",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 25752,
+        "latitude" : 51.524329000000002,
+        "locality" : "London",
+        "longitude" : -0.111821,
+        "name" : "The Salvation Army",
+        "placeID" : "",
+        "postalCode" : "EC4P 4EP"
+      },
+      {
+        "address" : "37 Cambria House",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 26478,
+        "latitude" : 51.525871299999999,
+        "locality" : "London",
+        "longitude" : -0.1238127,
+        "name" : "The Salvation Army",
+        "placeID" : "IAF5E3EBB4199B841",
+        "postalCode" : "WC1N 1BJ"
+      },
+      {
+        "address" : "122 Lower Clapton Road",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 20883,
+        "latitude" : 51.5543847,
+        "locality" : "London",
+        "longitude" : -0.0536289,
+        "name" : "The Salvation Army",
+        "placeID" : "IE4AD2553F3A77232",
+        "postalCode" : "E5 0QR"
+      },
+      {
+        "address" : "",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 25756,
+        "latitude" : 51.524566900000003,
+        "locality" : "London",
+        "longitude" : -0.1120167,
+        "name" : "The Salvation Army",
+        "placeID" : "I29834C86F2E45229",
+        "postalCode" : "EC4P 4EP"
+      },
+      {
+        "address" : "97 Rochester Row",
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 28765,
+        "latitude" : 51.492844699999999,
+        "locality" : "London",
+        "longitude" : -0.1375875,
+        "name" : "The Salvation Army",
+        "placeID" : "I2719D561F5358AEA",
+        "postalCode" : "SW1P 1LJ"
+      },
+      {
+        "address" : "101 Queen Victoria Street",
+        "category" : "",
+        "distanceMetres" : 25405,
+        "latitude" : 51.511664199999998,
+        "locality" : "London",
+        "longitude" : -0.098210500000000006,
+        "name" : "The Salvation Army International - Headquaters",
+        "placeID" : "I58D6E872BFAA8202",
+        "postalCode" : "EC4V 4EH"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:52Z",
+    "query" : "Salvation Army Centre (Harold Hill) Petersfield Avenue London",
+    "siteID" : "713",
+    "sourceAddress" : "Petersfield Avenue",
+    "sourceName" : "Salvation Army Centre (Harold Hill)"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "95 High Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3,
+        "latitude" : 51.546923800000002,
+        "locality" : "Willesden",
+        "longitude" : -0.2290807,
+        "name" : "The Library",
+        "placeID" : "IC43F411D709A3A92",
+        "postalCode" : "NW10 2SF"
+      },
+      {
+        "address" : "95 High Road",
+        "category" : "",
+        "distanceMetres" : 20,
+        "latitude" : 51.5467583,
+        "locality" : "London",
+        "longitude" : -0.22888449999999999,
+        "name" : "Willesden Green Library of Things",
+        "placeID" : "IEF0A3A5C912A4F0",
+        "postalCode" : "NW10 2SF"
+      },
+      {
+        "address" : "97a High Road",
+        "category" : "",
+        "distanceMetres" : 34,
+        "latitude" : 51.546975600000003,
+        "locality" : "London",
+        "longitude" : -0.22953270000000001,
+        "name" : "Willesden Library Dental Clinic",
+        "placeID" : "ICA7A042A403AC96C",
+        "postalCode" : "NW10 2SL"
+      },
+      {
+        "address" : "156 Golders Green Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3632,
+        "latitude" : 51.574756600000001,
+        "locality" : "London",
+        "longitude" : -0.20175509999999999,
+        "name" : "Golders Green Library",
+        "placeID" : "I4F4D9613BB06BDD5",
+        "postalCode" : "NW11 8HE"
+      },
+      {
+        "address" : "152 Olive Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1110,
+        "latitude" : 51.556832300000003,
+        "locality" : "London",
+        "longitude" : -0.2274513,
+        "name" : "Cricklewood Library",
+        "placeID" : "I85BDA36E1492D59B",
+        "postalCode" : "NW2 6UY"
+      },
+      {
+        "address" : "",
+        "category" : "MKPOICategoryPublicTransport",
+        "distanceMetres" : 73,
+        "latitude" : 51.547089,
+        "locality" : "London",
+        "longitude" : -0.230073,
+        "name" : "Willesden Green Library (Stop Q)",
+        "placeID" : "I72E8CE06D5B80589",
+        "postalCode" : ""
+      },
+      {
+        "address" : "Craven Park Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1745,
+        "latitude" : 51.538695300000001,
+        "locality" : "London",
+        "longitude" : -0.25049559999999998,
+        "name" : "Harlesden Library",
+        "placeID" : "I1B9D7C51489EAF89",
+        "postalCode" : "NW10 8SE"
+      },
+      {
+        "address" : "87\/91 Askew Road",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4906,
+        "latitude" : 51.503678999999998,
+        "locality" : "London",
+        "longitude" : -0.24306179999999999,
+        "name" : "Askew Road Library",
+        "placeID" : "I29BC0B060E240497",
+        "postalCode" : "W12 9AS"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:53Z",
+    "query" : "Library at Willesden Green 95 High Road London",
+    "siteID" : "710",
+    "sourceAddress" : "95 High Road",
+    "sourceName" : "Library at Willesden Green"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "4 Rutherford Way",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 0,
+        "latitude" : 51.559040000000003,
+        "locality" : "Wembley",
+        "longitude" : -0.28166000000000002,
+        "name" : "Wembley Library",
+        "placeID" : "I56D1B64EC87ACD04",
+        "postalCode" : "HA9 0EG"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:55Z",
+    "query" : "Wembley Library Brent Civic Centre, Engineers Way, London",
+    "siteID" : "711",
+    "sourceAddress" : "Brent Civic Centre, Engineers Way,",
+    "sourceName" : "Wembley Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Chippenham Road",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 23,
+        "latitude" : 51.605588699999998,
+        "locality" : "Romford",
+        "longitude" : 0.21954989999999999,
+        "name" : "Saint George's Parish Church",
+        "placeID" : "I45C326C2783BCFC2",
+        "postalCode" : "RM3 8HX"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:56Z",
+    "query" : "St Georges Church Chippenham Road London",
+    "siteID" : "712",
+    "sourceAddress" : "Chippenham Road",
+    "sourceName" : "St Georges Church"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:30:57Z",
+    "query" : "Hainault Forest - 1856 Cafe and Visitor Centre Romford Road London",
+    "siteID" : "715",
+    "sourceAddress" : "Romford Road",
+    "sourceName" : "Hainault Forest - 1856 Cafe and Visitor Centre"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "46 St James's Road",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 266,
+        "latitude" : 51.430235099999997,
+        "locality" : "Hampton Hill",
+        "longitude" : -0.36124529999999999,
+        "name" : "St James's Church",
+        "placeID" : "IF15CBA69EF0C127",
+        "postalCode" : "TW12 1DQ"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:30:59Z",
+    "query" : "St James's Church St James's Road London",
+    "siteID" : "709",
+    "sourceAddress" : "St James's Road",
+    "sourceName" : "St James's Church"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-18T14:31:00Z",
+    "query" : "Keith Axon Centre Library Grove Road London",
+    "siteID" : "720",
+    "sourceAddress" : "Grove Road",
+    "sourceName" : "Keith Axon Centre Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Whittaker Ave",
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 24,
+        "latitude" : 51.458832200000003,
+        "locality" : "Richmond",
+        "longitude" : -0.30651499999999998,
+        "name" : "Information and Reference Library",
+        "placeID" : "IE66EAFB8A1BA7FBE",
+        "postalCode" : "TW9 1TP"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:31:02Z",
+    "query" : "Richmond Reference Library Old Town Hall London",
+    "siteID" : "52",
+    "sourceAddress" : "Old Town Hall",
+    "sourceName" : "Richmond Reference Library"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "8 Pegler Square",
+        "category" : "",
+        "distanceMetres" : 43,
+        "latitude" : 51.461098800000002,
+        "locality" : "London",
+        "longitude" : 0.026757099999999999,
+        "name" : "Kidbrooke Village Community",
+        "placeID" : "I611AEAE085E973F6",
+        "postalCode" : "SE3"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:31:03Z",
+    "query" : "Kidbrooke community hub 8 Pegler Square London",
+    "siteID" : "722",
+    "sourceAddress" : "8 Pegler Square",
+    "sourceName" : "Kidbrooke community hub"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Fore Street",
+        "category" : "MKPOICategoryReligiousSite",
+        "distanceMetres" : 5,
+        "latitude" : 51.518714299999999,
+        "locality" : "London",
+        "longitude" : -0.093823699999999996,
+        "name" : "St. Giles'",
+        "placeID" : "I42E467122F068D71",
+        "postalCode" : "EC2Y 8DA"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:31:04Z",
+    "query" : "St Giles’ Church Cripplegate Fore St (Barbican) London",
+    "siteID" : "724",
+    "sourceAddress" : "Fore St (Barbican)",
+    "sourceName" : "St Giles’ Church Cripplegate"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Guildhall Yard",
+        "category" : "",
+        "distanceMetres" : 37,
+        "latitude" : 51.515556400000001,
+        "locality" : "London",
+        "longitude" : -0.091618900000000003,
+        "name" : "Guildhall Art Gallery",
+        "placeID" : "I905788AF4306FF37",
+        "postalCode" : "EC2V 5AE"
+      }
+    ],
+    "queriedAt" : "2026-09-18T14:31:06Z",
+    "query" : "Guildhall Art Gallery & London's Roman Amphitheatre Guildhall Yard London",
+    "siteID" : "725",
+    "sourceAddress" : "Guildhall Yard",
+    "sourceName" : "Guildhall Art Gallery & London's Roman Amphitheatre"
+  }
+]

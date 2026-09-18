@@ -1,0 +1,74 @@
+[
+  {
+    "sourceRecordID": "18",
+    "placeID": "I7E8561E6022ED614",
+    "sourceFingerprint": "68df9ec0361a06714121ba523c1f26c01c46b20d6e2013ff8d39e938de7b6517",
+    "candidateSnapshot": {
+      "name": "Canning Town Library",
+      "address": "18 Barking Road",
+      "postalCode": "E16 1EH",
+      "latitude": 51.517349,
+      "longitude": 0.0112009
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-18T14:33:54Z",
+    "evidenceURLs": [
+      "https://libraries.newham.gov.uk/digital-content/libraries/find-a-library/canning-town-library"
+    ],
+    "reason": "Official library address includes both 18 Rathbone Market and Barking Road, E16 1EH. Same library name and 78 m separation; address aliases explain the automatic mismatch."
+  },
+  {
+    "sourceRecordID": "714",
+    "placeID": "IFA86DF6398C33C6C",
+    "sourceFingerprint": "b9fa6a85e727a84b5ea69c92361438ac1534248dbac96df849d5f305544aa0c7",
+    "candidateSnapshot": {
+      "name": "The London Centre",
+      "address": "Aldermanbury",
+      "postalCode": "EC2P",
+      "latitude": 51.5156497,
+      "longitude": -0.0927838
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-18T14:33:54Z",
+    "evidenceURLs": [
+      "https://www.nla.london/index.php/events/nla-lates-unlocking-east-londons-potential"
+    ],
+    "reason": "Official NLA venue lists The London Centre at 3 Aldermanbury, EC2V 7HH. Apple has the same venue/street within 80 m but a conflicting postcode. Accepted venue identity after source review; neither source postcode was overwritten."
+  },
+  {
+    "sourceRecordID": "725",
+    "placeID": "I905788AF4306FF37",
+    "sourceFingerprint": "cc71a51d34a517151c815f135fec4f6b8fd51d8dc658b7809794e1b04a217857",
+    "candidateSnapshot": {
+      "name": "Guildhall Art Gallery",
+      "address": "Guildhall Yard",
+      "postalCode": "EC2V 5AE",
+      "latitude": 51.5155564,
+      "longitude": -0.0916189
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-18T14:33:54Z",
+    "evidenceURLs": [
+      "https://www.fis.cityoflondon.gov.uk/directory/guildhall-art-gallery-and-londons-roman-amphitheatre"
+    ],
+    "reason": "Official City directory presents the gallery and amphitheatre together at Guildhall Yard, EC2V 5AE. Apple shortens the venue name to Guildhall Art Gallery at that address, 37 m away. Venue-level identity accepted; this does not assert a specific cooling room."
+  },
+  {
+    "sourceRecordID": "702",
+    "placeID": "I308C4C6692010220",
+    "sourceFingerprint": "59c85d92d51180e9410b9521d2fbdeab0a37ba1dfa9eae7a2256bcb9f0a9715a",
+    "candidateSnapshot": {
+      "name": "The City Wall at Vine Street",
+      "address": "12 Jewry Street",
+      "postalCode": "EC3N 2HT",
+      "latitude": 51.5122186,
+      "longitude": -0.0765792
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-18T14:33:54Z",
+    "evidenceURLs": [
+      "https://citywallvinestreet.org/"
+    ],
+    "reason": "Official venue lists City Wall at Vine Street, 12 Jewry Street, EC3N 2HT. Re-resolving the previous Apple ID returns that name/address 46 m away. Name searches returned no result, demonstrating that no-result is not proof the Apple place is absent."
+  }
+]
