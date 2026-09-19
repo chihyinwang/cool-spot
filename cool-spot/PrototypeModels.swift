@@ -95,6 +95,7 @@ enum PlaceType: String, CaseIterable, Identifiable, Hashable, Codable {
     case waterside = "Waterside or water feature"
     case transport = "Transport or waiting area"
     case other = "Other"
+    case unknown = "Not sure"
 
     var id: String { rawValue }
     var shortName: String {
@@ -111,6 +112,7 @@ enum PlaceType: String, CaseIterable, Identifiable, Hashable, Codable {
         case .waterside: "Waterside"
         case .transport: "Transport"
         case .other: "Other"
+        case .unknown: "Place"
         }
     }
     var symbol: String {
@@ -126,7 +128,7 @@ enum PlaceType: String, CaseIterable, Identifiable, Hashable, Codable {
         case .square: "building.2.fill"
         case .waterside: "water.waves"
         case .transport: "tram.fill"
-        case .other: "mappin"
+        case .other, .unknown: "mappin"
         }
     }
 }
@@ -179,7 +181,7 @@ enum CoolingExperience: String, CaseIterable, Identifiable, Hashable, Codable {
     }
 }
 
-enum AccessType: String, CaseIterable, Identifiable {
+enum AccessType: String, CaseIterable, Identifiable, Codable {
     case free = "Free to use"
     case purchase = "Purchase required"
     case entryFee = "Entry fee"
@@ -188,7 +190,7 @@ enum AccessType: String, CaseIterable, Identifiable {
     var summary: String { self == .unsure ? "Cost not confirmed" : rawValue }
 }
 
-enum PlaceEntryEligibility: String, CaseIterable, Identifiable {
+enum PlaceEntryEligibility: String, CaseIterable, Identifiable, Codable {
     case everyone = "Everyone"
     case limited = "Limited access"
     case unknown = "Not sure"
@@ -207,7 +209,7 @@ enum PlaceEntryEligibility: String, CaseIterable, Identifiable {
     }
 }
 
-enum SeatingType: String, CaseIterable, Identifiable {
+enum SeatingType: String, CaseIterable, Identifiable, Codable {
     case available = "Seating available"
     case limited = "Limited seating"
     case none = "No seating"
@@ -245,12 +247,15 @@ struct PlaceInformation {
         var isExample = false
     }
 
-    enum Toilets: String {
-        case onSite = "on_site", nearby, none, unknown
+    enum Toilets: String, CaseIterable, Identifiable, Codable {
+        case onSite = "on_site", nearby, notOnSite = "not_on_site", none, unknown
+        var id: Self { self }
+        var choiceLabel: String { label ?? "Not added" }
         var label: String? {
             switch self {
             case .onSite: "Toilets on site"
             case .nearby: "Toilets nearby"
+            case .notOnSite: "No toilets on site"
             case .none: "No toilets"
             case .unknown: nil
             }
@@ -264,8 +269,10 @@ struct PlaceInformation {
     var wheelchairAccessible: Bool? = nil
     var staffedWhenOpen: Bool? = nil
     var tables: Bool? = nil
-    var instructions: String? = nil
-    var postedStayLimitMinutes: Int? = nil
+    var areaDescription: String? = nil
+    var postedStayLimit = CatalogStayLimit.unknown
+    var additionalInformation: String? = nil
+    var drinkingWater: Bool? = nil
 
     var hasFacilities: Bool {
         toilets != .unknown || staffedWhenOpen != nil || tables != nil
@@ -285,11 +292,11 @@ struct CoolSpot: Identifiable {
     let access: AccessType
     let seating: SeatingType
     let distance: String
-    let presenceCount: Int
-    let experienceReports: [CoolingExperience: Int]
-    let latestReportAt: Date
-    let stayReports: [StayLength: Int]
-    let comments: [String]
+    var presenceCount: Int
+    var experienceReports: [CoolingExperience: Int]
+    var latestReportAt: Date
+    var stayReports: [StayLength: Int]
+    var comments: [String]
     var isNearby: Bool
     var entryEligibility: PlaceEntryEligibility = .unknown
     var entryRequirement = ""
@@ -297,14 +304,21 @@ struct CoolSpot: Identifiable {
     var information = PlaceInformation()
     var applePlaceID: String? = nil
     var photos: [PlacePhotoAsset] = []
+    var catalogueItem: PrototypeCatalog.Item? = nil
     var isExample: Bool { information.source.isExample }
     var sourceLabel: String { information.source.label }
+    var detailsApplePlaceID: String? {
+        catalogueItem?.mapReferences?.first {
+            $0.provider == "apple_maps" && ["same_place", "within_place"].contains($0.relationship) &&
+            ["automatic", "reviewed"].contains($0.verification)
+        }?.placeID ?? applePlaceID
+    }
     var metadataLabel: String { "\(type.shortName) · \(sourceLabel)" }
     var entrySummary: String? { entryEligibility.summary(requirement: entryRequirement) }
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
-struct RecognisedPlace: Identifiable, Codable {
+struct RecognisedPlace: Identifiable, Codable, Equatable {
     let id: String
     let name: String
     let address: String
@@ -320,6 +334,7 @@ struct RecognisedPlace: Identifiable, Codable {
     var phoneNumber: String? = nil
     var websiteURL: URL? = nil
     var alternateApplePlaceIDs: [String]? = nil
+    var structuredAddress: PrototypeCatalog.Item.Address? = nil
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
@@ -340,13 +355,13 @@ struct SavedLocation: Identifiable, Codable {
     var note: String
 }
 
-enum ContributionKind: String {
+enum ContributionKind: String, Codable {
     case newPlace = "New Cool Spot"
     case placeUpdate = "Place details"
     case visitReport = "Past visit"
 }
 
-enum ContributionStatus: Equatable {
+enum ContributionStatus: Equatable, Codable {
     case draft
     case inReview
     case actionNeeded(String)
@@ -386,13 +401,14 @@ enum ContributionStatus: Equatable {
     }
 }
 
-struct Contribution: Identifiable {
+struct Contribution: Identifiable, Codable {
     let id: UUID
     let title: String
     let kind: ContributionKind
     var status: ContributionStatus
     let createdAt: Date
     var placeDraft: PlaceContributionDraft? = nil
+    var photoID: String? = nil
 }
 
 struct VisitReport: Identifiable, Codable {
@@ -456,6 +472,8 @@ private struct ReportJourneySnapshot: Codable {
     var presenceEndsAt: Date?
     // Optional so existing v1 journeys still decode without losing owner data.
     var savedPlaceDetails: [RecognisedPlace]? = nil
+    var placeContributions: [Contribution]? = nil
+    var publishedCatalogue: [PrototypeCatalog.Item]? = nil
 }
 
 struct CoolingEvidence: Equatable {
@@ -491,6 +509,8 @@ final class PrototypeStore: ObservableObject {
     let usesCatalog: Bool
     @Published var savedLocations = Fixtures.saved { didSet { persistJourneys() } }
     @Published var contributions = Fixtures.contributions
+    @Published var contributionError: String?
+    private var publishedCatalogue: [PrototypeCatalog.Item] = []
     @Published var visitReports: [VisitReport] = []
     @Published var activePresenceSpotID: String? { didSet { persistJourneys() } }
     @Published private(set) var presenceEndsAt: Date?
@@ -530,6 +550,14 @@ final class PrototypeStore: ObservableObject {
             visitReports = snapshot.reports
             savedLocations = snapshot.savedLocations
             selectedPlaces = snapshot.savedPlaceDetails ?? []
+            publishedCatalogue = snapshot.publishedCatalogue ?? []
+            for item in publishedCatalogue { applyPublished(item) }
+            let restored = (snapshot.placeContributions ?? []).map { record in
+                var record = record
+                if let photoID = record.photoID { record.placeDraft?.values.photo = PrototypePhotoStorage.original(id: photoID) }
+                return record
+            }
+            contributions.insert(contentsOf: restored, at: 0)
             if let end = snapshot.presenceEndsAt, end > .now {
                 activePresenceSpotID = snapshot.activePresenceSpotID
                 presenceEndsAt = end
@@ -551,7 +579,9 @@ final class PrototypeStore: ObservableObject {
                                              reports: visitReports, savedLocations: savedLocations,
                                              nearbySpotIDs: spots.filter(\.isNearby).map(\.id),
                                              activePresenceSpotID: activePresenceSpotID, presenceEndsAt: presenceEndsAt,
-                                             savedPlaceDetails: selectedPlaces.filter { isSaved(placeID: $0.id) })
+                                             savedPlaceDetails: selectedPlaces.filter { isSaved(placeID: $0.id) },
+                                             placeContributions: contributions.filter { $0.kind != .visitReport },
+                                             publishedCatalogue: publishedCatalogue)
         if let data = try? JSONEncoder().encode(snapshot) {
             reportDefaults.set(data, forKey: Self.journeyKey)
         }
@@ -750,6 +780,7 @@ final class PrototypeStore: ObservableObject {
     // An exact identity match is a duplicate; proximity alone cannot identify a venue.
     func existingSpot(for draft: PlaceContributionDraft) -> CoolSpot? {
         if let id = draft.spotID { return spot(id) }
+        if let place = draft.selectedPlace, let existing = existingSpot(for: place) { return existing }
         return spots.first { candidate in
             let samePoint = abs(candidate.latitude - draft.values.latitude) < 0.000001 &&
                 abs(candidate.longitude - draft.values.longitude) < 0.000001
@@ -760,14 +791,19 @@ final class PrototypeStore: ObservableObject {
 
     @discardableResult
     func submitPlaceContribution(_ draft: PlaceContributionDraft) -> Bool {
+        contributionError = nil
         guard draft.canSend else { return false }
         // The UI must explicitly reconcile a newly discovered duplicate first.
         if !draft.isUpdate, existingSpot(for: draft) != nil { return false }
         guard !contributions.contains(where: { $0.id == draft.id }) else { return false }
-        contributions.insert(.init(id: draft.id, title: draft.displayName,
-                                   kind: draft.isUpdate ? .placeUpdate : .newPlace,
-                                   status: .inReview, createdAt: .now, placeDraft: draft), at: 0)
-        return true
+        do {
+            let photoID = try draft.values.photo.map { try PrototypePhotoStorage.stage($0) }
+            contributions.insert(.init(id: draft.id, title: draft.displayName,
+                                       kind: draft.isUpdate ? .placeUpdate : .newPlace,
+                                       status: .inReview, createdAt: .now, placeDraft: draft, photoID: photoID), at: 0)
+            persistJourneys()
+            return true
+        } catch { contributionError = error.localizedDescription; return false }
     }
 
     @discardableResult
@@ -883,7 +919,62 @@ final class PrototypeStore: ObservableObject {
             case .newPlace, .placeUpdate: true
             }
         }) else { return }
+        if status == .published { _ = publishContribution(contributions[index].id); return }
+        // A completed publication cannot be undone merely by changing a status label.
+        guard contributions[index].status != .published else { return }
+        if case .merged = status {
+            contributionError = "Choose the matching place and submit an update before publishing. A status alone cannot merge places."
+            return
+        }
         contributions[index].status = status
+        persistJourneys()
+    }
+
+    @discardableResult
+    func publishContribution(_ id: UUID, at date: Date = .now) -> Bool {
+        contributionError = nil
+        guard let index = contributions.firstIndex(where: { $0.id == id }),
+              let draft = contributions[index].placeDraft else { return false }
+        if contributions[index].status == .published { return true }
+        guard contributions[index].status == .inReview else {
+            contributionError = "Only a proposal awaiting review can be published. Submit a revised proposal if changes are needed."
+            return false
+        }
+        do {
+            if !draft.isUpdate, existingSpot(for: draft) != nil { throw PrototypePublicationError.duplicatePlace }
+            let item = try PrototypePublication.publish(draft, onto: draft.spotID.flatMap(spot),
+                                                        photoID: contributions[index].photoID, at: date)
+            // Exercise the same read contract used for imported places before applying any state.
+            let response = PrototypeCatalog(schemaVersion: 3, catalogID: "local-publication", generatedAt: ISO8601DateFormatter().string(from: date),
+                                            source: nil, sources: [PrototypePublication.source] + (try PrototypeCatalog.bundled().sources ?? [])
+                                                + (try PrototypeCatalog.bundled(named: "CommunityCatalog.prototype").sources ?? []), items: [item])
+            let decoded = try PrototypeCatalog.decode(JSONEncoder().encode(response))
+            guard let published = decoded.items.first else { throw PrototypePublicationError.invalidContribution }
+            publishedCatalogue.removeAll { $0.id == published.id }
+            publishedCatalogue.append(published)
+            applyPublished(published)
+            contributions[index].status = .published
+            persistJourneys()
+            return true
+        } catch {
+            contributionError = error.localizedDescription
+            contributions[index].status = .actionNeeded(error.localizedDescription)
+            persistJourneys()
+            return false
+        }
+    }
+
+    private func applyPublished(_ item: PrototypeCatalog.Item) {
+        let previous = spots.first { $0.id == item.id }
+        let source: PrototypeCatalog.CatalogueSource
+        if let previous {
+            source = .init(id: item.sourceReferences?.first?.sourceID ?? PrototypePublication.source.id,
+                           provider: previous.source == .gla ? "gla" : "community", label: previous.sourceLabel,
+                           url: previous.information.source.url, isExample: previous.isExample)
+        } else { source = PrototypePublication.source }
+        let updated = item.makeSpot(catalogueSource: source, retaining: previous)
+        if let index = spots.firstIndex(where: { $0.id == item.id }) { spots[index] = updated }
+        else { spots.append(updated) }
     }
 }
 

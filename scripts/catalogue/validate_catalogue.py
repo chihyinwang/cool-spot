@@ -13,6 +13,12 @@ jsonschema.Draft202012Validator.check_schema(schema)
 validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
 validator.validate(response)
 validator.validate(export)
+community = load(ROOT / "cool-spot/Resources/CommunityCatalog.prototype.json")
+validator.validate(community)
+assert {i["id"] for i in community["items"]}.isdisjoint(i["id"] for i in response["items"])
+assert all(i["location"]["scope"] == "unknown" and i["access"]["eligibility"] == "unknown" for i in response["items"])
+assert response["sources"][0]["retrievedAt"] is None
+assert community["sources"][0]["isExample"] is True
 assert response['items'] == export['items']
 source_ids = {str(f['properties']['cs_indoor_site_id']) for f in load(DATA / 'gla-cool-spaces-2025.geojson')['features']}
 registry = load(DATA / 'identity-registry.json')
@@ -42,4 +48,4 @@ assert len(accepted) == len(set(accepted))
 assert sum(export['mapping']['summary']['byStatus'].values()) == len(items)
 photo_validator = jsonschema.Draft202012Validator(schema['$defs']['photo'], format_checker=jsonschema.FormatChecker())
 for photo in load(ROOT / 'cool-spot/Resources/ExamplePlacePhotos.json'): photo_validator.validate(photo)
-print('PASS: JSON Schema, 250 unique source/spot IDs, source provenance, accepted links, review evidence, fixture photos')
+print('PASS: v3 JSON Schema, 250 GLA + 3 community records, unique IDs, provenance, accepted links, unknown source scope/eligibility, photos')

@@ -1,0 +1,6 @@
+{
+  "downloadURL": "https://data.london.gov.uk/download/2z19p/blw/CoolSpaceSites_2025.json",
+  "retrievedAt": null,
+  "sha256": "070a3e86c54728da1c27bdab8a0a2e972d68a5aeee65276b50c350ddff980c14",
+  "note": "Historical download time was not independently recorded. Do not substitute filesystem modification time. Future downloads must record UTC retrieval time and hash together."
+}

@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://coolspot.example/schemas/catalogue-v2.json",
-  "title": "Cool Spot prototype catalogue response v2",
+  "$id": "https://coolspot.example/schemas/catalogue-v3.json",
+  "title": "Cool Spot prototype catalogue response v3",
   "description": "Read representation, not a database schema or write request. Only published photos and accepted same-place map links are returned. Candidate reconciliation lives in a separate audit export. Unknown facts are explicit, and omitted future fields must not break readers.",
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "const": 2
+      "const": 3
     },
     "catalogID": {
       "type": "string"
@@ -43,13 +43,23 @@
               }
             ]
           },
+          "isExample": {
+            "type": "boolean"
+          },
           "downloadURL": {
             "type": "string",
             "format": "uri"
           },
           "retrievedAt": {
-            "type": "string",
-            "format": "date-time"
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "sourceUpdatedAt": {
             "anyOf": [
@@ -96,8 +106,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Cool Spot identity owned by this service, independent of GLA/Apple IDs.",
-          "format": "uuid"
+          "description": "Opaque Cool Spot identity; new records use UUIDs, older prototype identities remain valid.",
+          "minLength": 1
         },
         "name": {
           "type": "string",
@@ -136,8 +146,25 @@
         "address": {
           "type": "object",
           "properties": {
+            "formatted": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "line1": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "line2": {
               "anyOf": [
@@ -150,7 +177,14 @@
               ]
             },
             "locality": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "borough": {
               "anyOf": [
@@ -173,11 +207,19 @@
               ]
             },
             "countryCode": {
-              "type": "string",
-              "pattern": "^[A-Z]{2}$"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "required": [
+            "formatted",
             "line1",
             "line2",
             "locality",
@@ -201,6 +243,7 @@
             "square",
             "waterside",
             "transport",
+            "other",
             "unknown"
           ]
         },
@@ -223,7 +266,8 @@
               "natural_ventilation",
               "tree_shade",
               "structural_shade",
-              "cooler_indoors"
+              "cooler_indoors",
+              "water_nearby"
             ]
           }
         },
@@ -231,6 +275,17 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "additionalInformation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Reviewed public information; excludes correction/removal reasons."
             },
             {
               "type": "null"
@@ -271,6 +326,7 @@
               "type": "string",
               "enum": [
                 "yes",
+                "limited",
                 "no",
                 "unknown"
               ]
@@ -288,6 +344,7 @@
               "enum": [
                 "on_site",
                 "nearby",
+                "not_on_site",
                 "none",
                 "unknown"
               ]
@@ -316,7 +373,7 @@
                 "unknown"
               ]
             },
-            "instructions": {
+            "areaDescription": {
               "anyOf": [
                 {
                   "type": "string",
@@ -327,14 +384,47 @@
                 }
               ]
             },
-            "postedStayLimitMinutes": {
-              "anyOf": [
+            "postedStayLimit": {
+              "oneOf": [
                 {
-                  "type": "integer",
-                  "minimum": 1
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "limited"
+                      ]
+                    },
+                    "minutes": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "minutes"
+                  ],
+                  "additionalProperties": true
                 },
                 {
-                  "type": "null"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "unknown",
+                        "no_stated_limit"
+                      ]
+                    },
+                    "minutes": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "minutes"
+                  ],
+                  "additionalProperties": true
                 }
               ]
             }
@@ -349,8 +439,8 @@
             "wheelchairAccess",
             "staffedWhenOpen",
             "tables",
-            "instructions",
-            "postedStayLimitMinutes"
+            "areaDescription",
+            "postedStayLimit"
           ],
           "additionalProperties": true
         },
@@ -411,6 +501,20 @@
               "sourceID": {
                 "type": "string"
               },
+              "recordID": {
+                "type": "string"
+              },
+              "recordedAt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "method": {
                 "type": "string",
                 "enum": [
@@ -430,6 +534,8 @@
             },
             "required": [
               "sourceID",
+              "recordID",
+              "recordedAt",
               "method",
               "fields"
             ],
@@ -454,7 +560,8 @@
               "relationship": {
                 "type": "string",
                 "enum": [
-                  "same_place"
+                  "same_place",
+                  "within_place"
                 ]
               },
               "verification": {
@@ -465,8 +572,15 @@
                 ]
               },
               "checkedAt": {
-                "type": "string",
-                "format": "date-time"
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -489,6 +603,7 @@
         "setting",
         "coolingFeatures",
         "coolingDetails",
+        "additionalInformation",
         "access",
         "hours",
         "photos",

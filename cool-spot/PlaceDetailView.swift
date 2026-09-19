@@ -97,8 +97,18 @@ struct CoolSpotDetailView: View {
             PlacePhotoStrip(photos: spot.photos, placeName: spot.name)
             VStack(alignment: .leading, spacing: 0) {
                 facilities
+                if let detail = spot.information.additionalInformation, !detail.isEmpty {
+                    DisclosureGroup {
+                        Text(detail).font(.subheadline).padding(.bottom, LayoutSpacing.related)
+                    } label: {
+                        Label("More information", systemImage: "text.alignleft")
+                            .labelStyle(PlaceActionLabelStyle())
+                            .font(.subheadline.weight(.semibold))
+                            .frame(minHeight: 44)
+                    }.foregroundStyle(AppStyle.brand)
+                }
                 ApplePlaceInformationView(coordinate: spot.coordinate,
-                                          placeIdentifier: spot.applePlaceID.flatMap(MKMapItem.Identifier.init(rawValue:)),
+                                          placeIdentifier: spot.detailsApplePlaceID.flatMap(MKMapItem.Identifier.init(rawValue:)),
                                           isExample: spot.applePlaceID == nil && spot.isExample).id(spot.id)
                 Button { showContribution = true } label: {
                     Label("Suggest an edit", systemImage: "square.and.pencil")
@@ -126,14 +136,14 @@ struct CoolSpotDetailView: View {
                     Text(spot.entryInformation)
                 }
             }
-            if let area = spot.information.instructions, !area.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if let area = spot.information.areaDescription, !area.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                     Text("Cooling area").fontWeight(.semibold)
                     Text(area)
                 }
             }
-            if let minutes = spot.information.postedStayLimitMinutes {
-                Text("Stay limit: \(minutes) minutes")
+            if let limit = spot.information.postedStayLimit.label {
+                Text(limit)
             }
         }
         .font(.subheadline)
@@ -141,9 +151,10 @@ struct CoolSpotDetailView: View {
     }
 
     @ViewBuilder private var facilities: some View {
-        if spot.information.hasFacilities || spot.information.wheelchairAccessible != nil {
+        if spot.information.hasFacilities || spot.information.wheelchairAccessible != nil || spot.information.drinkingWater == false {
             DisclosureGroup(isExpanded: $expandFacilities) {
                 VStack(alignment: .leading, spacing: LayoutSpacing.related) {
+                    if spot.information.drinkingWater == false { Label("No drinking water", systemImage: "waterbottle") }
                     if let toilets = spot.information.toilets.label {
                         Label(toilets, systemImage: "toilet")
                     }

@@ -29,13 +29,13 @@ enum ContributionSource {
     }
 }
 
-enum PlaceContributionKind: Equatable { case recognised, missing, exact, unlisted, update }
-enum OptionalFact: String, CaseIterable, Identifiable {
+enum PlaceContributionKind: Equatable, Codable { case recognised, missing, exact, unlisted, update }
+enum OptionalFact: String, CaseIterable, Identifiable, Codable {
     case unknown = "Not added", yes = "Yes", no = "No"
     var id: Self { self }
 }
 
-struct PlaceContributionValues: Equatable {
+struct PlaceContributionValues: Equatable, Codable {
     var name = ""
     var latitude: Double
     var longitude: Double
@@ -50,7 +50,7 @@ struct PlaceContributionValues: Equatable {
     var wheelchairAccess: OptionalFact = .unknown
     var staffedWhenOpen: OptionalFact = .unknown
     var stayLimit = ""
-    var toilets: OptionalFact = .unknown
+    var toilets: PlaceInformation.Toilets = .unknown
     var wifi: OptionalFact = .unknown
     var power: OptionalFact = .unknown
     var laptop: OptionalFact = .unknown
@@ -65,6 +65,12 @@ struct PlaceContributionValues: Equatable {
     var note = ""
     var sourceCorrection = ""
     var removalReason = ""
+    // Photo bytes live in device-local files, never in the catalogue or preferences JSON.
+    enum CodingKeys: String, CodingKey {
+        case name, latitude, longitude, locationConfirmed, setting, type, features, access, accessibility, seating
+        case tables, wheelchairAccess, staffedWhenOpen, stayLimit, toilets, wifi, power, laptop
+        case entryEligibility, entryRequirement, locationDetails, note, sourceCorrection, removalReason
+    }
     var normalized: Self {
         var copy = self
         copy.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -89,8 +95,9 @@ struct ContributionValidationIssue: Equatable {
     let message: String
 }
 
-struct PlaceContributionDraft: Identifiable, Equatable {
-    let id = UUID()
+struct PlaceContributionDraft: Identifiable, Equatable, Codable {
+    let id: UUID
+    let selectedPlace: RecognisedPlace?
     let identity: String
     let kind: PlaceContributionKind
     let spotID: String?
@@ -102,28 +109,29 @@ struct PlaceContributionDraft: Identifiable, Equatable {
 
     init(kind: PlaceContributionKind, anchor: CLLocationCoordinate2D,
          place: RecognisedPlace? = nil, spot: CoolSpot? = nil) {
+        id = UUID()
+        selectedPlace = place
         self.kind = kind
         spotID = spot?.id
         identity = spot.map { "spot:\($0.id)" } ?? place.map { "place:\($0.id)" } ?? UUID().uuidString
         sourceName = place != nil || spot != nil
-        sourceType = spot != nil || place?.hasTrustedType == true
+        sourceType = (spot != nil && spot?.type != .unknown) || place?.hasTrustedType == true
         sourceSetting = place?.trustedSetting != nil
         var initial = PlaceContributionValues(latitude: anchor.latitude, longitude: anchor.longitude)
         if let spot {
             initial.name = spot.name; initial.latitude = spot.latitude; initial.longitude = spot.longitude
-            initial.type = spot.type; initial.setting = spot.environment
+            initial.type = spot.type == .unknown ? nil : spot.type; initial.setting = spot.environment
             initial.features = Set(spot.features); initial.access = spot.access; initial.seating = spot.seating
             initial.entryEligibility = spot.entryEligibility
             initial.entryRequirement = spot.entryEligibility == .limited ? spot.entryRequirement : ""
             initial.accessibility = spot.entryInformation
-            // "Nearby toilets" does not establish toilets inside the venue.
-            initial.toilets = spot.information.toilets == .onSite ? .yes
-                : spot.information.toilets == .none ? .no : .unknown
+            initial.toilets = spot.information.toilets
             initial.wheelchairAccess = spot.information.wheelchairAccessible.map { $0 ? .yes : .no } ?? .unknown
             initial.staffedWhenOpen = spot.information.staffedWhenOpen.map { $0 ? .yes : .no } ?? .unknown
             initial.tables = spot.information.tables.map { $0 ? .yes : .no } ?? .unknown
-            initial.locationDetails = spot.information.instructions ?? ""
-            initial.stayLimit = spot.information.postedStayLimitMinutes.map { "\($0) minutes" } ?? ""
+            initial.locationDetails = spot.information.areaDescription ?? ""
+            initial.note = spot.information.additionalInformation ?? ""
+            initial.stayLimit = spot.information.postedStayLimit.formValue
             initial.locationConfirmed = true
         } else if let place {
             initial.name = place.name; initial.latitude = place.latitude; initial.longitude = place.longitude
@@ -371,7 +379,7 @@ struct ContributionFlow: View {
                     Text("Thanks for helping others find a cool spot").font(.title2.bold())
                     Text("Your information is waiting for review. It isn’t public yet.")
                     Text("Follow it in You → Places you’ve added or updated.")
-                    Text("Review preview · This session only")
+                    Text("Review demo · Saved on this device")
                         .font(.footnote).foregroundStyle(AppStyle.supportingText)
                     Button("Done") { dismiss() }.buttonStyle(PrimaryButtonStyle())
                 }.padding(24)
@@ -559,7 +567,7 @@ struct ContributionFlow: View {
                     } else {
                         ContributionPickerRow("Place type", selection: $draft.values.type, valueText: draft.values.type?.rawValue ?? "Not sure") {
                             Text("Not sure").tag(nil as PlaceType?)
-                            ForEach(PlaceType.allCases) { Text($0.rawValue).tag(Optional($0)) }
+                            ForEach(PlaceType.allCases.filter { $0 != .unknown }) { Text($0.rawValue).tag(Optional($0)) }
                         }
                     }
                     fieldError(.type).id(ContributionField.type)
@@ -576,7 +584,7 @@ struct ContributionFlow: View {
                             if draft.sourceType {
                                 ContributionPickerRow("Suggested place type", selection: $draft.values.type,
                                                       valueText: draft.values.type?.rawValue ?? "Choose a type") {
-                                    ForEach(PlaceType.allCases) { Text($0.rawValue).tag(Optional($0)) }
+                                    ForEach(PlaceType.allCases.filter { $0 != .unknown }) { Text($0.rawValue).tag(Optional($0)) }
                                 }
                             }
                             VStack(alignment: .leading, spacing: 8) {
@@ -643,7 +651,9 @@ struct ContributionFlow: View {
                         PostedStayLimitPicker(value: $draft.values.stayLimit)
                     }
                     DisclosureGroup("Facilities", isExpanded: $facilitiesExpanded) {
-                        factPicker("Toilets on site", value: $draft.values.toilets)
+                        ContributionPickerRow("Toilets", selection: $draft.values.toilets, valueText: draft.values.toilets.choiceLabel) {
+                            ForEach(PlaceInformation.Toilets.allCases) { Text($0.choiceLabel).tag($0) }
+                        }
                         factPicker("Staff on site when open", value: $draft.values.staffedWhenOpen)
                         factPicker("Tables", value: $draft.values.tables)
                     }

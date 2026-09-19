@@ -167,11 +167,14 @@ extension RecognisedPlace {
             id = "apple-maps:coordinate:\(digest)"
         }
         self.init(id: id, name: name, address: address, latitude: coordinate.latitude,
-                  longitude: coordinate.longitude, type: type ?? .other, distance: "",
+                  longitude: coordinate.longitude, type: type ?? .unknown, distance: "",
                   hasTrustedType: type != nil, sourceCategory: category,
                   phoneNumber: mapItem.phoneNumber?.trimmingCharacters(in: .whitespacesAndNewlines),
                   websiteURL: mapItem.url.flatMap { ["http", "https"].contains($0.scheme?.lowercased() ?? "") ? $0 : nil },
-                  alternateApplePlaceIDs: mapItem.alternateIdentifiers.map(\.rawValue))
+                  alternateApplePlaceIDs: mapItem.alternateIdentifiers.map(\.rawValue),
+                  structuredAddress: .init(line1: street.isEmpty ? nil : street, formatted: address, line2: nil,
+                                           borough: nil, locality: placemark.locality, countryCode: placemark.isoCountryCode,
+                                           postalCode: placemark.postalCode))
     }
 
     var searchSubtitle: String {

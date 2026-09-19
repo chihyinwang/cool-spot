@@ -130,26 +130,30 @@ def build():
                'verification':'reviewed' if status=='reviewed_matched' else 'automatic',
                'checkedAt':review['reviewedAt'] if status=='reviewed_matched' else chosen['queriedAt']}] if chosen else []
         item={'id':registry[sid],'name':text(p['cs_name']),
-              'location':{'latitude':lat,'longitude':lon,'scope':'venue'},
-              'address':{'line1':text(p['cs_address_one']) or '', 'line2':text(p.get('cs_address_two')),
+              'location':{'latitude':lat,'longitude':lon,'scope':'unknown'},
+              'address':{'formatted':None,'line1':text(p['cs_address_one']) or '', 'line2':text(p.get('cs_address_two')),
                          'locality':'London','borough':text(p.get('cs_borough')),'postalCode':text(p.get('cs_postcode')),'countryCode':'GB'},
               'placeType':place_type,'setting':'indoors','coolingFeatures':sorted(set(cooling)),
-              'coolingDetails':text(p.get('cs_cooling_facilities_other')),
+              'coolingDetails':text(p.get('cs_cooling_facilities_other')),'additionalInformation':None,
               'access':{'cost':'free' if availability(p.get('is_free_of_charge'))=='yes' else 'unknown',
-                        'eligibility':'everyone','eligibilityDetails':None,
+                        'eligibility':'unknown','eligibilityDetails':None,
                         'seating':availability(p.get('has_seating')),'drinkingWater':availability(p.get('has_drinking_water')),
                         'toilets':{'available on site':'on_site','not available':'none','short walk and signposted from the site':'nearby'}.get((text(p.get('cs_toilets_available')) or '').lower(),'unknown'),
                         'wheelchairAccess':availability(p.get('cs_wheelchair_access')),
                         'staffedWhenOpen':availability(p.get('is_staffed_when_open')),'tables':'unknown',
-                        'instructions':None,'postedStayLimitMinutes':None},
+                        'areaDescription':None,'postedStayLimit':{'status':'unknown','minutes':None}},
               'hours':{'text':text(p.get('cs_opening_hours')),'timeZone':'Europe/London'} if text(p.get('cs_opening_hours')) else None,
               'photos':[],
               'sourceReferences':[{'sourceID':SOURCE_ID,'recordID':sid}],
               'provenance':[
-                  {'sourceID':SOURCE_ID,'method':'imported','fields':['/name','/location/latitude','/location/longitude','/address/line1','/address/line2','/address/borough','/address/postalCode','/coolingFeatures','/coolingDetails','/access/cost','/access/seating','/access/drinkingWater','/access/toilets','/access/wheelchairAccess','/access/staffedWhenOpen','/hours']},
-                  {'sourceID':SOURCE_ID,'method':'dataset_context','fields':['/setting','/location/scope','/address/locality','/address/countryCode','/access/eligibility']},
+                  {'sourceID':SOURCE_ID,'method':'imported','fields':['/name','/location/latitude','/location/longitude','/address/line1','/address/line2','/address/borough','/address/postalCode','/coolingFeatures','/coolingDetails','/access/cost','/access/seating','/access/drinkingWater','/access/toilets','/access/wheelchairAccess','/access/staffedWhenOpen','/hours/text']},
+                  {'sourceID':SOURCE_ID,'method':'dataset_context','fields':['/setting','/address/locality','/address/countryCode','/hours/timeZone']},
                   {'sourceID':SOURCE_ID,'method':'name_rule','fields':['/placeType']}],
               'mapReferences':refs}
+        for evidence in item['provenance']:
+            evidence.update(recordID=sid, recordedAt=now)
+            if item['hours'] is None:
+                evidence['fields']=[f for f in evidence['fields'] if not f.startswith('/hours/')]
         items.append(item)
         results.append({'coolSpotID':item['id'],'sourceRecordID':sid,'sourceName':item['name'],
                         'borough':item['address']['borough'],'sourceAddress':item['address']['line1'],
@@ -166,10 +170,13 @@ def build():
         if row['selectedPlaceID'] and ids[row['selectedPlaceID']]>1:
             row.update(status='needs_review',reason='Multiple GLA records point to this Apple place; do not merge automatically',selectedPlaceID=None)
             item['mapReferences']=[]
+    manifest=json.loads((DATA/'source-manifest.json').read_text())
+    if manifest['sha256'] != hashlib.sha256(raw.read_bytes()).hexdigest():
+        raise ValueError('Source changed: record the new download in source-manifest.json first')
     source={'id':SOURCE_ID,'provider':'gla','label':'GLA · 2025','dataset':'Cool Space Data 2025',
-            'url':DATASET_URL,'downloadURL':SOURCE_URL,'retrievedAt':dt.datetime.fromtimestamp(raw.stat().st_mtime,dt.timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'),'sourceUpdatedAt':None,
+            'url':DATASET_URL,'downloadURL':SOURCE_URL,'retrievedAt':manifest['retrievedAt'],'sourceUpdatedAt':None,
             'sha256':hashlib.sha256(raw.read_bytes()).hexdigest()}
-    catalogue={'schemaVersion':2,'catalogID':'gla-2025-all','generatedAt':now,'sources':[source], 'items':items}
+    catalogue={'schemaVersion':3,'catalogID':'gla-2025-all','generatedAt':now,'sources':[source], 'items':items}
     counts=dict(collections.Counter(r['status'] for r in results))
     summary={'sourceRecords':len(features),'converted':len(items),'lookupsCompleted':sum(r['status']!='not_checked' for r in results),
              'byStatus':counts,'recordsWithDataWarnings':sum(bool(r['dataWarnings']) for r in results)}

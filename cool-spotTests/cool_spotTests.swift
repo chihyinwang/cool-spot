@@ -6,6 +6,203 @@ import MapKit
 @MainActor
 final class CoolSpotTests: XCTestCase {
 
+    func testReviewedCommunityContributionPreservesAnswersPhotosAndIdentityAcrossRelaunch() throws {
+        let suite = "publication-test-\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        var store = PrototypeStore.catalogStore(reportDefaults: defaults)
+        var draft = PlaceContributionDraft(kind: .unlisted, anchor: .init(latitude: 51.48, longitude: -0.15))
+        draft.values.name = "TEST Cooling room"
+        draft.values.locationConfirmed = true
+        draft.values.setting = .indoors
+        draft.values.type = .other
+        draft.values.features = [.fans, .waterFeature, .drinkingWater]
+        draft.values.seating = .limited
+        draft.values.toilets = .nearby
+        draft.values.staffedWhenOpen = .no
+        draft.values.wheelchairAccess = .no
+        draft.values.tables = .yes
+        draft.values.access = .purchase
+        draft.values.entryEligibility = .limited
+        draft.values.locationDetails = "Room beside reception"
+        draft.values.stayLimit = "No stated limit"
+        draft.values.note = "Ask staff for a drinking glass."
+        draft.values.sourceCorrection = "Private review reason"
+        draft.values.photo = UIGraphicsImageRenderer(size: CGSize(width: 20, height: 20)).pngData { context in
+            UIColor.green.setFill(); context.fill(CGRect(x: 0, y: 0, width: 20, height: 20))
+        }
+        let originalCount = store.spots.count
+        XCTAssertTrue(store.submitPlaceContribution(draft))
+        let photoID = try XCTUnwrap(store.contributions.first?.photoID)
+        defer { try? FileManager.default.removeItem(at: PrototypePhotoStorage.directory.appendingPathComponent(photoID)) }
+        XCTAssertEqual(store.spots.count, originalCount, "Pending facts and photos must not become public.")
+        store = PrototypeStore.catalogStore(reportDefaults: defaults)
+        XCTAssertEqual(store.contributions.first?.id, draft.id)
+        XCTAssertEqual(store.contributions.first?.status, .inReview)
+        XCTAssertNotNil(store.contributions.first?.placeDraft?.values.photo)
+        XCTAssertTrue(store.publishContribution(draft.id), store.contributionError ?? "")
+        XCTAssertTrue(store.publishContribution(draft.id), "Publishing twice must be idempotent.")
+        store = PrototypeStore.catalogStore(reportDefaults: defaults)
+        let spot = try XCTUnwrap(store.spot(draft.id.uuidString))
+        XCTAssertEqual(store.spots.count, originalCount + 1)
+        XCTAssertEqual(spot.features, [.fans, .waterFeature, .drinkingWater])
+        XCTAssertEqual(spot.seating, .limited)
+        XCTAssertEqual(spot.type, .other)
+        XCTAssertEqual(spot.information.toilets, .nearby)
+        XCTAssertEqual(spot.information.staffedWhenOpen, false)
+        XCTAssertEqual(spot.information.wheelchairAccessible, false)
+        XCTAssertEqual(spot.information.tables, true)
+        XCTAssertEqual(spot.information.postedStayLimit.status, .noStatedLimit)
+        XCTAssertEqual(spot.information.additionalInformation, draft.values.note)
+        XCTAssertEqual(spot.photos.count, 1)
+        XCTAssertEqual(spot.photos.first?.contributionID, draft.id.uuidString)
+        XCTAssertNotNil(UIImage(contentsOfFile: try XCTUnwrap(PrototypePhotoStorage.fileURL(for: spot.photos[0].imageURL)).path))
+        XCTAssertEqual(store.contributions.first?.status, .published)
+        XCTAssertTrue(store.visitReports.isEmpty)
+        XCTAssertTrue(store.visitConfirmedAt.isEmpty)
+        XCTAssertNil(store.activePresenceSpotID)
+        let item = try XCTUnwrap(spot.catalogueItem)
+        let data = try JSONEncoder().encode(item)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertFalse(String(decoding: data, as: UTF8.self).contains("Private review reason"))
+        XCTAssertTrue(json["hours"] is NSNull)
+        let address = try XCTUnwrap(json["address"] as? [String: Any])
+        XCTAssertTrue(address["countryCode"] is NSNull, "An unmatched coordinate must not invent a London address.")
+        let access = try XCTUnwrap(json["access"] as? [String: Any])
+        XCTAssertNil(access["instructions"])
+        XCTAssertNil(access["postedStayLimitMinutes"])
+        let reopened = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        XCTAssertEqual(reopened.values.stayLimit, "No stated limit")
+        XCTAssertEqual(reopened.values.note, draft.values.note)
+        XCTAssertEqual(reopened.values.toilets, .nearby)
+        XCTAssertFalse(reopened.isDirty)
+        // Export the actual Swift-produced record so the independent JSON Schema validator can inspect it.
+        try data.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("coolspot-publication-contract.json"))
+    }
+
+    func testReviewedEditsPatchOnlyChangedGLAFactsAndKeepFieldLevelEvidence() throws {
+        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let spot = try XCTUnwrap(store.spots.first { $0.name == "Canning Town Library" })
+        let original = try XCTUnwrap(spot.catalogueItem)
+        var first = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        first.values.tables = .yes
+        var second = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        second.values.staffedWhenOpen = .no
+        XCTAssertTrue(store.submitPlaceContribution(first))
+        XCTAssertTrue(store.submitPlaceContribution(second))
+        XCTAssertTrue(store.publishContribution(first.id))
+        XCTAssertTrue(store.publishContribution(second.id), store.contributionError ?? "")
+        let updated = try XCTUnwrap(store.spot(spot.id)?.catalogueItem)
+        XCTAssertEqual(store.spot(spot.id)?.sourceLabel, "GLA · 2025 · Local edits")
+        XCTAssertEqual(updated.id, original.id)
+        XCTAssertEqual(updated.hours, original.hours)
+        XCTAssertEqual(updated.address, original.address)
+        XCTAssertEqual(updated.mapReferences, original.mapReferences)
+        XCTAssertEqual(updated.access.tables, .yes)
+        XCTAssertEqual(updated.access.staffedWhenOpen, .no)
+        XCTAssertEqual(updated.access.drinkingWater, original.access.drinkingWater)
+        let evidence = try XCTUnwrap(updated.provenance)
+        XCTAssertEqual(evidence.first { $0.recordID == first.id.uuidString }?.fields, ["/access/tables"])
+        XCTAssertEqual(evidence.first { $0.recordID == second.id.uuidString }?.fields, ["/access/staffedWhenOpen"])
+        XCTAssertFalse(evidence.filter { $0.sourceID == "gla-cool-spaces-2025" }.flatMap(\.fields).contains("/access/staffedWhenOpen"))
+    }
+
+    func testConflictingReviewedEditsDoNotSilentlyOverwritePublishedFacts() throws {
+        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let spot = try XCTUnwrap(store.spots.first)
+        var first = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        var second = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        first.values.access = .purchase
+        second.values.access = .entryFee
+        XCTAssertTrue(store.submitPlaceContribution(first))
+        XCTAssertTrue(store.submitPlaceContribution(second))
+        XCTAssertTrue(store.publishContribution(first.id))
+        XCTAssertFalse(store.publishContribution(second.id))
+        XCTAssertEqual(store.spot(spot.id)?.access, .purchase)
+        XCTAssertNotNil(store.contributionError)
+        guard case .actionNeeded = store.contributions.first(where: { $0.id == second.id })?.status else {
+            return XCTFail("A conflict must remain visible for review.")
+        }
+    }
+
+    func testUnchangedNegativeWaterFactSurvivesOtherFeatureEdits() throws {
+        var item = try XCTUnwrap(PrototypeCatalog.bundled().items.first)
+        item.access.drinkingWater = .no
+        let spot = item.makeSpot()
+        let store = PrototypeStore(catalogSpots: [spot])
+        var draft = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
+        draft.values.features.insert(.waterFeature)
+        XCTAssertTrue(store.submitPlaceContribution(draft))
+        XCTAssertTrue(store.publishContribution(draft.id))
+        XCTAssertEqual(store.spot(spot.id)?.information.drinkingWater, false)
+        XCTAssertEqual(store.spot(spot.id)?.catalogueItem?.access.drinkingWater, .no)
+    }
+
+    func testAreaDescriptionDoesNotSplitTheSelectedVenueIdentity() throws {
+        let place = RecognisedPlace(id: "apple-maps:I7E8561E6022ED614", name: "Example building", address: "Example address",
+                                    latitude: 51.48, longitude: -0.15, type: .unknown, distance: "", hasTrustedType: false)
+        let store = PrototypeStore(catalogSpots: [])
+        var draft = PlaceContributionDraft(kind: .recognised, anchor: place.coordinate, place: place)
+        draft.values.setting = .indoors
+        draft.values.features = [.fans]
+        draft.values.locationDetails = "Room on the upper floor"
+        XCTAssertTrue(store.submitPlaceContribution(draft))
+        XCTAssertTrue(store.publishContribution(draft.id), store.contributionError ?? "")
+        let spot = try XCTUnwrap(store.spot(draft.id.uuidString))
+        XCTAssertEqual(spot.applePlaceID, "I7E8561E6022ED614")
+        XCTAssertEqual(spot.detailsApplePlaceID, "I7E8561E6022ED614")
+        XCTAssertEqual(spot.catalogueItem?.location.scope, .venue)
+        XCTAssertEqual(spot.type, .unknown)
+        XCTAssertEqual(store.existingSpot(for: place)?.id, spot.id, "Area text must not cause duplicate search results for the selected venue.")
+    }
+
+    func testExplicitAreaRelationshipUsesParentDetailsWithoutAliasingItsIdentity() throws {
+        var item = try XCTUnwrap(PrototypeCatalog.bundled().items.first { $0.matchedAppleID != nil })
+        let parentID = try XCTUnwrap(item.matchedAppleID)
+        item.location.scope = .specificArea
+        item.mapReferences?[0].relationship = "within_place"
+        let spot = item.makeSpot()
+        XCTAssertNil(spot.applePlaceID)
+        XCTAssertEqual(spot.detailsApplePlaceID, parentID)
+        let parent = RecognisedPlace(id: "apple-maps:\(parentID)", name: item.name, address: item.address.display,
+                                     latitude: item.location.latitude, longitude: item.location.longitude, type: .library, distance: "")
+        XCTAssertNil(PrototypeStore(catalogSpots: [spot]).existingSpot(for: parent))
+    }
+
+    func testStayLimitPreservesNoStatedLimitAndCustomDurationWithoutInventingUnknownValues() throws {
+        for minutes in [1, 30, 60, 95, 120, 1499] {
+            let value = CatalogStayLimit(status: .limited, minutes: minutes)
+            XCTAssertEqual(try CatalogStayLimit.fromForm(value.formValue), value)
+        }
+        XCTAssertEqual(try CatalogStayLimit.fromForm("No stated limit").status, .noStatedLimit)
+        XCTAssertEqual(try CatalogStayLimit.fromForm("Not sure"), .unknown)
+        XCTAssertEqual(try CatalogStayLimit.fromForm(""), .unknown)
+        XCTAssertThrowsError(try CatalogStayLimit.fromForm("0 hr 0 min"))
+        XCTAssertThrowsError(try CatalogStayLimit.fromForm("invalid"))
+    }
+
+    func testLegacyCatalogueAccessAliasesStillReadButEncodeOnlyCurrentNames() throws {
+        let item = try XCTUnwrap(PrototypeCatalog.bundled().items.first)
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(item)) as? [String: Any])
+        var access = try XCTUnwrap(json["access"] as? [String: Any])
+        access.removeValue(forKey: "postedStayLimit")
+        access.removeValue(forKey: "areaDescription")
+        access["postedStayLimitMinutes"] = 60
+        access["instructions"] = "Reading room"
+        json["access"] = access
+        let decoded = try JSONDecoder().decode(PrototypeCatalog.Item.self, from: JSONSerialization.data(withJSONObject: json))
+        let spot = decoded.makeSpot()
+        XCTAssertEqual(spot.information.areaDescription, "Reading room")
+        XCTAssertEqual(spot.information.postedStayLimit.minutes, 60)
+        XCTAssertEqual(PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot).values.stayLimit, "1 hour")
+        let encoded = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(decoded)) as? [String: Any])
+        let newAccess = try XCTUnwrap(encoded["access"] as? [String: Any])
+        XCTAssertEqual(newAccess["areaDescription"] as? String, "Reading room")
+        XCTAssertNil(newAccess["instructions"])
+        XCTAssertNil(newAccess["postedStayLimitMinutes"])
+    }
+
+
     func testCatalogueSourceAdaptsCommunityWithoutRequiringGLADatasetMetadata() throws {
         let source = try JSONDecoder().decode(PrototypeCatalog.CatalogueSource.self,
             from: Data(#"{"id":"community","provider":"community","label":"Community reports"}"#.utf8))
@@ -147,7 +344,7 @@ final class CoolSpotTests: XCTestCase {
         var draft = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
         XCTAssertEqual(draft.values.wheelchairAccess, .yes)
         XCTAssertEqual(draft.values.staffedWhenOpen, .yes)
-        XCTAssertEqual(draft.values.toilets, .yes)
+        XCTAssertEqual(draft.values.toilets, .onSite)
         XCTAssertFalse(draft.isDirty)
         draft.values.staffedWhenOpen = .no
         XCTAssertTrue(draft.canSend)
@@ -163,7 +360,7 @@ final class CoolSpotTests: XCTestCase {
         let reconciled = proposal.reconciled(with: spot)
         XCTAssertEqual(reconciled.values.wheelchairAccess, .no)
         XCTAssertEqual(reconciled.values.staffedWhenOpen, .yes)
-        XCTAssertEqual(reconciled.values.toilets, .yes)
+        XCTAssertEqual(reconciled.values.toilets, .onSite)
     }
 
     func testCatalogLoadsAllSourcePlacesWithoutFabricatingVisitorEvidence() throws {

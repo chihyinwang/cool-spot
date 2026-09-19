@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 3,
+  "catalogID": "community-examples",
+  "generatedAt": "2026-09-18T22:32:22Z",
+  "sources": [
+    {
+      "id": "prototype-community-examples",
+      "provider": "community",
+      "label": "Example cooling info",
+      "isExample": true
+    }
+  ],
+  "items": [
+    {
+      "id": "f536167c-f689-4e46-8e2d-9a144ac03b7e",
+      "name": "Tate Modern",
+      "location": {
+        "latitude": 51.5074983,
+        "longitude": -0.0994222,
+        "scope": "venue"
+      },
+      "address": {
+        "formatted": "Bankside, London SE1 9TG",
+        "line1": null,
+        "line2": null,
+        "locality": "London",
+        "borough": null,
+        "postalCode": null,
+        "countryCode": "GB"
+      },
+      "placeType": "culture",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "cooler_indoors"
+      ],
+      "coolingDetails": null,
+      "additionalInformation": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "eligibilityDetails": null,
+        "seating": "yes",
+        "drinkingWater": "unknown",
+        "toilets": "on_site",
+        "wheelchairAccess": "yes",
+        "staffedWhenOpen": "yes",
+        "tables": "yes",
+        "areaDescription": null,
+        "postedStayLimit": {
+          "status": "unknown",
+          "minutes": null
+        }
+      },
+      "hours": null,
+      "photos": [],
+      "sourceReferences": [
+        {
+          "sourceID": "prototype-community-examples",
+          "recordID": "f536167c-f689-4e46-8e2d-9a144ac03b7e"
+        }
+      ],
+      "provenance": [
+        {
+          "sourceID": "prototype-community-examples",
+          "recordID": "f536167c-f689-4e46-8e2d-9a144ac03b7e",
+          "recordedAt": "2026-09-18T22:32:22Z",
+          "method": "reviewed_contribution",
+          "fields": [
+            "/name",
+            "/location/latitude",
+            "/location/longitude",
+            "/location/scope",
+            "/address/formatted",
+            "/address/locality",
+            "/address/countryCode",
+            "/placeType",
+            "/setting",
+            "/coolingFeatures",
+            "/access/cost",
+            "/access/eligibility",
+            "/access/seating",
+            "/access/toilets",
+            "/access/wheelchairAccess",
+            "/access/staffedWhenOpen",
+            "/access/tables"
+          ]
+        }
+      ],
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "I5D0F2F6C33848101",
+          "relationship": "same_place",
+          "verification": "reviewed",
+          "checkedAt": null
+        }
+      ]
+    },
+    {
+      "id": "bc21d832-6796-46ac-81ac-c96dc242dd18",
+      "name": "Example Community Room",
+      "location": {
+        "latitude": 51.5056,
+        "longitude": -0.095,
+        "scope": "venue"
+      },
+      "address": {
+        "formatted": "Southwark, London",
+        "line1": null,
+        "line2": null,
+        "locality": "London",
+        "borough": null,
+        "postalCode": null,
+        "countryCode": "GB"
+      },
+      "placeType": "community",
+      "setting": "indoors",
+      "coolingFeatures": [
+        "fans"
+      ],
+      "coolingDetails": null,
+      "additionalInformation": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "eligibilityDetails": null,
+        "seating": "yes",
+        "drinkingWater": "yes",
+        "toilets": "none",
+        "wheelchairAccess": "no",
+        "staffedWhenOpen": "yes",
+        "tables": "yes",
+        "areaDescription": null,
+        "postedStayLimit": {
+          "status": "no_stated_limit",
+          "minutes": null
+        }
+      },
+      "hours": null,
+      "photos": [
+        {
+          "id": "example-community-photo-1",
+          "thumbnailURL": "bundle://CommunityPhoto1.jpg",
+          "imageURL": "bundle://CommunityPhoto1.jpg",
+          "width": 1448,
+          "height": 1086,
+          "caption": "Shaded entrance",
+          "capturedAt": null,
+          "publishedAt": null,
+          "attribution": "Illustrative image · Example Community Room",
+          "source": "illustration",
+          "contributionID": null
+        },
+        {
+          "id": "example-community-photo-2",
+          "thumbnailURL": "bundle://CommunityPhoto2.jpg",
+          "imageURL": "bundle://CommunityPhoto2.jpg",
+          "width": 1448,
+          "height": 1086,
+          "caption": "Indoor seating",
+          "capturedAt": null,
+          "publishedAt": null,
+          "attribution": "Illustrative image · Example Community Room",
+          "source": "illustration",
+          "contributionID": null
+        },
+        {
+          "id": "example-community-photo-3",
+          "thumbnailURL": "bundle://CommunityPhoto3.jpg",
+          "imageURL": "bundle://CommunityPhoto3.jpg",
+          "width": 1448,
+          "height": 1086,
+          "caption": "Drinking water",
+          "capturedAt": null,
+          "publishedAt": null,
+          "attribution": "Illustrative image · Example Community Room",
+          "source": "illustration",
+          "contributionID": null
+        }
+      ],
+      "sourceReferences": [
+        {
+          "sourceID": "prototype-community-examples",
+          "recordID": "bc21d832-6796-46ac-81ac-c96dc242dd18"
+        }
+      ],
+      "provenance": [
+        {
+          "sourceID": "prototype-community-examples",
+          "recordID": "bc21d832-6796-46ac-81ac-c96dc242dd18",
+          "recordedAt": "2026-09-18T22:32:22Z",
+          "method": "reviewed_contribution",
+          "fields": [
+            "/name",
+            "/location/latitude",
+            "/location/longitude",
+            "/location/scope",
+            "/address/formatted",
+            "/address/locality",
+            "/address/countryCode",
+            "/placeType",
+            "/setting",
+            "/coolingFeatures",
+            "/access/cost",
+            "/access/eligibility",
+            "/access/seating",
+            "/access/drinkingWater",
+            "/access/toilets",
+            "/access/wheelchairAccess",
+            "/access/staffedWhenOpen",
+            "/access/tables",
+            "/access/postedStayLimit/status"
+          ]
+        }
+      ],
+      "mapReferences": []
+    },
+    {
+      "id": "23e2f374-3e18-445c-8f2a-db3fb7a8c130",
+      "name": "Example Shaded Garden",
+      "location": {
+        "latitude": 51.503,
+        "longitude": -0.0982,
+        "scope": "specific_area"
+      },
+      "address": {
+        "formatted": "Southwark, London",
+        "line1": null,
+        "line2": null,
+        "locality": "London",
+        "borough": null,
+        "postalCode": null,
+        "countryCode": "GB"
+      },
+      "placeType": "park",
+      "setting": "outdoors",
+      "coolingFeatures": [
+        "tree_shade",
+        "water_nearby"
+      ],
+      "coolingDetails": null,
+      "additionalInformation": null,
+      "access": {
+        "cost": "free",
+        "eligibility": "everyone",
+        "eligibilityDetails": null,
+        "seating": "limited",
+        "drinkingWater": "unknown",
+        "toilets": "unknown",
+        "wheelchairAccess": "unknown",
+        "staffedWhenOpen": "no",
+        "tables": "unknown",
+        "areaDescription": null,
+        "postedStayLimit": {
+          "status": "unknown",
+          "minutes": null
+        }
+      },
+      "hours": null,
+      "photos": [],
+      "sourceReferences": [
+        {
+          "sourceID": "prototype-community-examples",
+          "recordID": "23e2f374-3e18-445c-8f2a-db3fb7a8c130"
+        }
+      ],
+      "provenance": [
+        {
+          "sourceID": "prototype-community-examples",
+          "recordID": "23e2f374-3e18-445c-8f2a-db3fb7a8c130",
+          "recordedAt": "2026-09-18T22:32:22Z",
+          "method": "reviewed_contribution",
+          "fields": [
+            "/name",
+            "/location/latitude",
+            "/location/longitude",
+            "/location/scope",
+            "/address/formatted",
+            "/address/locality",
+            "/address/countryCode",
+            "/placeType",
+            "/setting",
+            "/coolingFeatures",
+            "/access/cost",
+            "/access/eligibility",
+            "/access/seating",
+            "/access/staffedWhenOpen"
+          ]
+        }
+      ],
+      "mapReferences": []
+    }
+  ]
+}

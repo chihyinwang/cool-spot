@@ -560,7 +560,7 @@ struct PlaceContributionsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text("Review preview")
+                Text("Review demo · Saved on this device")
                     .font(.subheadline).foregroundStyle(AppStyle.supportingText)
                 ContributionSection(title: "Needs your attention", items: items.filter {
                     if case .actionNeeded = $0.status { true } else { false }
@@ -649,7 +649,7 @@ struct CoolHuntView: View {
             HStack {
                 Text("Place types discovered").font(.headline)
                 Spacer()
-                Text("\(store.unlockedTypes.count)/\(PlaceType.allCases.count) discovered")
+                Text("\(store.unlockedTypes.count)/\(PlaceType.allCases.filter { $0 != .unknown }.count) discovered")
                     .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             }
             ScrollView(.horizontal, showsIndicators: false) {
@@ -666,6 +666,7 @@ struct CoolHuntView: View {
 
 struct PrototypeControlsView: View {
     @ObservedObject var store: PrototypeStore
+    private var latestPlaceContribution: Contribution? { store.contributions.first { $0.kind != .visitReport } }
     var body: some View {
         Form {
             VStack(alignment: .leading, spacing: 10) {
@@ -682,12 +683,18 @@ struct PrototypeControlsView: View {
                 Text("Moves unstarted, confirmed visits back seven days and sets you away. They stay available to report.")
                     .font(.caption).foregroundStyle(.secondary)
                 Divider()
-                Text("Change the newest place contribution to inspect each review outcome.")
+                Text("Simulate review of your newest place contribution on this device.")
                     .font(.caption).foregroundStyle(.secondary)
                 Button("Needs clarification") { store.simulate(.actionNeeded("Please add a clearer photo of the shaded area.")) }
-                Button("Publish") { store.simulate(.published) }
-                Button("Merge with an existing place") { store.simulate(.merged("Riverside Library")) }
+                    .disabled(latestPlaceContribution == nil || latestPlaceContribution?.status == .published)
+                if let latest = latestPlaceContribution {
+                    Text("\(latest.title) · \(latest.status.title)").font(.subheadline)
+                }
+                Button("Publish locally") { store.simulate(.published) }
+                    .disabled(latestPlaceContribution?.status != .inReview)
+                if let error = store.contributionError { Text(error).font(.footnote).foregroundStyle(.red) }
                 Button("Do not publish") { store.simulate(.notPublished("This spot is not open to visitors.")) }
+                    .disabled(latestPlaceContribution == nil || latestPlaceContribution?.status == .published)
             }.padding(.top, 10)
         }
         // Several prototype actions share one form row; keep their tap handling independent.

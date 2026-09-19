@@ -15,8 +15,8 @@ struct PlacePhotoAsset: Codable, Identifiable, Hashable {
 
     var isDisplayable: Bool {
         !id.isEmpty && width > 0 && height > 0 &&
-        ["https", "bundle"].contains(thumbnailURL.scheme ?? "") &&
-        ["https", "bundle"].contains(imageURL.scheme ?? "")
+        ["https", "bundle", "prototype-photo"].contains(thumbnailURL.scheme ?? "") &&
+        ["https", "bundle", "prototype-photo"].contains(imageURL.scheme ?? "")
     }
 
     // Same response shape as remote photos, using bundled URLs only for labelled fixtures.
@@ -158,6 +158,7 @@ private struct PlacePhotoImage: View {
     let fill: Bool
     @State private var attempt = 0
     private var bundledImage: UIImage? {
+        if let file = PrototypePhotoStorage.fileURL(for: url) { return UIImage(contentsOfFile: file.path) }
         guard url.scheme == "bundle", let filename = url.host,
               let file = Bundle.main.url(forResource: (filename as NSString).deletingPathExtension,
                                          withExtension: (filename as NSString).pathExtension) else { return nil }
