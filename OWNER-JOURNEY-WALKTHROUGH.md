@@ -4,16 +4,112 @@
 
 ## 本輪狀態與起點
 
-**Add cooling information 的本輪修正已實作，現在從 B04 做 owner 重測。** 新位置的名稱及照片皆必填；送出前未填完會標示缺漏並定位第一項。接著再測 B05；B03、B06、B10 覆蓋 Pin、選单焦點與照片。以下 agent 證據不代表 owner 已接受版面。
+目前 app 程式基準：`42c0905` — `Improve GLA-to-Apple place matching and Cool Spot discovery`（2026-09-23，owner 委託提交）。16 個檔案包含搜尋排序／場館內降溫區發現、保守配對規則、已核對連結、查詢／抽查資料、測試、互動報表工具、PRODUCT 與 owner 要求的資料討論快照。未 push，未為 commit 重跑測試；staged diff 檢查通過。ViewCoolSpots 未改；此程式基準不代表後續文件 commit 的 HEAD。
+
+**2026-09-23：文件校正。** 依目前程式與目錄更新下方 A–E 現行步驟：改用正常啟動可找到的地點、明確區分持久化與預覽模式、修正審核控制及跨案例前提。40 個案例編號與以下有日期的歷史紀錄保留。本次只核對文件／程式、連結與編號，沒有執行 App、重跑測試或新增 owner 通過紀錄。這兩份文件在 Prototyping 已受 Git 追蹤，依 owner 要求一起提交。
+
+**2026-09-19：十筆真實搜尋／地點配對抽查（ec9fbf9 之上的變更，2026-09-23 提交為 42c0905）。** Owner 授權挑十筆代表案例，確認搜尋 → 正確地點 → 降溫卡／Place details。新增只讀、序列查詢的 `AuditDiscovery.swift`；真實名稱搜尋與必要的地址補查存於 `data/catalogue/apple-discovery-sample.json`，不把 API 回傳視為原生 UI 驗證。十筆案例及逐筆結果見 `data/catalogue/discovery-cases.json`、`data/catalogue/discovery-audit.json`。
+
+修正：地址限定的 Street/St 正規化、門牌在第二行仍參與衝突檢查、公共交通／停車場／廁所候選不可自動當場所。原生 Beckton 搜尋重現兩筆相同圖書館，查 Newham 官方同址別名後接受連結。Green Street 新名稱查詢找到 337–341 Green Street 的正確 ID，拒絕 1.1 km 外的 7 Green Street；Willesden Green 採用官方 95 High Road 的 The Library，保留公車站、Library of Things、牙醫為不同身份；Harold Hill 以地址找到正確 Salvation Army 分點，系統卡電話／網站亦與官方相同，Apple 的 Thrift Store 分類未覆寫 GLA。Ham Library 的縮寫解決；同規則另外改善 Hampton Hill。Streatham 大廳只建立 within_place → 場館詳情，搜尋場館能列出大廳，場所身份不合併。實際搜尋 Ham Library 發現完整名稱埋在其他結果後，已改完整名稱優先。來源事實、250 UUID／座標皆未更動。
+
+限定原生證據：只用 **Cool Spot Contract QA / iPhone 17 Pro Max / iOS 26.4**（D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852），正常持久化 store。十筆均由 Explore 輸入搜尋 → 點 GLA 結果 → 地圖移到來源座標 → 半卡；八笔有已核准連結的 Place details 均實際開卡並讀名稱／地址。Canning Town、Custom House、Beckton、Ham、Green Street、Willesden Green、Harold Hill 為同場所，Streatham 為所屬場館；後者在搜尋場館時可找到大廳。最終排序版本已原生看到 Ham Library 第一筆。Horniman 原生仍有 GLA／Apple 兩筆，未核准身份仍是限制；藥學博物館查無 Apple 場所，GLA 卡可開、没有 Place details，另查 66–68 East Smithfield 地址距 GLA 57 m，沒有擅改來源座標。七個同場所並不代表即時條件或入口位置已實地查證。完整250結果為 143 同場所＋1 所屬場館、87 待判定、19 查無候選；不是144筆皆同一身份。
+
+驗證：Python 三個新增案例先失敗再修正，最終 **11 passed**；最終相關 Swift **7 passed, 0 failures**，含三個新增案例，log `/tmp/coolspot-discovery-final-tests.log`。初次 test 編譯因 optional sourceReferences 缺少 `?` 失敗，修正後相關六項通過；後續排序修正再跑七項，不把初次失敗算通過。v3 schema、250 GLA＋3 社群、穩定 ID、來源 facts 不變與來源保留檢查通過。安裝前 `/tmp/coolspot-discovery-backup` 備份本機資料，最終既有 preferences 原鍵值及 Documents／Application Support 檔案逐值／逐檔一致。未送出提案、未改收藏、未操作 owner 其他模擬器。結果總覽支援本輪10筆、完整250筆與待處理篩選，關係與原生限制分開呈現。未跑完整 suite／裝置矩陣；未修改 ViewCoolSpots。當日未 commit/push；2026-09-23 按 owner 要求提交為 42c0905，未 push。
+
+**2026-09-18：欄位契約修正與本機發布（已納入 ec9fbf9）。** Owner 授權修正逐欄稽核缺口。schema v3 保留 Water nearby、Limited seating、附近／不在現場／沒有廁所，以及 no_stated_limit／unknown／正整數分鐘；Other 與未知類型分開。公開補充使用 additionalInformation，特定區域使用 areaDescription；舊 instructions／postedStayLimitMinutes 可讀不再輸出。GLA 未逐筆提供的 scope／eligibility 保留 unknown，下載時間不再取 filesystem mtime，改為 hash-bound manifest（舊下載時間為 null）。三個社群範例移至 CommunityCatalog.prototype.json，與 250 GLA 共用 decoder；既有 UUID 與 133 自動／4 覆核／94 待覆核／19 無候選配對結果不變。
+
+送審提案／狀態、已發布場所與照片均在正常啟動重開後保留。圖片原檔／縮圖放獨立 device-local 檔案，JSON/preferences 不塞圖片 bytes。You → Settings → Prototype controls → Publish locally 僅模擬本機審核決策；更新只套用 changed fields，保留其他 GLA 事實、身份、visitor evidence、presence 與私人資料；衝突為 Action needed，重複 Publish 不建立重複紀錄／照片。GLA 有本機修改會標 Local edits，欄位 evidence 保留 source record ID 和 recording time。移除僅改標籤、沒有資料套用的 Merge 控制，重複地點保留原 Review update 路徑。可填選項沒有增加新問題，只將 Toilets 原本 Yes/No 改為清楚的地點／可用性選項。未發布或拒絕的提案不進入公开卡；修改理由不公開，public note 在 More information 收合區。Optional area text 不會把已選場所拆成另一筆；只有明確 specific_area + within_place 的資料才引用父場所詳情而不合併身份。
+
+驗證：`/tmp/cool-spot-contract-final-tests.log` **83 passed, 0 failed**（8 個新增測試涵蓋發布／重開／照片／欄位保留／衝突／來源／地址未知／區域身份／舊欄位相容等）；最後 Local edits 文案另以兩個相關模型測試驗證，`/tmp/cool-spot-contract-attribution-tests.log` **2 passed**。GLA 配對規則 8 passed；v3 Schema 驗证 250 GLA + 3 社群例子及 Swift 實際產生、原生提交流程保存的 JSON 皆通過。初次完整測試有一個案例使用了 MapKit 不接受的假 identifier，修正成合法格式後再跑全套；不將初次失敗算作通過。必要的 app/test 編譯成功，未跑裝置／字級／外觀矩陣。
+
+原生：僅新建 **Cool Spot Contract QA**（iPhone 17 Pro Max / iOS 26.4，UDID D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852）。正常持久化 store 的 Example Community Room → Suggest an edit：選 Water nearby、Limited seating、Toilets nearby、輸入 TEST PUBLIC NOTE、從系統 picker 選事先加入該 QA 相簿的示意照片 → Send for review。重開後 In review 保留；Prototype controls → Publish locally → 再重開：同一 ID 的卡顯示 Limited seating、Water nearby、Toilets nearby、More information 下的 TEST PUBLIC NOTE；原兩則 visitor reports／兩人基準保留，Photos 從 3 變 4，See all → 第四張可正常打開並標 Community photo · Local demo。圖片 `/tmp/cool-spot-contract-evidence/published-photo.png`，原生實際發布 JSON `/tmp/cool-spot-contract-evidence/native-published-item.json`。最終版 Canning Town Library 卡的名稱／地址／GLA 2025、AC／水／免費座位及既有 Place details 等入口仍在；沒有無依據的 Open to everyone 或已移除的 hours。填寫時工具小寫輸入出現鍵盤轉碼異常，改用全大寫測試文字後確認 Your changes 有正確內容，不將 AX setValue 的暫時畫面文字當成已保存答案。
+
+未修改 owner 既有模擬器資料、ViewCoolSpots；2026-09-19 依 owner 要求 commit 為 ec9fbf9，未 push。這是有實際資料套用的本機 prototype，沒有伺服器審核、遠端照片上傳或跨裝置同步；不是 250 地點現況逐筆驗證。A–E 40 個編號保留，B06/B11/E01 路徑與 PRODUCT 已更新。
+
+**2026-09-15 owner 指示：** Prototype 只在 iPhone 17 Pro Max 做簡短互動與必要編譯確認；不跑 iPad、多尺寸、Dynamic Type／外觀矩陣。下方歷史裝置證據不代表需要重跑。
+
+**2026-09-18：Photos B、完整 GLA 目錄與配對。** Owner 指定先研究 API 設計，再實作 B，將所有 Cool Spaces 轉為 Cool Spot 並交付完整 JSON／可查看的配對結果。正常啟動已有 250 個 GLA 2025 場所加 3 個既有社群範例。新 producer schema v2／adapter 支援來源參照、欄位 provenance、結構地址、explicit unknown、photos 與已接受 mapReferences；原十筆 UUID 保留。原始 snapshot／校驗碼、兩輪名稱搜尋及舊 ID 的重新解析均保留。結果為 133 自動接受、4 筆 Codex 另查官方來源後接受、94 筆候選待核對、19 筆查無候選，沒有尚未查詢或服務失敗的紀錄。四筆覆核有來源 fingerprint／candidate snapshot；不是 owner 人工驗收。完整輸出為 `data/catalogue/coolspot-catalogue-mapping.json`，app response 不帶候選稽核資料。76 筆有分類／未辨識降溫方式的轉換提醒，保留原資料而非補猜。
+
+B 的操作：搜尋 **Example Community Room → 照片縮圖 → 全螢幕照片 → Next／Previous → Done**；**See all → Photos 相簿 → 選照片 → Done → Back**。照片在 cooling/access 摘要後、Facilities & accessibility 前，最多三張 108 pt 縮圖；GLA 無圖不放空殼。三張圖均為產生的示意素材，caption/attribution 標明 illustration，沒有捏造拍攝時間。相簿兩欄初次檢查發現圖片壓縮欄距，已以明確欄寬修正後原生重看。使用者表單 photo 仍是本機待審提案，沒有新增上傳、自動發佈或遠端媒體服務。
+
+限定證據：iPhone 17 Pro Max／Cool Spot Layout QA 正常持久化啟動，縮圖開對應照片、Next 更新照片與說明、See all 開相簿、第三張圖為 3 of 3 且 Next disabled、相簿 Back 返回相同場所卡均已原生確認。滑動手勢工具未可靠改頁，不將其列為通過證據；原生 TabView 支援分頁，Next/Previous 的實際操作已確認。`/tmp/coolspot-photos-catalogue-final-tests.log` 56 項 CoolSpotTests 通過；最後來源適配改動另以三項相關測試檢查（來源 community/unknown、照片 decoder、A/B/C 搜尋），三項均通過，結果見 `/tmp/coolspot-catalogue-source-adapter-tests.log`。配對規則 8 測試通過；JSON Schema、250 個唯一 ID/來源覆蓋、十個既有 UUID、accepted links 無重複、來源欄位指標及圖片 JSON 驗證通過。建置 `/tmp/coolspot-photos-catalogue-final-build.log` 成功；最終 source-adapter 測試也會編譯 app。這不是遠端服務整合、所有 250 個場所原生逐點檢查或完整 journey 驗收。
+
+更新前備份 `/tmp/coolspot-photos-catalogue-backup-20260918-152356`。正常安裝後 app 既有 preference（journey JSON）與 Documents 逐值／逐檔核對保留，沒有新增收藏、回報、presence 或改私人筆記。結果總覽已在瀏覽器檢查狀態篩選、Canning 搜尋及清除後 250 筆清單；顯示候選差異、來源、查詢與 review 原因，完整候選仍在 JSON。沒有跑 iPad／多尺寸／字級矩陣。
+
+**2026-09-18：淡分隔線與第一區入口（已納入 8674c98）。** Owner 比較互動稿後授權實作：場所資訊、Visitor reports、目前人數／分享操作之間均使用 native Divider，線上下各 16 pt；照片與私人筆記有內容才產生下一區及分隔線。Place details／View nearby streets 同在第一區，街景加入 binoculars；較輕、無右箭頭的 Suggest an edit 位於第一區末端。人數及分享操作共用白底，移除內層藍底及已分享狀態內的額外分隔線。普通場所採同一組 Place details／街景，再以淡線分開 Add cooling information 與有內容的私人筆記。Report a problem 原本僅顯示服務不可用，已移除。未變更 MapKit 請求、收藏、回報／presence 資格或資料。
+
+限定驗證：建置成功 `/tmp/cool-spot-section-layout-build.log`。僅在 Cool Spot Layout QA／iPhone 17 Pro Max 正常啟動：Tate Modern 第一區入口順序／圖示／淡線可見，街景展開取得 Look Around 後可收合；Suggest an edit 開到既有 Update place details，未修改／送出，關閉返回。John Harvard Library 展開卡同時確認 1–2、2–3 的淡線，以及白底人數／Here to cool down?。截圖 `/tmp/cool-spot-section-layout-evidence/tate-first-section.png` 與 `gla-section-dividers.png`。Tate 下方的原生 scroll/drag 工具未可靠移動，改以同一實作的較短 GLA 卡確認第三區，沒有因此調整 app 的捲動程式。沒有宣稱已重測所有分支、ordinary 卡或私人筆記的原生畫面；條件渲染已 source review。純 UI 調整未新增／重跑模型測試，也未跑裝置矩陣。安裝前備份 `/var/folders/qv/yytjvjrd1857dks_nts936g40000gn/T/cool-spot-section-layout-backup-mu9gu29u`；安裝／操作後既有 preferences 的 journey JSON 與 3 個 Documents／Application Support 檔案比對一致。A01／B09／E05 現行步驟已更新，40 個 A–E 編號保留。ViewCoolSpots 未改；後續依 owner 要求提交為 `8674c98`，未 push。
+
+**2026-09-18：場所資訊入口圖示。** Owner 確認後，Facilities & accessibility 加 list.bullet、Read all reports 加 text.bubble；與 Place details 共用可縮放 20 pt 圖示欄及 8 pt 文字間距，保留文字／原有箭頭，區塊標題不加圖示。建置成功 `/tmp/cool-spot-detail-icons-build.log`；只在 iPhone 17 Pro Max 的 Tate Modern 展開卡確認兩個新圖示、三個入口文字對齊及 AX 名稱仍清楚，截圖 `/tmp/cool-spot-detail-icons.png`。純呈現改動未新增／重跑模型測試。安裝前備份 `/tmp/cool-spot-detail-icons-backup`，安裝後既有偏好／journey／Documents 比對保留；未 commit/push，ViewCoolSpots 未改。
+
+**2026-09-18：設施／訪客回報範例與人數確認（已納入 e90bfb4）。** Owner 要求移除 Cooling space hours，UI 已移除，GLA 原始時間資料保留。正常目錄為十筆 GLA＋三個社群範例：Tate Modern（四種設施，三則回報）；Example Community Room（無廁所、輪椅不通行、有值守／桌子，兩則回報）；Example Shaded Garden（輪椅可通行、無值守，廁所／桌子未知，兩則回報）。後兩者是虛構場所，沒有假 Apple Place ID。來源及每則回報均標 Example，固定 UUID／日期，彙總與七則個別回報一致，不注入個人已發佈報告或確認。票數相同時改為「2 reports · Mixed experiences」，避免原來拼接成重複句子。
+
+人數原因：新 GLA／Tate 初始 presenceCount 為 0，CoolSpotPin 只在 >0 顯示數字；所有新地點附近狀態預設 false，How this works 的 2→3 是獨立示範。未找到標記更新缺陷、沒有改動人數行為。兩個明確虛構範例新增固定示範底數 2／1，並非即時遠端人數。QA 以 Prototype controls 模擬 John Harvard Library 附近，I’m cooling off here 後卡片 0→1，半卡上方真實地圖標記顯示 1；Stop sharing 後卡片歸零。未發佈訪客回報。測試後只移除此輪產生的 nearby／presence／John Harvard 到訪確認，回復測試前的 journey snapshot，先檢查其餘資料及既有確認未變，正常啟動。
+
+限定驗證：四項測試通過（GLA 不製造證據、三類搜尋／身分、社群設施與七則回報一致且不污染私人資料、人數附近條件／加一／600 秒到期），`/tmp/cool-spot-community-examples-tests.log`。最終混合體感文案修正後建置成功，`/tmp/cool-spot-community-examples-final-build.log`。只用 iPhone 17 Pro Max；三個社群範例均展開設施確認，Tate 的 Read all reports 可讀三則標記範例的評論，地圖 0→1 已原生確認。Simulator AX 在測試後只有外框，改用原生截圖／座標完成操作，未因此調整 app 行為。截圖 `/tmp/cool-spot-community-examples-evidence/`；更新前備份 `/tmp/cool-spot-community-examples-backup`，原有偏好／文件已核對保留；defaults CLI 無法覆寫 app container 的快取資料，因此關閉此 QA 裝置後只還原此輪修改的 journey key，再正常啟動比對。最終 Community Room 原生截圖確認 Mixed experiences 文案。沒有裝置矩陣或完整 suite，ViewCoolSpots 未改，未 commit/push。
+
+**2026-09-18：時間／設施漸進展開（先前版本的限定驗證）。** Owner 確認後實作：摘要保留費用、座位與入場條件；Cooling space hours 及 Facilities & accessibility 依資料存在才顯示，預設收起、原地展開。設施集中廁所、輪椅通行、人員值守及桌子；已知「沒有」仍可顯示，未知不補值，只有輪椅資料也能顯示此列。飲水／座位不在設施中重複；Place details 固定接在這組補充資訊之後，Visitor reports 的條狀圖與評論保持原有行為。沒有變更 catalogue、表單、保存或回報規則。
+
+限定驗證：iPhone 17 Pro Max／Cool Spot Layout QA 正常持久化啟動，John Harvard Library 初始兩列收起，分別展開看到正確時間與廁所／輪椅／值守，再收合成功；Place details 開到同名圖書館系統卡，關閉回原降溫卡。Tate Modern 與 British Museum 均沒有空時間／設施列，保留相同 Place details。只做這一台的 A/B/C 原生畫面與互動確認；建置成功 `/tmp/cool-spot-disclosures-build.log`，UI-only 調整沒有新增或重跑模型測試。截圖在 `/tmp/cool-spot-disclosures-evidence/`。更新前 `/tmp/cool-spot-disclosures-backup` 備份的 12 個 preferences plist 既有鍵值及 Documents 檔案均保留。`git diff --check` 通過，40 個 A–E 編號與本機文件連結有效；ViewCoolSpots 仍乾淨，未 commit/push。這不是完整 journey 或真人 usability 驗收。
+
+**2026-09-18：來源整合版地點頁與表單（先前版本的限定驗證）。** Owner 授權最新版。A/B/C 共用名稱→地址→分類的 identity header；GLA 或社群來源不決定欄位位置。降溫特色後直接顯示已知費用／座位／資格／輪椅通行／來源時間／特定區域／停留上限，不再有 Hours & access 折疊。來源在分類旁出現一次。Visitor reports 包含統計、日期、展開的條狀圖、停留體驗、個別評論、唯一 Read all reports 和回報入口。Facilities 位於其後，按資料顯示廁所、值守、桌子。十筆 staffedWhenOpen 已按 GLA objectID 對回原始 is_staffed_when_open，未更新 2025 快照年代。表單移除 Wi-Fi／Power outlets／Laptop use allowed；輪椅通行加入 Entry and seating，廁所／值守／桌子置於 Facilities。Specific area · Optional 改為描述特定房間／角落，普通場所預設收起。修正仍送審，不直接改公開事實，也不自動產生體感回報；本輪沒有做真正審核／發佈後端。
+
+限定驗證：編譯成功，9 項相關測試通過：5 項目錄／來源／修正測試與 4 項原有表單提交／重複場所／選填行為。紀錄 `/tmp/cool-spot-unified-details-tests.log`、`/tmp/cool-spot-unified-details-contribution-tests.log`；初次 selector 指向錯誤 class 的 4 項未執行，已改用 ApprovedContributionTests 執行通過，沒有把未執行算通過。沒有重跑全 suite。iPhone 17 Pro Max／Cool Spot Layout QA 正常啟動確認 John Harvard Library 半卡／展開卡的入口資訊與較下方 Facilities；Suggest an edit 可見預填輪椅、廁所、值守及未填的桌子，Specific area 預設收起，沒有三個已移除問題，未送出提案。Tate Modern 保留 Example cooling info，缺少時間／設施時不留空區；British Museum 保留附近探索、Place details、Directions／Save，無 Call／Website。隔離 memory-only place preview 顯示有資料的 Visitor reports，統計與評論集中，隨後已恢復正常持久化啟動。原生手勢／AX 連線在測試後失效，重開 Simulator 並重選原 QA 裝置後恢復；沒有因此更改 app 互動實作。
+
+更新前備份 `/tmp/cool-spot-unified-details-backup`，安裝後既有偏好值一致；圖片在 `/tmp/cool-spot-unified-details-evidence/`（a-gla、b-community、c-ordinary、visitor-reports-example）。沒有裝置矩陣，沒有寫入 ViewCoolSpots，未 commit/push。保留 40 個 A–E 編號；A01/A05/B05/B06 的現行點擊路徑已更新。這些是限定原生與模型證據，不是完整 journey 驗收或真人 usability 結果。
+
+**2026-09-18：縮減場所卡操作（先前限定驗證）。** Owner 指定移除地點頁的 Call／Website，聯絡資訊留在 Place details 系統卡。已刪除普通場所卡的兩個按鈕，保留相容的資料欄位；A/B 原本沒有獨立聯絡按鈕。Tate Modern 移除沒有依據的 ground-floor seating 示範說明，沒有補充資訊就不顯示 Hours & access；GLA 原始欄位不變。Visiting information 的欄位範圍及 How to find this spot 表單是否保留仍在討論，本輪沒有擴改表單。編譯及調整後的單一三狀態測試通過（`/tmp/cool-spot-contact-removal-tests.log`）；只在 iPhone 17 Pro Max 的正常持久化啟動確認：Tate Modern 無空的 Hours & access，British Museum 無 Call／Website 且保留 Place details、Find nearby Cool Spots、Directions、Save。更新前已備份 `/tmp/cool-spot-contact-removal-backup`，安裝後既有偏好值一致。未重跑完整 suite、未跑裝置矩陣，未 commit/push。A05 預期已更新，40 個 A–E 編號不變。
+
+**2026-09-18：A／B／C 正常啟動比較初次驗證（下文記錄當時畫面）。** Owner 要求三種頁面可直接看，並拒絕在 app 按鈕中使用 Apple Maps 品牌。正常 Explore 現有十筆 GLA 加 Tate Modern（Example cooling info），另有可搜尋的 British Museum 普通場所。Tate Modern 的 Apple Place ID 已用 MapKit 查核，降溫／進入內容為明確標示的非 GLA 示範，不填假開放時間或訪客回報。`PlaceInformation` 將可顯示事實與來源分開；Hours & access 依資料存在與否呈現，B 缺 hours 仍可讀 instructions。三種詳情按鈕都叫 Place details；A/B 放在 access 資訊旁、訪客回報之前，街景仍在下方。C 保留 No cooling information yet／附近探索與原本操作。新 MapKit 搜尋結果優先於本機種子資料，保留電話／網站等資料。
+
+限定驗證：五項 catalogue 測試通過（含新增三種狀態、B 精確身分合併，以及原本四項相容檢查），`/tmp/cool-spot-three-states-tests.log`；沒有重跑全 suite。最終 UI 建置成功 `/tmp/cool-spot-three-states-final-build.log`。只用 Cool Spot Layout QA／iPhone 17 Pro Max／iOS 26.4：正常啟動顯示 11 Cool Spots；搜尋 Tate Modern 只有一筆該場所，半卡／展開卡標 Example cooling info，Hours & access 顯示 ground-floor seating 示範說明；Place details 開到真實 Tate Modern 並可關閉返回。Canning Town Library 顯示來源時間、廁所、無障礙與相鄰 Place details，原 Saved 狀態保留。搜尋 British Museum 開普通場所卡，有 Call／Website／Place details／Find nearby Cool Spots，沒有空的 Hours & access。未再逐一開 A/C 系統卡、未重做收藏／回報完整旅程，也未跑任何裝置矩陣。QA 更新前備份 `/tmp/cool-spot-three-states-backup`，安裝後持久化鍵值比對一致。沒有改 owner 其他模擬器或 ViewCoolSpots，未 commit/push。
+
+畫面：`/tmp/cool-spot-three-states-evidence/a-gla.png`、`b-community.png`、`c-ordinary.png`。A05 已加入三種直接搜尋路徑，A–E 40 個固定編號不變。這些是 agent 的限定原生證據；owner 尚待判斷呈現感覺。
+
+**2026-09-18：十筆 GLA JSON 初次整合。** 正常啟動使用自己的 API-shaped JSON，取自 GLA 2025 的十筆真實場所；原始資料共 250 筆。本輪十筆名稱／來源 ID／座標／開放時間已與原始檔核對。每筆另有固定內部 UUID 與人工檢查的 Apple Place ID，搜尋以已知 primary/alternate ID 合併，不靠距離或名稱猜測。沒有新增伺服器、沒有為新場所填入示範回報或人數。舊收藏與筆記保留，來源標成 GLA · 2025；Hours & access 顯示來源開放時間／廁所／無障礙資訊。這是來源快照，不代表 2026 現況已重新查證。
+
+驗證：`/tmp/cool-spot-catalog-build.log` 建置成功；`/tmp/cool-spot-catalog-tests.log` **67 passed、0 failed**，含四項新檢查：十筆資料與無虛構訪客證據、Apple 別名去重與拒絕近距離誤合併、未知代碼／版本處理、既有 Apple 收藏與內部 ID 回報保存。只在 Cool Spot Layout QA（iPhone 17 Pro Max／iOS 26.4）正常持久化啟動：Explore 顯示十筆；搜尋 Canning Town Library 只有一筆該場所，開卡後地圖移到 Canning Town；Hours & access 顯示週一至六 9–20／週日及假日休息、廁所與無障礙；Apple Maps place details 顯示相同圖書館和 Rathbone Market／Barking Road 地址；關閉回原卡。Save → 重啟 → Saved → Canning Town Library 仍為同一降溫卡與 Saved 狀態。既有 Riverside Library 收藏仍在。QA 安裝前資料備份 `/tmp/cool-spot-catalog-backup`；安裝／測試後、建立新測試收藏前既有偏好鍵值一致。截圖 `/tmp/cool-spot-catalog-evidence/canning-hours-saved.png`。未操作 owner 模擬器、未跑裝置矩陣，未 commit/push，未修改 ViewCoolSpots。
+
+本輪只證明十筆整合路線與上述互動；未聲稱已批次配對全 250 筆、完成全部 A–E 或完成真人可用性驗收。回報資格仍是模擬 nearby／先前確認，新的十筆預設不在附近；需試填時在 QA 的 You → Settings → Prototype controls 選該場所。以下舊版驗證有日期，不能當作新目錄逐項重測結果。
+
+**2026-09-17 文案、間距與收藏編輯：** Owner 要求刪除 Across recorded visits／not a guarantee 類旁白、體感條狀圖直接顯示，並重看所有 view 的分組。單人檢視 Explore、兩種場所卡、Saved／Pins、You／報告／貢獻／帳戶／設定／Cool Hunt、表單／說明頁及共用 label/button/image/icon；原生 Form/List 保留平台分組，未為重排而改動資料資格與提交流程。
+
+| View 範圍 | 這次決定與實作 |
+|---|---|
+| Explore／搜尋／附近面板 | 標題與地點／距離靠近；列與列有清楚分隔；移除 Reviewed places only 等重複說明；清除搜尋與篩選保留 44 pt 點擊區 |
+| Cool Spot／一般場所 | 名稱地址為一組、設施與進入條件一組；體感摘要、日期與常駐條狀圖放 How it felt；Visitor reports 集中個別評論預覽、Read all reports 與分享入口；主區塊 32 pt、內部 4–16 pt；一般場所的缺資料狀態與附近按鈕靠近，聯絡／Apple 資訊另成組 |
+| 照片／街景／共用圖示 | 沒有實際照片時不顯示大型裝飾圖；有照片保留；街景維持按需；共用 icon-label 採一致間距與文字基線 |
+| Saved／Pin | Save 一次即完成；Saved → Edit saved place → Save changes；沒有筆記不插入空表單，有筆記才顯示 Your note 摘要；Pin 使用左上 Edit 進同一編輯器，不重複提供兩個 Edit；Cancel 保護修改，移除有筆記的收藏需確認 |
+| Visitor reports／You | 個別回報取消重複上下 padding；作者日期靠近；縮短 demo、保存、感謝、review/account 等旁白，保留精簡狀態與必要 Example 標記 |
+| Contribution／Visit report | Native Form 24 pt 分節、問題與欄位 8 pt；刪除重複 chooser／分類解釋；Posted time limit 直接表達意思；Comment 有固定標籤；必填提示與錯誤保留 |
+| 說明／設定／狀態頁 | 刪除重複動畫／appearance 解說；較長資格解釋留在主動開啟的 help；模擬控制仍有操作說明，避免誤動測試紀錄 |
+
+實際證據：只用 **Cool Spot Layout QA（iPhone 17 Pro Max／iOS 26.4，ADD1EA21-7D94-4DC3-BAF8-87BEAD36DDD6）**，正常持久化啟動。Riverside Library 半卡／完整卡可直接讀圖表，沒有兩句刪除文案或 Reported experiences 按鈕；Save 後不出現空編輯表單。Saved 選單 → 編輯測試筆記 → Save changes → Your note 顯示；再改 → Cancel → Discard changes 保留原筆記；重啟以 Saved 開啟仍有筆記、資訊順序一致。Suggest an edit 的 native Form 分組已查看，未送出。Pin 首輪發現筆記 Edit 與 Edit saved pin 重複，已收斂為左上單一 Edit，最終原生畫面及開啟 Edit saved pin 已確認。建置 `/tmp/cool-spot-layout-build.log`、`/tmp/cool-spot-layout-build-final.log` 成功；未重跑歷史單元測試、iPad／多尺寸／Dynamic Type 矩陣，未修改 owner 模擬器資料。截圖 `/tmp/cool-spot-layout-evidence/place-expanded.png`。這是 source review 與限定原生操作，不是每個狀態的完整可用性驗證。
+
+**2026-09-17 評論入口修正：** Owner 指出統計旁的 View all 與下方可點評論重複且分散。How it felt 現在只放統計／停留時間；Visitor reports 將最新評論、Read all reports 與分享入口放在同一組，預覽文字不可導航。只在同一台 iPhone 17 Pro Max QA 原生確認：點預覽留在原卡、Read all reports 開啟完整回報、Back 回到原卡與原捲動位置；既有 Saved／測試筆記仍在。建置 `/tmp/cool-spot-report-grouping-build.log` 成功，`git diff --check` 通過；截圖 `/tmp/cool-spot-layout-evidence/report-grouping.png`。沒有重跑裝置矩陣或單元測試，回報資料／排序／資格未改。
+
+**2026-09-16 owner 同意並委託實作旅程調整：** 已統一 Explore／Saved 場所卡順序；cooling features 保留單一區塊、先顯示兩項再原地展開；體感摘要縮短，分布改為展開查看；Seating provided 已改顯示文字且保留舊儲存值。一般場所提供 Find nearby Cool Spots，以所選地點為中心找已有 Cool Spot 資料；可擴大範圍、返回原卡，沒有把 Apple 結果當成已確認 Cool Spot。Opening hours & place details 與按需 View nearby streets 為次要資訊。沒有更改 Report／Cooling here 資格或審核流程。資料仍是三個示範 Cool Spot，這次未接入真實降溫目錄。以下原生證據是 agent 操作，不是 owner 驗收。
+
+本輪僅 iPhone 17 Pro Max、iOS 26.4 正常啟動與建置（`/tmp/cool-spot-journey-card-build.log`）；未跑其他裝置或重跑歷史 63 項測試。原生確認 British Museum → Find nearby Cool Spots：1 km 空結果 → 3 km 出现 City Gallery Foyer 2.4 km／Shade beside the playground 2.7 km → 開卡 → 關閉回同一範圍 → Back to The British Museum 回原場所 → 關閉後 British Museum 搜尋字仍保留。結果卡的距離也已核對為 2.4 km from The British Museum (straight-line)，不再顯示 fixture 的 14 min walk。系統卡顯示 Museum 營業時間並返回；展開街景才載入，仍是 Apple 的黑門視角。Riverside Library 的設施可在原區塊展開／收合，半卡顯示 Seating provided。Saved 使用相同 view 與轉 Explore 的程式路徑已檢視；原生分頁座標操作受工具視窗定位問題阻擋，未宣稱這段已完成原生驗證。重裝前備份 `/tmp/cool-spot-journey-backup-20260916-104223`，更新後原有兩個持久化鍵值完全一致。截圖 `/tmp/cool-spot-journey-evidence/cooling-card.png`、`/tmp/cool-spot-journey-evidence/nearby-results.png`。
+
+**2026-09-15：選點會移動地圖，場所卡先顯示半張、可展開；correction 提供名稱與類型選項。Owner 可從 A01/A05/B12 看操作感覺。** 搜尋仍沿用原本的場所頁、Save 與提案表單；本輪沒有改寫 Report／Cooling here／冰棒流程。先前表單的 B04 owner 重測仍待進行，接續 B03/B05/B06/B10。以下 agent 證據不代表 owner 驗收。
 
 | 範圍 | 最新證據 | 仍需確認 |
 |---|---|---|
 | 表單、名稱／照片 | 本輪 iPhone 窄螢幕原生操作：缺名字被攔下，補齊名稱及照片後到 Sent for review；首次漏填定位成功 | Owner 的理解與閱讀舒適度；B03–B05 完整分支 |
 | Entry/cost 與大字體 | 一般字級 Cost／Seating／Tables 同高；iPad 最大字級深色的選項、時長及已知場所無照片送審已操作 | 全部選單取消／返回；iPad 橫向及 split view |
 | 更新既有場所 | 未改資料時清楚提示、不提交；單改 Seating 即可送審 | B09 還原原值、B12 全部移除的原生分支 |
-| 自動測試 | 本輪 48 passed、0 failed，包含新規則及 store 拒絕無效提案；最後 UI 建置成功 | 不代表完整 VoiceOver 或真實可用性測試 |
-| A、C、D、E 其餘流程 | 先前實作／部分原生測試紀錄 | 未改動，也未宣稱此版全部 40 個案例通過 |
+| 自動測試 | 2026-09-15：63 passed、0 failed（原有 61 ＋ 聯絡資料相容／更正送審 2）；最後 UI 建置成功 | 不代表完整 VoiceOver 或真實可用性測試 |
+| 其餘流程 | C/D/E 原實作與 48 項既有測試仍通過；本輪 A05／B01/B02 有新增搜尋證據 | 未宣稱此版全部 40 個案例或完整 VoiceOver 通過 |
 
+
+2026-09-15 Look Around／Apple 詳情延伸：僅在 iPhone 17 Pro Max 確認 Tesco Extra（Grand Depot Road）的街景預覽、Apple Maps place details → 系統卡的 Tesco 品牌圖／營業時間／電話／網站 → 關閉返回同一 cooling 卡，沒有改變 Save 狀態。無覆蓋與載入失敗有提示／重試程式分支，本次未另找地點重現。建置成功（`/tmp/cool-spot-look-around-build.log`）；本次只增加原生 UI 串接，沒有重跑先前 63 項測試或裝置矩陣。截圖：`/tmp/cool-spot-look-around/cooling-card.png`、`/tmp/cool-spot-look-around/apple-place-card.png`。重裝前備份 `/tmp/cool-spot-look-around-backup-20260915-111313`，既有持久化鍵值比對一致。
+
+2026-09-15 A05 街景入口回饋：修正前 British Museum 預覽為黑色住宅門、British Library 為 Midland Road 側面。將有效 Place ID 的請求從 coordinate 改為完整 MKMapItem，與系統卡共用身分；British Museum 仍為同一黑門，Library 仍為側面（視角改成面向紅色外牆），不能宣稱入口問題已修好。附近街景提示已說明可能看不到入口或室內情況。Museum 系統卡顯示正確館名／博物館圖示，關閉可回同一 cooling 卡。本輪僅 iPhone 17 Pro Max 正常啟動與建置成功，未重跑單元測試；紀錄 `/tmp/cool-spot-look-around-location-build.log`，修正前後截圖 `/tmp/cool-spot-look-around-location/`。重裝前備份 `/tmp/cool-spot-look-around-location-backup-20260915-115204`，既有持久化鍵值比對一致。
+
+2026-09-15 簡短原生確認（iPhone 17 Pro Max，iOS 26.4）：Tesco Extra／Grand Depot Road 選點前地圖仍在 London Bridge；修正後定位 Woolwich 並顯示標記與 Half screen 卡。原生 Sheet Grabber 可展開為 Expanded；座標拖曳工具沒有可靠完成上滑，實際手勢感覺留給 owner。此結果顯示 Food market、Call、Website；Add cooling information → correction 可見預填名稱及 12 個既有類型選項，未送出提案。Riverside Library 半張卡仍顯示降溫、費用、體感與導航。沒有重跑 iPad 或其他顯示矩陣。
+
+建置：`/tmp/cool-spot-place-card-build.log`；測試：`/tmp/cool-spot-place-card-tests.xcresult`。重裝前備份在 `/tmp/cool-spot-place-card-backup-20260915-103349`，原有持久化鍵值比較一致。地圖修正以選點前後的原生畫面確認，沒有額外新增只測座標 helper 的測試。這些是 agent 確認，尚未代表 owner 驗收。
 
 證據按需讀取：
 
@@ -23,6 +119,26 @@
 - [留存的 48 項測試結果](.impeccable/review/entry-copy-2026-09-07/test-summary.json)
 
 以上是各次檢查範圍的證據，不等於完整真人可用性驗證。
+
+### 2026-09-14：真實地點搜尋與相容保存
+
+基準：`Prototyping` 的 `7c0a756` 加本輪未提交變更；owner 明確要求 agent 直接實作，保留現有 user flow。另一 worktree 的 `ViewCoolSpots` 仍為 `425e138`，未修改其 Swift、測試或 Xcode 設定，本輪不計入重建 S03。
+
+- 實作：Explore 與 Choose a place 共用 MapKit 搜尋，350 ms debounce、Search 立即送出、清空／離頁取消、忽略舊結果、loading／empty／failure／Try again。保留 fixtures；選到一般場所沿用原頁／原表單，不新增 cooling 證據。Save 保存基本地點資料，舊 snapshot 相容。MapKit 沒提供照片，新結果用 Place illustration。
+- Red → Green 實際驗證：新場所收藏後重新建立 store 找不到詳細資料；搜尋未送 request；舊請求未取消／最新結果未顯示；清空仍發送空查詢。四輪失敗及修正結果保留於 `/tmp/cool-spot-search-{save,request,latest,clear}-{red,green}.xcresult`。其餘搜尋與回歸檢查共 61 passed、0 failed，結果 `/tmp/cool-spot-search-suite.xcresult`。最後 UI 建置紀錄 `/tmp/cool-spot-search-build-final.log`。
+- 原生環境：Cool Spot Compact QA（iPhone SE，375 pt，iOS 18.2）與 Cool Spot Form Tablet QA 18（iPad Air 11-inch M2，iOS 18.2，既有最大 Dynamic Type，Light／Dark）。正常啟動，沒有使用 memory-only preview，也沒有替換 owner 的模擬器或操作其未送出表單。
+
+| 案例 | 實際原生證據 | 範圍限制 |
+|---|---|---|
+| A05 | iPhone 搜尋 British Library，地址為 96 Euston Road, London, NW1 2DB；開原本地點頁 → Save；重開 App → Saved → 同一地點、地址及 Saved 狀態 | 私人備註／舊回報相容有單元測試；未在原生畫面編輯私人備註 |
+| B01/B02 | British Library → Add cooling information；名稱／來源類型帶入、Indoors/Outdoors 沒預選；Change place → 搜尋 Tate Modern → 原表單。iPad 再驗證 British Library 地址保留 | 未實際送出真實場所提案；審核仍為 session-only prototype |
+| A01/A05 | 搜尋 Riverside Library 仍顯示原 Cool Spot，點選開原完整降溫資訊頁；原收藏與 Pin 仍可見 | 未重做 C/D/E 完整原生旅程 |
+| A05／E05 | iPad 搜尋 SW1A 1AA 與 British Library；最大字體／深色的名稱、地址、未有降溫資訊可讀；觀察到 Searching places…。iPhone 軟體鍵盤開啟時可讀完整結果並點入；按 Search 後 Nearby strip 恢復 | 未完成全部 VoiceOver、橫向／split view，iPhone accessibility tree 未穩定提供內容，以原生截圖操作 |
+| A09 | 清空回到原 Explore；失敗、重試及真正空結果有受控測試 | Apple 對亂字仍回傳近似場所，本輪未宣称自然重現原生無結果／網路失敗 |
+
+原生檢查發現並修正：搜尋列的次要文字在 material 背景不可見，改用明確文字色；表單地址改由已選場所解析，避免清空結果後消失；距離標示區分 selected place、Pin 與 example location。窄螢幕軟體鍵盤曾把結果壓到半列，已將非空搜尋聚焦時的 Nearby strip 暫時收起，完成輸入／清空後恢復；這些修正保留導航與表單步驟。
+
+歷史搜尋截圖當時存於 `/tmp/cool-spot-search-evidence/`（iPhone 搜尋、鍵盤、iPad 大字體深色、重啟後 Saved）；2026-09-17 檢查時暫存檔已不在，不再提供失效連結。QA iPad 的外觀已還原為原本的 Light，保留原最大字體；B04 既有 owner 反饋仍未驗收。
 
 ### 2026-09-08：整體流程與資訊層級評估
 
@@ -100,29 +216,40 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 1. 一次只跑一個編號；卡住約 30 秒就截圖，記下原本預期。先查範例資料是否符合前提，找不到測試狀態不等於功能通過或失敗。
 2. 這份有點擊提示的走查用於覆蓋功能。找第一次使用的人做可用性測試時，先只給標題情境與目標，隱藏點擊步驟；記錄他是否自行找到、猶豫在哪裡，以及能否解釋公開／私人結果。提示後完成要另記，不能算自行找到。
 3. 輸入本輪資料時加 `TEST`。取消收藏／丟棄只處理本輪測試資料；保留原有回報、備註與 Pin。資料不足請用隔離 QA 裝置，不清空原本裝置。
-4. 除非写「接上一項」，開始前退出目前表單／地點。公開測試表單用 Close → Discard and close；個人回報用 Finish later。分清兩種草稿的保存範圍，見 PRODUCT。
+4. 除非寫「接上一項」，開始前退出目前表單／地點。公開測試表單用 Close → Discard and close；個人回報用 Finish later。分清兩種草稿的保存範圍，見 PRODUCT。
 5. 每次修正後只重測受影響編號；記錄版本、日期與結果。沒有實際測試就填「待測」，不要沿用舊版的通過狀態。
 
-`→` 是下一個點擊或動作；「返回」是左上角返回；「關閉地點」是 ×。Explore／Saved／You 是底部分頁，Places／Pins 是 Saved 內的分類。下面地點均為 prototype fixture；GPS、搜尋、審核等限制見 PRODUCT。
+`→` 是下一個點擊或動作；「返回」是左上角返回；「關閉地點」是 ×。Explore／Saved／You 是底部分頁，Places／Pins 是 Saved 內的分類。GPS 與審核仍為 prototype，限制見 PRODUCT。
+
+**現行 A–E 一律正常啟動，不加 `--shape-preview`、`--reports-test-fixtures` 或 `--example-catalog`。** 這些參數改用 memory-only store，不能驗證下方的重啟保存。正常啟動有 250 筆 GLA、三筆社群示例與 British Museum 普通場所，並讀取裝置原有紀錄；以下是未經本機修改的初始狀態：
+
+| 用途 | 可搜尋的地點 | 前提 |
+|---|---|---|
+| GLA 資訊／修正 | John Harvard Library、Canning Town Library | 初始沒有 visitor reports 或示範人數；沒有填的資格／設施不應推測。 |
+| 非 GLA 降溫資訊 | Tate Modern | 三則 Example 回報、零示範人數，可開真實場所的 Place details。 |
+| 個人回報／人數／草稿 | Example Community Room、Example Shaded Garden | 各有兩則 Example 回報；固定示範人數分別為二、一。示範回報不給目前使用者到訪資格。 |
+| 普通場所／新增提案 | British Museum | 應顯示 No cooling information yet。British Library 已在 GLA 目錄，不能用來測這個分支。 |
+
+既有本機回報／發布可能改變上述狀態，先確認前提再測。B11／E01 會持久化測試提案，C03／D04 的日期模擬會修改所有「已確認、尚未開始回報」的造訪；需要這些情境時使用隔離 QA iPhone 17 Pro Max，只建立本輪資料，不重置 owner 裝置。若 British Museum 已在該 QA 本機發布成 Cool Spot，改用另一個明確顯示 No cooling information yet 的普通場所，整組相關步驟使用同一個名稱。
 
 ## A：找地點、閱讀、私人儲存
 
 ### A01｜很熱，想判斷去哪裡
 
-1. Explore → 底部 **Cool Spots nearby** → **Riverside Library**。同一地點也能直接點地圖標記。
-2. 往下讀：場所名稱、費用／座位、已知的進入資格、Opening hours、體感摘要與三種回報數。
-3. **Show all 7 cooling features** → **Show fewer cooling features**。
-4. 往下 → **How long people stayed** → 再點一次收合。
+1. Explore → 搜尋 `John Harvard Library` → 點同名 Cool Spot；也可從底部 **Cool Spots** 或地圖標記開啟。
+2. 確認地圖移到場所、半卡上方仍看得見標記。讀名稱、GLA · 2025、降溫設施與費用／座位；上滑展開。
+3. 降溫特色下方讀有資料的費用、座位與使用資格；未知資格不應顯示 Open to everyone。不再顯示 Cooling space hours；**Facilities & accessibility** 預設收起，點開讀廁所／輪椅通行／人員值守。再次點擊可收合，座位／飲水不重複。來源在分類旁；同組的 **Place details** 開同一場所的補充資訊，關閉回原降溫卡；**View nearby streets** 緊接其後，第一區末端是較輕的 **Suggest an edit**。
+4. 場所資訊、Visitor reports、目前人數／分享操作三區之間均有淡分隔線；人數與 Here to cool down? 共用白底，沒有內層藍色卡片。新場所 **Visitor reports → No reports yet**；沒有捏造體感條狀圖。A05 的社群示例在正常啟動即可檢查回報分布，常駐顯示而非按鈕收合。
 
-**觀察：** 你能否決定去不去、還缺什麼資訊？人數、座位、涼不涼是否被誤讀成同一件事？這裡的 opening hours 仍是未知，沒有實際時刻表。
+**觀察：** 是否足以決定去不去、還缺什麼？GLA 時間仍留在資料中但不在 app 卡顯示；要看場所時間可開 Place details，資料依系統卡提供。座位表示設有座位，並非現在有空位。
 
 ### A02｜比較兩個地點
 
-1. 關閉地點 → Explore 底部地點列橫向滑動 → **Shade beside the playground**。
-2. 比較它的三種體感回報、樹蔭、入場、座位與即時人數。
-3. 關閉 → **City Gallery Foyer** → 往下到 Visitor reports。
+1. 關閉地點 → Explore 搜尋 **Example Shaded Garden** → 開啟同名 Cool Spot。
+2. 比較降溫特色、入場／座位資訊與 Visitor reports；體感分布預設顯示。
+3. 關閉 → 搜尋 **Example Community Room** → 開啟並讀 Visitor reports 與目前人數。
 
-**觀察：** 哪些資料是場所資訊，哪些是一次造訪的經驗？如果 City Gallery Foyer 沒有個別回報，應顯示 **No individual reports to read yet**，不會有 View all；它仍可能有示範彙總數，這是目前資料不完整，請記下是否令人困惑。
+**觀察：** 哪些是場所資訊、哪些是一次造訪的經驗？這兩個虛構場所各有兩則 Example 回報，統計應來自同一批個別紀錄；有本機回報時再加上本機資料。花園／社區空間的固定示範人數是一／二，不是遠端即時使用者。
 
 ### A03｜用篩選縮小範圍
 
@@ -134,26 +261,37 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### A04｜定位、暫不提供定位、移動地圖
 
-1. Explore → **Nearby**。若出現 **Use your current location?**，先選 **Not now** → 搜尋框输入 `Riverside`，確認仍可搜尋。
+1. Explore → **Nearby**。若出現 **Use your current location?**，先選 **Not now** → 搜尋框輸入 `John Harvard Library`，確認仍可搜尋。
 2. 清空搜尋框 → Nearby → 若再次出現說明，選 **Continue**。
 3. 拖動地圖 → **Search this area**。
 
 **目前行為：** 說明是 App 內的模擬流程，不是 iOS 真正的定位授權。已按過 Continue 時不一定再問。Search this area 目前只收起按鈕，不會重新取得該區資料；地圖移動也不會改變模擬的所在地。
 
-### A05｜搜尋尚無降溫資料的場所
+### A05｜搜尋已知 Cool Space 與尚無降溫資料的場所
 
-1. Explore → 搜尋框输入 `Riverside Café` → 點 **Riverside Café**。
-2. 讀 **No cooling information yet** → 點 **Save**；若本來已 Saved，不用取消舊收藏。
-3. 關閉地點 → Saved → **Places** → Riverside Café。
-4. 在 Private details 只對本輪測試資料填名稱／備註 → **Save private details** → 確認 Private details saved → 關閉地點 → 重開確認。
+在同一次正常啟動中比較三種狀態，不需 Run Arguments：
 
-**觀察：** 收藏是否被誤認為公開新增 Cool Spot？私人名字是否和場所原名分得清？普通場所現在也有 Directions；已收藏時在同一場所頁編輯私人紀錄，也能直接點 Saved 取消收藏。
+- **A：Canning Town Library** → GLA · 2025；摘要後為預設收起的 Facilities & accessibility，以及 Place details；展開有廁所／輪椅／值守，沒有 Cooling space hours；Place details 開同一圖書館。
+- **B：Tate Modern** → Example cooling info；降溫、費用、座位與使用資格仍可見；Facilities & accessibility 顯示範例的廁所／輪椅／值守／桌子，Visitor reports 有三則標 Example 的回報，統計與列表一致。Place details 開真實 Tate Modern 卡。另搜 Example Community Room（含沒有廁所／輪椅不通行）及 Example Shaded Garden（部分未知、沒有工作人員），各有兩則回報；兩者為虛構場所，沒有捏造 Apple 場所卡連結。這是非 GLA 的示範降溫資訊，不是實際社群回報或重新查證的場所承諾。
+- **C：British Museum** → No cooling information yet／Find nearby Cool Spots；沒有空的 Cooling space hours 或 Facilities & accessibility 區；詳情按鈕同樣叫 Place details，名稱／地址／分類順序與 A/B 一致。
+
+本輪 A05 抽查可搜尋 Canning Town Library、Custom House Library、Beckton Library、Ham Library、Green Street Library、Library at Willesden Green、Streatham Ice and Leisure Centre、Salvation Army Centre (Harold Hill)、Horniman Museum、Museum of the Royal Pharmaceutical Society。完整名稱相符的 Cool Spot 應先顯示；Streatham 場館與大廳保持不同身份；Horniman 仍有待核對重複結果。
+
+A/B/C 的搜尋結果可能另有 MapKit 近似場所。B 同一場所不應同時出現一筆普通場所與一筆 Cool Spot。接著可用以下普通場所分支檢查收藏／返回。
+
+1. Explore → 搜尋框輸入 `British Museum`（確認仍是 No cooling information yet 的普通場所）→ 核對地址 → 點選該場所。
+2. 確認地圖移到該場所、出現標記及半張卡；讀 **No cooling information yet**，有來源資料時可見分類；地點頁不提供 Call／Website，聯絡方式留在 Place details。上滑展開；點 **View nearby streets** 才載入附近街景，標示為附近街景。有 Place ID 時可點 **Place details** → 關閉應回同一 cooling 卡。點 **Save**；若本來已 Saved，不用取消舊收藏。
+3. 關閉地點 → Saved → **Places** → 剛收藏的場所；重新啟動 App 後再開一次，名稱、地址與 Saved 應仍正確。
+4. **Saved → Edit saved place**；只對本輪測試資料修改 Name in Saved／Your note → **Save changes** → 回原場所，Your note 應顯示摘要；關閉／重啟後仍保留。再修改 → Cancel → Discard changes 應保留之前內容。
+5. 同一普通場所 → **Find nearby Cool Spots**：地圖以這個場所為中心，顯示 1 km 內已有資料的結果。空結果可 **Search a wider area**。點結果開降溫卡 → 關閉應回原範圍；**Back to [原場所]** → 關閉原卡後，Explore 搜尋字應保留。從 Saved 進入時會切至 Explore，使用該收藏場所名稱作搜尋上下文。距離是從該場所起算的直線距離，不是步行時間。
+
+**觀察：** 收藏是否被誤認為公開新增 Cool Spot？私人名字是否和場所原名分得清？普通場所現在也有 Directions；已收藏時用 Saved 選單編輯或 Remove from Saved；不再突然出現第二個儲存表單。
 
 ### A06｜收藏／取消收藏已存在的 Cool Spot
 
-1. Explore → **Riverside Library** → **Save**（若原本已 Saved，直接下一步）。
-2. 關閉 → Saved → Places → Riverside Library，應直接開完整地點頁。
-3. 只有在這是本輪新收藏時，點 **Saved** 取消 → 關閉 → 確認 Places 已移除；再從 Explore 收藏回來。
+1. Explore → **John Harvard Library** → **Save**（若原本已 Saved，直接下一步）。
+2. 關閉 → Saved → Places → John Harvard Library，應開相同資訊順序的地點頁，不會換成照片優先。
+3. 只有在這是本輪新收藏時，點 **Saved → Remove from Saved** 取消；有筆記時須再確認 → 關閉 → 確認 Places 已移除；再從 Explore 收藏回來。
 
 **觀察：** 已有 Cool Spot 與普通場所的 Saved 入口是否都合理？取消收藏不應刪除你的回報。
 
@@ -169,17 +307,17 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 ### A08｜從 Saved 存 Pin、命名並找回
 
 1. Saved → 右上 Pin 按鈕（**Save a pin here**）→ **Save pin** → **View pin**；也可從 Pins 開最新 Dropped pin。
-2. Private details → 名稱填 `TEST 河邊樹蔭` → 備註填 `TEST 靠牆的長椅` → **Save private details**。
+2. 左上 **Edit** → Name in Saved 填 `TEST 河邊樹蔭` → Your note 填 `TEST 靠牆的長椅` → **Save changes**。
 3. **Done** → 再從 Pins 開剛存的項目 → 核對名稱、備註、位置。
 
 **保留給 B03：** 使用這個測試 Pin，確認公開提案不會自動帶入私人文字。目前沒有刪除 Pin 的使用者入口；不必連續建立很多個。
 
 ### A09｜離開 App 去導航／搜尋不到
 
-1. Explore → Riverside Library → **Directions** → 檢查交給 Apple Maps 的步行目的地 → 返回 Cool Spot；不用真的出發。
+1. Explore → John Harvard Library → **Directions** → 檢查交給 Apple Maps 的步行目的地 → 返回 Cool Spot；不用真的出發。
 2. 關閉地點 → Explore 搜尋 `TEST nowhere 999` → 觀察結果 → 清空搜尋。
 
-**目前行為：** 兩種場所的 Directions 都是外部地圖連結。無結果時顯示 **No places found**，可改搜尋字詞，或點 **Add cooling information at a location** 進入新增流程；沒有直接把搜尋字詞當成新場所。搜尋仍使用示範資料。
+**目前行為：** 兩種場所的 Directions 都是外部地圖連結。無結果時顯示 **No places found**，可改搜尋字詞，或點 **Add cooling information at a location** 進入新增流程；沒有直接把搜尋字詞當成新場所。搜尋包括 Apple Maps 真實結果與目前目錄；Apple 可能回傳近似結果，不能把隨意字串當成一定無結果。若失敗應顯示 Couldn’t search places 與 Try again，清空後不保留舊結果。
 
 ## B：新增／修正公開場所資訊
 
@@ -187,23 +325,23 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### B01｜從普通場所直接補降溫資訊
 
-1. Explore → 搜尋 `Riverside Café` → Riverside Café → **Add cooling information**。
-2. 核對表單已帶入 Riverside Café；**Indoors or outdoors?** → **Indoors**。
-3. 在 **What helps people cool down?** 選 **Air conditioning**。
-4. 觀察 Send for review 是否可點；先不送，直接接 B06 檢查選填。
+1. Explore → 搜尋 `British Museum` → 核對 Great Russell Street 的場所 → 確認 **No cooling information yet** → **Add cooling information**。
+2. 核對表單帶入同一場所名稱／地址；**Indoors or outdoors?** → **Indoors**。
+3. 在 **What helps people cool down?** 選 **Air conditioning**，只作隔離 QA 表單輸入，不代表已查證該場所冷氣。
+4. 先不送，直接接 B06 檢查選填。按鈕可點不代表資料完整；未填完整時應顯示驗證提示。
 
-**觀察：** 是否不用再選一次場所？Place type 已知時應顯示來源值，不要求重填；其他項目應可略過。
+**觀察：** 是否不用再選一次場所？Place type 已知時應顯示來源值，不要求重填；其他選填項目可略過。
 
-**也測收藏入口：** Saved → Places → Riverside Café → **Add cooling information**。應直接開同一場所的表單，不需要重新搜尋。
+**也測收藏入口：** Saved → Places → A05 收藏的 British Museum → **Add cooling information**。應直接開同一場所的表單，名稱／地址正確；未由 MapKit 提供的場所類型仍為選填，環境不得推測。若已本機發布成 Cool Spot，這會成為更新分支，需另備普通場所。
 
 ### B02｜Explore ＋ 的統一選擇頁
 
 1. 關閉目前公開表單（測試答案可選 **Discard and close**）→ 關閉地點 → Explore → ＋ → **Add cooling information**。
-2. 在 **Nearby places** 點 Riverside Café → 看是否開相同單頁表單 → 返回。
-3. 搜尋框输入 `Market` → **Market Street Supermarket** → 看場所名稱與來源內容 → 返回。
-4. 清空搜尋 → **Riverside Library** → 應開 **Update place details**，不是新增另一個 Library。
+2. 在選擇頁搜尋 `British Museum` → 選尚無降溫資訊的同名場所 → 核對新增表單 → 返回。
+3. 搜尋 `Tate Modern` → 核對 Bankside, London 地址及 **Already on Cool Spot · Update information** → 選結果 → 應開 **Update place details**，帶入既有示例資料 → 返回。
+4. 改搜 `John Harvard Library` → 選既有 Cool Spot → 同樣開更新表單，不建立第二個 Library。
 
-**觀察：** 選項下的 Add cooling information／Already on Cool Spot · Update information 是否足以讓你知道接下來做什麼？
+**觀察：** Nearby places 會包含目前目錄，不保證目標在第一屏；可直接搜尋。選項下的 Add cooling information／Already on Cool Spot · Update information 是否足以預告接下來做什麼？
 
 ### B03｜把私人 Pin 的位置提供給別人
 
@@ -211,31 +349,31 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 1. 關閉公開表單 → Saved → Pins → A08 的 **TEST 河邊樹蔭** → **Add cooling information**。
 2. **Confirm the spot**：確認原本 Pin 的位置 → **Use this spot**。
-3. 核對公開名稱與備註為空，不應出現私人 `TEST` 文字；自行填公開名稱 `TEST Shade beside the playground` → Indoors or outdoors? → **Outdoors** → **Tree shade**。
+3. 核對公開名稱與備註為空，不應出現私人 `TEST` 文字；自行填公開名稱 `TEST Playground shade` → Indoors or outdoors? → **Outdoors** → **Tree shade**。
 4. **Add photo** → 選一張測試照片；名稱及照片皆提供後，不用回答進入資格也可以送審。Required 應使用同樣樣式，跟隨名稱及照片問題。
-5. 確認照片顯示、Send for review 可點；先不送，可接 B10。
+5. 確認照片顯示且必要答案已填；先不送，可接 B10。Send for review 可點本身不代表驗證已通過。
 
-**觀察：** 先回答室內／室外，再填相鄰的名稱與找路描述是否順暢？名稱提示是否清楚歸屬輸入欄？位置只留一個 Change location，進入資格與必填照片是否分得清？
+**觀察：** 先回答室內／室外，再填相鄰的名稱與特定區域描述是否順暢？名稱提示是否清楚歸屬輸入欄？位置只留一個 Change location，進入資格與必填照片是否分得清？
 
-**也測 Pin 對應到已知場所：** 完成本項與 B10 後，Close → Discard and close → 從同一 Pin 再進 Add cooling information → Confirm the spot → **Search nearby places** → **Riverside Café**。應改為為 Café 填資料；退出後，原私人 Pin 的名稱、備註和位置都應保留。
+**也測 Pin 對應到已知場所：** 完成本項與 B10 後，Close → Discard and close → 從同一 Pin 再進 Add cooling information → Confirm the spot → **Search nearby places** → 搜尋並選 **British Museum**（仍無降溫資訊時）。應改為該場所填資料；退出後，原私人 Pin 的名稱、備註和位置都應保留。
 
 ### B04｜搜尋不到，但知道有名稱的場所
 
 **狀態：規則已實作；agent 限定檢查見上方，完整 owner 走查待測。**
 
 1. Explore → ＋ → Add cooling information → 搜尋 `TEST courtyard`。
-2. 無結果 → **Choose a spot on the map** → 在地圖點選位置 → **Use this spot**。
+2. 無結果，或 Apple Maps 的近似結果不是目標場所 → **Choose a spot on the map** → 在地圖點選位置 → **Use this spot**。
 3. **Indoors or outdoors?** 直接選 **Outdoors** → **Place name** 填 `TEST Community Courtyard`，兩題皆應標明必填 → Place type · Optional → **Square, plaza or courtyard**。
 4. 選 Tree shade → 未加照片按 Send，應定位 Photo 並要求照片、不得實際送審；Add photo → 選測試照片 → 確認符合送審條件；先不送。
 
-**觀察：** 三個室內／室外選項是否可直接選，未選時有沒有誤導性預設？是否分得清場所名稱與找路描述？名稱應鼓勵容易辨認的描述，不必假造正式場所名稱；描述欄位不應預留多餘空白。有名稱時照片仍必填。
+**觀察：** 三個室內／室外選項是否可直接選，未選時有沒有誤導性預設？是否分得清場所名稱與特定區域描述？名稱應鼓勵容易辨認的描述，不必假造正式場所名稱；描述欄位不應預留多餘空白。有名稱時照片仍必填。
 
 ### B05｜室內角落、無名位置與改位置
 
 **狀態：規則已實作；agent 限定檢查見上方，完整 owner 走查待測。**
 
 1. 接 B04 表單：清空名稱 → Indoors or outdoors? 選 **Indoors**；將之前選的 Place type 改回 **Not sure**。即使已有照片，缺名稱也不得實際送審。
-2. **How to find this spot · Optional** 填 `TEST Fourth floor, corner by the windows`；加長到多行，確認欄位隨內容增高。
+2. **Specific area · Optional** 填 `TEST Fourth floor, corner by the windows`；加長到多行，確認欄位隨內容增高。
 3. 自訂容易理解的公開名稱 `TEST Fourth-floor window seating` → 選至少一個降溫設施，確認有一張照片 → 確認符合送審條件；切換 Outdoors／Both 也使用相同規則。
 4. 回表單上方 **Change location** → 調整地圖位置 → **Use this spot** → 答案保留。
 5. 關閉本次測試表單。若從 Saved Pin 進入，核對原 Pin 的位置與私人文字沒被改動。
@@ -245,23 +383,23 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 ### B06｜選填資料在同頁完成
 
 1. 在 B01 或其他公開表單 → 展開 **Entry and seating**。
-2. **Who can use this spot?** → **Limited access**，確認不會出現額外填寫區塊；**Cost to use** 選 Free to use，確認免費與學生限定可以並存。
+2. **Who can use this spot?** → **Limited access**，確認不會出現額外填寫區塊；**Cost to use** 選 Free to use，確認免費與 Limited access 可以並存；目前沒有填具體限制對象的欄位。
 3. **Time limit** → Other duration… → Hours 選 1、Minutes 選 30。
-4. 試 **Seating／Tables**，以及 Other facilities 的 **Toilets／Wi-Fi／Power outlets／Laptop use allowed**；再收合兩組。
+4. 試 **Seating／Wheelchair accessible**，以及 Facilities 的 **Toilets／Staff on site when open／Tables**；再收合兩組。確認沒有 Wi-Fi／Power outlets／Laptop use allowed。
 5. **Anything else people should know?** 填 `TEST public note`；重新展開原分組，確認答案保留。
 
 **重點回饋：** Who can use this spot? 有 Everyone／Limited access／Not sure，皆不擋送審。Cost to use 有 Free to use／Purchase required／Entry fee／Not sure。沒有 Who is it limited to? 或 Tickets and booking 填寫區塊。Time limit 是場所公告限制，不是這次造訪待了多久。
 
-**重測錄影中的跳位：** 點一下上方 Place name → 往下滑 → Entry and seating → Cost to use／Seating／Time limit，分別開啟、取消及選值。開選單時背景應停在原位，不跳回名稱區；這項測試不需要送審。
+**重測錄影中的跳位：** 點一下上方 Place name → 往下滑 → Entry and seating → Cost to use／Seating／Posted time limit，分別開啟、取消及選值。開選單時背景應停在原位，不跳回名稱區；這項測試不需要送審。
 
 ### B07｜返回與改選場所
 
-1. Explore → ＋ → Add cooling information → Riverside Café → Indoors or outdoors? 選 Indoors → Air conditioning。
-2. 左上返回 → 再選同一個 Riverside Café → 確認答案保留。
-3. **Change place** → Market Street Supermarket → 讀 **Change to a different place?** → **Keep current place**，或點彈出框外取消 → 返回原表單。
-4. 再 Change place → Market Street Supermarket → **Change place** → 確認不再帶入前一場所的答案。
+1. Explore → ＋ → Add cooling information → 搜尋並選尚無降溫資訊的 British Museum → Indoors or outdoors? 選 Indoors → Air conditioning。
+2. 左上返回 → 再搜尋並選同一場所 → 確認答案保留。
+3. **Change place** → 搜尋並選 **Tate Modern** → 讀 **Change to a different place?** → **Keep current place**，或點彈出框外取消 → 返回原表單。
+4. 再 Change place → Tate Modern → 確認 **Change place** → 應開 Update place details，帶入 Tate 的既有資料，不保留剛才為另一場所選的 Air conditioning。
 
-**觀察：** 是否分清返回、取消這次換場所、確定更換？同一份尚未關閉的公開表單會在記憶體保留答案，避免重填；它不是永久草稿。從已知場所直接進表單時，可能沒有第一層返回鍵，用 Change place 進選擇頁即可。
+**觀察：** 是否分清返回、取消換場所、確定更換？同一份尚未關閉的公開表單在記憶體保留答案；它不是永久草稿。從已知場所直接進表單時可能沒有第一層返回鍵，用 Change place 進選擇頁即可。
 
 ### B08｜離開公開表單而不誤送
 
@@ -274,12 +412,12 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### B09｜只修正既有 Cool Spot 的一項資料
 
-1. Explore → Riverside Library → **Suggest an edit** → 確認標題 Update place details、既有設施已選好。
+1. Explore → John Harvard Library → 第一區末端 **Suggest an edit** → 確認標題 Update place details、既有設施已選好。
 2. 先不修改 → 按 Send for review；應顯示 Change at least one detail before sending an update，不建立提案。
 3. Entry and seating → Seating → 選與原值不同的項目 → 讀 **Your changes**。
 4. 改回原值 → 再按 Send，若無其他改動應提示需修改一項、不提交；再改一次，留給 B11 送審。
 
-**其他入口：** Saved → Places → 已收藏的 Riverside Library → Suggest an edit；或 Explore → ＋ → Add cooling information → Riverside Library。都應開既有資料的修正表單。
+**其他入口：** Saved → Places → 已收藏的 John Harvard Library → Suggest an edit；或 Explore → ＋ → Add cooling information → John Harvard Library。都應開既有資料的修正表單。
 
 ### B10｜照片：選取、取消、更換、移除
 
@@ -288,49 +426,49 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 1. 在 B03 自訂名稱戶外表單 → Add photo → 先取消系統選擇器；其他答案應保留。
 2. 再 Add photo → 選一張測試照片 → 等待載入 → 確認無須另勾「能辨識地點」開關。
 3. **Replace photo** → 選另一張 → **Remove photo**。
-4. 新地圖位置即使有名稱，移除照片後也不得實際送審；再加入照片。另在 B01 已由搜尋選到的 Riverside Café 表單，試一次移除選填照片，確認此分支沒有新增照片要求。
+4. 新地圖位置即使有名稱，移除照片後也不得實際送審；再加入照片。另在 B01 已由搜尋選到的 British Museum 表單，試一次移除選填照片，確認此分支沒有新增照片要求。
 
 **若自然遇到錯誤：** Photo couldn’t be loaded → **OK** → 重新 Add photo。不要刻意找壞檔案或清空相簿；這項不是每次都能重現。照片不會真的上傳。
 
 ### B11｜送審與找回結果
 
-**完整覆蓋時分別送四筆測試資料：** B01 的已知場所、B03 的自訂名稱戶外位置、B04 的有名新場所、B09 的既有 Cool Spot 修正。每筆都用下方同一組步驟核對。送出前完成要保留的返回／照片測試。
+**需要覆蓋四種來源時：** 分別用 B01 的普通場所、B03 的自訂名稱戶外位置、B04 的有名新場所、B09 的既有 Cool Spot 修正。每次重新準備一份表單，完成 B11 → E01 後再送下一筆；控制器只處理最新一筆場所提案，不能指定較早的待審案。其他案例可能已要求丟棄表單，不要假定四份未送出答案會同時保留。送出前完成要保留的返回／照片測試。
 
 1. 在一份已填好的測試提案／修正中 → **Send for review**。
 2. **Sent for review** → 讀說明 → **Done**；若回到 Saved／地點的父頁，先按 Done／× 回主畫面。
 3. You → **Places you’ve added or updated** → **In progress** → 找剛才的地點與 **In review**。
-4. 接 E01 可立刻檢查審核結果；如果先重啟 App，這份場所提案目前會重設，E01 會教你重新準備一筆。
+4. 重啟 App 後確認提案仍在 In review，再接 E01。送審資料與照片會保存，但此時不得出現在公開地點頁。
 
 **目前止點：** 這些紀錄是狀態展示，不能點進去編輯、補件或開提案詳情。送審不會立即改掉地圖上的場所資訊。
 
 ### B12｜來源不正確／移除全部降溫設施
 
-1. Riverside Library → Suggest an edit → **Name or place type is incorrect** → 填 `TEST the place name has changed` → 核對 Your changes。
+1. John Harvard Library → Suggest an edit → **Name or place type is incorrect** → Suggested name 改為 `TEST Updated Library`；Suggested place type 可從既有分類選擇；Additional details 可略過 → 核對 Your changes 的名稱／類型前後值。
 2. 在同一修正表單，取消全部原有降溫設施。
 3. 應出現 Required 的原因欄位；先按 Send，應定位原因欄並提示、不能實際提交 → 填 `TEST the cooling facilities are no longer available` → 核對可送審及 Your changes。
 4. 這是驗證分支，最後 Close → Discard and close 即可。
 
-**目前行為：** 名稱／來源類型不是在主欄位直接覆寫，而是送出更正說明。如果這不符合你的預期，記下來討論。
+**目前行為：** 更正欄位預填原始名稱／類型；只修改有誤的項目即可。送出的是等待審核的建議，保留原始值，不會改動 Apple Maps 或已發布場所。
 
 ## C：分享人數、到訪資格、離開
 
-**準備 C 與 D：** 優先用還沒發布過本次造訪回報的 City Gallery Foyer 和 Shade beside the playground；不動你的舊 Riverside Library 回報。如果已顯示 You’ve shared this visit，改用另一個地點。若三個地點都已發布，標記「C/D 前置資料不足」，不要刪舊回報或改系統時間。
+**準備 C 與 D：** 使用 John Harvard Library、Example Community Room、Example Shaded Garden 尚無自己當次已發布回報／既有草稿的狀態；不修改原有紀錄。館方／社群範例回報不影響此資格。若前提不足，標記「C/D 前置資料不足」或使用隔離 QA，不刪舊回報、不改系統時間。下列 Garden／Room 簡稱分別指這兩個 Example 場所。
 
 **切換模擬所在地的完整路徑：** You → Settings → Prototype controls → **Nearby place** → 選地點或 **Away from all Cool Spots** → 返回 Settings → 返回 You → Explore。它只改測試資格，不會真的追蹤位置，也不會把地圖的固定示範座標搬到該場所。
 
 ### C01｜理解人數動畫
 
-1. Explore → 任一地點 → **How this works**（在 Here to cool down? 區塊下方）。
+1. Explore → 任一 Cool Spot → **How this works**（在 Here to cool down? 區塊下方）。
 2. 讀說明、看地圖上 **2 → 3** → **Pause example** → **Resume example**。
-3. **Done** → 回地點頁，比較原本真實顯示的人數。
+3. **Done** → 回地點頁，比較卡片顯示的人數；其中可能包含固定示範基準。
 
 **觀察：** 你是否理解動畫只是示例？是否誤以為人數等於空位、溫度或全部在場人數？若目前已分享，先 Stop sharing 才會重新看到此入口。
 
 ### C02｜只分享人數，不寫回報
 
-1. 用上述設定把 Nearby place 設為 City Gallery Foyer → Explore → City Gallery Foyer。
+1. 用上述設定把 Nearby place 設為 John Harvard Library → Explore → John Harvard Library（正常目錄即可）。
 2. 記下人數 → **I’m cooling off here**。
-3. 確認人數加一、出現結束時間 → 先不要選下方體感 → **Stop sharing**。
+3. 確認人數加一、出現結束時間 → 收成半卡確認地圖標記顯示 1 → 再展開，先不要選下方體感 → **Stop sharing**，卡片歸零。
 4. 關閉地點 → You → Your reports → 查看 **Visits you can report**。
 
 **應理解：** Stop sharing 停止人數分享，但已建立的私人開始回報資格仍在；沒有選寫回報前，不應當成你填到一半的報告。
@@ -338,15 +476,15 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 ### C03｜離開七天後才開始回報
 
 1. 接 C02，用設定選 Away from all Cool Spots → You → Your reports → Visits you can report。
-2. 確認 Gallery 還有 Share how it felt，先不要點。
+2. 確認 John Harvard Library 還有 Share how it felt，先不要點。
 3. You → Settings → Prototype controls → **Simulate a visit 7 days ago** → 返回 Your reports。
 4. 日期應變成七天前，**Share how it felt 仍可用**。點進去應保留該造訪日期；Finish later 可留下草稿。
 
-**檢查：** 確認過的到訪沒有開始／完成期限。此控制會修改本機示範日期，不是實際等待七天的測試；不改既有草稿與已發布回報。
+**檢查：** 確認過的到訪沒有開始／完成期限。此控制會將所有已確認但尚未開始回報的造訪移到七天前，並設為 Away；只在隔離 QA 的本輪資料操作。這不是實際等待七天的測試，也不改既有草稿與已發布回報。
 
 ### C04｜離開前什麼都沒做／只有收藏
 
-1. 先在 You → Your reports 確認另一地點（優先 Shade beside the playground）沒有未完成回報；不刪除舊資料。
+1. 先在 You → Your reports 確認另一地點（優先 Example Shaded Garden）沒有未完成回報；不刪除舊資料。
 2. Nearby place 選 Away → Explore → 該地點 → **Save**（若已收藏略過）→ 查看 Share how it felt 是否仍不可用。
 3. **Why can’t I share?** → 讀說明 → Done；同時查看 I’m cooling off here 在不附近時是否不可用。
 
@@ -354,7 +492,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### C05｜分享人數後，走體感捷徑
 
-1. Nearby place 改 City Gallery Foyer → Explore → City Gallery Foyer → I’m cooling off here。
+1. Nearby place 改 Example Community Room → Explore → Example Community Room → I’m cooling off here。
 2. 分享成功區塊下方 → **A little cooler** → 進 Your report。
 3. 確認體感已預選；改選 **Not cooler** → **Finish later**。
 4. 回地點頁 → Stop sharing；保留這份草稿，D 輪會繼續使用。
@@ -363,8 +501,8 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### C06｜切換分享地點、重新啟動及十分鐘到期
 
-1. 在附近的 City Gallery Foyer → I’m cooling off here → 記下結束時間。
-2. 關閉地點 → Nearby place 改 Shade beside the playground → Explore → 該地點 → I’m cooling off here。
+1. 在附近的 Example Community Room → I’m cooling off here → 記下結束時間。
+2. 關閉地點 → Nearby place 改 Example Shaded Garden → Explore → 該地點 → I’m cooling off here。
 3. 回前一地點確認只有新地點仍有自己的分享；回新地點記下結束時間。
 4. 關閉並重新開啟 App，在結束時間前查看分享仍在；不用重按分享。等待到顯示的結束時間後再看人數。
 
@@ -376,7 +514,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### D01｜不分享人數，也能開始回報
 
-1. Nearby place 選 Shade beside the playground → Explore → 該地點 → Visitor reports 下方 **Share how it felt**。如果已有草稿，按 Continue report 即可，但略過「預設未選」觀察。
+1. Nearby place 選 Example Shaded Garden → Explore → 該地點 → Visitor reports 下方 **Share how it felt**。如果已有草稿，按 Continue report 即可，但略過「預設未選」觀察。
 2. 初次進入時先不選體感，確認 Publish report 不可用；記錄原 Visit time。
 3. 選 **Not cooler**，確認 Publish 可用；不必填原因、停留或留言。
 4. 先按 **Finish later**，不要發布 → 查看地點頁出現 Continue report。
@@ -385,7 +523,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### D02｜選填、改時間與返回
 
-1. You → Your reports → Unfinished → Shade beside the playground 的 **Continue report**。
+1. You → Your reports → Unfinished → Example Shaded Garden 的 **Continue report**。
 2. **What helped** 展開 → 選 Tree shade、再取消一次；選好測試答案後收合。
 3. **Time here** → 選一個時長；再試 **Prefer not to say** 或 **Not added**，最後留自己想測的答案。
 4. 留言框填 `TEST D02 這裡有樹蔭` → **Visit time** 改為稍早的時間 → Finish later。
@@ -395,7 +533,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 ### D03｜離開、重啟，再續填
 
 1. Nearby place → Away from all Cool Spots → 返回主頁 → 關閉並重新開啟 App。
-2. You → Your reports → Unfinished → Continue report。
+2. You → Your reports → Unfinished → Example Shaded Garden 的 Continue report。
 3. 核對 D02 的體感、設施、停留答案、留言及 Visit time → Finish later。
 
 **觀察：** 從 You 能否直接找到草稿？不應要求重新到場、重新分享人數或先收藏。
@@ -403,77 +541,71 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 ### D04｜已開始的草稿不受時間限制
 
 1. You → Settings → Prototype controls → **Simulate a visit 7 days ago**。
-2. 返回 You → Your reports → Unfinished → Continue report。
+2. 返回 You → Your reports → Unfinished → Example Shaded Garden 的 Continue report。
 3. 確認答案仍可修改、Publish 可用 → Finish later。
 
 **注意：** 控制器只調整未開始回報的造訪日期，所有確認過的到訪都繼續可回報；已開始草稿保留原答案及日期。
 
 ### D05｜同時有兩份草稿，從不同入口找回
 
-1. You → Your reports → 檢查 C05 的 City Gallery Foyer 與 D01 的 Shade 草稿都在 Unfinished。
-2. 打開 Gallery 的 Continue report → Finish later → 再打開 Shade 的，確認兩份答案沒有混在一起。
-3. Explore → Shade → Continue report → Finish later。
-4. 若 Shade 已收藏，關閉地點 → Saved → Places → Shade → Continue report → Finish later。
+1. You → Your reports → 檢查 C05 的 Example Community Room 與 D01 的 Garden 草稿都在 Unfinished。
+2. 打開 Room 的 Continue report → Finish later → 再打開 Garden 的，確認兩份答案沒有混在一起。
+3. Explore → Garden → Continue report → Finish later。
+4. 若 Garden 已收藏，關閉地點 → Saved → Places → Garden → Continue report → Finish later。
 
 **觀察：** You、地點頁和已收藏地點是否回到同一份草稿？Saved 沒有收藏該地點時不會憑空出現這條路徑。
 
 ### D06｜丟棄測試草稿與重新開始
 
-1. You → Your reports → City Gallery Foyer 的 Continue report → 頁面下方 **Discard answers**。
+1. You → Your reports → Example Community Room 的 Continue report → 頁面下方 **Discard answers**。
 2. 先點彈出框外取消 → 確認答案仍在。
 3. 再 Discard answers → 確認丟棄 → 檢查該草稿消失；Away 時仍可在 Visits you can report 重新開始。
-4. You → Your reports → Visits you can report → City Gallery Foyer 的 Share how it felt → 應為新的空白表單 → 選一項 → Finish later。
+4. You → Your reports → Visits you can report → Example Community Room 的 Share how it felt → 應為新的空白表單 → 選一項 → Finish later。
 
 **只丟棄 C05 測試草稿。** 這只清除答案，保留已確認到訪；不刪除 Saved 或以前已發布回報。
 
 ### D07｜發布回報與防止同次重複發布
 
-1. You → Your reports → Shade 的 Continue report → 檢查內容／Visit time → **Publish report**。
+1. You → Your reports → Garden 的 Continue report → 檢查內容／Visit time → **Publish report**。
 2. 完成頁 → **Done** → You → Your reports → **Published** → 打開這一則。
-3. 核對 Visit、Published、体感與選填答案；Unfinished 應少一份，Gallery 的測試草稿仍在。
-4. 返回 Explore → Shade → 應看到 **You’ve shared this visit**；檢查人數沒有因發布回報而增加。
+3. 核對 Visit、Published、體感與選填答案；Unfinished 應少一份，Room 的測試草稿仍在。
+4. 返回 Explore → Garden → 應看到 **You’ve shared this visit**；檢查人數沒有因發布回報而增加。
 
-**也測另一次到訪：** 模擬在 Shade 附近 → 該場所頁 → **Share a new visit** → 選體感 → Finish later。確認舊回報仍在 Published、新草稿單獨存在，人數沒有增加。Published 沒有編輯／刪除入口。
+**也測另一次到訪：** 模擬在 Garden 附近 → 該場所頁 → **Share a new visit** → 選體感 → Finish later。確認舊回報仍在 Published、新草稿單獨存在，人數沒有增加。Published 沒有編輯／刪除入口。
 
 ### D08｜最新預覽、全部回報、自己的與範例格式
 
-1. Explore → Shade → 讀 Visitor reports 下方預覽 → **View all**。
-2. 核對新報告與 Example visitor report 是否使用相同內容順序；有填的資料才出現。
-3. 返回地點頁 → 直接點預覽文字，也應進入同一 Visitor reports 頁。
-4. 再打開 Riverside Library 的 Visitor reports，比較你原有報告與範例；返回 You → Your reports → Published 查看自己的版本。
+1. Explore → **Example Shaded Garden** → **Visitor reports**：同區讀體感統計、分布、最新預覽，再點 **Read all reports**。
+2. 核對 D07 新報告與 Example visitor report 是否使用相同內容順序；有填的資料才出現。
+3. 返回地點頁 → 直接點預覽文字應留在原卡；只有 **Read all reports** 開啟回報清單，統計標題旁沒有另一個 View all。
+4. 再打開 **Example Community Room** 的 Visitor reports，比較示例格式；返回 You → Your reports → Published 查看 D07 自己的版本。
 
-**排序：** 依 Visit time，最新在前，不分作者；不是依按下發布的時間。故把造訪時間填得更早的新發布回報，不一定占預覽。範例有固定示範日期和 Example 標示；未填的選填欄位可略過，但不應改成另一套格式。
+**排序：** 依 Visit time，最新在前，不分作者；不是依按下發布的時間。造訪時間填得較早的新回報不一定占預覽。範例有固定日期和 Example 標示；未填的選填欄位可略過，不應改成另一套格式。
 
-**補充觀察：** You 裡自己的已發布詳情也共用 Visitor reports 的閱讀格式，另在下方補充 Published 時間與收到的感謝。
+**補充觀察：** You 裡自己的已發布詳情共用 Visitor reports 的閱讀格式，另在下方補充 Published 時間與收到的感謝。
 
 ## E：審核狀態、感謝、帳戶與設定
 
-### E01｜場所提案的全部審核狀態
+### E01｜場所提案的審核與本機發布
 
-1. 若 B11 後曾重啟 App，先用 **Explore → Riverside Library → Suggest an edit → Entry and seating → Seating** 改一项 → **Send for review → Done**，準備一筆本輪測試提案。
-2. You → Places you’ve added or updated → 確認 **In progress／In review**。
-3. 返回 You → Settings → Prototype controls → 按下方表格中的一項 → 返回 Settings → 返回 You → Places you’ve added or updated。
-4. 記錄結果；回到同一控制頁，依序試完四個按鈕。它們會覆寫最新那筆場所提案的狀態，不是新增四筆。
+1. 接 B11 剛送出的提案（重開仍保留）。You → Places you’ve added or updated → In progress／In review。
+2. You → Settings → Prototype controls → 核對畫面列出的最新場所提案名稱與狀態 → **Publish locally**。控制器只針對最新一筆場所提案；只有它是 In review 時可發布，不會跳過已發布案去找較早的待審案。完成後發布按鈕應不可用。
+3. Explore 搜尋該地點；新增案應出現地點，修改案保留原身份並只變更提案欄位。有送照片才在 Photos 查看；有一般補充才在 More information 查看；修改理由不公開。
+4. 重開 App 後確認場所、照片、審核狀態保留，原有 Saved/private notes/visitor reports/presence 不受影響。
+5. 要試 **Needs clarification** 或 **Do not publish**，各自重新準備一筆最新待審提案；核對相應結果為 Action needed 或 Not published，公開場所資訊仍未套用。已發布紀錄不能用狀態按鈕撤回。
 
-| 點擊的測試按鈕 | 回到紀錄頁應看到 | 這一版能做到哪裡 |
-|---|---|---|
-| Needs clarification | Needs your attention → Action needed 與原因 | 只能讀原因，沒有補件／重送入口 |
-| Publish | Outcomes → Published | 只模擬狀態，不會建立地圖上的新地點／更新設施 |
-| Merge with an existing place | Outcomes → Added to an existing Cool Spot | 只有說明，沒有可點進目的地的入口 |
-| Do not publish | Outcomes → Not published 與原因 | 沒有重送、申訴入口 |
-
-**這不是使用者自己審核自己的內容：** Prototype controls 只是在測試不同結果畫面；真正審核服務尚未接上。狀態卡是閱讀內容，不是按鈕。
+**目前止點：** 這是本機審核／發布模擬，沒有伺服器、跨裝置同步、補件／申訴服務。沒有選擇任意舊提案或實際合併的 Merge 按鈕；重複地點仍走 Review update。衝突保護與重複發布的模型證據見上方歷史紀錄，不能把按鈕已停用當成這些模型分支的新測試。
 
 ### E02｜對別人的範例回報送感謝、取消
 
-1. Explore → Riverside Library → Visitor reports → View all → **Example visitor report** → **Send a popsicle**。
+1. Explore → Example Community Room → Visitor reports → Read all reports → **Example visitor report** → **Send a popsicle**。
 2. 如果第一次出現 **Send a little thank-you?**，先 Cancel；再點 Send a popsicle → 確認送出。已看過說明時可能直接切換為已送。
 3. 確認 **Popsicle sent · Demo** → **Undo** → 再送一次，最後可 Undo。
 4. 查看自己的回報，確認沒有對自己送感謝的按鈕。
 
 **觀察：** 是否清楚這是感謝作者，不是涼度投票？本地示範不通知真人，也不改變回報排序或人數。
 
-### E03｜收到感謝後找回对应回報
+### E03｜收到感謝後找回對應回報
 
 1. You → Settings → **Popsicle thank-you example**，先讀 **For your report at…** 指定的是哪一筆。
 2. **Simulate receiving a popsicle** → 返回 You → Your reports → Published → 開對應地點的最新指定報告。
@@ -489,14 +621,16 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 **目前止點：** Preview account 只是本次使用的帳戶示範，沒有 Apple／Email 驗證、跨裝置同步或 Sign out。Cool Hunt 的類型解鎖會對本次人數分享反應，但 Shade finder 1 of 2 與部分貢獻數是固定示例；方塊不可點進。也沒有獨立 All contributions 的目前導覽入口。
 
-### E05｜外觀、大字、減少動態與問題回報
+### E05｜外觀、大字、減少動態與輔助入口
+
+**選做，不列入目前預設驗證。** 只有 owner 指定相關問題時，才在 iPhone 17 Pro Max 檢查對應一項並還原設定；不跑 iPad、尺寸／字級／外觀矩陣。下列保留各設定的查找路徑，不是要求逐項執行。
 
 1. You → Settings → Appearance → **Dark** → 返回 Explore → 打開一個地點及其回報；再試 **Light**／**Match System**，最後恢復你原來的設定。
 2. 若使用 iPhone／Simulator 的系統 Settings：Accessibility → Display & Text Size → Larger Text → 放大文字 → 回 Cool Spot 看表單、回報、送出鈕；之後恢復原值。
 3. 系統 Settings → Accessibility → Motion → **Reduce Motion** → 回地點 → How this works，查看靜態完成狀態；之後恢復原值。系統語言不同時按相應中文名稱找設定。
-4. 回地點頁 → **Report a problem** → 讀尚未接通的說明 → **Done**。目前沒有假送出的 Send report 按鈕。
+4. 回地點頁確認沒有不可用的 **Report a problem** 入口；要修正場所資料，使用第一區末端 **Suggest an edit**。
 
-**觀察：** 大字是否擠壓、遮住操作？深色是否難讀？問題回報是否和「這次不涼」混淆？不要為此更改自己的資料或開啟不需要的系統權限。
+**觀察：** 大字是否擠壓、遮住操作？深色是否難讀？Suggest an edit 是否和「分享這次體感」分得清？不要為此更改自己的資料或開啟不需要的系統權限。
 
 ## 無法靠一般點擊完整重現的分支
 
@@ -504,11 +638,11 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 | 分支 | 若自然出現的點擊順序 | 目前限制／測試方式 |
 |---|---|---|
-| 新提案與既有地点重複 | This place is already on Cool Spot → **Review update** → 核對 Your changes → Send for review；或 **Keep editing** 取消 | 目前比對需座標幾乎完全相同，且有名稱時名稱相同；手指點地圖不易精確觸發，不是模糊近距離去重。需要另備測試資料，已有模型測試。 |
+| 新提案與既有地點重複 | This place is already on Cool Spot → **Review update** → 核對 Your changes → Send for review；或 **Keep editing** 取消 | 已知 Cool Spot／Apple 場所身份可直接對應既有資料；無來源身份的新位置需座標幾乎完全相同，且符合特定點位或名稱條件。手指點地圖不易觸發，不是模糊近距離去重。需要另備測試資料，模型證據另記。 |
 | 照片讀取失敗 | Photo couldn’t be loaded → OK → Add／Replace photo | 本輪不要求刻意損壞圖片；如遇到，確認其他答案留著。 |
 | 場所提案送出失敗 | Not sent → Keep editing → 補正後再 Send for review | 沒有「模擬失敗」按鈕，也沒有真實網路上傳；正常按鈕驗證可能讓你遇不到。 |
 | 個人回報發布失敗 | Report wasn’t published → Keep editing → 確認 Visit time 再 Publish report | 沒有固定 UI 開關可觸發；不可把沒有遇到寫成已通過失敗復原。 |
-| 完全空白資料狀態 | Saved 的 Nothing saved yet／You 的 No reports yet／無場所提案 | 目前有預設 Pin 與提案，沒有安全的一鍵清空測試控制；保留真實舊資料，若需要再另備隔離測試環境。 |
+| 完全空白資料狀態 | Saved 的 Nothing saved yet／You 的 No reports yet／無場所提案 | 全新隔離 QA 的正常啟動沒有私人收藏、Pin、提案或自己的回報，但目錄與三個社群示例仍在。已有裝置須保留原有資料，不使用 memory-only 舊 fixture 或清空 owner 裝置來製造此狀態。 |
 
 ## 記錄回饋
 
@@ -528,11 +662,11 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 | 收藏是否清楚私人；公開表單、名稱／角落／照片與選填分類是否直覺 | A05–A09、B01–B10 |
 | 保存後是否找到返回入口；真的去過但缺乏確認時是否失望 | C02–C05、D01–D07 |
 | 最新回報預覽、範例格式、審核結果與感謝是否被正確理解 | D08、E01–E04 |
-| 大字、深色、減少動態、返回／滑動與選單焦點是否穩定 | B05、B06、B08、E05 |
+| 返回／滑動與選單焦點是否穩定；外觀／輔助設定只依 owner 指定選做 | B05、B06、B08、E05 |
 
 ### 本輪結果紀錄
 
-目前只有上方列出的歷次證據與 owner「可用、仍需驗證」的總評，沒有新增逐項通過紀錄。收到實際回饋後在此記錄，不新增另一份 findings 文件。
+目前只有上方列出的歷次證據與 owner「可用、仍需驗證」的總評；2026-09-23 文件校正沒有新增逐項通過紀錄。下表是尚未取得的 owner 回饋，不表示目前已授權開始跑完整走查。收到實際回饋後在此記錄，不新增另一份 findings 文件。
 
 | 日期／版本 | 編號 | 觀察與完成方式 | 決定／修正 | 復測結果 |
 |---|---|---|---|---|

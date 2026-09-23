@@ -10,9 +10,10 @@ README is the public project introduction. These three files are the active agen
 
 ## Current handoff
 
-- Code baseline inspected: `3b8bf457f39e50bdbd650efb3fd4bb2f29f71e8a` plus the 2026-09-08 working changes to ContributionView, contribution tests and these active documents. The form refinement is not committed; preserve the existing working tree and dated review evidence.
+- App-code baseline: `Prototyping` at `42c09053cb8a8ec923a0bf8f36712e26a75a2048` — `Improve GLA-to-Apple place matching and Cool Spot discovery`, committed at the owner’s request on 2026-09-23. The 16 committed files cover discovery/ranking, conservative-v2 matching, reviewed links, query/audit evidence, regression tests, report tooling and the requested data-discussion snapshot. No push was requested or performed. Existing test/native evidence remains in the walkthrough; tests were not rerun just for this commit. Staged whitespace checks passed.
 - Owner assessment: the current version is usable enough to continue, but still needs validation. Validate journeys and resolve feedback before beginning a broad visual redesign. Follow any newer user instruction that changes this scope.
-- Current focus: Add cooling information now requires descriptive names and photos for unlisted-location proposals, uses consistent question labels/picker rows and submit-attempt validation. Scoped agent native checks and 48 passing tests are recorded in the walkthrough. Start the owner retest with **B04**, then affected B03/B05/B06/B10 branches; do not treat agent interaction as owner usability acceptance.
+- Current focus: ten-case discovery/mapping validation after ec9fbf9 is committed in 42c0905. Changes add bounded live MapKit evidence, conservative-v2 address/category checks, four source-reviewed relationships, exact-name-first search and discovery of cooling areas through reviewed containing venues. Current totals are 136 automatic same-place links, 7 reviewed same-place links, 1 reviewed containing-venue link, 87 needs-review and 19 no-candidate. All ten sampled records were opened natively on iPhone 17 Pro Max; Horniman duplicate identity and the pharmacy museum missing Apple identity remain unresolved. The recorded 2026-09-19 run passed seven focused Swift tests and eleven Python rule tests, with device data preserved. See the walkthrough and data/catalogue/discovery-audit.json for evidence. No backend or push; ViewCoolSpots untouched. The owner-requested DATA-DISCUSSION-2026-09-23.md records the data/backend/App discussion as a pre-commit snapshot; recommendations there are not new implementation authorization.
+- Documentation reconciliation, 2026-09-23: current A–E steps use normal-launch catalogue records and persistent storage. The 40 case IDs and dated historical evidence are retained. This was a source/document review, not a new native walkthrough or test run; outstanding owner checks remain outstanding. The app-code baseline above is separate from later documentation commits.
 - No app-code change, new feature, deployment, or production rewrite is authorized merely by opening a new session.
 
 ## Working with the owner
@@ -28,11 +29,14 @@ README is the public project introduction. These three files are the active agen
 | File | Main responsibility |
 |---|---|
 | `cool-spot/ContentView.swift`, `cool_spotApp.swift` | App entry, tabs, store setup, appearance and DEBUG inspection routes |
+| `cool-spot/PrototypeCatalog.swift`, `cool-spot/Resources/CoolSpotCatalog.prototype.json`, `cool-spot/Resources/CommunityCatalog.prototype.json` | Typed v1/v2/v3 mock response, 250 GLA records, source adapter and three-state comparison fixtures |
 | `cool-spot/PrototypeModels.swift` | Fixtures, shared colors, domain types, persistence, eligibility, publishing and contribution records |
 | `cool-spot/ExploreView.swift` | Map/search/filter UI, discovery and quick-save/add entry points |
+| `cool-spot/PlaceSearch.swift` | MapKit search, cancellation/debounce/state, result mapping and search feedback |
 | `cool-spot/PlaceDetailView.swift` | Cool Spot and ordinary-place detail, presence, report form and explainer |
 | `cool-spot/ContributionView.swift` | Public place selection, form, location/photo handling and review validation |
 | `cool-spot/SavedYouViews.swift` | Saved/private notes, You, report history, contribution outcomes, account and settings |
+| `cool-spot/PlacePhotos.swift`, `cool-spot/PrototypePublication.swift`, `cool-spot/PrototypePhotoStorage.swift`, `data/catalogue/`, `scripts/catalogue/` | Published photo strip/gallery/viewer, source snapshots, producer schema, mapping audit and reproducible reconciliation |
 | `cool-spot/VisitorReportsView.swift` | Shared report rendering and popsicle UI |
 | `cool-spot/PrototypeSharedViews.swift` | Shared native visual components |
 | `cool-spotTests/cool_spotTests.swift` | XCTest model and persistence coverage |
@@ -41,7 +45,7 @@ Some legacy cases, fields, comments and test names still exist. Trace the reacha
 
 ## Build and verify
 
-Repository on this workstation: `/Users/chihyinwang/Desktop/cool-spot`. Open `cool-spot.xcodeproj`; scheme `cool-spot`, test target `cool_spotTests`. Deployment target is iOS 18; iPhone and iPad are supported. Use the installed Xcode/Simulator SDK, not a hard-coded future version.
+Prototype worktree: `/Users/chihyinwang/Desktop/cool-spot-prototype`, branch `Prototyping`. The separate `/Users/chihyinwang/Desktop/cool-spot` worktree uses `ViewCoolSpots`; do not copy prototype code into it for this task. Open `cool-spot.xcodeproj`; scheme `cool-spot`, test target `cool_spotTests`. Deployment target is iOS 18; iPhone and iPad are supported. Use the installed Xcode/Simulator SDK, not a hard-coded future version.
 
 ```sh
 xcodebuild -project cool-spot.xcodeproj -scheme cool-spot -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/cool-spot-build build
@@ -54,13 +58,14 @@ For model/persistence changes, select an isolated QA simulator from that invento
 xcodebuild -project cool-spot.xcodeproj -scheme cool-spot -destination 'platform=iOS Simulator,id=QA_SIMULATOR_UDID' -derivedDataPath /tmp/cool-spot-tests test
 ```
 
-For UI changes, build and inspect the affected real SwiftUI flow on iPhone and iPad; include narrow width, large Dynamic Type and dark appearance where relevant. Use native interaction/screenshot tools. A build or source review is not an interaction test. Run only checks appropriate to the change; documentation-only edits need content, link and scope checks, not an app rebuild.
+Owner clarification, 2026-09-15: this is a prototype. Use only iPhone 17 Pro Max for a brief native interaction check and necessary compilation. Do not run iPad, multiple screen sizes, Dynamic Type or appearance matrices, or spend time on broad polishing. Let the owner judge feel through direct use. Run focused model checks only when changed behavior warrants them. A build or source review is not an interaction test. Documentation-only edits need no rebuild.
 
-DEBUG inspection uses `--shape-preview` followed by `contribution`, `contribution-pin`, `new-place`, `update`, `report`, `report-required`, `visitor-reports`, `place`, `pin`, `markers` or `presence`; `--preview-large` and `--preview-dark` alter the preview. These routes use memory-only stores; the `place`/`visitor-reports` previews may read existing local reports for display. `--reports-test-fixtures` supplies disposable report examples. Do not use preview outcomes as proof that production persistence works.
+DEBUG inspection uses `--shape-preview` followed by `contribution`, `contribution-pin`, `new-place`, `update`, `report`, `report-required`, `visitor-reports`, `place`, `pin`, `markers` or `presence`; `--preview-large` and `--preview-dark` alter the preview. These routes use memory-only stores; the `place`/`visitor-reports` previews may read existing local reports for display. `--reports-test-fixtures` supplies disposable report examples. `--example-catalog` opens the older example catalogue in memory only; normal launches use 250 GLA records, three labelled community examples, the British Museum ordinary-place seed and device-local journeys/contributions/publications. Run the current A–E walkthrough without these fixture/preview flags. Do not use memory-only preview outcomes as proof that normal-launch persistence works.
 
 ## Protect the working state
 
 - Check `git status` before changes; preserve unrelated edits and staging. Do not commit, reset, or discard user work unless requested.
+- `AGENTS.md` and `OWNER-JOURNEY-WALKTHROUGH.md` are tracked in this prototype worktree. The separate rebuild checkout’s local/excluded-document policy does not apply here. Include authorized documentation changes when committing; do not force-add or reset files based on assumptions about the other checkout.
 - Normal launches use device-local saved data. Use isolated simulators for destructive/reset scenarios; never erase the owner's reports, notes, pins, preferences or photo library to prepare a test.
 - Before replacing the app on the owner's simulator, inspect its current state, protect any in-progress input, back up app data and verify persisted values afterwards. Do not leave the owner's app in a memory-only preview.
 - Simulation controls can alter local test records. Use the walkthrough's prerequisites and only act on designated test data.
