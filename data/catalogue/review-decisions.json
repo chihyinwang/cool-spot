@@ -70,5 +70,85 @@
       "https://citywallvinestreet.org/"
     ],
     "reason": "Official venue lists City Wall at Vine Street, 12 Jewry Street, EC3N 2HT. Re-resolving the previous Apple ID returns that name/address 46 m away. Name searches returned no result, demonstrating that no-result is not proof the Apple place is absent."
+  },
+  {
+    "sourceRecordID": "12",
+    "placeID": "IB58D044B3FE1218C",
+    "relationship": "same_place",
+    "sourceFingerprint": "b3585a737170ae3f16afe76af5ca45b47665c9abe1a3df3cc6afe02dc6e5407b",
+    "candidateSnapshot": {
+      "name": "Beckton Globe Library",
+      "address": "1 Kingsford Way",
+      "postalCode": "E6 5JQ",
+      "latitude": 51.5149638,
+      "longitude": 0.0555765,
+      "category": "MKPOICategoryLibrary"
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-19T00:16:05Z",
+    "evidenceURLs": [
+      "https://libraries.newham.gov.uk/digital-content/libraries/find-a-library/beckton-library"
+    ],
+    "reason": "Newham uses both Beckton Library and Beckton Globe Library at 1 Kingsford Way, E6 5JQ. The library candidate is 41 m from the GLA point. Name alias accepted; source facts unchanged."
+  },
+  {
+    "sourceRecordID": "710",
+    "placeID": "IC43F411D709A3A92",
+    "relationship": "same_place",
+    "sourceFingerprint": "18cc6724fd85deb704405f56bf6be8fdb601f6a38d98ec28c1edf080e6d5db2a",
+    "candidateSnapshot": {
+      "name": "The Library",
+      "address": "95 High Road",
+      "postalCode": "NW10 2SF",
+      "latitude": 51.5469238,
+      "longitude": -0.2290807,
+      "category": "MKPOICategoryLibrary"
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-19T00:16:05Z",
+    "evidenceURLs": [
+      "https://www.brent.gov.uk/en/libraries-arts-and-heritage/libraries/the-library-at-willesden-green"
+    ],
+    "reason": "Brent identifies the library at 95 High Road, NW10 2SF. Live name search and exact ID resolution return The Library at that address, 3 m away, with library category. The bus stop, Library of Things and dental clinic are separate places and are not accepted."
+  },
+  {
+    "sourceRecordID": "707",
+    "placeID": "I469799177B7DF2F3",
+    "relationship": "within_place",
+    "sourceFingerprint": "3f3f51aa0c720b1db00f1e0a1c8bf03023968ae747a9c4ab4ed4e8c8758f85d5",
+    "candidateSnapshot": {
+      "name": "Streatham Ice and Leisure Centre",
+      "address": "390 Streatham High Road",
+      "postalCode": "SW16 6HX",
+      "latitude": 51.4242196,
+      "longitude": -0.1307952,
+      "category": ""
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-19T00:16:05Z",
+    "evidenceURLs": [
+      "https://active.lambeth.gov.uk/locations/streatham/"
+    ],
+    "reason": "GLA names the ice rink lobby at 390 Streatham High Road, SW16 6HX. The operator confirms the containing Streatham Ice and Leisure Centre at that address, 23 m away. This link opens venue details only; it does not extend lobby cooling facts to the whole centre or merge identities."
+  },
+  {
+    "sourceRecordID": "713",
+    "placeID": "I55C92C3205E557D6",
+    "relationship": "same_place",
+    "sourceFingerprint": "32a018d36883cde7c809436ac2307f7685438f053baaedbb7996a683d3e49df0",
+    "candidateSnapshot": {
+      "name": "The Salvation Army",
+      "address": "Petersfield Ave",
+      "postalCode": "RM3 9PP",
+      "latitude": 51.603626,
+      "longitude": 0.23707,
+      "category": "MKPOICategoryStore"
+    },
+    "reviewer": "codex",
+    "reviewedAt": "2026-09-19T00:16:05Z",
+    "evidenceURLs": [
+      "https://www.salvationarmy.org.uk/harold-hill"
+    ],
+    "reason": "The Salvation Army official Harold Hill page gives Petersfield Avenue, RM3 9PP and coordinates beside the GLA point. Address-focused search finds the same organisation there, 4 m away. Distant headquarters/other branches are excluded. Apple store category is retained as source metadata, not used to replace the GLA venue type."
   }
 ]

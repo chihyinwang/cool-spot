@@ -32,13 +32,14 @@ for item, row in zip(items, export['mapping']['results']):
     assert item['id'] == registry[sid] == row['coolSpotID']
     assert row['sourceRecordID'] == sid
     assert item['photos'] == []  # This source supplies no photographs.
-    if row['status'] in ('auto_matched', 'reviewed_matched'):
+    if row['status'] in ('auto_matched', 'reviewed_matched', 'reviewed_related'):
         assert len(item['mapReferences']) == 1
         assert item['mapReferences'][0]['placeID'] == row['selectedPlaceID']
         selected = next(c for c in row['candidates'] if c['placeID'] == row['selectedPlaceID'])
         if row['status'] == 'auto_matched': assert selected['evidence']['meetsAutomaticRule']
         else: assert row['review']['evidenceURLs']
-        accepted.append(row['selectedPlaceID'])
+        assert item['mapReferences'][0]['relationship'] == ('within_place' if row['status'] == 'reviewed_related' else 'same_place')
+        if row['status'] != 'reviewed_related': accepted.append(row['selectedPlaceID'])
     else: assert not item['mapReferences'] and row['selectedPlaceID'] is None
     for evidence in item['provenance']:
         for pointer in evidence['fields']:

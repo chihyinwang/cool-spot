@@ -1,0 +1,128 @@
+{
+  "cases": [
+    {
+      "sourceRecordID": "18",
+      "name": "Canning Town Library",
+      "query": "Canning Town Library",
+      "reasonSelected": "Reviewed address alias",
+      "beforeStatus": "reviewed_matched",
+      "latitude": 51.516829995,
+      "longitude": 0.010439996,
+      "placeIDs": [
+        "I7E8561E6022ED614"
+      ]
+    },
+    {
+      "sourceRecordID": "17",
+      "name": "Custom House Library",
+      "query": "Custom House Library",
+      "reasonSelected": "Automatic exact match",
+      "beforeStatus": "auto_matched",
+      "latitude": 51.51458,
+      "longitude": 0.03171,
+      "placeIDs": [
+        "IB13A37DC976A0E0E"
+      ]
+    },
+    {
+      "sourceRecordID": "12",
+      "name": "Beckton Library",
+      "query": "Beckton Library",
+      "reasonSelected": "Alternate venue name",
+      "beforeStatus": "needs_review",
+      "latitude": 51.51527,
+      "longitude": 0.05591,
+      "placeIDs": [
+        "IB58D044B3FE1218C"
+      ]
+    },
+    {
+      "sourceRecordID": "51",
+      "name": "Ham Library",
+      "query": "Ham Library",
+      "reasonSelected": "Street abbreviation",
+      "beforeStatus": "needs_review",
+      "latitude": 51.437850004,
+      "longitude": -0.313249994,
+      "placeIDs": [
+        "I12FAFA373E0E5590"
+      ]
+    },
+    {
+      "sourceRecordID": "11",
+      "name": "Green Street Library",
+      "query": "Green Street Library",
+      "reasonSelected": "Conflicting source position and street number",
+      "beforeStatus": "needs_review",
+      "latitude": 51.53637,
+      "longitude": 0.03505,
+      "placeIDs": [
+        "IF48DE22405773257"
+      ]
+    },
+    {
+      "sourceRecordID": "710",
+      "name": "Library at Willesden Green",
+      "query": "Library at Willesden Green",
+      "reasonSelected": "Bus stop and service inside library",
+      "beforeStatus": "needs_review",
+      "latitude": 51.546904198,
+      "longitude": -0.2290560381,
+      "placeIDs": [
+        "I72E8CE06D5B80589",
+        "IEF0A3A5C912A4F0",
+        "ICA7A042A403AC96C"
+      ]
+    },
+    {
+      "sourceRecordID": "707",
+      "name": "Streatham Ice Rink lobby",
+      "query": "Streatham Ice Rink lobby",
+      "reasonSelected": "Cooling area inside larger venue",
+      "beforeStatus": "needs_review",
+      "latitude": 51.4242620803,
+      "longitude": -0.1311127576,
+      "placeIDs": [
+        "I94EE3AF7D3D3BFE6",
+        "I469799177B7DF2F3"
+      ]
+    },
+    {
+      "sourceRecordID": "33",
+      "name": "Horniman Museum",
+      "query": "Horniman Museum",
+      "reasonSelected": "Multiple Apple identities",
+      "beforeStatus": "needs_review",
+      "latitude": 51.4411309997,
+      "longitude": -0.0607629998,
+      "placeIDs": [
+        "I3B375AF4BC7A4AE7",
+        "I16810C798E2BE309"
+      ]
+    },
+    {
+      "sourceRecordID": "629",
+      "name": "Museum of the Royal Pharmaceutical Society",
+      "query": "Museum of the Royal Pharmaceutical Society",
+      "reasonSelected": "No candidate in initial collection",
+      "beforeStatus": "no_candidate",
+      "latitude": 51.5088667017,
+      "longitude": -0.0690152151,
+      "placeIDs": []
+    },
+    {
+      "sourceRecordID": "713",
+      "name": "Salvation Army Centre (Harold Hill)",
+      "query": "Salvation Army Centre (Harold Hill)",
+      "reasonSelected": "Same organisation with many branches",
+      "beforeStatus": "needs_review",
+      "latitude": 51.6036602623,
+      "longitude": 0.2370624117,
+      "placeIDs": [
+        "I58D6E872BFAA8202",
+        "IE4AD2553F3A77232",
+        "I93238D45FDABC8CA"
+      ]
+    }
+  ]
+}

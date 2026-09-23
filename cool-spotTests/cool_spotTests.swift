@@ -391,6 +391,47 @@ final class CoolSpotTests: XCTestCase {
         XCTAssertEqual(store.searchCoolSpots(query: "Provider alias", including: [apple, apple]).map(\.id), [item.id])
     }
 
+    func testExactPlaceNameRanksBeforeSubstringAndRelatedSearchResults() throws {
+        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        XCTAssertEqual(store.searchCoolSpots(query: "ham library", including: []).first?.name, "Ham Library")
+        XCTAssertEqual(store.searchCoolSpots(query: "  HAM LIBRARY  ", including: []).first?.name, "Ham Library")
+    }
+
+    func testSearchingContainingVenueFindsCoolingAreaWithoutMergingIdentities() throws {
+        var item = try XCTUnwrap(PrototypeCatalog.bundled().items.first { $0.matchedAppleID != nil })
+        let parentID = try XCTUnwrap(item.matchedAppleID)
+        item.name = "Cooling lobby"
+        item.mapReferences?[0].relationship = "within_place"
+        let store = PrototypeStore(catalogSpots: [item.makeSpot()])
+        let parent = RecognisedPlace(id: "apple-maps:\(parentID)", name: "Sports centre", address: "",
+                                     latitude: item.location.latitude, longitude: item.location.longitude,
+                                     type: .leisure, distance: "")
+        XCTAssertNil(store.existingSpot(for: parent))
+        XCTAssertEqual(store.searchCoolSpots(query: "Sports centre", including: [parent]).map(\.id), [item.id])
+        XCTAssertTrue(store.searchCoolSpots(query: "Sports centre", including: []).isEmpty)
+        XCTAssertEqual(store.spots[0].detailsApplePlaceID, parentID)
+    }
+
+    func testReviewedDiscoverySampleResolvesCorrectVenueAndRejectsNearbyServices() throws {
+        let catalog = try PrototypeCatalog.bundled()
+        let store = PrototypeStore(catalogSpots: catalog.items.map { $0.makeSpot() })
+        let accepted = [("12", "IB58D044B3FE1218C"), ("11", "I36D6141A975EE64F"),
+                        ("51", "I12FAFA373E0E5590"), ("710", "IC43F411D709A3A92"),
+                        ("713", "I55C92C3205E557D6")]
+        func place(_ id: String) -> RecognisedPlace {
+            RecognisedPlace(id: "apple-maps:\(id)", name: "Provider search alias", address: "",
+                            latitude: 51.5, longitude: 0, type: .unknown, distance: "")
+        }
+        for (recordID, appleID) in accepted {
+            let item = try XCTUnwrap(catalog.items.first { $0.sourceReferences?.first?.recordID == recordID })
+            XCTAssertEqual(store.existingSpot(for: place(appleID))?.id, item.id)
+            XCTAssertEqual(store.searchCoolSpots(query: "Provider search alias", including: [place(appleID)]).map(\.id), [item.id])
+        }
+        for rejected in ["IF48DE22405773257", "I72E8CE06D5B80589", "IEF0A3A5C912A4F0", "I94EE3AF7D3D3BFE6", "I469799177B7DF2F3"] {
+            XCTAssertNil(store.existingSpot(for: place(rejected)), "Different address, service or containing venue must not inherit cooling facts.")
+        }
+    }
+
     func testCatalogUnknownCodesStayUnknownAndUnsupportedVersionsFail() throws {
         let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpotCatalog.prototype", withExtension: "json"))
         var response = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])

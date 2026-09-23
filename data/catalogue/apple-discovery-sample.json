@@ -1,0 +1,1623 @@
+[
+  {
+    "candidates" : [
+      {
+        "address" : "18 Barking Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 78,
+        "latitude" : 51.517349000000003,
+        "locality" : "Canning Town",
+        "longitude" : 0.0112009,
+        "name" : "Canning Town Library",
+        "placeID" : "I7E8561E6022ED614",
+        "postalCode" : "E16 1EH"
+      },
+      {
+        "address" : "Strattondale St",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2774,
+        "latitude" : 51.495896299999998,
+        "locality" : "London",
+        "longitude" : -0.0112599,
+        "name" : "Cubitt Town Library",
+        "placeID" : "I1A42A1CE2D754240",
+        "postalCode" : "E14 3HG"
+      },
+      {
+        "address" : "7 Rathbone Market",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 45,
+        "latitude" : 51.516423500000002,
+        "locality" : "London",
+        "longitude" : 0.010450299999999999,
+        "name" : "Custom House and Canning Town Community Neighbourhood Centre",
+        "placeID" : "ID8E11C6DF333AE61",
+        "postalCode" : "E16 1EH"
+      },
+      {
+        "address" : "1 Artizan St",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 6061,
+        "latitude" : 51.5156499,
+        "locality" : "London",
+        "longitude" : -0.076855999999999994,
+        "name" : "Artizan Street Library",
+        "placeID" : "I3DB5506089D603A2",
+        "postalCode" : "E1 7AF"
+      },
+      {
+        "address" : "Prince Regent Lane",
+        "alternatePlaceIDs" : [
+          "I6C2D8C9A858AE7CD",
+          "I987BC7C60E3A9AF4"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1482,
+        "latitude" : 51.514605400000001,
+        "locality" : "London",
+        "longitude" : 0.031483200000000003,
+        "name" : "Custom House Library",
+        "placeID" : "IB13A37DC976A0E0E",
+        "postalCode" : "E16 3JJ"
+      },
+      {
+        "address" : "21 Surrey Quays Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4651,
+        "latitude" : 51.497782399999998,
+        "locality" : "London",
+        "longitude" : -0.049198699999999998,
+        "name" : "Canada Water Library",
+        "placeID" : "I36F527472EE31F8A",
+        "postalCode" : "SE16 7AR"
+      },
+      {
+        "address" : "Mile End Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3584,
+        "latitude" : 51.524298600000002,
+        "locality" : "London",
+        "longitude" : -0.039782499999999998,
+        "name" : "Mile End Library",
+        "placeID" : "I23DD20F779B0E400",
+        "postalCode" : "E1 4NS"
+      },
+      {
+        "address" : "Churchill Place",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2230,
+        "latitude" : 51.504425500000004,
+        "locality" : "London",
+        "longitude" : -0.0147902,
+        "name" : "Idea Store Canary Wharf",
+        "placeID" : "IE061D3037F37C9EB",
+        "postalCode" : "E14 5RB"
+      },
+      {
+        "address" : "3 The Grove",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2873,
+        "latitude" : 51.542362300000001,
+        "locality" : "London",
+        "longitude" : 0.0042507999999999999,
+        "name" : "Stratford Library",
+        "placeID" : "I641B47F674199714",
+        "postalCode" : "E15 1EL"
+      },
+      {
+        "address" : "638 Commercial Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryHotel",
+        "distanceMetres" : 3094,
+        "latitude" : 51.512284800000003,
+        "locality" : "London",
+        "longitude" : -0.0335383,
+        "name" : "Limehouse Library Hotel",
+        "placeID" : "I4417DB81718BB9A4",
+        "postalCode" : "E14 7HS"
+      },
+      {
+        "address" : "2 Town Square",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 5279,
+        "latitude" : 51.536333499999998,
+        "locality" : "Barking",
+        "longitude" : 0.079767900000000003,
+        "name" : "Barking Library at Barking Learning Centre",
+        "placeID" : "I576B16728D1D5935",
+        "postalCode" : "IG11 7NB"
+      },
+      {
+        "address" : "80 Hoxton Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 6462,
+        "latitude" : 51.530436799999997,
+        "locality" : "London",
+        "longitude" : -0.080061300000000002,
+        "name" : "Shoreditch Library",
+        "placeID" : "ID4FC9423F631D94A",
+        "postalCode" : "N1 6LP"
+      },
+      {
+        "address" : "Cambridge Heath Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4588,
+        "latitude" : 51.526461300000001,
+        "locality" : "London",
+        "longitude" : -0.053826600000000002,
+        "name" : "Bethnal Green Library",
+        "placeID" : "I3A5608290EB9C4B1",
+        "postalCode" : "E2 0HL"
+      },
+      {
+        "address" : "79 North Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1777,
+        "latitude" : 51.529692599999997,
+        "locality" : "London",
+        "longitude" : 0.025621499999999998,
+        "name" : "Plaistow Library",
+        "placeID" : "IACFB57570F1748B5",
+        "postalCode" : "E13 9HL"
+      },
+      {
+        "address" : "321 Whitechapel Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4738,
+        "latitude" : 51.5199894,
+        "locality" : "London",
+        "longitude" : -0.0576353,
+        "name" : "Idea Store",
+        "placeID" : "I5E81B70133F0F8B1",
+        "postalCode" : "E1 1BU"
+      },
+      {
+        "address" : "10 Stockwell Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4289,
+        "latitude" : 51.480160099999999,
+        "locality" : "London",
+        "longitude" : -0.0086152999999999993,
+        "name" : "University of Greenwich",
+        "placeID" : "IE6E992801F322279",
+        "postalCode" : "SE10 9BD"
+      },
+      {
+        "address" : "1 Reading Lane",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 5548,
+        "latitude" : 51.5444794,
+        "locality" : "London",
+        "longitude" : -0.056070299999999997,
+        "name" : "Hackney Central Library",
+        "placeID" : "I7AD6921B1FB12124",
+        "postalCode" : "E8 1GQ"
+      },
+      {
+        "address" : "Newark Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4920,
+        "latitude" : 51.517225099999997,
+        "locality" : "London",
+        "longitude" : -0.060440399999999998,
+        "name" : "Queen Mary University of London - Whitechapel Library",
+        "placeID" : "I8562080319C98AB6",
+        "postalCode" : "E1 2AD"
+      },
+      {
+        "address" : "1 Vesey Path",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1827,
+        "latitude" : 51.511724000000001,
+        "locality" : "London",
+        "longitude" : -0.0145738,
+        "name" : "Idea Store Chrisp Street",
+        "placeID" : "ID453B3151F8AE248",
+        "postalCode" : "E14 6BT"
+      },
+      {
+        "address" : "230 Bishopsgate",
+        "alternatePlaceIDs" : [
+          "IBE8EC3F41B7A7EB3"
+        ],
+        "category" : "",
+        "distanceMetres" : 6230,
+        "latitude" : 51.518718900000003,
+        "locality" : "London",
+        "longitude" : -0.079254500000000005,
+        "name" : "Bishopsgate Institute",
+        "placeID" : "ID3DDB98D8BC29FC6",
+        "postalCode" : "EC2M 4QH"
+      },
+      {
+        "address" : "100 Shoreditch High St",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryNightlife",
+        "distanceMetres" : 6157,
+        "latitude" : 51.525502899999999,
+        "locality" : "London",
+        "longitude" : -0.077167600000000003,
+        "name" : "Seed Library",
+        "placeID" : "I9FD1A6D35B2E246",
+        "postalCode" : "E1 6JQ"
+      },
+      {
+        "address" : "122 Peckham Hill Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 7279,
+        "latitude" : 51.474379999999996,
+        "locality" : "London",
+        "longitude" : -0.069348999999999994,
+        "name" : "Peckham Library",
+        "placeID" : "IE3AA4C1D32400B45",
+        "postalCode" : "SE15 5JR"
+      },
+      {
+        "address" : "Northwold Road",
+        "alternatePlaceIDs" : [
+          "IBD82F43EB2829308"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 7054,
+        "latitude" : 51.562686200000002,
+        "locality" : "London",
+        "longitude" : -0.059741299999999997,
+        "name" : "Clapton Library",
+        "placeID" : "I3C3A0B207361B0EE",
+        "postalCode" : "E5 8RA"
+      },
+      {
+        "address" : "43 Trinity Square",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryNightlife",
+        "distanceMetres" : 6090,
+        "latitude" : 51.510483999999998,
+        "locality" : "London",
+        "longitude" : -0.076697399999999999,
+        "name" : "The Wine Library",
+        "placeID" : "IC4EA5B6E166A46F2",
+        "postalCode" : "EC3N 4DJ"
+      },
+      {
+        "address" : "7 Siding Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2768,
+        "latitude" : 51.537548200000003,
+        "locality" : "London",
+        "longitude" : -0.011643799999999999,
+        "name" : "UCL East Library",
+        "placeID" : "I3C2456D2B0AD456E",
+        "postalCode" : "E20 2AE"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:03Z",
+    "query" : "Canning Town Library",
+    "resolvedIdentities" : [
+      {
+        "address" : "18 Barking Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 78,
+        "latitude" : 51.517349000000003,
+        "locality" : "Canning Town",
+        "longitude" : 0.0112009,
+        "name" : "Canning Town Library",
+        "placeID" : "I7E8561E6022ED614",
+        "postalCode" : "E16 1EH",
+        "requestedPlaceID" : "I7E8561E6022ED614"
+      }
+    ],
+    "siteID" : "18"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Prince Regent Lane",
+        "alternatePlaceIDs" : [
+          "I6C2D8C9A858AE7CD",
+          "I987BC7C60E3A9AF4"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 16,
+        "latitude" : 51.514605400000001,
+        "locality" : "London",
+        "longitude" : 0.031483200000000003,
+        "name" : "Custom House Library",
+        "placeID" : "IB13A37DC976A0E0E",
+        "postalCode" : "E16 3JJ"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:06Z",
+    "query" : "Custom House Library",
+    "resolvedIdentities" : [
+      {
+        "address" : "Prince Regent Lane",
+        "alternatePlaceIDs" : [
+          "I6C2D8C9A858AE7CD",
+          "I987BC7C60E3A9AF4"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 16,
+        "latitude" : 51.514605400000001,
+        "locality" : "London",
+        "longitude" : 0.031483200000000003,
+        "name" : "Custom House Library",
+        "placeID" : "IB13A37DC976A0E0E",
+        "postalCode" : "E16 3JJ",
+        "requestedPlaceID" : "IB13A37DC976A0E0E"
+      }
+    ],
+    "siteID" : "17"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "1 Kingsford Way",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 41,
+        "latitude" : 51.514963799999997,
+        "locality" : "London",
+        "longitude" : 0.055576500000000001,
+        "name" : "Beckton Globe Library",
+        "placeID" : "IB58D044B3FE1218C",
+        "postalCode" : "E6 5JQ"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:08Z",
+    "query" : "Beckton Library",
+    "resolvedIdentities" : [
+      {
+        "address" : "1 Kingsford Way",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 41,
+        "latitude" : 51.514963799999997,
+        "locality" : "London",
+        "longitude" : 0.055576500000000001,
+        "name" : "Beckton Globe Library",
+        "placeID" : "IB58D044B3FE1218C",
+        "postalCode" : "E6 5JQ",
+        "requestedPlaceID" : "IB58D044B3FE1218C"
+      }
+    ],
+    "siteID" : "12"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Ham St",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3,
+        "latitude" : 51.437878400000002,
+        "locality" : "Richmond",
+        "longitude" : -0.31326589999999999,
+        "name" : "Ham Library",
+        "placeID" : "I12FAFA373E0E5590",
+        "postalCode" : "TW10 7HR"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:11Z",
+    "query" : "Ham Library",
+    "resolvedIdentities" : [
+      {
+        "address" : "Ham St",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3,
+        "latitude" : 51.437878400000002,
+        "locality" : "Richmond",
+        "longitude" : -0.31326589999999999,
+        "name" : "Ham Library",
+        "placeID" : "I12FAFA373E0E5590",
+        "postalCode" : "TW10 7HR",
+        "requestedPlaceID" : "I12FAFA373E0E5590"
+      }
+    ],
+    "siteID" : "51"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "7 Green Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1132,
+        "latitude" : 51.546312299999997,
+        "locality" : "London",
+        "longitude" : 0.031597100000000003,
+        "name" : "Green Street Library",
+        "placeID" : "IF48DE22405773257",
+        "postalCode" : "E7 8DA"
+      },
+      {
+        "address" : "337-341 Green Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 18,
+        "latitude" : 51.536391700000003,
+        "locality" : "London",
+        "longitude" : 0.035308199999999998,
+        "name" : "Green Street Library",
+        "placeID" : "I36D6141A975EE64F",
+        "postalCode" : "E13 9AR"
+      },
+      {
+        "address" : "79 North Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 990,
+        "latitude" : 51.529692599999997,
+        "locality" : "London",
+        "longitude" : 0.025621499999999998,
+        "name" : "Plaistow Library",
+        "placeID" : "IACFB57570F1748B5",
+        "postalCode" : "E13 9HL"
+      },
+      {
+        "address" : "High Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 6614,
+        "latitude" : 51.5844381,
+        "locality" : "Walthamstow",
+        "longitude" : -0.021047,
+        "name" : "Walthamstow Library",
+        "placeID" : "IB5C8DC41BDB66FE8",
+        "postalCode" : "E17 7JN"
+      },
+      {
+        "address" : "1 Troubridge Square",
+        "alternatePlaceIDs" : [
+          "I2F0F7952A219BBD6"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 6267,
+        "latitude" : 51.587136399999999,
+        "locality" : "London",
+        "longitude" : -0.0040930999999999997,
+        "name" : "Wood Street Library",
+        "placeID" : "IA3610EF154436098",
+        "postalCode" : "E17 3HB"
+      },
+      {
+        "address" : "3 The Grove",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2238,
+        "latitude" : 51.542362300000001,
+        "locality" : "London",
+        "longitude" : 0.0042507999999999999,
+        "name" : "Stratford Library",
+        "placeID" : "I641B47F674199714",
+        "postalCode" : "E15 1EL"
+      },
+      {
+        "address" : "35 Wellington Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 5639,
+        "latitude" : 51.489400000000003,
+        "locality" : "London",
+        "longitude" : 0.065586000000000005,
+        "name" : "Woolwich Centre Library",
+        "placeID" : "I4533C73AA90FC385",
+        "postalCode" : "SE18 6HQ"
+      },
+      {
+        "address" : "6-8 Woodgrange Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1339,
+        "latitude" : 51.546917000000001,
+        "locality" : "London",
+        "longitude" : 0.025753999999999999,
+        "name" : "Forest Gate Library",
+        "placeID" : "I54F4207E944C6BD8",
+        "postalCode" : "E7 0QH"
+      },
+      {
+        "address" : "7 Siding Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3242,
+        "latitude" : 51.537548200000003,
+        "locality" : "London",
+        "longitude" : -0.011643799999999999,
+        "name" : "UCL East Library",
+        "placeID" : "I3C2456D2B0AD456E",
+        "postalCode" : "E20 2AE"
+      },
+      {
+        "address" : "18 Barking Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2686,
+        "latitude" : 51.517349000000003,
+        "locality" : "Canning Town",
+        "longitude" : 0.0112009,
+        "name" : "Canning Town Library",
+        "placeID" : "I7E8561E6022ED614",
+        "postalCode" : "E16 1EH"
+      },
+      {
+        "address" : "Mile End Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 5363,
+        "latitude" : 51.524298600000002,
+        "locality" : "London",
+        "longitude" : -0.039782499999999998,
+        "name" : "Mile End Library",
+        "placeID" : "I23DD20F779B0E400",
+        "postalCode" : "E1 4NS"
+      },
+      {
+        "address" : "Clements Road",
+        "alternatePlaceIDs" : [
+          "I122F98898C609ABC",
+          "IF6D023DFDC619189",
+          "IEA80DA72F3D495C8",
+          "I2D2058A33F43D5C1",
+          "I8D46707A5AF53DBB",
+          "I798ACFDB2B49690",
+          "IDD51EE6314A334CC"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3687,
+        "latitude" : 51.5581064,
+        "locality" : "Ilford",
+        "longitude" : 0.0751555,
+        "name" : "Redbridge Central Library",
+        "placeID" : "I5FABAECA2A6908E7",
+        "postalCode" : "IG1 1EA"
+      },
+      {
+        "address" : "21 Surrey Quays Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 7252,
+        "latitude" : 51.497782399999998,
+        "locality" : "London",
+        "longitude" : -0.049198699999999998,
+        "name" : "Canada Water Library",
+        "placeID" : "I36F527472EE31F8A",
+        "postalCode" : "SE16 7AR"
+      },
+      {
+        "address" : "Water Lane",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2048,
+        "latitude" : 51.544653400000001,
+        "locality" : "London",
+        "longitude" : 0.0086858000000000005,
+        "name" : "UEL Stratford Library",
+        "placeID" : "IC9B5825B5056BC0E",
+        "postalCode" : "E15"
+      },
+      {
+        "address" : "273 High Road Leyton",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3831,
+        "latitude" : 51.558508799999998,
+        "locality" : "London",
+        "longitude" : -0.0072509999999999996,
+        "name" : "Leyton Library",
+        "placeID" : "I1CC9382EFE27DEB2",
+        "postalCode" : "E10 5QH"
+      },
+      {
+        "address" : "328 Barking Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1573,
+        "latitude" : 51.533028399999999,
+        "locality" : "East Ham",
+        "longitude" : 0.057085900000000002,
+        "name" : "East Ham Library",
+        "placeID" : "I94EDC67A84B89969",
+        "postalCode" : "E6 2RT"
+      },
+      {
+        "address" : "638 Commercial Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryHotel",
+        "distanceMetres" : 5461,
+        "latitude" : 51.512284800000003,
+        "locality" : "London",
+        "longitude" : -0.0335383,
+        "name" : "Limehouse Library Hotel",
+        "placeID" : "I4417DB81718BB9A4",
+        "postalCode" : "E14 7HS"
+      },
+      {
+        "address" : "Church Lane",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3927,
+        "latitude" : 51.568157499999998,
+        "locality" : "London",
+        "longitude" : 0.0104499,
+        "name" : "Leytonstone Library",
+        "placeID" : "I6AC913312AD1F31E",
+        "postalCode" : "E11 1HG"
+      },
+      {
+        "address" : "2 Town Square",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3102,
+        "latitude" : 51.536333499999998,
+        "locality" : "Barking",
+        "longitude" : 0.079767900000000003,
+        "name" : "Barking Library at Barking Learning Centre",
+        "placeID" : "I576B16728D1D5935",
+        "postalCode" : "IG11 7NB"
+      },
+      {
+        "address" : "Prince Regent Lane",
+        "alternatePlaceIDs" : [
+          "I6C2D8C9A858AE7CD",
+          "I987BC7C60E3A9AF4"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2434,
+        "latitude" : 51.514605400000001,
+        "locality" : "London",
+        "longitude" : 0.031483200000000003,
+        "name" : "Custom House Library",
+        "placeID" : "IB13A37DC976A0E0E",
+        "postalCode" : "E16 3JJ"
+      },
+      {
+        "address" : "1 Vesey Path",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4401,
+        "latitude" : 51.511724000000001,
+        "locality" : "London",
+        "longitude" : -0.0145738,
+        "name" : "Idea Store Chrisp Street",
+        "placeID" : "ID453B3151F8AE248",
+        "postalCode" : "E14 6BT"
+      },
+      {
+        "address" : "Churchill Place",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4959,
+        "latitude" : 51.504425500000004,
+        "locality" : "London",
+        "longitude" : -0.0147902,
+        "name" : "Idea Store Canary Wharf",
+        "placeID" : "IE061D3037F37C9EB",
+        "postalCode" : "E14 5RB"
+      },
+      {
+        "address" : "Homerton High St",
+        "alternatePlaceIDs" : [
+          "I75950396B09BE75B",
+          "I4FAB2A418A1CC62B"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 5514,
+        "latitude" : 51.548904999999998,
+        "locality" : "London",
+        "longitude" : -0.041848000000000003,
+        "name" : "Homerton Library",
+        "placeID" : "I95B1C421BA4A47A6",
+        "postalCode" : "E9 6AS"
+      },
+      {
+        "address" : "685-693 Romford Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1798,
+        "latitude" : 51.550719399999998,
+        "locality" : "London",
+        "longitude" : 0.0469696,
+        "name" : "Manor Park Library",
+        "placeID" : "I6623131D1B067B8D",
+        "postalCode" : "E12 5AD"
+      },
+      {
+        "address" : "Spratt Hall Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4434,
+        "latitude" : 51.575761999999997,
+        "locality" : "London",
+        "longitude" : 0.025384,
+        "name" : "Wanstead Library",
+        "placeID" : "IC4D430F58CE8E154",
+        "postalCode" : "E11 2RQ"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:14Z",
+    "query" : "Green Street Library",
+    "resolvedIdentities" : [
+      {
+        "address" : "7 Green Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1132,
+        "latitude" : 51.546312299999997,
+        "locality" : "London",
+        "longitude" : 0.031597100000000003,
+        "name" : "Green Street Library",
+        "placeID" : "IF48DE22405773257",
+        "postalCode" : "E7 8DA",
+        "requestedPlaceID" : "IF48DE22405773257"
+      }
+    ],
+    "siteID" : "11"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "95 High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3,
+        "latitude" : 51.546923800000002,
+        "locality" : "Willesden",
+        "longitude" : -0.2290807,
+        "name" : "The Library",
+        "placeID" : "IC43F411D709A3A92",
+        "postalCode" : "NW10 2SF"
+      },
+      {
+        "address" : "95 High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 20,
+        "latitude" : 51.5467583,
+        "locality" : "London",
+        "longitude" : -0.22888449999999999,
+        "name" : "Willesden Green Library of Things",
+        "placeID" : "IEF0A3A5C912A4F0",
+        "postalCode" : "NW10 2SF"
+      },
+      {
+        "address" : "Bathurst Gardens",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1470,
+        "latitude" : 51.533806900000002,
+        "locality" : "London",
+        "longitude" : -0.22623940000000001,
+        "name" : "Kensal Rise Library",
+        "placeID" : "IF34EE0F03686E854",
+        "postalCode" : "NW10 5JA"
+      },
+      {
+        "address" : "156 Golders Green Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3632,
+        "latitude" : 51.574756600000001,
+        "locality" : "London",
+        "longitude" : -0.20175509999999999,
+        "name" : "Golders Green Library",
+        "placeID" : "I4F4D9613BB06BDD5",
+        "postalCode" : "NW11 8HE"
+      },
+      {
+        "address" : "",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryPublicTransport",
+        "distanceMetres" : 73,
+        "latitude" : 51.547089,
+        "locality" : "London",
+        "longitude" : -0.230073,
+        "name" : "Willesden Green Library (Stop Q)",
+        "placeID" : "I72E8CE06D5B80589",
+        "postalCode" : ""
+      },
+      {
+        "address" : "97a High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 34,
+        "latitude" : 51.546975600000003,
+        "locality" : "London",
+        "longitude" : -0.22953270000000001,
+        "name" : "Willesden Library Dental Clinic",
+        "placeID" : "ICA7A042A403AC96C",
+        "postalCode" : "NW10 2SL"
+      },
+      {
+        "address" : "42 Salusbury Road",
+        "alternatePlaceIDs" : [
+          "IF15643407FD5828F"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2101,
+        "latitude" : 51.535112900000001,
+        "locality" : "Kilburn",
+        "longitude" : -0.205401,
+        "name" : "Kilburn Library",
+        "placeID" : "I12A7F365744100B6",
+        "postalCode" : "NW6 6NN"
+      },
+      {
+        "address" : "Craven Park Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1745,
+        "latitude" : 51.538695300000001,
+        "locality" : "London",
+        "longitude" : -0.25049559999999998,
+        "name" : "Harlesden Library",
+        "placeID" : "I1B9D7C51489EAF89",
+        "postalCode" : "NW10 8SE"
+      },
+      {
+        "address" : "152 Olive Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 1110,
+        "latitude" : 51.556832300000003,
+        "locality" : "London",
+        "longitude" : -0.2274513,
+        "name" : "Cricklewood Library",
+        "placeID" : "I85BDA36E1492D59B",
+        "postalCode" : "NW2 6UY"
+      },
+      {
+        "address" : "1 Pembridge Sq",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4532,
+        "latitude" : 51.511278900000001,
+        "locality" : "London",
+        "longitude" : -0.19739300000000001,
+        "name" : "Notting Hill Gate Library",
+        "placeID" : "I7D0AE9C0A45383BC",
+        "postalCode" : "W2 4EW"
+      },
+      {
+        "address" : "666 Harrow Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2545,
+        "latitude" : 51.527025100000003,
+        "locality" : "London",
+        "longitude" : -0.2109134,
+        "name" : "Queen's Park Library",
+        "placeID" : "I360D4C5D6E5C312D",
+        "postalCode" : "W10 4NE"
+      },
+      {
+        "address" : "Sutherland Ave",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3647,
+        "latitude" : 51.524669699999997,
+        "locality" : "London",
+        "longitude" : -0.19043470000000001,
+        "name" : "Maida Vale Library",
+        "placeID" : "IE13AA847AD102F5D",
+        "postalCode" : "W9 2QT"
+      },
+      {
+        "address" : "12 Phillimore Walk",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 5609,
+        "latitude" : 51.501369799999999,
+        "locality" : "London",
+        "longitude" : -0.1943636,
+        "name" : "Kensington Central Library",
+        "placeID" : "I989D6BC11309E88B",
+        "postalCode" : "W8 7RX"
+      },
+      {
+        "address" : "",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryPublicTransport",
+        "distanceMetres" : 69,
+        "latitude" : 51.546641299999997,
+        "locality" : "London",
+        "longitude" : -0.2281569,
+        "name" : "Willesden Green Library (Stop J)",
+        "placeID" : "I917F9D94D06656F7",
+        "postalCode" : ""
+      },
+      {
+        "address" : "101A Brondesbury Park",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 507,
+        "latitude" : 51.546129899999997,
+        "locality" : "London",
+        "longitude" : -0.22186030000000001,
+        "name" : "J S Library International",
+        "placeID" : "I5648F6E2E1AE2730",
+        "postalCode" : "NW2 5JL"
+      },
+      {
+        "address" : "6 Wood Lane",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4576,
+        "latitude" : 51.505880699999999,
+        "locality" : "London",
+        "longitude" : -0.22428319999999999,
+        "name" : "Shepherds Bush Library",
+        "placeID" : "I53237AEEE09C7ED4",
+        "postalCode" : "W12 7BF"
+      },
+      {
+        "address" : "20 Circus Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4192,
+        "latitude" : 51.533687299999997,
+        "locality" : "London",
+        "longitude" : -0.17246120000000001,
+        "name" : "St John's Wood Library",
+        "placeID" : "ID743A647D492BDEA",
+        "postalCode" : "NW8 6PD"
+      },
+      {
+        "address" : "88 Ave Road",
+        "alternatePlaceIDs" : [
+          "IDD2B4F47CD77A950"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3954,
+        "latitude" : 51.542347800000002,
+        "locality" : "London",
+        "longitude" : -0.1725246,
+        "name" : "Swiss Cottage Library",
+        "placeID" : "ICDC866F1C5871EFA",
+        "postalCode" : "NW3 3HA"
+      },
+      {
+        "address" : "4 Rutherford Way",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3891,
+        "latitude" : 51.559040000000003,
+        "locality" : "Wembley",
+        "longitude" : -0.28166000000000002,
+        "name" : "Wembley Library",
+        "placeID" : "I56D1B64EC87ACD04",
+        "postalCode" : "HA9 0EG"
+      },
+      {
+        "address" : "Porchester Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4332,
+        "latitude" : 51.517263499999999,
+        "locality" : "Westminster",
+        "longitude" : -0.18857199999999999,
+        "name" : "Paddington Library",
+        "placeID" : "IEFC51C6043326520",
+        "postalCode" : "W2 5DU"
+      },
+      {
+        "address" : "108 Ladbroke Grove",
+        "alternatePlaceIDs" : [
+          "IE3E2EDFA839C10B8"
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3635,
+        "latitude" : 51.516666499999999,
+        "locality" : "London",
+        "longitude" : -0.20920079999999999,
+        "name" : "North Kensington Library",
+        "placeID" : "IDFAD35171A1AE572",
+        "postalCode" : "W11 1PZ"
+      },
+      {
+        "address" : "67 Church St",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 4850,
+        "latitude" : 51.523216300000001,
+        "locality" : "London",
+        "longitude" : -0.17036850000000001,
+        "name" : "Church Street Library",
+        "placeID" : "I379E74FE011BF813",
+        "postalCode" : "NW8 8EU"
+      },
+      {
+        "address" : "",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryPublicTransport",
+        "distanceMetres" : 80,
+        "latitude" : 51.547229999999999,
+        "locality" : "London",
+        "longitude" : -0.22803399999999999,
+        "name" : "Willesden Green Library (Stop K)",
+        "placeID" : "I3D491DE7FE660880",
+        "postalCode" : ""
+      },
+      {
+        "address" : "20 Kensal Library",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 2992,
+        "latitude" : 51.523842799999997,
+        "locality" : "London",
+        "longitude" : -0.20685770000000001,
+        "name" : "Kensal Library",
+        "placeID" : "I61C53DAADCF8D5F6",
+        "postalCode" : "W10 5PF"
+      },
+      {
+        "address" : "25 Mayfair Library",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 6832,
+        "latitude" : 51.509328699999998,
+        "locality" : "London",
+        "longitude" : -0.15116660000000001,
+        "name" : "Mayfair Library",
+        "placeID" : "I83BBC1652F41DE5B",
+        "postalCode" : "W1K 2PB"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:17Z",
+    "query" : "Library at Willesden Green",
+    "resolvedIdentities" : [
+      {
+        "address" : "",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryPublicTransport",
+        "distanceMetres" : 73,
+        "latitude" : 51.547089,
+        "locality" : "London",
+        "longitude" : -0.230073,
+        "name" : "Willesden Green Library (Stop Q)",
+        "placeID" : "I72E8CE06D5B80589",
+        "postalCode" : "",
+        "requestedPlaceID" : "I72E8CE06D5B80589"
+      },
+      {
+        "address" : "95 High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 20,
+        "latitude" : 51.5467583,
+        "locality" : "London",
+        "longitude" : -0.22888449999999999,
+        "name" : "Willesden Green Library of Things",
+        "placeID" : "IEF0A3A5C912A4F0",
+        "postalCode" : "NW10 2SF",
+        "requestedPlaceID" : "IEF0A3A5C912A4F0"
+      },
+      {
+        "address" : "97a High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 34,
+        "latitude" : 51.546975600000003,
+        "locality" : "London",
+        "longitude" : -0.22953270000000001,
+        "name" : "Willesden Library Dental Clinic",
+        "placeID" : "ICA7A042A403AC96C",
+        "postalCode" : "NW10 2SL",
+        "requestedPlaceID" : "ICA7A042A403AC96C"
+      }
+    ],
+    "siteID" : "710"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-19T00:14:22Z",
+    "query" : "Streatham Ice Rink lobby",
+    "resolvedIdentities" : [
+      {
+        "address" : "390 Streatham High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryRestroom",
+        "distanceMetres" : 38,
+        "latitude" : 51.424042,
+        "locality" : "London",
+        "longitude" : -0.130688,
+        "name" : "Streatham Ice Rink Toilets",
+        "placeID" : "I94EE3AF7D3D3BFE6",
+        "postalCode" : "SW16 6HX",
+        "requestedPlaceID" : "I94EE3AF7D3D3BFE6"
+      },
+      {
+        "address" : "390 Streatham High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 23,
+        "latitude" : 51.424219600000001,
+        "locality" : "London",
+        "longitude" : -0.1307952,
+        "name" : "Streatham Ice and Leisure Centre",
+        "placeID" : "I469799177B7DF2F3",
+        "postalCode" : "SW16 6HX",
+        "requestedPlaceID" : "I469799177B7DF2F3"
+      }
+    ],
+    "siteID" : "707"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "100 London Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 22,
+        "latitude" : 51.441031700000003,
+        "locality" : "London",
+        "longitude" : -0.061031000000000002,
+        "name" : "Horniman Museum and Gardens",
+        "placeID" : "I3B375AF4BC7A4AE7",
+        "postalCode" : "SE23 3PQ"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:25Z",
+    "query" : "Horniman Museum",
+    "resolvedIdentities" : [
+      {
+        "address" : "100 London Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 22,
+        "latitude" : 51.441031700000003,
+        "locality" : "London",
+        "longitude" : -0.061031000000000002,
+        "name" : "Horniman Museum and Gardens",
+        "placeID" : "I3B375AF4BC7A4AE7",
+        "postalCode" : "SE23 3PQ",
+        "requestedPlaceID" : "I3B375AF4BC7A4AE7"
+      },
+      {
+        "address" : "100 London Road",
+        "alternatePlaceIDs" : [
+          "ID231FBD390C3F65A",
+          "I5291B69402498362",
+          "I2ECE8E6A5102EDEB",
+          "I2B19021F6703CF57"
+        ],
+        "category" : "MKPOICategoryMuseum",
+        "distanceMetres" : 126,
+        "latitude" : 51.441402799999999,
+        "locality" : "London",
+        "longitude" : -0.0625169,
+        "name" : "Horniman Museum and Gardens",
+        "placeID" : "I16810C798E2BE309",
+        "postalCode" : "SE23 3PQ",
+        "requestedPlaceID" : "I16810C798E2BE309"
+      }
+    ],
+    "siteID" : "33"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-19T00:14:29Z",
+    "query" : "Museum of the Royal Pharmaceutical Society",
+    "resolvedIdentities" : [
+
+    ],
+    "siteID" : "629"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Salvation Army Centre",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 17882,
+        "latitude" : 51.537277199999998,
+        "locality" : "London",
+        "longitude" : 0.0021824000000000001,
+        "name" : "Salvation Army Centre",
+        "placeID" : "",
+        "postalCode" : "E15 4QB"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:14:30Z",
+    "query" : "Salvation Army Centre (Harold Hill)",
+    "resolvedIdentities" : [
+      {
+        "address" : "101 Queen Victoria Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 25405,
+        "latitude" : 51.511664199999998,
+        "locality" : "London",
+        "longitude" : -0.098210500000000006,
+        "name" : "The Salvation Army International - Headquaters",
+        "placeID" : "I58D6E872BFAA8202",
+        "postalCode" : "EC4V 4EH",
+        "requestedPlaceID" : "I58D6E872BFAA8202"
+      },
+      {
+        "address" : "122 Lower Clapton Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 20883,
+        "latitude" : 51.5543847,
+        "locality" : "London",
+        "longitude" : -0.0536289,
+        "name" : "The Salvation Army",
+        "placeID" : "IE4AD2553F3A77232",
+        "postalCode" : "E5 0QR",
+        "requestedPlaceID" : "IE4AD2553F3A77232"
+      },
+      {
+        "address" : "Mary Ann Gardens",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 22803,
+        "latitude" : 51.479976399999998,
+        "locality" : "London",
+        "longitude" : -0.025026,
+        "name" : "The Salvation Army",
+        "placeID" : "I93238D45FDABC8CA",
+        "postalCode" : "SE8 3DP",
+        "requestedPlaceID" : "I93238D45FDABC8CA"
+      }
+    ],
+    "siteID" : "713"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "337-341 Green Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 18,
+        "latitude" : 51.536391700000003,
+        "locality" : "London",
+        "longitude" : 0.035308199999999998,
+        "name" : "337-341 Green Street",
+        "placeID" : "",
+        "postalCode" : "E13 9AR"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:15:07Z",
+    "query" : "Green Street Library 337-341 Green Street",
+    "resolvedIdentities" : [
+      {
+        "address" : "337-341 Green Street",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 18,
+        "latitude" : 51.536391700000003,
+        "locality" : "London",
+        "longitude" : 0.035308199999999998,
+        "name" : "Green Street Library",
+        "placeID" : "I36D6141A975EE64F",
+        "postalCode" : "E13 9AR",
+        "requestedPlaceID" : "I36D6141A975EE64F"
+      }
+    ],
+    "siteID" : "11"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "95 High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 20,
+        "latitude" : 51.5467583,
+        "locality" : "London",
+        "longitude" : -0.22888449999999999,
+        "name" : "Willesden Green Library of Things",
+        "placeID" : "IEF0A3A5C912A4F0",
+        "postalCode" : "NW10 2SF"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:15:10Z",
+    "query" : "Willesden Green Library 95 High Road",
+    "resolvedIdentities" : [
+      {
+        "address" : "95 High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryLibrary",
+        "distanceMetres" : 3,
+        "latitude" : 51.546923800000002,
+        "locality" : "Willesden",
+        "longitude" : -0.2290807,
+        "name" : "The Library",
+        "placeID" : "IC43F411D709A3A92",
+        "postalCode" : "NW10 2SF",
+        "requestedPlaceID" : "IC43F411D709A3A92"
+      }
+    ],
+    "siteID" : "710"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "390 Streatham High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 23,
+        "latitude" : 51.424219600000001,
+        "locality" : "London",
+        "longitude" : -0.1307952,
+        "name" : "Streatham Ice and Leisure Centre",
+        "placeID" : "I469799177B7DF2F3",
+        "postalCode" : "SW16 6HX"
+      },
+      {
+        "address" : "Streatham Common South",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryPlayground",
+        "distanceMetres" : 369,
+        "latitude" : 51.421655199999996,
+        "locality" : "London",
+        "longitude" : -0.12782180000000001,
+        "name" : "Streatham Common Children's Playground",
+        "placeID" : "IB3D118D108948546",
+        "postalCode" : "SW16 3EN"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:15:13Z",
+    "query" : "Streatham Ice and Leisure Centre",
+    "resolvedIdentities" : [
+      {
+        "address" : "390 Streatham High Road",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "",
+        "distanceMetres" : 23,
+        "latitude" : 51.424219600000001,
+        "locality" : "London",
+        "longitude" : -0.1307952,
+        "name" : "Streatham Ice and Leisure Centre",
+        "placeID" : "I469799177B7DF2F3",
+        "postalCode" : "SW16 6HX",
+        "requestedPlaceID" : "I469799177B7DF2F3"
+      }
+    ],
+    "siteID" : "707"
+  },
+  {
+    "error" : {
+      "code" : 4,
+      "domain" : "MKErrorDomain",
+      "message" : "The operation couldn’t be completed. (MKErrorDomain error 4.)"
+    },
+    "queriedAt" : "2026-09-19T00:15:15Z",
+    "query" : "Royal Pharmaceutical Society Museum East Smithfield",
+    "resolvedIdentities" : [
+
+    ],
+    "siteID" : "629"
+  },
+  {
+    "candidates" : [
+      {
+        "address" : "Petersfield Ave",
+        "alternatePlaceIDs" : [
+
+        ],
+        "category" : "MKPOICategoryStore",
+        "distanceMetres" : 4,
+        "latitude" : 51.603625999999998,
+        "locality" : "Harold Hill",
+        "longitude" : 0.23707,
+        "name" : "The Salvation Army",
+        "placeID" : "I55C92C3205E557D6",
+        "postalCode" : "RM3 9PP"
+      }
+    ],
+    "queriedAt" : "2026-09-19T00:15:17Z",
+    "query" : "Salvation Army Petersfield Avenue Harold Hill",
+    "resolvedIdentities" : [
+
+    ],
+    "siteID" : "713"
+  }
+]

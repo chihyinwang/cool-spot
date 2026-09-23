@@ -4,9 +4,12 @@ import sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 payload=json.loads((ROOT/'data/catalogue/coolspot-catalogue-mapping.json').read_text())
+audit_path=ROOT/'data/catalogue/discovery-audit.json'
+samples={r['sourceRecordID']:r for r in json.loads(audit_path.read_text())['cases']} if audit_path.exists() else {}
 rows=[]
 for row in payload['mapping']['results']:
     row=dict(row)
+    row['sample']=samples.get(row['sourceRecordID'])
     row['candidateCount']=len(row['candidates'])
     chosen=next((c for c in row['candidates'] if c['placeID']==row['selectedPlaceID']),None)
     row['candidates']=([chosen] if chosen else [])+[c for c in row['candidates'] if c is not chosen][:3 if not chosen else 2]

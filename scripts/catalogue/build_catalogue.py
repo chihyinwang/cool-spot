@@ -29,6 +29,19 @@ def normalized(value):
     value = re.sub(r'\b(rd|st|ave)\b', lambda m: {'rd':'road','st':'st','ave':'avenue'}[m[0]], value)
     return ' '.join(re.findall(r'[a-z0-9]+', value))
 
+def normalized_address(value):
+    # Address-only expansion: "St" in a venue name can mean Saint.
+    value = normalized(value)
+    return re.sub(r'\bst\b(?= *$| *\d)', 'street', value)
+
+def source_street(p):
+    line1 = text(p.get('cs_address_one')) or ''
+    line2 = text(p.get('cs_address_two')) or ''
+    # Some GLA rows put only the building number in line 2.
+    if re.fullmatch(r'\d+[a-zA-Z]?(?:\s*-\s*\d+[a-zA-Z]?)?', line2):
+        return f'{line2} {line1}'
+    return line1
+
 def availability(value):
     return {'yes':'yes','no':'no'}.get((text(value) or '').lower(), 'unknown')
 
@@ -54,7 +67,7 @@ def evaluate(p, candidates):
         postcode=(text(p.get('cs_postcode')) or '').replace(' ','').upper()
         postcode_match=bool(postcode and postcode==c['postalCode'].replace(' ','').upper())
         postcode_conflict=bool(postcode and c['postalCode'] and not postcode_match)
-        sa,ca=normalized(p.get('cs_address_one')),normalized(c['address'])
+        sa,ca=normalized_address(source_street(p)),normalized_address(c['address'])
         nums_a=set(re.findall(r'\b\d+[a-z]?\b',sa)); nums_b=set(re.findall(r'\b\d+[a-z]?\b',ca))
         tokens_a=set(sa.split())-nums_a; tokens_b=set(ca.split())-nums_b
         street_overlap=len(tokens_a&tokens_b)/max(1,len(tokens_a|tokens_b))
@@ -64,10 +77,11 @@ def evaluate(p, candidates):
         number_conflict=bool(nums_a and nums_b and not nums_a&nums_b)
         close=c['distanceMetres']<=150
         strong_name=a==b or (similarity>=.94 and set(a.split())&set(b.split()))
-        eligible=bool(c['placeID'] and close and strong_name and (postcode_match or address_match) and not number_conflict and not postcode_conflict)
+        category_conflict=c.get('category') in {'MKPOICategoryPublicTransport','MKPOICategoryParking','MKPOICategoryRestroom'}
+        eligible=bool(not category_conflict and c['placeID'] and close and strong_name and (postcode_match or address_match) and not number_conflict and not postcode_conflict)
         c['evidence']={'nameSimilarity':round(similarity,3),'exactName':a==b,'postcodeAgrees':postcode_match,
                        'streetAgrees':address_match,'streetNumberConflicts':number_conflict,'postcodeConflicts':postcode_conflict,
-                       'within150Metres':close,'meetsAutomaticRule':eligible}
+                       'categoryConflicts':category_conflict,'within150Metres':close,'meetsAutomaticRule':eligible}
         output.append(c)
     return sorted(output,key=lambda c:(c['evidence']['meetsAutomaticRule'],c['evidence']['nameSimilarity'],-c['distanceMetres']),reverse=True)
 
@@ -76,7 +90,7 @@ def build():
     features=json.loads(raw.read_text())['features']
     registry=json.loads((DATA/'identity-registry.json').read_text())
     lookups=collections.defaultdict(list)
-    for filename in ['apple-candidates.json','apple-address-candidates.json','apple-identifier-candidates.json']:
+    for filename in ['apple-candidates.json','apple-address-candidates.json','apple-identifier-candidates.json','apple-discovery-sample.json']:
         if (DATA/filename).exists():
             for row in json.loads((DATA/filename).read_text()): lookups[row['siteID']].append(row)
     reviews={r['sourceRecordID']:r for r in json.loads((DATA/'review-decisions.json').read_text())} if (DATA/'review-decisions.json').exists() else {}
@@ -122,13 +136,13 @@ def build():
             reviewed_candidate=next((c for c in candidates if c['placeID']==review['placeID']),None)
             same_candidate=reviewed_candidate and all(reviewed_candidate.get(k)==v for k,v in review['candidateSnapshot'].items())
             if review['sourceFingerprint']==source_fingerprint(f) and same_candidate:
-                status,reason='reviewed_matched',review['reason']
+                status,reason=('reviewed_related' if review.get('relationship')=='within_place' else 'reviewed_matched'),review['reason']
                 chosen=reviewed_candidate
             else:
                 status,reason,chosen='needs_review','Previous review no longer matches this source/candidate snapshot',None
-        refs=[{'provider':'apple_maps','placeID':chosen['placeID'],'relationship':'same_place',
-               'verification':'reviewed' if status=='reviewed_matched' else 'automatic',
-               'checkedAt':review['reviewedAt'] if status=='reviewed_matched' else chosen['queriedAt']}] if chosen else []
+        refs=[{'provider':'apple_maps','placeID':chosen['placeID'],'relationship':review.get('relationship','same_place') if review else 'same_place',
+               'verification':'reviewed' if review else 'automatic',
+               'checkedAt':review['reviewedAt'] if review else chosen['queriedAt']}] if chosen else []
         item={'id':registry[sid],'name':text(p['cs_name']),
               'location':{'latitude':lat,'longitude':lon,'scope':'unknown'},
               'address':{'formatted':None,'line1':text(p['cs_address_one']) or '', 'line2':text(p.get('cs_address_two')),
@@ -159,16 +173,17 @@ def build():
                         'borough':item['address']['borough'],'sourceAddress':item['address']['line1'],
                         'latitude':lat,'longitude':lon,'status':status,'reason':reason,
                         'selectedPlaceID':chosen['placeID'] if chosen else None,
+                        'relationship':refs[0]['relationship'] if refs else None,
                         'queriedAt':row.get('queriedAt') if row else None,'query':row.get('query') if row else None,
                         'error':row.get('error') if row else None,
                         'review':review,
                         'attempts':[{k:v for k,v in a.items() if k in ('query','queriedAt','error')} for a in attempts],
                         'dataWarnings':problems,'candidates':candidates})
     # Two GLA records pointing at one Apple venue require an explicit relationship decision.
-    ids=collections.Counter(r['selectedPlaceID'] for r in results if r['selectedPlaceID'])
+    ids=collections.Counter(r['selectedPlaceID'] for r in results if r['selectedPlaceID'] and r['relationship']=='same_place')
     for item,row in zip(items,results):
-        if row['selectedPlaceID'] and ids[row['selectedPlaceID']]>1:
-            row.update(status='needs_review',reason='Multiple GLA records point to this Apple place; do not merge automatically',selectedPlaceID=None)
+        if row['relationship']=='same_place' and ids[row['selectedPlaceID']]>1:
+            row.update(status='needs_review',reason='Multiple GLA records point to this Apple place; do not merge automatically',selectedPlaceID=None,relationship=None)
             item['mapReferences']=[]
     manifest=json.loads((DATA/'source-manifest.json').read_text())
     if manifest['sha256'] != hashlib.sha256(raw.read_bytes()).hexdigest():
@@ -180,8 +195,8 @@ def build():
     counts=dict(collections.Counter(r['status'] for r in results))
     summary={'sourceRecords':len(features),'converted':len(items),'lookupsCompleted':sum(r['status']!='not_checked' for r in results),
              'byStatus':counts,'recordsWithDataWarnings':sum(bool(r['dataWarnings']) for r in results)}
-    export={**catalogue,'mapping':{'algorithm':'conservative-v1','summary':summary,
-          'automaticRule':'One named POI with a Place ID, exact or >=0.94 normalised name similarity, agreeing street or postcode, no street-number or postcode conflict and within 150 m; duplicate Apple destinations require review. This is a heuristic, not a calibrated probability or human verification.',
+    export={**catalogue,'mapping':{'algorithm':'conservative-v2','summary':summary,
+          'automaticRule':'One compatible named POI with a Place ID, exact or >=0.94 normalised name similarity, agreeing street or postcode, no street-number (including numeric address line 2), postcode or transport/parking/restroom category conflict and within 150 m; duplicate Apple destinations require review. This is a heuristic, not a calibrated probability or human verification.',
           'results':results}}
     (DATA/'identity-registry.json').write_text(json.dumps(registry,indent=2,sort_keys=True)+'\n')
     (DATA/'coolspot-catalogue-mapping.json').write_text(json.dumps(export,ensure_ascii=False,indent=2)+'\n')

@@ -1,0 +1,323 @@
+{
+  "checkedAt": "2026-09-19T00:28:22+00:00",
+  "scope": "Ten sampled records. MapKit API snapshots are distinct from native interaction evidence. Not a current-condition verification of all 250 sites.",
+  "summary": {
+    "sourceRecords": 250,
+    "converted": 250,
+    "lookupsCompleted": 250,
+    "byStatus": {
+      "reviewed_matched": 7,
+      "auto_matched": 136,
+      "needs_review": 87,
+      "no_candidate": 19,
+      "reviewed_related": 1
+    },
+    "recordsWithDataWarnings": 76
+  },
+  "cases": [
+    {
+      "sourceRecordID": "18",
+      "name": "Canning Town Library",
+      "query": "Canning Town Library",
+      "reasonSelected": "Reviewed address alias",
+      "beforeStatus": "reviewed_matched",
+      "latitude": 51.516829995,
+      "longitude": 0.010439996,
+      "placeIDs": [
+        "I7E8561E6022ED614"
+      ],
+      "afterStatus": "reviewed_matched",
+      "acceptedPlaceID": "I7E8561E6022ED614",
+      "relationship": "same_place",
+      "outcomeLabel": "既有配對保留",
+      "finding": "地址別名已核對；保留同一個 Cool Spot。",
+      "nativeSummary": "搜尋只有一筆對應的 GLA 場所；選點移到 Canning Town；系統卡名稱及 Rathbone Market／Barking Road 地址相符。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Canning Town Library",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "17",
+      "name": "Custom House Library",
+      "query": "Custom House Library",
+      "reasonSelected": "Automatic exact match",
+      "beforeStatus": "auto_matched",
+      "latitude": 51.51458,
+      "longitude": 0.03171,
+      "placeIDs": [
+        "IB13A37DC976A0E0E"
+      ],
+      "afterStatus": "auto_matched",
+      "acceptedPlaceID": "IB13A37DC976A0E0E",
+      "relationship": "same_place",
+      "outcomeLabel": "既有配對保留",
+      "finding": "主 ID 與 Apple 提供的 alternate IDs 均對回原場所。",
+      "nativeSummary": "搜尋只有一筆對應的 GLA 場所；選點移到 Custom House；系統卡為同名圖書館、Prince Regent Lane。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Custom House Library",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "12",
+      "name": "Beckton Library",
+      "query": "Beckton Library",
+      "reasonSelected": "Alternate venue name",
+      "beforeStatus": "needs_review",
+      "latitude": 51.51527,
+      "longitude": 0.05591,
+      "placeIDs": [
+        "IB58D044B3FE1218C"
+      ],
+      "afterStatus": "reviewed_matched",
+      "acceptedPlaceID": "IB58D044B3FE1218C",
+      "relationship": "same_place",
+      "outcomeLabel": "已修正重複",
+      "finding": "Beckton Library 與 Beckton Globe Library 已確認同址同館。",
+      "nativeSummary": "修正前原生看到兩筆相同圖書館，修正後一筆；地圖移到 Beckton，系統卡為 Beckton Globe Library、1 Kingsford Way。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Beckton Library",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "51",
+      "name": "Ham Library",
+      "query": "Ham Library",
+      "reasonSelected": "Street abbreviation",
+      "beforeStatus": "needs_review",
+      "latitude": 51.437850004,
+      "longitude": -0.313249994,
+      "placeIDs": [
+        "I12FAFA373E0E5590"
+      ],
+      "afterStatus": "auto_matched",
+      "acceptedPlaceID": "I12FAFA373E0E5590",
+      "relationship": "same_place",
+      "outcomeLabel": "已修正縮寫",
+      "finding": "Ham Street／Ham St 只在地址比對中視為相同。",
+      "nativeSummary": "搜尋與開卡正常；完整名稱現排第一；地圖移到 Ham；系統卡為 Ham Library、Ham St。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Ham Library",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "11",
+      "name": "Green Street Library",
+      "query": "Green Street Library",
+      "reasonSelected": "Conflicting source position and street number",
+      "beforeStatus": "needs_review",
+      "latitude": 51.53637,
+      "longitude": 0.03505,
+      "placeIDs": [
+        "IF48DE22405773257"
+      ],
+      "afterStatus": "auto_matched",
+      "acceptedPlaceID": "I36D6141A975EE64F",
+      "relationship": "same_place",
+      "outcomeLabel": "已找到正確候選",
+      "finding": "採用 337–341 Green Street、距 GLA 18 m 的結果；拒絕 7 Green Street、相距 1.1 km 的候選。",
+      "nativeSummary": "正確 GLA 結果排第一；地圖移到 Upton Park；系統卡地址為 337–341 Green Street，未採用錯誤的 7 Green Street ID。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Green Street Library",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "710",
+      "name": "Library at Willesden Green",
+      "query": "Library at Willesden Green",
+      "reasonSelected": "Bus stop and service inside library",
+      "beforeStatus": "needs_review",
+      "latitude": 51.546904198,
+      "longitude": -0.2290560381,
+      "placeIDs": [
+        "I72E8CE06D5B80589",
+        "IEF0A3A5C912A4F0",
+        "ICA7A042A403AC96C"
+      ],
+      "afterStatus": "reviewed_matched",
+      "acceptedPlaceID": "IC43F411D709A3A92",
+      "relationship": "same_place",
+      "outcomeLabel": "已找到正確候選",
+      "finding": "採用同址的 The Library；公車站、Library of Things 與牙醫診所維持不同身份。",
+      "nativeSummary": "GLA 圖書館排第一；Library of Things、牙醫及公車站保持不同身份；系統卡為 The Library、95 High Road。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Library at Willesden Green",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "707",
+      "name": "Streatham Ice Rink lobby",
+      "query": "Streatham Ice Rink lobby",
+      "reasonSelected": "Cooling area inside larger venue",
+      "beforeStatus": "needs_review",
+      "latitude": 51.4242620803,
+      "longitude": -0.1311127576,
+      "placeIDs": [
+        "I94EE3AF7D3D3BFE6",
+        "I469799177B7DF2F3"
+      ],
+      "afterStatus": "reviewed_related",
+      "acceptedPlaceID": "I469799177B7DF2F3",
+      "relationship": "within_place",
+      "outcomeLabel": "已連到所屬場館",
+      "finding": "大廳保留獨立身份；Place details 開場館，搜尋場館也會列出大廳。",
+      "nativeSummary": "搜尋 Streatham Ice and Leisure Centre 會列出 lobby 降溫卡；選點移到大廳，系統卡為包含它的場館，身份不合併。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Streatham Ice and Leisure Centre",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "33",
+      "name": "Horniman Museum",
+      "query": "Horniman Museum",
+      "reasonSelected": "Multiple Apple identities",
+      "beforeStatus": "needs_review",
+      "latitude": 51.4411309997,
+      "longitude": -0.0607629998,
+      "placeIDs": [
+        "I3B375AF4BC7A4AE7",
+        "I16810C798E2BE309"
+      ],
+      "afterStatus": "needs_review",
+      "acceptedPlaceID": null,
+      "relationship": null,
+      "outcomeLabel": "仍待確認",
+      "finding": "兩個 Apple ID 都叫 Museum and Gardens；館內與花園範圍尚無法確定，不強制合併。",
+      "nativeSummary": "搜尋仍有 GLA 與 Apple 兩筆，這是未解限制；GLA 卡可開、地圖移到来源座標，沒有未核准的 Place details 入口。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Horniman Museum",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": false,
+        "systemCardAbsentWithoutAcceptedIdentity": true,
+        "persistedUserDataModified": false
+      }
+    },
+    {
+      "sourceRecordID": "629",
+      "name": "Museum of the Royal Pharmaceutical Society",
+      "query": "Museum of the Royal Pharmaceutical Society",
+      "reasonSelected": "No candidate in initial collection",
+      "beforeStatus": "no_candidate",
+      "latitude": 51.5088667017,
+      "longitude": -0.0690152151,
+      "placeIDs": [],
+      "afterStatus": "no_candidate",
+      "acceptedPlaceID": null,
+      "relationship": null,
+      "outcomeLabel": "仍查無候選",
+      "finding": "兩種搜尋文字皆未找到候選；保留 GLA 地點，沒有捏造 Apple Place ID。",
+      "nativeSummary": "名稱搜尋仍能找到 GLA 卡；地圖移到來源座標；無 Apple 場所連結時不顯示 Place details。另查地址結果距來源 57 m，沒有足夠依據改動座標。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Museum of the Royal Pharmaceutical Society",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": false,
+        "systemCardAbsentWithoutAcceptedIdentity": true,
+        "persistedUserDataModified": false
+      },
+      "addressCheck": {
+        "candidates": [
+          {
+            "address": "66-68 East Smithfield",
+            "alternatePlaceIDs": [],
+            "category": "",
+            "distanceMetres": 57,
+            "latitude": 51.5090793,
+            "locality": "London",
+            "longitude": -0.0682711,
+            "name": "66-68 East Smithfield",
+            "placeID": "",
+            "postalCode": "E1W 1AW"
+          }
+        ],
+        "queriedAt": "2026-09-19T00:27:47Z",
+        "query": "66 East Smithfield London E1W 1AW",
+        "resolvedIdentities": [],
+        "siteID": "629"
+      }
+    },
+    {
+      "sourceRecordID": "713",
+      "name": "Salvation Army Centre (Harold Hill)",
+      "query": "Salvation Army Centre (Harold Hill)",
+      "reasonSelected": "Same organisation with many branches",
+      "beforeStatus": "needs_review",
+      "latitude": 51.6036602623,
+      "longitude": 0.2370624117,
+      "placeIDs": [
+        "I58D6E872BFAA8202",
+        "IE4AD2553F3A77232",
+        "I93238D45FDABC8CA"
+      ],
+      "afterStatus": "reviewed_matched",
+      "acceptedPlaceID": "I55C92C3205E557D6",
+      "relationship": "same_place",
+      "outcomeLabel": "已找到正確分店",
+      "finding": "地址查詢找出 Petersfield Avenue 的 Harold Hill 分點；排除市中心總部及其他分店。",
+      "nativeSummary": "GLA 分點排第一；地圖移到 Harold Hill；系統卡地址、電話及網站均對應 Harold Hill，Apple 的 Thrift Store 分類未寫回 Cool Spot。",
+      "nativeEvidence": {
+        "device": "Cool Spot Contract QA · iPhone 17 Pro Max · iOS 26.4",
+        "searchedQuery": "Salvation Army Centre (Harold Hill)",
+        "searchAndCoolingCardChecked": true,
+        "cameraMovedToSourceCoordinate": true,
+        "systemCardOpened": true,
+        "systemCardAbsentWithoutAcceptedIdentity": false,
+        "persistedUserDataModified": false
+      }
+    }
+  ],
+  "validation": {
+    "swiftTestsPassed": 7,
+    "pythonRuleTestsPassed": 11,
+    "schemaValidation": "250 GLA + 3 community records passed",
+    "nativeCasesChecked": 10,
+    "samePlaceSamples": 7,
+    "containingVenueSamples": 1,
+    "unresolvedSamples": 2,
+    "existingDeviceDataPreserved": true
+  }
+}

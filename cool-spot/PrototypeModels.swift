@@ -763,8 +763,17 @@ final class PrototypeStore: ObservableObject {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return [] }
         let linkedIDs = Set(places.compactMap { existingSpot(for: $0)?.id })
-        return spots.filter { linkedIDs.contains($0.id) || $0.name.localizedCaseInsensitiveContains(query) ||
+        let appleIDs = Set(places.flatMap {
+            ([$0.appleMapItemIdentifier?.rawValue].compactMap { $0 }) + ($0.alternateApplePlaceIDs ?? [])
+        })
+        // A containing venue can help discover its cooling area without sharing identity.
+        return spots.filter { linkedIDs.contains($0.id) ||
+            ($0.detailsApplePlaceID.map(appleIDs.contains) ?? false) || $0.name.localizedCaseInsensitiveContains(query) ||
             $0.address.localizedCaseInsensitiveContains(query) || $0.type.rawValue.localizedCaseInsensitiveContains(query) }
+            .sorted { lhs, rhs in
+                lhs.name.localizedCaseInsensitiveCompare(query) == .orderedSame &&
+                rhs.name.localizedCaseInsensitiveCompare(query) != .orderedSame
+            }
     }
 
     func savedLocation(for spot: CoolSpot) -> SavedLocation? {

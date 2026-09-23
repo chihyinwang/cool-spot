@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "catalogID": "gla-2025-all",
-  "generatedAt": "2026-09-18T22:27:30Z",
+  "generatedAt": "2026-09-19T00:16:05Z",
   "sources": [
     {
       "id": "gla-cool-spaces-2025",
@@ -90,7 +90,7 @@
             "/hours/text"
           ],
           "recordID": "18",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -102,7 +102,7 @@
             "/hours/timeZone"
           ],
           "recordID": "18",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -111,7 +111,7 @@
             "/placeType"
           ],
           "recordID": "18",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -198,7 +198,7 @@
             "/hours/text"
           ],
           "recordID": "12",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -210,7 +210,7 @@
             "/hours/timeZone"
           ],
           "recordID": "12",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -219,10 +219,18 @@
             "/placeType"
           ],
           "recordID": "12",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
-      "mapReferences": []
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "IB58D044B3FE1218C",
+          "relationship": "same_place",
+          "verification": "reviewed",
+          "checkedAt": "2026-09-19T00:16:05Z"
+        }
+      ]
     },
     {
       "id": "5f6a4ca7-4725-5ebb-91bc-87054f9d3c2b",
@@ -299,7 +307,7 @@
             "/hours/text"
           ],
           "recordID": "17",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -311,7 +319,7 @@
             "/hours/timeZone"
           ],
           "recordID": "17",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -320,7 +328,7 @@
             "/placeType"
           ],
           "recordID": "17",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -329,7 +337,7 @@
           "placeID": "IB13A37DC976A0E0E",
           "relationship": "same_place",
           "verification": "automatic",
-          "checkedAt": "2026-09-18T14:17:45Z"
+          "checkedAt": "2026-09-19T00:14:06Z"
         }
       ]
     },
@@ -408,7 +416,7 @@
             "/hours/text"
           ],
           "recordID": "10",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -420,7 +428,7 @@
             "/hours/timeZone"
           ],
           "recordID": "10",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -429,7 +437,7 @@
             "/placeType"
           ],
           "recordID": "10",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -516,7 +524,7 @@
             "/hours/text"
           ],
           "recordID": "11",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -528,7 +536,7 @@
             "/hours/timeZone"
           ],
           "recordID": "11",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -537,10 +545,18 @@
             "/placeType"
           ],
           "recordID": "11",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
-      "mapReferences": []
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "I36D6141A975EE64F",
+          "relationship": "same_place",
+          "verification": "automatic",
+          "checkedAt": "2026-09-19T00:14:14Z"
+        }
+      ]
     },
     {
       "id": "1bd00a74-fc1a-5d66-8f84-9493cbb0ae30",
@@ -617,7 +633,7 @@
             "/hours/text"
           ],
           "recordID": "87",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -629,7 +645,7 @@
             "/hours/timeZone"
           ],
           "recordID": "87",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -638,7 +654,7 @@
             "/placeType"
           ],
           "recordID": "87",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -717,7 +733,7 @@
             "/hours/text"
           ],
           "recordID": "681",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -729,7 +745,7 @@
             "/hours/timeZone"
           ],
           "recordID": "681",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -738,7 +754,7 @@
             "/placeType"
           ],
           "recordID": "681",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -817,7 +833,7 @@
             "/hours/text"
           ],
           "recordID": "46",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -829,7 +845,7 @@
             "/hours/timeZone"
           ],
           "recordID": "46",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -838,7 +854,7 @@
             "/placeType"
           ],
           "recordID": "46",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -925,7 +941,7 @@
             "/hours/text"
           ],
           "recordID": "45",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -937,7 +953,7 @@
             "/hours/timeZone"
           ],
           "recordID": "45",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -946,7 +962,7 @@
             "/placeType"
           ],
           "recordID": "45",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -1033,7 +1049,7 @@
             "/hours/text"
           ],
           "recordID": "48",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1045,7 +1061,7 @@
             "/hours/timeZone"
           ],
           "recordID": "48",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1054,7 +1070,7 @@
             "/placeType"
           ],
           "recordID": "48",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -1133,7 +1149,7 @@
             "/hours/text"
           ],
           "recordID": "714",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1145,7 +1161,7 @@
             "/hours/timeZone"
           ],
           "recordID": "714",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1154,7 +1170,7 @@
             "/placeType"
           ],
           "recordID": "714",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -1241,7 +1257,7 @@
             "/hours/text"
           ],
           "recordID": "49",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1253,7 +1269,7 @@
             "/hours/timeZone"
           ],
           "recordID": "49",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1262,7 +1278,7 @@
             "/placeType"
           ],
           "recordID": "49",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -1341,7 +1357,7 @@
             "/hours/text"
           ],
           "recordID": "51",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1353,7 +1369,7 @@
             "/hours/timeZone"
           ],
           "recordID": "51",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1362,10 +1378,18 @@
             "/placeType"
           ],
           "recordID": "51",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
-      "mapReferences": []
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "I12FAFA373E0E5590",
+          "relationship": "same_place",
+          "verification": "automatic",
+          "checkedAt": "2026-09-19T00:14:11Z"
+        }
+      ]
     },
     {
       "id": "096b96cf-5e48-52b3-a575-b39d02ceead7",
@@ -1441,7 +1465,7 @@
             "/hours/text"
           ],
           "recordID": "53",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1453,7 +1477,7 @@
             "/hours/timeZone"
           ],
           "recordID": "53",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1462,7 +1486,7 @@
             "/placeType"
           ],
           "recordID": "53",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -1549,7 +1573,7 @@
             "/hours/text"
           ],
           "recordID": "55",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1561,7 +1585,7 @@
             "/hours/timeZone"
           ],
           "recordID": "55",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1570,10 +1594,18 @@
             "/placeType"
           ],
           "recordID": "55",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
-      "mapReferences": []
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "I8C06733D1D7C4FB7",
+          "relationship": "same_place",
+          "verification": "automatic",
+          "checkedAt": "2026-09-18T14:28:20Z"
+        }
+      ]
     },
     {
       "id": "954ce4a4-4246-57dd-854b-2de3739e5b5f",
@@ -1649,7 +1681,7 @@
             "/hours/text"
           ],
           "recordID": "50",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1661,7 +1693,7 @@
             "/hours/timeZone"
           ],
           "recordID": "50",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1670,7 +1702,7 @@
             "/placeType"
           ],
           "recordID": "50",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -1757,7 +1789,7 @@
             "/hours/text"
           ],
           "recordID": "13",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1769,7 +1801,7 @@
             "/hours/timeZone"
           ],
           "recordID": "13",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1778,7 +1810,7 @@
             "/placeType"
           ],
           "recordID": "13",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -1865,7 +1897,7 @@
             "/hours/text"
           ],
           "recordID": "630",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1877,7 +1909,7 @@
             "/hours/timeZone"
           ],
           "recordID": "630",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1886,7 +1918,7 @@
             "/placeType"
           ],
           "recordID": "630",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -1965,7 +1997,7 @@
             "/hours/text"
           ],
           "recordID": "625",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1977,7 +2009,7 @@
             "/hours/timeZone"
           ],
           "recordID": "625",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -1986,7 +2018,7 @@
             "/placeType"
           ],
           "recordID": "625",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -2074,7 +2106,7 @@
             "/hours/text"
           ],
           "recordID": "627",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2086,7 +2118,7 @@
             "/hours/timeZone"
           ],
           "recordID": "627",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2095,7 +2127,7 @@
             "/placeType"
           ],
           "recordID": "627",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -2182,7 +2214,7 @@
             "/hours/text"
           ],
           "recordID": "629",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2194,7 +2226,7 @@
             "/hours/timeZone"
           ],
           "recordID": "629",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2203,7 +2235,7 @@
             "/placeType"
           ],
           "recordID": "629",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -2283,7 +2315,7 @@
             "/hours/text"
           ],
           "recordID": "631",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2295,7 +2327,7 @@
             "/hours/timeZone"
           ],
           "recordID": "631",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2304,7 +2336,7 @@
             "/placeType"
           ],
           "recordID": "631",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -2391,7 +2423,7 @@
             "/hours/text"
           ],
           "recordID": "623",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2403,7 +2435,7 @@
             "/hours/timeZone"
           ],
           "recordID": "623",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2412,7 +2444,7 @@
             "/placeType"
           ],
           "recordID": "623",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -2499,7 +2531,7 @@
             "/hours/text"
           ],
           "recordID": "635",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2511,7 +2543,7 @@
             "/hours/timeZone"
           ],
           "recordID": "635",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2520,7 +2552,7 @@
             "/placeType"
           ],
           "recordID": "635",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -2597,7 +2629,7 @@
             "/hours/text"
           ],
           "recordID": "626",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2609,7 +2641,7 @@
             "/hours/timeZone"
           ],
           "recordID": "626",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2618,7 +2650,7 @@
             "/placeType"
           ],
           "recordID": "626",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -2697,7 +2729,7 @@
             "/hours/text"
           ],
           "recordID": "624",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2709,7 +2741,7 @@
             "/hours/timeZone"
           ],
           "recordID": "624",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2718,7 +2750,7 @@
             "/placeType"
           ],
           "recordID": "624",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -2805,7 +2837,7 @@
             "/hours/text"
           ],
           "recordID": "638",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2817,7 +2849,7 @@
             "/hours/timeZone"
           ],
           "recordID": "638",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2826,7 +2858,7 @@
             "/placeType"
           ],
           "recordID": "638",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -2906,7 +2938,7 @@
             "/hours/text"
           ],
           "recordID": "634",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2918,7 +2950,7 @@
             "/hours/timeZone"
           ],
           "recordID": "634",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -2927,7 +2959,7 @@
             "/placeType"
           ],
           "recordID": "634",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3006,7 +3038,7 @@
             "/hours/text"
           ],
           "recordID": "633",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3018,7 +3050,7 @@
             "/hours/timeZone"
           ],
           "recordID": "633",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3027,7 +3059,7 @@
             "/placeType"
           ],
           "recordID": "633",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3106,7 +3138,7 @@
             "/hours/text"
           ],
           "recordID": "636",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3118,7 +3150,7 @@
             "/hours/timeZone"
           ],
           "recordID": "636",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3127,7 +3159,7 @@
             "/placeType"
           ],
           "recordID": "636",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3206,7 +3238,7 @@
             "/hours/text"
           ],
           "recordID": "641",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3218,7 +3250,7 @@
             "/hours/timeZone"
           ],
           "recordID": "641",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3227,7 +3259,7 @@
             "/placeType"
           ],
           "recordID": "641",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3306,7 +3338,7 @@
             "/hours/text"
           ],
           "recordID": "642",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3318,7 +3350,7 @@
             "/hours/timeZone"
           ],
           "recordID": "642",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3327,7 +3359,7 @@
             "/placeType"
           ],
           "recordID": "642",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3407,7 +3439,7 @@
             "/hours/text"
           ],
           "recordID": "643",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3419,7 +3451,7 @@
             "/hours/timeZone"
           ],
           "recordID": "643",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3428,7 +3460,7 @@
             "/placeType"
           ],
           "recordID": "643",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3505,7 +3537,7 @@
             "/hours/text"
           ],
           "recordID": "656",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3517,7 +3549,7 @@
             "/hours/timeZone"
           ],
           "recordID": "656",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3526,7 +3558,7 @@
             "/placeType"
           ],
           "recordID": "656",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3605,7 +3637,7 @@
             "/hours/text"
           ],
           "recordID": "131",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3617,7 +3649,7 @@
             "/hours/timeZone"
           ],
           "recordID": "131",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3626,7 +3658,7 @@
             "/placeType"
           ],
           "recordID": "131",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3705,7 +3737,7 @@
             "/hours/text"
           ],
           "recordID": "125",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3717,7 +3749,7 @@
             "/hours/timeZone"
           ],
           "recordID": "125",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3726,7 +3758,7 @@
             "/placeType"
           ],
           "recordID": "125",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -3813,7 +3845,7 @@
             "/hours/text"
           ],
           "recordID": "657",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3825,7 +3857,7 @@
             "/hours/timeZone"
           ],
           "recordID": "657",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3834,7 +3866,7 @@
             "/placeType"
           ],
           "recordID": "657",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -3913,7 +3945,7 @@
             "/hours/text"
           ],
           "recordID": "660",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3925,7 +3957,7 @@
             "/hours/timeZone"
           ],
           "recordID": "660",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -3934,7 +3966,7 @@
             "/placeType"
           ],
           "recordID": "660",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -4021,7 +4053,7 @@
             "/hours/text"
           ],
           "recordID": "664",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4033,7 +4065,7 @@
             "/hours/timeZone"
           ],
           "recordID": "664",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4042,7 +4074,7 @@
             "/placeType"
           ],
           "recordID": "664",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -4121,7 +4153,7 @@
             "/hours/text"
           ],
           "recordID": "661",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4133,7 +4165,7 @@
             "/hours/timeZone"
           ],
           "recordID": "661",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4142,7 +4174,7 @@
             "/placeType"
           ],
           "recordID": "661",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -4229,7 +4261,7 @@
             "/hours/text"
           ],
           "recordID": "662",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4241,7 +4273,7 @@
             "/hours/timeZone"
           ],
           "recordID": "662",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4250,7 +4282,7 @@
             "/placeType"
           ],
           "recordID": "662",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -4337,7 +4369,7 @@
             "/hours/text"
           ],
           "recordID": "659",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4349,7 +4381,7 @@
             "/hours/timeZone"
           ],
           "recordID": "659",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4358,7 +4390,7 @@
             "/placeType"
           ],
           "recordID": "659",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -4445,7 +4477,7 @@
             "/hours/text"
           ],
           "recordID": "663",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4457,7 +4489,7 @@
             "/hours/timeZone"
           ],
           "recordID": "663",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4466,7 +4498,7 @@
             "/placeType"
           ],
           "recordID": "663",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -4545,7 +4577,7 @@
             "/hours/text"
           ],
           "recordID": "637",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4557,7 +4589,7 @@
             "/hours/timeZone"
           ],
           "recordID": "637",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4566,7 +4598,7 @@
             "/placeType"
           ],
           "recordID": "637",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -4654,7 +4686,7 @@
             "/hours/text"
           ],
           "recordID": "648",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4666,7 +4698,7 @@
             "/hours/timeZone"
           ],
           "recordID": "648",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4675,7 +4707,7 @@
             "/placeType"
           ],
           "recordID": "648",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -4762,7 +4794,7 @@
             "/hours/text"
           ],
           "recordID": "647",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4774,7 +4806,7 @@
             "/hours/timeZone"
           ],
           "recordID": "647",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4783,7 +4815,7 @@
             "/placeType"
           ],
           "recordID": "647",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -4871,7 +4903,7 @@
             "/hours/text"
           ],
           "recordID": "645",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4883,7 +4915,7 @@
             "/hours/timeZone"
           ],
           "recordID": "645",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4892,7 +4924,7 @@
             "/placeType"
           ],
           "recordID": "645",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -4972,7 +5004,7 @@
             "/hours/text"
           ],
           "recordID": "646",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4984,7 +5016,7 @@
             "/hours/timeZone"
           ],
           "recordID": "646",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -4993,7 +5025,7 @@
             "/placeType"
           ],
           "recordID": "646",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -5081,7 +5113,7 @@
             "/hours/text"
           ],
           "recordID": "302",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5093,7 +5125,7 @@
             "/hours/timeZone"
           ],
           "recordID": "302",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5102,7 +5134,7 @@
             "/placeType"
           ],
           "recordID": "302",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -5182,7 +5214,7 @@
             "/hours/text"
           ],
           "recordID": "305",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5194,7 +5226,7 @@
             "/hours/timeZone"
           ],
           "recordID": "305",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5203,7 +5235,7 @@
             "/placeType"
           ],
           "recordID": "305",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -5291,7 +5323,7 @@
             "/hours/text"
           ],
           "recordID": "303",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5303,7 +5335,7 @@
             "/hours/timeZone"
           ],
           "recordID": "303",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5312,7 +5344,7 @@
             "/placeType"
           ],
           "recordID": "303",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -5400,7 +5432,7 @@
             "/hours/text"
           ],
           "recordID": "304",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5412,7 +5444,7 @@
             "/hours/timeZone"
           ],
           "recordID": "304",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5421,7 +5453,7 @@
             "/placeType"
           ],
           "recordID": "304",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -5501,7 +5533,7 @@
             "/hours/text"
           ],
           "recordID": "301",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5513,7 +5545,7 @@
             "/hours/timeZone"
           ],
           "recordID": "301",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5522,7 +5554,7 @@
             "/placeType"
           ],
           "recordID": "301",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -5610,7 +5642,7 @@
             "/hours/text"
           ],
           "recordID": "306",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5622,7 +5654,7 @@
             "/hours/timeZone"
           ],
           "recordID": "306",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5631,7 +5663,7 @@
             "/placeType"
           ],
           "recordID": "306",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -5718,7 +5750,7 @@
             "/hours/text"
           ],
           "recordID": "644",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5730,7 +5762,7 @@
             "/hours/timeZone"
           ],
           "recordID": "644",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5739,7 +5771,7 @@
             "/placeType"
           ],
           "recordID": "644",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -5827,7 +5859,7 @@
             "/hours/text"
           ],
           "recordID": "308",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5839,7 +5871,7 @@
             "/hours/timeZone"
           ],
           "recordID": "308",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5848,7 +5880,7 @@
             "/placeType"
           ],
           "recordID": "308",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -5936,7 +5968,7 @@
             "/hours/text"
           ],
           "recordID": "307",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5948,7 +5980,7 @@
             "/hours/timeZone"
           ],
           "recordID": "307",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -5957,7 +5989,7 @@
             "/placeType"
           ],
           "recordID": "307",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -6036,7 +6068,7 @@
             "/hours/text"
           ],
           "recordID": "666",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6048,7 +6080,7 @@
             "/hours/timeZone"
           ],
           "recordID": "666",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6057,7 +6089,7 @@
             "/placeType"
           ],
           "recordID": "666",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -6145,7 +6177,7 @@
             "/hours/text"
           ],
           "recordID": "680",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6157,7 +6189,7 @@
             "/hours/timeZone"
           ],
           "recordID": "680",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6166,7 +6198,7 @@
             "/placeType"
           ],
           "recordID": "680",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -6246,7 +6278,7 @@
             "/hours/text"
           ],
           "recordID": "670",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6258,7 +6290,7 @@
             "/hours/timeZone"
           ],
           "recordID": "670",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6267,7 +6299,7 @@
             "/placeType"
           ],
           "recordID": "670",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -6354,7 +6386,7 @@
             "/hours/text"
           ],
           "recordID": "669",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6366,7 +6398,7 @@
             "/hours/timeZone"
           ],
           "recordID": "669",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6375,7 +6407,7 @@
             "/placeType"
           ],
           "recordID": "669",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -6462,7 +6494,7 @@
             "/hours/text"
           ],
           "recordID": "668",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6474,7 +6506,7 @@
             "/hours/timeZone"
           ],
           "recordID": "668",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6483,7 +6515,7 @@
             "/placeType"
           ],
           "recordID": "668",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -6571,7 +6603,7 @@
             "/hours/text"
           ],
           "recordID": "667",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6583,7 +6615,7 @@
             "/hours/timeZone"
           ],
           "recordID": "667",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6592,7 +6624,7 @@
             "/placeType"
           ],
           "recordID": "667",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -6671,7 +6703,7 @@
             "/hours/text"
           ],
           "recordID": "679",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6683,7 +6715,7 @@
             "/hours/timeZone"
           ],
           "recordID": "679",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6692,7 +6724,7 @@
             "/placeType"
           ],
           "recordID": "679",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -6772,7 +6804,7 @@
             "/hours/text"
           ],
           "recordID": "671",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6784,7 +6816,7 @@
             "/hours/timeZone"
           ],
           "recordID": "671",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6793,7 +6825,7 @@
             "/placeType"
           ],
           "recordID": "671",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -6873,7 +6905,7 @@
             "/hours/text"
           ],
           "recordID": "665",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6885,7 +6917,7 @@
             "/hours/timeZone"
           ],
           "recordID": "665",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6894,7 +6926,7 @@
             "/placeType"
           ],
           "recordID": "665",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -6981,7 +7013,7 @@
             "/hours/text"
           ],
           "recordID": "672",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -6993,7 +7025,7 @@
             "/hours/timeZone"
           ],
           "recordID": "672",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7002,7 +7034,7 @@
             "/placeType"
           ],
           "recordID": "672",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -7081,7 +7113,7 @@
             "/hours/text"
           ],
           "recordID": "683",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7093,7 +7125,7 @@
             "/hours/timeZone"
           ],
           "recordID": "683",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7102,7 +7134,7 @@
             "/placeType"
           ],
           "recordID": "683",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -7189,7 +7221,7 @@
             "/hours/text"
           ],
           "recordID": "583",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7201,7 +7233,7 @@
             "/hours/timeZone"
           ],
           "recordID": "583",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7210,7 +7242,7 @@
             "/placeType"
           ],
           "recordID": "583",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -7295,7 +7327,7 @@
             "/hours/text"
           ],
           "recordID": "151",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7307,7 +7339,7 @@
             "/hours/timeZone"
           ],
           "recordID": "151",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7316,7 +7348,7 @@
             "/placeType"
           ],
           "recordID": "151",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -7404,7 +7436,7 @@
             "/hours/text"
           ],
           "recordID": "649",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7416,7 +7448,7 @@
             "/hours/timeZone"
           ],
           "recordID": "649",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7425,7 +7457,7 @@
             "/placeType"
           ],
           "recordID": "649",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -7512,7 +7544,7 @@
             "/hours/text"
           ],
           "recordID": "650",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7524,7 +7556,7 @@
             "/hours/timeZone"
           ],
           "recordID": "650",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7533,7 +7565,7 @@
             "/placeType"
           ],
           "recordID": "650",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -7620,7 +7652,7 @@
             "/hours/text"
           ],
           "recordID": "29",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7632,7 +7664,7 @@
             "/hours/timeZone"
           ],
           "recordID": "29",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7641,7 +7673,7 @@
             "/placeType"
           ],
           "recordID": "29",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -7720,7 +7752,7 @@
             "/hours/text"
           ],
           "recordID": "30",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7732,7 +7764,7 @@
             "/hours/timeZone"
           ],
           "recordID": "30",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7741,7 +7773,7 @@
             "/placeType"
           ],
           "recordID": "30",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -7821,7 +7853,7 @@
             "/hours/text"
           ],
           "recordID": "1",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7833,7 +7865,7 @@
             "/hours/timeZone"
           ],
           "recordID": "1",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7842,7 +7874,7 @@
             "/placeType"
           ],
           "recordID": "1",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -7930,7 +7962,7 @@
             "/hours/text"
           ],
           "recordID": "2",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7942,7 +7974,7 @@
             "/hours/timeZone"
           ],
           "recordID": "2",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -7951,7 +7983,7 @@
             "/placeType"
           ],
           "recordID": "2",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -8030,7 +8062,7 @@
             "/hours/text"
           ],
           "recordID": "3",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8042,7 +8074,7 @@
             "/hours/timeZone"
           ],
           "recordID": "3",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8051,7 +8083,7 @@
             "/placeType"
           ],
           "recordID": "3",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -8138,7 +8170,7 @@
             "/hours/text"
           ],
           "recordID": "6",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8150,7 +8182,7 @@
             "/hours/timeZone"
           ],
           "recordID": "6",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8159,7 +8191,7 @@
             "/placeType"
           ],
           "recordID": "6",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -8238,7 +8270,7 @@
             "/hours/text"
           ],
           "recordID": "8",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8250,7 +8282,7 @@
             "/hours/timeZone"
           ],
           "recordID": "8",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8259,7 +8291,7 @@
             "/placeType"
           ],
           "recordID": "8",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -8338,7 +8370,7 @@
             "/hours/text"
           ],
           "recordID": "15",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8350,7 +8382,7 @@
             "/hours/timeZone"
           ],
           "recordID": "15",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8359,7 +8391,7 @@
             "/placeType"
           ],
           "recordID": "15",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -8438,7 +8470,7 @@
             "/hours/text"
           ],
           "recordID": "653",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8450,7 +8482,7 @@
             "/hours/timeZone"
           ],
           "recordID": "653",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8459,7 +8491,7 @@
             "/placeType"
           ],
           "recordID": "653",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -8538,7 +8570,7 @@
             "/hours/text"
           ],
           "recordID": "4",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8550,7 +8582,7 @@
             "/hours/timeZone"
           ],
           "recordID": "4",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8559,7 +8591,7 @@
             "/placeType"
           ],
           "recordID": "4",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -8646,7 +8678,7 @@
             "/hours/text"
           ],
           "recordID": "9",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8658,7 +8690,7 @@
             "/hours/timeZone"
           ],
           "recordID": "9",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8667,7 +8699,7 @@
             "/placeType"
           ],
           "recordID": "9",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -8746,7 +8778,7 @@
             "/hours/text"
           ],
           "recordID": "14",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8758,7 +8790,7 @@
             "/hours/timeZone"
           ],
           "recordID": "14",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8767,7 +8799,7 @@
             "/placeType"
           ],
           "recordID": "14",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -8854,7 +8886,7 @@
             "/hours/text"
           ],
           "recordID": "16",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8866,7 +8898,7 @@
             "/hours/timeZone"
           ],
           "recordID": "16",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8875,7 +8907,7 @@
             "/placeType"
           ],
           "recordID": "16",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -8963,7 +8995,7 @@
             "/hours/text"
           ],
           "recordID": "19",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8975,7 +9007,7 @@
             "/hours/timeZone"
           ],
           "recordID": "19",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -8984,7 +9016,7 @@
             "/placeType"
           ],
           "recordID": "19",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -9071,7 +9103,7 @@
             "/hours/text"
           ],
           "recordID": "21",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9083,7 +9115,7 @@
             "/hours/timeZone"
           ],
           "recordID": "21",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9092,7 +9124,7 @@
             "/placeType"
           ],
           "recordID": "21",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -9171,7 +9203,7 @@
             "/hours/text"
           ],
           "recordID": "22",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9183,7 +9215,7 @@
             "/hours/timeZone"
           ],
           "recordID": "22",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9192,7 +9224,7 @@
             "/placeType"
           ],
           "recordID": "22",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -9271,7 +9303,7 @@
             "/hours/text"
           ],
           "recordID": "23",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9283,7 +9315,7 @@
             "/hours/timeZone"
           ],
           "recordID": "23",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9292,7 +9324,7 @@
             "/placeType"
           ],
           "recordID": "23",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -9379,7 +9411,7 @@
             "/hours/text"
           ],
           "recordID": "25",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9391,7 +9423,7 @@
             "/hours/timeZone"
           ],
           "recordID": "25",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9400,7 +9432,7 @@
             "/placeType"
           ],
           "recordID": "25",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -9479,7 +9511,7 @@
             "/hours/text"
           ],
           "recordID": "26",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9491,7 +9523,7 @@
             "/hours/timeZone"
           ],
           "recordID": "26",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9500,7 +9532,7 @@
             "/placeType"
           ],
           "recordID": "26",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -9581,7 +9613,7 @@
             "/hours/text"
           ],
           "recordID": "33",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9593,7 +9625,7 @@
             "/hours/timeZone"
           ],
           "recordID": "33",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9602,7 +9634,7 @@
             "/placeType"
           ],
           "recordID": "33",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -9681,7 +9713,7 @@
             "/hours/text"
           ],
           "recordID": "32",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9693,7 +9725,7 @@
             "/hours/timeZone"
           ],
           "recordID": "32",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9702,7 +9734,7 @@
             "/placeType"
           ],
           "recordID": "32",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -9783,7 +9815,7 @@
             "/hours/text"
           ],
           "recordID": "34",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9795,7 +9827,7 @@
             "/hours/timeZone"
           ],
           "recordID": "34",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9804,7 +9836,7 @@
             "/placeType"
           ],
           "recordID": "34",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -9892,7 +9924,7 @@
             "/hours/text"
           ],
           "recordID": "35",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9904,7 +9936,7 @@
             "/hours/timeZone"
           ],
           "recordID": "35",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -9913,7 +9945,7 @@
             "/placeType"
           ],
           "recordID": "35",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -9993,7 +10025,7 @@
             "/hours/text"
           ],
           "recordID": "36",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10005,7 +10037,7 @@
             "/hours/timeZone"
           ],
           "recordID": "36",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10014,7 +10046,7 @@
             "/placeType"
           ],
           "recordID": "36",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -10094,7 +10126,7 @@
             "/hours/text"
           ],
           "recordID": "38",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10106,7 +10138,7 @@
             "/hours/timeZone"
           ],
           "recordID": "38",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10115,7 +10147,7 @@
             "/placeType"
           ],
           "recordID": "38",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -10202,7 +10234,7 @@
             "/hours/text"
           ],
           "recordID": "39",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10214,7 +10246,7 @@
             "/hours/timeZone"
           ],
           "recordID": "39",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10223,7 +10255,7 @@
             "/placeType"
           ],
           "recordID": "39",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -10310,7 +10342,7 @@
             "/hours/text"
           ],
           "recordID": "40",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10322,7 +10354,7 @@
             "/hours/timeZone"
           ],
           "recordID": "40",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10331,7 +10363,7 @@
             "/placeType"
           ],
           "recordID": "40",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -10418,7 +10450,7 @@
             "/hours/text"
           ],
           "recordID": "41",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10430,7 +10462,7 @@
             "/hours/timeZone"
           ],
           "recordID": "41",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10439,7 +10471,7 @@
             "/placeType"
           ],
           "recordID": "41",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -10526,7 +10558,7 @@
             "/hours/text"
           ],
           "recordID": "37",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10538,7 +10570,7 @@
             "/hours/timeZone"
           ],
           "recordID": "37",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10547,7 +10579,7 @@
             "/placeType"
           ],
           "recordID": "37",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -10627,7 +10659,7 @@
             "/hours/text"
           ],
           "recordID": "42",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10639,7 +10671,7 @@
             "/hours/timeZone"
           ],
           "recordID": "42",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10648,7 +10680,7 @@
             "/placeType"
           ],
           "recordID": "42",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -10736,7 +10768,7 @@
             "/hours/text"
           ],
           "recordID": "44",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10748,7 +10780,7 @@
             "/hours/timeZone"
           ],
           "recordID": "44",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10757,7 +10789,7 @@
             "/placeType"
           ],
           "recordID": "44",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -10837,7 +10869,7 @@
             "/hours/text"
           ],
           "recordID": "43",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10849,7 +10881,7 @@
             "/hours/timeZone"
           ],
           "recordID": "43",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10858,7 +10890,7 @@
             "/placeType"
           ],
           "recordID": "43",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -10938,7 +10970,7 @@
             "/hours/text"
           ],
           "recordID": "56",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10950,7 +10982,7 @@
             "/hours/timeZone"
           ],
           "recordID": "56",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -10959,7 +10991,7 @@
             "/placeType"
           ],
           "recordID": "56",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -11047,7 +11079,7 @@
             "/hours/text"
           ],
           "recordID": "61",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11059,7 +11091,7 @@
             "/hours/timeZone"
           ],
           "recordID": "61",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11068,7 +11100,7 @@
             "/placeType"
           ],
           "recordID": "61",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -11147,7 +11179,7 @@
             "/hours/text"
           ],
           "recordID": "62",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11159,7 +11191,7 @@
             "/hours/timeZone"
           ],
           "recordID": "62",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11168,7 +11200,7 @@
             "/placeType"
           ],
           "recordID": "62",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -11255,7 +11287,7 @@
             "/hours/text"
           ],
           "recordID": "64",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11267,7 +11299,7 @@
             "/hours/timeZone"
           ],
           "recordID": "64",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11276,7 +11308,7 @@
             "/placeType"
           ],
           "recordID": "64",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -11363,7 +11395,7 @@
             "/hours/text"
           ],
           "recordID": "67",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11375,7 +11407,7 @@
             "/hours/timeZone"
           ],
           "recordID": "67",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11384,7 +11416,7 @@
             "/placeType"
           ],
           "recordID": "67",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -11472,7 +11504,7 @@
             "/hours/text"
           ],
           "recordID": "70",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11484,7 +11516,7 @@
             "/hours/timeZone"
           ],
           "recordID": "70",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11493,7 +11525,7 @@
             "/placeType"
           ],
           "recordID": "70",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -11572,7 +11604,7 @@
             "/hours/text"
           ],
           "recordID": "66",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11584,7 +11616,7 @@
             "/hours/timeZone"
           ],
           "recordID": "66",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11593,7 +11625,7 @@
             "/placeType"
           ],
           "recordID": "66",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -11673,7 +11705,7 @@
             "/hours/text"
           ],
           "recordID": "63",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11685,7 +11717,7 @@
             "/hours/timeZone"
           ],
           "recordID": "63",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11694,7 +11726,7 @@
             "/placeType"
           ],
           "recordID": "63",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -11773,7 +11805,7 @@
             "/hours/text"
           ],
           "recordID": "72",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11785,7 +11817,7 @@
             "/hours/timeZone"
           ],
           "recordID": "72",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11794,7 +11826,7 @@
             "/placeType"
           ],
           "recordID": "72",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -11883,7 +11915,7 @@
             "/hours/text"
           ],
           "recordID": "79",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11895,7 +11927,7 @@
             "/hours/timeZone"
           ],
           "recordID": "79",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11904,7 +11936,7 @@
             "/placeType"
           ],
           "recordID": "79",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -11985,7 +12017,7 @@
             "/hours/text"
           ],
           "recordID": "80",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -11997,7 +12029,7 @@
             "/hours/timeZone"
           ],
           "recordID": "80",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12006,7 +12038,7 @@
             "/placeType"
           ],
           "recordID": "80",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -12095,7 +12127,7 @@
             "/hours/text"
           ],
           "recordID": "82",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12107,7 +12139,7 @@
             "/hours/timeZone"
           ],
           "recordID": "82",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12116,7 +12148,7 @@
             "/placeType"
           ],
           "recordID": "82",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -12197,7 +12229,7 @@
             "/hours/text"
           ],
           "recordID": "74",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12209,7 +12241,7 @@
             "/hours/timeZone"
           ],
           "recordID": "74",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12218,7 +12250,7 @@
             "/placeType"
           ],
           "recordID": "74",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -12299,7 +12331,7 @@
             "/hours/text"
           ],
           "recordID": "83",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12311,7 +12343,7 @@
             "/hours/timeZone"
           ],
           "recordID": "83",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12320,7 +12352,7 @@
             "/placeType"
           ],
           "recordID": "83",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -12408,7 +12440,7 @@
             "/hours/text"
           ],
           "recordID": "75",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12420,7 +12452,7 @@
             "/hours/timeZone"
           ],
           "recordID": "75",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12429,7 +12461,7 @@
             "/placeType"
           ],
           "recordID": "75",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -12510,7 +12542,7 @@
             "/hours/text"
           ],
           "recordID": "77",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12522,7 +12554,7 @@
             "/hours/timeZone"
           ],
           "recordID": "77",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12531,7 +12563,7 @@
             "/placeType"
           ],
           "recordID": "77",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -12620,7 +12652,7 @@
             "/hours/text"
           ],
           "recordID": "78",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12632,7 +12664,7 @@
             "/hours/timeZone"
           ],
           "recordID": "78",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12641,7 +12673,7 @@
             "/placeType"
           ],
           "recordID": "78",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -12722,7 +12754,7 @@
             "/hours/text"
           ],
           "recordID": "76",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12734,7 +12766,7 @@
             "/hours/timeZone"
           ],
           "recordID": "76",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12743,7 +12775,7 @@
             "/placeType"
           ],
           "recordID": "76",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -12824,7 +12856,7 @@
             "/hours/text"
           ],
           "recordID": "73",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12836,7 +12868,7 @@
             "/hours/timeZone"
           ],
           "recordID": "73",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12845,7 +12877,7 @@
             "/placeType"
           ],
           "recordID": "73",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -12933,7 +12965,7 @@
             "/hours/text"
           ],
           "recordID": "81",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12945,7 +12977,7 @@
             "/hours/timeZone"
           ],
           "recordID": "81",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -12954,7 +12986,7 @@
             "/placeType"
           ],
           "recordID": "81",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -13043,7 +13075,7 @@
             "/hours/text"
           ],
           "recordID": "84",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13055,7 +13087,7 @@
             "/hours/timeZone"
           ],
           "recordID": "84",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13064,7 +13096,7 @@
             "/placeType"
           ],
           "recordID": "84",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -13151,7 +13183,7 @@
             "/hours/text"
           ],
           "recordID": "88",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13163,7 +13195,7 @@
             "/hours/timeZone"
           ],
           "recordID": "88",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13172,7 +13204,7 @@
             "/placeType"
           ],
           "recordID": "88",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -13251,7 +13283,7 @@
             "/hours/text"
           ],
           "recordID": "86",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13263,7 +13295,7 @@
             "/hours/timeZone"
           ],
           "recordID": "86",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13272,7 +13304,7 @@
             "/placeType"
           ],
           "recordID": "86",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -13351,7 +13383,7 @@
             "/hours/text"
           ],
           "recordID": "89",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13363,7 +13395,7 @@
             "/hours/timeZone"
           ],
           "recordID": "89",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13372,7 +13404,7 @@
             "/placeType"
           ],
           "recordID": "89",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -13451,7 +13483,7 @@
             "/hours/text"
           ],
           "recordID": "91",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13463,7 +13495,7 @@
             "/hours/timeZone"
           ],
           "recordID": "91",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13472,7 +13504,7 @@
             "/placeType"
           ],
           "recordID": "91",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -13559,7 +13591,7 @@
             "/hours/text"
           ],
           "recordID": "90",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13571,7 +13603,7 @@
             "/hours/timeZone"
           ],
           "recordID": "90",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13580,7 +13612,7 @@
             "/placeType"
           ],
           "recordID": "90",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -13659,7 +13691,7 @@
             "/hours/text"
           ],
           "recordID": "92",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13671,7 +13703,7 @@
             "/hours/timeZone"
           ],
           "recordID": "92",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13680,7 +13712,7 @@
             "/placeType"
           ],
           "recordID": "92",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -13768,7 +13800,7 @@
             "/hours/text"
           ],
           "recordID": "93",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13780,7 +13812,7 @@
             "/hours/timeZone"
           ],
           "recordID": "93",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13789,7 +13821,7 @@
             "/placeType"
           ],
           "recordID": "93",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -13876,7 +13908,7 @@
             "/hours/text"
           ],
           "recordID": "96",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13888,7 +13920,7 @@
             "/hours/timeZone"
           ],
           "recordID": "96",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13897,7 +13929,7 @@
             "/placeType"
           ],
           "recordID": "96",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -13976,7 +14008,7 @@
             "/hours/text"
           ],
           "recordID": "99",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13988,7 +14020,7 @@
             "/hours/timeZone"
           ],
           "recordID": "99",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -13997,7 +14029,7 @@
             "/placeType"
           ],
           "recordID": "99",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14084,7 +14116,7 @@
             "/hours/text"
           ],
           "recordID": "31",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14096,7 +14128,7 @@
             "/hours/timeZone"
           ],
           "recordID": "31",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14105,7 +14137,7 @@
             "/placeType"
           ],
           "recordID": "31",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14192,7 +14224,7 @@
             "/hours/text"
           ],
           "recordID": "100",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14204,7 +14236,7 @@
             "/hours/timeZone"
           ],
           "recordID": "100",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14213,7 +14245,7 @@
             "/placeType"
           ],
           "recordID": "100",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14300,7 +14332,7 @@
             "/hours/text"
           ],
           "recordID": "101",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14312,7 +14344,7 @@
             "/hours/timeZone"
           ],
           "recordID": "101",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14321,7 +14353,7 @@
             "/placeType"
           ],
           "recordID": "101",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14408,7 +14440,7 @@
             "/hours/text"
           ],
           "recordID": "102",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14420,7 +14452,7 @@
             "/hours/timeZone"
           ],
           "recordID": "102",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14429,7 +14461,7 @@
             "/placeType"
           ],
           "recordID": "102",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14516,7 +14548,7 @@
             "/hours/text"
           ],
           "recordID": "103",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14528,7 +14560,7 @@
             "/hours/timeZone"
           ],
           "recordID": "103",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14537,7 +14569,7 @@
             "/placeType"
           ],
           "recordID": "103",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14624,7 +14656,7 @@
             "/hours/text"
           ],
           "recordID": "104",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14636,7 +14668,7 @@
             "/hours/timeZone"
           ],
           "recordID": "104",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14645,7 +14677,7 @@
             "/placeType"
           ],
           "recordID": "104",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14732,7 +14764,7 @@
             "/hours/text"
           ],
           "recordID": "105",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14744,7 +14776,7 @@
             "/hours/timeZone"
           ],
           "recordID": "105",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14753,7 +14785,7 @@
             "/placeType"
           ],
           "recordID": "105",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14840,7 +14872,7 @@
             "/hours/text"
           ],
           "recordID": "106",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14852,7 +14884,7 @@
             "/hours/timeZone"
           ],
           "recordID": "106",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14861,7 +14893,7 @@
             "/placeType"
           ],
           "recordID": "106",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -14948,7 +14980,7 @@
             "/hours/text"
           ],
           "recordID": "108",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14960,7 +14992,7 @@
             "/hours/timeZone"
           ],
           "recordID": "108",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -14969,7 +15001,7 @@
             "/placeType"
           ],
           "recordID": "108",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -15048,7 +15080,7 @@
             "/hours/text"
           ],
           "recordID": "109",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15060,7 +15092,7 @@
             "/hours/timeZone"
           ],
           "recordID": "109",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15069,7 +15101,7 @@
             "/placeType"
           ],
           "recordID": "109",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -15156,7 +15188,7 @@
             "/hours/text"
           ],
           "recordID": "115",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15168,7 +15200,7 @@
             "/hours/timeZone"
           ],
           "recordID": "115",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15177,7 +15209,7 @@
             "/placeType"
           ],
           "recordID": "115",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -15264,7 +15296,7 @@
             "/hours/text"
           ],
           "recordID": "117",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15276,7 +15308,7 @@
             "/hours/timeZone"
           ],
           "recordID": "117",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15285,7 +15317,7 @@
             "/placeType"
           ],
           "recordID": "117",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -15364,7 +15396,7 @@
             "/hours/text"
           ],
           "recordID": "107",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15376,7 +15408,7 @@
             "/hours/timeZone"
           ],
           "recordID": "107",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15385,7 +15417,7 @@
             "/placeType"
           ],
           "recordID": "107",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -15472,7 +15504,7 @@
             "/hours/text"
           ],
           "recordID": "119",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15484,7 +15516,7 @@
             "/hours/timeZone"
           ],
           "recordID": "119",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15493,7 +15525,7 @@
             "/placeType"
           ],
           "recordID": "119",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -15572,7 +15604,7 @@
             "/hours/text"
           ],
           "recordID": "120",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15584,7 +15616,7 @@
             "/hours/timeZone"
           ],
           "recordID": "120",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15593,7 +15625,7 @@
             "/placeType"
           ],
           "recordID": "120",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -15680,7 +15712,7 @@
             "/hours/text"
           ],
           "recordID": "121",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15692,7 +15724,7 @@
             "/hours/timeZone"
           ],
           "recordID": "121",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15701,7 +15733,7 @@
             "/placeType"
           ],
           "recordID": "121",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -15788,7 +15820,7 @@
             "/hours/text"
           ],
           "recordID": "123",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15800,7 +15832,7 @@
             "/hours/timeZone"
           ],
           "recordID": "123",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15809,7 +15841,7 @@
             "/placeType"
           ],
           "recordID": "123",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -15896,7 +15928,7 @@
             "/hours/text"
           ],
           "recordID": "124",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15908,7 +15940,7 @@
             "/hours/timeZone"
           ],
           "recordID": "124",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -15917,7 +15949,7 @@
             "/placeType"
           ],
           "recordID": "124",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -16005,7 +16037,7 @@
             "/hours/text"
           ],
           "recordID": "127",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16017,7 +16049,7 @@
             "/hours/timeZone"
           ],
           "recordID": "127",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16026,7 +16058,7 @@
             "/placeType"
           ],
           "recordID": "127",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -16106,7 +16138,7 @@
             "/hours/text"
           ],
           "recordID": "128",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16118,7 +16150,7 @@
             "/hours/timeZone"
           ],
           "recordID": "128",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16127,7 +16159,7 @@
             "/placeType"
           ],
           "recordID": "128",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -16215,7 +16247,7 @@
             "/hours/text"
           ],
           "recordID": "129",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16227,7 +16259,7 @@
             "/hours/timeZone"
           ],
           "recordID": "129",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16236,7 +16268,7 @@
             "/placeType"
           ],
           "recordID": "129",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -16323,7 +16355,7 @@
             "/hours/text"
           ],
           "recordID": "139",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16335,7 +16367,7 @@
             "/hours/timeZone"
           ],
           "recordID": "139",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16344,7 +16376,7 @@
             "/placeType"
           ],
           "recordID": "139",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -16423,7 +16455,7 @@
             "/hours/text"
           ],
           "recordID": "140",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16435,7 +16467,7 @@
             "/hours/timeZone"
           ],
           "recordID": "140",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16444,7 +16476,7 @@
             "/placeType"
           ],
           "recordID": "140",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -16532,7 +16564,7 @@
             "/hours/text"
           ],
           "recordID": "142",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16544,7 +16576,7 @@
             "/hours/timeZone"
           ],
           "recordID": "142",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16553,7 +16585,7 @@
             "/placeType"
           ],
           "recordID": "142",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -16630,7 +16662,7 @@
             "/hours/text"
           ],
           "recordID": "145",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16642,7 +16674,7 @@
             "/hours/timeZone"
           ],
           "recordID": "145",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16651,7 +16683,7 @@
             "/placeType"
           ],
           "recordID": "145",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -16738,7 +16770,7 @@
             "/hours/text"
           ],
           "recordID": "147",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16750,7 +16782,7 @@
             "/hours/timeZone"
           ],
           "recordID": "147",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16759,7 +16791,7 @@
             "/placeType"
           ],
           "recordID": "147",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -16838,7 +16870,7 @@
             "/hours/text"
           ],
           "recordID": "153",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16850,7 +16882,7 @@
             "/hours/timeZone"
           ],
           "recordID": "153",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16859,7 +16891,7 @@
             "/placeType"
           ],
           "recordID": "153",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -16946,7 +16978,7 @@
             "/hours/text"
           ],
           "recordID": "572",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16958,7 +16990,7 @@
             "/hours/timeZone"
           ],
           "recordID": "572",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -16967,7 +16999,7 @@
             "/placeType"
           ],
           "recordID": "572",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -17044,7 +17076,7 @@
             "/hours/text"
           ],
           "recordID": "582",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17056,7 +17088,7 @@
             "/hours/timeZone"
           ],
           "recordID": "582",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17065,7 +17097,7 @@
             "/placeType"
           ],
           "recordID": "582",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -17153,7 +17185,7 @@
             "/hours/text"
           ],
           "recordID": "586",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17165,7 +17197,7 @@
             "/hours/timeZone"
           ],
           "recordID": "586",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17174,7 +17206,7 @@
             "/placeType"
           ],
           "recordID": "586",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -17254,7 +17286,7 @@
             "/hours/text"
           ],
           "recordID": "587",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17266,7 +17298,7 @@
             "/hours/timeZone"
           ],
           "recordID": "587",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17275,7 +17307,7 @@
             "/placeType"
           ],
           "recordID": "587",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -17354,7 +17386,7 @@
             "/hours/text"
           ],
           "recordID": "573",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17366,7 +17398,7 @@
             "/hours/timeZone"
           ],
           "recordID": "573",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17375,7 +17407,7 @@
             "/placeType"
           ],
           "recordID": "573",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -17455,7 +17487,7 @@
             "/hours/text"
           ],
           "recordID": "575",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17467,7 +17499,7 @@
             "/hours/timeZone"
           ],
           "recordID": "575",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17476,7 +17508,7 @@
             "/placeType"
           ],
           "recordID": "575",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -17555,7 +17587,7 @@
             "/hours/text"
           ],
           "recordID": "576",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17567,7 +17599,7 @@
             "/hours/timeZone"
           ],
           "recordID": "576",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17576,7 +17608,7 @@
             "/placeType"
           ],
           "recordID": "576",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -17664,7 +17696,7 @@
             "/hours/text"
           ],
           "recordID": "577",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17676,7 +17708,7 @@
             "/hours/timeZone"
           ],
           "recordID": "577",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17685,7 +17717,7 @@
             "/placeType"
           ],
           "recordID": "577",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -17772,7 +17804,7 @@
             "/hours/text"
           ],
           "recordID": "578",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17784,7 +17816,7 @@
             "/hours/timeZone"
           ],
           "recordID": "578",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17793,7 +17825,7 @@
             "/placeType"
           ],
           "recordID": "578",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -17881,7 +17913,7 @@
             "/hours/text"
           ],
           "recordID": "580",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17893,7 +17925,7 @@
             "/hours/timeZone"
           ],
           "recordID": "580",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -17902,7 +17934,7 @@
             "/placeType"
           ],
           "recordID": "580",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -17990,7 +18022,7 @@
             "/hours/text"
           ],
           "recordID": "581",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18002,7 +18034,7 @@
             "/hours/timeZone"
           ],
           "recordID": "581",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18011,7 +18043,7 @@
             "/placeType"
           ],
           "recordID": "581",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -18090,7 +18122,7 @@
             "/hours/text"
           ],
           "recordID": "584",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18102,7 +18134,7 @@
             "/hours/timeZone"
           ],
           "recordID": "584",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18111,7 +18143,7 @@
             "/placeType"
           ],
           "recordID": "584",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -18199,7 +18231,7 @@
             "/hours/text"
           ],
           "recordID": "590",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18211,7 +18243,7 @@
             "/hours/timeZone"
           ],
           "recordID": "590",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18220,7 +18252,7 @@
             "/placeType"
           ],
           "recordID": "590",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -18308,7 +18340,7 @@
             "/hours/text"
           ],
           "recordID": "591",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18320,7 +18352,7 @@
             "/hours/timeZone"
           ],
           "recordID": "591",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18329,7 +18361,7 @@
             "/placeType"
           ],
           "recordID": "591",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -18416,7 +18448,7 @@
             "/hours/text"
           ],
           "recordID": "592",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18428,7 +18460,7 @@
             "/hours/timeZone"
           ],
           "recordID": "592",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18437,7 +18469,7 @@
             "/placeType"
           ],
           "recordID": "592",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -18516,7 +18548,7 @@
             "/hours/text"
           ],
           "recordID": "593",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18528,7 +18560,7 @@
             "/hours/timeZone"
           ],
           "recordID": "593",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18537,7 +18569,7 @@
             "/placeType"
           ],
           "recordID": "593",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -18624,7 +18656,7 @@
             "/hours/text"
           ],
           "recordID": "594",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18636,7 +18668,7 @@
             "/hours/timeZone"
           ],
           "recordID": "594",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18645,7 +18677,7 @@
             "/placeType"
           ],
           "recordID": "594",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -18732,7 +18764,7 @@
             "/hours/text"
           ],
           "recordID": "596",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18744,7 +18776,7 @@
             "/hours/timeZone"
           ],
           "recordID": "596",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18753,7 +18785,7 @@
             "/placeType"
           ],
           "recordID": "596",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -18840,7 +18872,7 @@
             "/hours/text"
           ],
           "recordID": "598",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18852,7 +18884,7 @@
             "/hours/timeZone"
           ],
           "recordID": "598",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18861,7 +18893,7 @@
             "/placeType"
           ],
           "recordID": "598",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -18948,7 +18980,7 @@
             "/hours/text"
           ],
           "recordID": "599",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18960,7 +18992,7 @@
             "/hours/timeZone"
           ],
           "recordID": "599",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -18969,7 +19001,7 @@
             "/placeType"
           ],
           "recordID": "599",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -19048,7 +19080,7 @@
             "/hours/text"
           ],
           "recordID": "601",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19060,7 +19092,7 @@
             "/hours/timeZone"
           ],
           "recordID": "601",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19069,7 +19101,7 @@
             "/placeType"
           ],
           "recordID": "601",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -19156,7 +19188,7 @@
             "/hours/text"
           ],
           "recordID": "602",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19168,7 +19200,7 @@
             "/hours/timeZone"
           ],
           "recordID": "602",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19177,7 +19209,7 @@
             "/placeType"
           ],
           "recordID": "602",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -19264,7 +19296,7 @@
             "/hours/text"
           ],
           "recordID": "603",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19276,7 +19308,7 @@
             "/hours/timeZone"
           ],
           "recordID": "603",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19285,7 +19317,7 @@
             "/placeType"
           ],
           "recordID": "603",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -19372,7 +19404,7 @@
             "/hours/text"
           ],
           "recordID": "604",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19384,7 +19416,7 @@
             "/hours/timeZone"
           ],
           "recordID": "604",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19393,7 +19425,7 @@
             "/placeType"
           ],
           "recordID": "604",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -19480,7 +19512,7 @@
             "/hours/text"
           ],
           "recordID": "605",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19492,7 +19524,7 @@
             "/hours/timeZone"
           ],
           "recordID": "605",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19501,7 +19533,7 @@
             "/placeType"
           ],
           "recordID": "605",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -19588,7 +19620,7 @@
             "/hours/text"
           ],
           "recordID": "597",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19600,7 +19632,7 @@
             "/hours/timeZone"
           ],
           "recordID": "597",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19609,7 +19641,7 @@
             "/placeType"
           ],
           "recordID": "597",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -19696,7 +19728,7 @@
             "/hours/text"
           ],
           "recordID": "606",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19708,7 +19740,7 @@
             "/hours/timeZone"
           ],
           "recordID": "606",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19717,7 +19749,7 @@
             "/placeType"
           ],
           "recordID": "606",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -19796,7 +19828,7 @@
             "/hours/text"
           ],
           "recordID": "607",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19808,7 +19840,7 @@
             "/hours/timeZone"
           ],
           "recordID": "607",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19817,7 +19849,7 @@
             "/placeType"
           ],
           "recordID": "607",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -19904,7 +19936,7 @@
             "/hours/text"
           ],
           "recordID": "608",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19916,7 +19948,7 @@
             "/hours/timeZone"
           ],
           "recordID": "608",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -19925,7 +19957,7 @@
             "/placeType"
           ],
           "recordID": "608",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -20004,7 +20036,7 @@
             "/hours/text"
           ],
           "recordID": "609",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20016,7 +20048,7 @@
             "/hours/timeZone"
           ],
           "recordID": "609",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20025,7 +20057,7 @@
             "/placeType"
           ],
           "recordID": "609",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20112,7 +20144,7 @@
             "/hours/text"
           ],
           "recordID": "610",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20124,7 +20156,7 @@
             "/hours/timeZone"
           ],
           "recordID": "610",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20133,7 +20165,7 @@
             "/placeType"
           ],
           "recordID": "610",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20220,7 +20252,7 @@
             "/hours/text"
           ],
           "recordID": "611",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20232,7 +20264,7 @@
             "/hours/timeZone"
           ],
           "recordID": "611",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20241,7 +20273,7 @@
             "/placeType"
           ],
           "recordID": "611",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20328,7 +20360,7 @@
             "/hours/text"
           ],
           "recordID": "612",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20340,7 +20372,7 @@
             "/hours/timeZone"
           ],
           "recordID": "612",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20349,7 +20381,7 @@
             "/placeType"
           ],
           "recordID": "612",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20436,7 +20468,7 @@
             "/hours/text"
           ],
           "recordID": "613",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20448,7 +20480,7 @@
             "/hours/timeZone"
           ],
           "recordID": "613",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20457,7 +20489,7 @@
             "/placeType"
           ],
           "recordID": "613",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20544,7 +20576,7 @@
             "/hours/text"
           ],
           "recordID": "614",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20556,7 +20588,7 @@
             "/hours/timeZone"
           ],
           "recordID": "614",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20565,7 +20597,7 @@
             "/placeType"
           ],
           "recordID": "614",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20652,7 +20684,7 @@
             "/hours/text"
           ],
           "recordID": "615",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20664,7 +20696,7 @@
             "/hours/timeZone"
           ],
           "recordID": "615",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20673,7 +20705,7 @@
             "/placeType"
           ],
           "recordID": "615",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20760,7 +20792,7 @@
             "/hours/text"
           ],
           "recordID": "616",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20772,7 +20804,7 @@
             "/hours/timeZone"
           ],
           "recordID": "616",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20781,7 +20813,7 @@
             "/placeType"
           ],
           "recordID": "616",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -20868,7 +20900,7 @@
             "/hours/text"
           ],
           "recordID": "617",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20880,7 +20912,7 @@
             "/hours/timeZone"
           ],
           "recordID": "617",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20889,7 +20921,7 @@
             "/placeType"
           ],
           "recordID": "617",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -20968,7 +21000,7 @@
             "/hours/text"
           ],
           "recordID": "618",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20980,7 +21012,7 @@
             "/hours/timeZone"
           ],
           "recordID": "618",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -20989,7 +21021,7 @@
             "/placeType"
           ],
           "recordID": "618",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -21074,7 +21106,7 @@
             "/hours/text"
           ],
           "recordID": "619",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21086,7 +21118,7 @@
             "/hours/timeZone"
           ],
           "recordID": "619",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21095,7 +21127,7 @@
             "/placeType"
           ],
           "recordID": "619",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -21174,7 +21206,7 @@
             "/hours/text"
           ],
           "recordID": "621",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21186,7 +21218,7 @@
             "/hours/timeZone"
           ],
           "recordID": "621",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21195,7 +21227,7 @@
             "/placeType"
           ],
           "recordID": "621",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -21275,7 +21307,7 @@
             "/hours/text"
           ],
           "recordID": "622",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21287,7 +21319,7 @@
             "/hours/timeZone"
           ],
           "recordID": "622",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21296,7 +21328,7 @@
             "/placeType"
           ],
           "recordID": "622",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -21375,7 +21407,7 @@
             "/hours/text"
           ],
           "recordID": "652",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21387,7 +21419,7 @@
             "/hours/timeZone"
           ],
           "recordID": "652",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21396,7 +21428,7 @@
             "/placeType"
           ],
           "recordID": "652",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -21484,7 +21516,7 @@
             "/hours/text"
           ],
           "recordID": "655",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21496,7 +21528,7 @@
             "/hours/timeZone"
           ],
           "recordID": "655",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21505,7 +21537,7 @@
             "/placeType"
           ],
           "recordID": "655",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -21593,7 +21625,7 @@
             "/hours/text"
           ],
           "recordID": "654",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21605,7 +21637,7 @@
             "/hours/timeZone"
           ],
           "recordID": "654",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21614,7 +21646,7 @@
             "/placeType"
           ],
           "recordID": "654",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -21703,7 +21735,7 @@
             "/hours/text"
           ],
           "recordID": "673",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21715,7 +21747,7 @@
             "/hours/timeZone"
           ],
           "recordID": "673",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21724,7 +21756,7 @@
             "/placeType"
           ],
           "recordID": "673",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -21803,7 +21835,7 @@
             "/hours/text"
           ],
           "recordID": "676",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21815,7 +21847,7 @@
             "/hours/timeZone"
           ],
           "recordID": "676",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21824,7 +21856,7 @@
             "/placeType"
           ],
           "recordID": "676",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -21903,7 +21935,7 @@
             "/hours/text"
           ],
           "recordID": "675",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21915,7 +21947,7 @@
             "/hours/timeZone"
           ],
           "recordID": "675",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -21924,7 +21956,7 @@
             "/placeType"
           ],
           "recordID": "675",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -22003,7 +22035,7 @@
             "/hours/text"
           ],
           "recordID": "677",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22015,7 +22047,7 @@
             "/hours/timeZone"
           ],
           "recordID": "677",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22024,7 +22056,7 @@
             "/placeType"
           ],
           "recordID": "677",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -22103,7 +22135,7 @@
             "/hours/text"
           ],
           "recordID": "682",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22115,7 +22147,7 @@
             "/hours/timeZone"
           ],
           "recordID": "682",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22124,7 +22156,7 @@
             "/placeType"
           ],
           "recordID": "682",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -22203,7 +22235,7 @@
             "/hours/text"
           ],
           "recordID": "684",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22215,7 +22247,7 @@
             "/hours/timeZone"
           ],
           "recordID": "684",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22224,7 +22256,7 @@
             "/placeType"
           ],
           "recordID": "684",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -22301,7 +22333,7 @@
             "/hours/text"
           ],
           "recordID": "689",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22313,7 +22345,7 @@
             "/hours/timeZone"
           ],
           "recordID": "689",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22322,7 +22354,7 @@
             "/placeType"
           ],
           "recordID": "689",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -22407,7 +22439,7 @@
             "/hours/text"
           ],
           "recordID": "691",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22419,7 +22451,7 @@
             "/hours/timeZone"
           ],
           "recordID": "691",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22428,7 +22460,7 @@
             "/placeType"
           ],
           "recordID": "691",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -22505,7 +22537,7 @@
             "/hours/text"
           ],
           "recordID": "692",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22517,7 +22549,7 @@
             "/hours/timeZone"
           ],
           "recordID": "692",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22526,7 +22558,7 @@
             "/placeType"
           ],
           "recordID": "692",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -22611,7 +22643,7 @@
             "/hours/text"
           ],
           "recordID": "690",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22623,7 +22655,7 @@
             "/hours/timeZone"
           ],
           "recordID": "690",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22632,7 +22664,7 @@
             "/placeType"
           ],
           "recordID": "690",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -22711,7 +22743,7 @@
             "/hours/text"
           ],
           "recordID": "693",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22723,7 +22755,7 @@
             "/hours/timeZone"
           ],
           "recordID": "693",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22732,7 +22764,7 @@
             "/placeType"
           ],
           "recordID": "693",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -22819,7 +22851,7 @@
             "/hours/text"
           ],
           "recordID": "687",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22831,7 +22863,7 @@
             "/hours/timeZone"
           ],
           "recordID": "687",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22840,7 +22872,7 @@
             "/placeType"
           ],
           "recordID": "687",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -22919,7 +22951,7 @@
             "/hours/text"
           ],
           "recordID": "688",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22931,7 +22963,7 @@
             "/hours/timeZone"
           ],
           "recordID": "688",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -22940,7 +22972,7 @@
             "/placeType"
           ],
           "recordID": "688",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -23028,7 +23060,7 @@
             "/hours/text"
           ],
           "recordID": "685",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23040,7 +23072,7 @@
             "/hours/timeZone"
           ],
           "recordID": "685",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23049,7 +23081,7 @@
             "/placeType"
           ],
           "recordID": "685",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -23136,7 +23168,7 @@
             "/hours/text"
           ],
           "recordID": "694",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23148,7 +23180,7 @@
             "/hours/timeZone"
           ],
           "recordID": "694",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23157,7 +23189,7 @@
             "/placeType"
           ],
           "recordID": "694",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -23244,7 +23276,7 @@
             "/hours/text"
           ],
           "recordID": "695",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23256,7 +23288,7 @@
             "/hours/timeZone"
           ],
           "recordID": "695",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23265,7 +23297,7 @@
             "/placeType"
           ],
           "recordID": "695",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -23344,7 +23376,7 @@
             "/hours/text"
           ],
           "recordID": "704",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23356,7 +23388,7 @@
             "/hours/timeZone"
           ],
           "recordID": "704",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23365,7 +23397,7 @@
             "/placeType"
           ],
           "recordID": "704",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -23444,7 +23476,7 @@
             "/hours/text"
           ],
           "recordID": "705",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23456,7 +23488,7 @@
             "/hours/timeZone"
           ],
           "recordID": "705",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23465,7 +23497,7 @@
             "/placeType"
           ],
           "recordID": "705",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -23545,7 +23577,7 @@
             "/hours/text"
           ],
           "recordID": "707",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23557,7 +23589,7 @@
             "/hours/timeZone"
           ],
           "recordID": "707",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23566,10 +23598,18 @@
             "/placeType"
           ],
           "recordID": "707",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
-      "mapReferences": []
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "I469799177B7DF2F3",
+          "relationship": "within_place",
+          "verification": "reviewed",
+          "checkedAt": "2026-09-19T00:16:05Z"
+        }
+      ]
     },
     {
       "id": "cb41b2f6-1f9f-56f0-8056-d20fa22f29d0",
@@ -23646,7 +23686,7 @@
             "/hours/text"
           ],
           "recordID": "700",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23658,7 +23698,7 @@
             "/hours/timeZone"
           ],
           "recordID": "700",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23667,7 +23707,7 @@
             "/placeType"
           ],
           "recordID": "700",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -23746,7 +23786,7 @@
             "/hours/text"
           ],
           "recordID": "703",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23758,7 +23798,7 @@
             "/hours/timeZone"
           ],
           "recordID": "703",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23767,7 +23807,7 @@
             "/placeType"
           ],
           "recordID": "703",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -23854,7 +23894,7 @@
             "/hours/text"
           ],
           "recordID": "702",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23866,7 +23906,7 @@
             "/hours/timeZone"
           ],
           "recordID": "702",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23875,7 +23915,7 @@
             "/placeType"
           ],
           "recordID": "702",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -23962,7 +24002,7 @@
             "/hours/text"
           ],
           "recordID": "701",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23974,7 +24014,7 @@
             "/hours/timeZone"
           ],
           "recordID": "701",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -23983,7 +24023,7 @@
             "/placeType"
           ],
           "recordID": "701",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -24070,7 +24110,7 @@
             "/hours/text"
           ],
           "recordID": "706",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24082,7 +24122,7 @@
             "/hours/timeZone"
           ],
           "recordID": "706",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24091,7 +24131,7 @@
             "/placeType"
           ],
           "recordID": "706",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -24168,7 +24208,7 @@
             "/hours/text"
           ],
           "recordID": "713",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24180,7 +24220,7 @@
             "/hours/timeZone"
           ],
           "recordID": "713",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24189,10 +24229,18 @@
             "/placeType"
           ],
           "recordID": "713",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
-      "mapReferences": []
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "I55C92C3205E557D6",
+          "relationship": "same_place",
+          "verification": "reviewed",
+          "checkedAt": "2026-09-19T00:16:05Z"
+        }
+      ]
     },
     {
       "id": "31e5b80e-1b7c-5de3-b429-86eb0ec6e7b6",
@@ -24268,7 +24316,7 @@
             "/hours/text"
           ],
           "recordID": "710",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24280,7 +24328,7 @@
             "/hours/timeZone"
           ],
           "recordID": "710",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24289,10 +24337,18 @@
             "/placeType"
           ],
           "recordID": "710",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
-      "mapReferences": []
+      "mapReferences": [
+        {
+          "provider": "apple_maps",
+          "placeID": "IC43F411D709A3A92",
+          "relationship": "same_place",
+          "verification": "reviewed",
+          "checkedAt": "2026-09-19T00:16:05Z"
+        }
+      ]
     },
     {
       "id": "d28e1957-aade-5ebb-b68c-ab55d9187f61",
@@ -24368,7 +24424,7 @@
             "/hours/text"
           ],
           "recordID": "711",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24380,7 +24436,7 @@
             "/hours/timeZone"
           ],
           "recordID": "711",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24389,7 +24445,7 @@
             "/placeType"
           ],
           "recordID": "711",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -24466,7 +24522,7 @@
             "/hours/text"
           ],
           "recordID": "712",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24478,7 +24534,7 @@
             "/hours/timeZone"
           ],
           "recordID": "712",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24487,7 +24543,7 @@
             "/placeType"
           ],
           "recordID": "712",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -24567,7 +24623,7 @@
             "/hours/text"
           ],
           "recordID": "718",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24579,7 +24635,7 @@
             "/hours/timeZone"
           ],
           "recordID": "718",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24588,7 +24644,7 @@
             "/placeType"
           ],
           "recordID": "718",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -24675,7 +24731,7 @@
             "/hours/text"
           ],
           "recordID": "721",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24687,7 +24743,7 @@
             "/hours/timeZone"
           ],
           "recordID": "721",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24696,7 +24752,7 @@
             "/placeType"
           ],
           "recordID": "721",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -24783,7 +24839,7 @@
             "/hours/text"
           ],
           "recordID": "716",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24795,7 +24851,7 @@
             "/hours/timeZone"
           ],
           "recordID": "716",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24804,7 +24860,7 @@
             "/placeType"
           ],
           "recordID": "716",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -24892,7 +24948,7 @@
             "/hours/text"
           ],
           "recordID": "717",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24904,7 +24960,7 @@
             "/hours/timeZone"
           ],
           "recordID": "717",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -24913,7 +24969,7 @@
             "/placeType"
           ],
           "recordID": "717",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -25000,7 +25056,7 @@
             "/hours/text"
           ],
           "recordID": "715",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25012,7 +25068,7 @@
             "/hours/timeZone"
           ],
           "recordID": "715",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25021,7 +25077,7 @@
             "/placeType"
           ],
           "recordID": "715",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -25100,7 +25156,7 @@
             "/hours/text"
           ],
           "recordID": "709",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25112,7 +25168,7 @@
             "/hours/timeZone"
           ],
           "recordID": "709",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25121,7 +25177,7 @@
             "/placeType"
           ],
           "recordID": "709",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -25200,7 +25256,7 @@
             "/hours/text"
           ],
           "recordID": "720",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25212,7 +25268,7 @@
             "/hours/timeZone"
           ],
           "recordID": "720",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25221,7 +25277,7 @@
             "/placeType"
           ],
           "recordID": "720",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -25301,7 +25357,7 @@
             "/hours/text"
           ],
           "recordID": "719",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25313,7 +25369,7 @@
             "/hours/timeZone"
           ],
           "recordID": "719",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25322,7 +25378,7 @@
             "/placeType"
           ],
           "recordID": "719",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -25409,7 +25465,7 @@
             "/hours/text"
           ],
           "recordID": "47",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25421,7 +25477,7 @@
             "/hours/timeZone"
           ],
           "recordID": "47",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25430,7 +25486,7 @@
             "/placeType"
           ],
           "recordID": "47",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -25517,7 +25573,7 @@
             "/hours/text"
           ],
           "recordID": "52",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25529,7 +25585,7 @@
             "/hours/timeZone"
           ],
           "recordID": "52",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25538,7 +25594,7 @@
             "/placeType"
           ],
           "recordID": "52",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -25617,7 +25673,7 @@
             "/hours/text"
           ],
           "recordID": "54",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25629,7 +25685,7 @@
             "/hours/timeZone"
           ],
           "recordID": "54",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25638,7 +25694,7 @@
             "/placeType"
           ],
           "recordID": "54",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -25725,7 +25781,7 @@
             "/hours/text"
           ],
           "recordID": "723",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25737,7 +25793,7 @@
             "/hours/timeZone"
           ],
           "recordID": "723",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25746,7 +25802,7 @@
             "/placeType"
           ],
           "recordID": "723",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -25833,7 +25889,7 @@
             "/hours/text"
           ],
           "recordID": "722",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25845,7 +25901,7 @@
             "/hours/timeZone"
           ],
           "recordID": "722",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25854,7 +25910,7 @@
             "/placeType"
           ],
           "recordID": "722",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -25933,7 +25989,7 @@
             "/hours/text"
           ],
           "recordID": "724",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25945,7 +26001,7 @@
             "/hours/timeZone"
           ],
           "recordID": "724",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -25954,7 +26010,7 @@
             "/placeType"
           ],
           "recordID": "724",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": []
@@ -26033,7 +26089,7 @@
             "/hours/text"
           ],
           "recordID": "725",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -26045,7 +26101,7 @@
             "/hours/timeZone"
           ],
           "recordID": "725",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -26054,7 +26110,7 @@
             "/placeType"
           ],
           "recordID": "725",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [
@@ -26141,7 +26197,7 @@
             "/hours/text"
           ],
           "recordID": "116",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -26153,7 +26209,7 @@
             "/hours/timeZone"
           ],
           "recordID": "116",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         },
         {
           "sourceID": "gla-cool-spaces-2025",
@@ -26162,7 +26218,7 @@
             "/placeType"
           ],
           "recordID": "116",
-          "recordedAt": "2026-09-18T22:27:30Z"
+          "recordedAt": "2026-09-19T00:16:05Z"
         }
       ],
       "mapReferences": [

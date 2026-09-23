@@ -23,6 +23,19 @@ class MappingTests(unittest.TestCase):
         self.assertFalse(self.accepted(self.source(),self.candidate(postalCode='SE1 1AB')))
     def test_missing_apple_identity_never_qualifies(self):
         self.assertFalse(self.accepted(self.source(),self.candidate(placeID='')))
+    def test_street_suffix_abbreviation_matches_without_relaxing_venue_name(self):
+        self.assertTrue(self.accepted(self.source(cs_name='Ham Library', cs_address_one='Ham Street', cs_postcode=None),
+                                      self.candidate(name='Ham Library', address='Ham St', postalCode='TW10 7HR')))
+        self.assertFalse(self.accepted(self.source(cs_name='Ham Library', cs_address_one='Ham Street', cs_postcode=None),
+                                       self.candidate(name='Ham Library Cafe', address='Ham St', postalCode='TW10 7HR')))
+
+    def test_transport_stop_named_after_a_library_is_not_the_library(self):
+        self.assertFalse(self.accepted(self.source(), self.candidate(category='MKPOICategoryPublicTransport')))
+
+    def test_street_number_in_second_address_line_cannot_be_ignored(self):
+        self.assertFalse(self.accepted(self.source(cs_address_one='Example Road', cs_address_two='42'),
+                                       self.candidate(address='7 Example Road')))
+
     def test_unknown_source_answer_is_not_false(self):
         for value in [None,'','future_answer']: self.assertEqual(availability(value),'unknown')
         self.assertEqual(availability(' Yes '),'yes')
