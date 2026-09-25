@@ -3,17 +3,17 @@ import UIKit
 
 // Device-local stand-in for a reviewed publication operation. No remote API or moderation is implied.
 enum PrototypePublication {
-    static let source = PrototypeCatalog.CatalogueSource(
+    static let source = CoolSpotsResponse.SourceMetadata(
         id: "prototype-community", provider: "community", label: "Community info · Local demo", url: nil)
 
     static func publish(_ draft: PlaceContributionDraft, onto current: CoolSpot?, photoID: String?,
-                        at date: Date) throws -> PrototypeCatalog.Item {
+                        at date: Date) throws -> CoolSpotsResponse.Item {
         guard draft.canSend, !draft.isUpdate || current != nil else { throw PrototypePublicationError.invalidContribution }
         let now = ISO8601DateFormatter().string(from: date)
         let v = draft.values.normalized
         let before = draft.original.normalized
         let currentValues = current.map { PlaceContributionDraft(kind: .update, anchor: $0.coordinate, spot: $0).values.normalized }
-        var item = current?.catalogueItem ?? baseline(draft, current: current)
+        var item = current?.publishedRecord ?? baseline(draft, current: current)
         var changed: [String] = []
 
         // Only explicitly changed answers become writes. Untouched facts keep their existing evidence.
@@ -28,23 +28,23 @@ enum PrototypePublication {
             changed.append(path)
         }
         try apply(\.name, path: "/name") { item.name = $0 }
-        try apply(\.setting, path: "/setting") { item.setting = CatalogSetting(environment: $0) }
-        try apply(\.type, path: "/placeType") { item.placeType = CatalogPlaceType(type: $0) }
+        try apply(\.setting, path: "/setting") { item.setting = CoolSpotSetting(environment: $0) }
+        try apply(\.type, path: "/placeType") { item.placeType = CoolSpotPlaceType(type: $0) }
         try apply(\.features, path: "/coolingFeatures") {
-            item.coolingFeatures = $0.compactMap(CatalogFeature.init(feature:)).sorted { $0.rawValue < $1.rawValue }
+            item.coolingFeatures = $0.compactMap(CoolSpotFeature.init(feature:)).sorted { $0.rawValue < $1.rawValue }
             // This checkbox can assert yes or withdraw an assertion. It cannot assert no.
             if !draft.isUpdate || $0.contains(.drinkingWater) != before.features.contains(.drinkingWater) {
                 item.access.drinkingWater = $0.contains(.drinkingWater) ? .yes : .unknown
                 changed.append("/access/drinkingWater")
             }
         }
-        try apply(\.access, path: "/access/cost") { item.access.cost = CatalogCost(access: $0) }
+        try apply(\.access, path: "/access/cost") { item.access.cost = CoolSpotCost(access: $0) }
         try apply(\.entryEligibility, path: "/access/eligibility") {
             item.access.eligibility = $0 == .everyone ? "everyone" : $0 == .limited ? "limited" : "unknown"
             if $0 != .limited { item.access.eligibilityDetails = nil; changed.append("/access/eligibilityDetails") }
         }
-        try apply(\.seating, path: "/access/seating") { item.access.seating = CatalogSeating(seating: $0) }
-        try apply(\.toilets, path: "/access/toilets") { item.access.toilets = CatalogToilets(rawValue: $0.rawValue) ?? .unknown }
+        try apply(\.seating, path: "/access/seating") { item.access.seating = CoolSpotSeating(seating: $0) }
+        try apply(\.toilets, path: "/access/toilets") { item.access.toilets = CoolSpotToilets(rawValue: $0.rawValue) ?? .unknown }
         try apply(\.wheelchairAccess, path: "/access/wheelchairAccess") { item.access.wheelchairAccess = .init(answer: $0) }
         try apply(\.staffedWhenOpen, path: "/access/staffedWhenOpen") { item.access.staffedWhenOpen = .init(answer: $0) }
         try apply(\.tables, path: "/access/tables") { item.access.tables = .init(answer: $0) }
@@ -97,10 +97,10 @@ enum PrototypePublication {
         return item
     }
 
-    private static func baseline(_ draft: PlaceContributionDraft, current: CoolSpot?) -> PrototypeCatalog.Item {
+    private static func baseline(_ draft: PlaceContributionDraft, current: CoolSpot?) -> CoolSpotsResponse.Item {
         let place = draft.selectedPlace
         let v = draft.values
-        var item = PrototypeCatalog.Item(id: current?.id ?? draft.id.uuidString, name: v.name,
+        var item = CoolSpotsResponse.Item(id: current?.id ?? draft.id.uuidString, name: v.name,
                      location: .init(latitude: v.latitude, longitude: v.longitude, scope: .unknown),
                      address: place?.structuredAddress ?? .init(line1: nil, formatted: current?.address ?? place?.address,
                                                                 line2: nil, borough: nil, locality: nil, countryCode: nil, postalCode: nil),
@@ -114,7 +114,7 @@ enum PrototypePublication {
             item.name = current.name
             item.placeType = .init(type: current.type)
             item.setting = .init(environment: current.environment)
-            item.coolingFeatures = current.features.compactMap(CatalogFeature.init(feature:))
+            item.coolingFeatures = current.features.compactMap(CoolSpotFeature.init(feature:))
             item.coolingDetails = current.information.coolingDetails
             item.additionalInformation = current.information.additionalInformation
             item.access.cost = .init(access: current.access)
@@ -141,25 +141,25 @@ private extension String {
     var nilIfEmpty: String? { isEmpty ? nil : self }
 }
 
-extension CatalogAvailability {
+extension CoolSpotAvailability {
     init(answer: OptionalFact) { self = answer == .yes ? .yes : answer == .no ? .no : .unknown }
 }
-extension CatalogSeating {
+extension CoolSpotSeating {
     init(seating: SeatingType) {
         self = switch seating { case .available: .yes; case .limited: .limited; case .none: .no; case .unsure: .unknown }
     }
 }
-extension CatalogCost {
+extension CoolSpotCost {
     init(access: AccessType) {
         self = switch access { case .free: .free; case .purchase: .purchaseRequired; case .entryFee: .entryFee; case .unsure: .unknown }
     }
 }
-extension CatalogSetting {
+extension CoolSpotSetting {
     init(environment: PlaceEnvironment?) {
         self = switch environment { case .indoors: .indoors; case .outdoors: .outdoors; case .both: .both; default: .unknown }
     }
 }
-extension CatalogPlaceType {
+extension CoolSpotPlaceType {
     init(type: PlaceType?) {
         self = switch type {
         case .library: .library; case .publicService: .community; case .faith: .faith; case .culture: .culture
@@ -168,7 +168,7 @@ extension CatalogPlaceType {
         }
     }
 }
-extension CatalogFeature {
+extension CoolSpotFeature {
     init?(feature: CoolingFeature) {
         switch feature {
         case .airConditioning: self = .airConditioning; case .fans: self = .fans; case .coolerIndoors: self = .coolerIndoors

@@ -1,24 +1,24 @@
 import Foundation
 import CoreLocation
 
-// PROTOTYPE: a bundled response exercises the catalogue contract without a server.
+// PROTOTYPE: a bundled response exercises the Cool Spots response contract without a server.
 // Wire codes are independent of English labels and existing journey storage values.
-private protocol CatalogCode: RawRepresentable, Codable where RawValue == String {
+private protocol CoolSpotCode: RawRepresentable, Codable where RawValue == String {
     static var unknown: Self { get }
 }
 
-extension CatalogCode {
+extension CoolSpotCode {
     init(from decoder: Decoder) throws {
         let code = try decoder.singleValueContainer().decode(String.self)
         self = Self(rawValue: code) ?? .unknown
     }
 }
 
-enum CatalogAvailability: String, CatalogCode {
+enum CoolSpotAvailability: String, CoolSpotCode {
     case yes, no, unknown
 }
 
-enum CatalogFeature: String, CatalogCode {
+enum CoolSpotFeature: String, CoolSpotCode {
     case airConditioning = "air_conditioning"
     case fans
     case ventilation = "natural_ventilation"
@@ -42,7 +42,7 @@ enum CatalogFeature: String, CatalogCode {
     }
 }
 
-enum CatalogPlaceType: String, CatalogCode {
+enum CoolSpotPlaceType: String, CoolSpotCode {
     case library, community, faith, culture, leisure, shop, food, park, square, waterside, transport, other, unknown
     var type: PlaceType {
         switch self {
@@ -63,7 +63,7 @@ enum CatalogPlaceType: String, CatalogCode {
     }
 }
 
-enum CatalogSetting: String, CatalogCode {
+enum CoolSpotSetting: String, CoolSpotCode {
     case indoors, outdoors, both, unknown
     var environment: PlaceEnvironment {
         switch self {
@@ -75,7 +75,7 @@ enum CatalogSetting: String, CatalogCode {
     }
 }
 
-enum CatalogCost: String, CatalogCode {
+enum CoolSpotCost: String, CoolSpotCode {
     case free, purchaseRequired = "purchase_required", entryFee = "entry_fee", unknown
     var access: AccessType {
         switch self {
@@ -87,22 +87,24 @@ enum CatalogCost: String, CatalogCode {
     }
 }
 
-enum CatalogToilets: String, CatalogCode {
+enum CoolSpotToilets: String, CoolSpotCode {
     case onSite = "on_site", nearby, notOnSite = "not_on_site", none, unknown
 }
 
-enum CatalogSeating: String, CatalogCode { case yes, limited, no, unknown }
-enum CatalogScope: String, CatalogCode { case venue, specificArea = "specific_area", unknown }
+enum CoolSpotSeating: String, CoolSpotCode { case yes, limited, no, unknown }
+enum CoolSpotScope: String, CoolSpotCode { case venue, specificArea = "specific_area", unknown }
 
-struct PrototypeCatalog: Codable {
+struct CoolSpotsResponse: Codable {
+    static let currentSchemaVersion = 4
+
     let schemaVersion: Int
-    let catalogID: String
+    let datasetID: String
     var generatedAt: String? = nil
     var source: Source?
-    var sources: [CatalogueSource]?
+    var sources: [SourceMetadata]?
     var items: [Item]
 
-    struct CatalogueSource: Codable, Equatable {
+    struct SourceMetadata: Codable, Equatable {
         var id: String
         var provider: String
         var label: String
@@ -122,9 +124,9 @@ struct PrototypeCatalog: Codable {
         var name: String
         var location: Location
         var address: Address
-        var placeType: CatalogPlaceType
-        var setting: CatalogSetting
-        var coolingFeatures: [CatalogFeature]
+        var placeType: CoolSpotPlaceType
+        var setting: CoolSpotSetting
+        var coolingFeatures: [CoolSpotFeature]
         var additionalInformation: String? = nil
         var coolingDetails: String?
         var access: Access
@@ -155,7 +157,7 @@ struct PrototypeCatalog: Codable {
         struct Location: Codable, Equatable {
             var latitude: Double
             var longitude: Double
-            var scope: CatalogScope? = nil
+            var scope: CoolSpotScope? = nil
             var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
         }
         struct Address: Codable, Equatable {
@@ -173,20 +175,20 @@ struct PrototypeCatalog: Codable {
             }
         }
         struct Access: Codable, Equatable {
-            var cost: CatalogCost
+            var cost: CoolSpotCost
             var eligibility: String
-            var seating: CatalogSeating
-            var drinkingWater: CatalogAvailability
-            var toilets: CatalogToilets
-            var wheelchairAccess: CatalogAvailability
-            var staffedWhenOpen: CatalogAvailability?
-            var tables: CatalogAvailability?
+            var seating: CoolSpotSeating
+            var drinkingWater: CoolSpotAvailability
+            var toilets: CoolSpotToilets
+            var wheelchairAccess: CoolSpotAvailability
+            var staffedWhenOpen: CoolSpotAvailability?
+            var tables: CoolSpotAvailability?
             var eligibilityDetails: String?
             var instructions: String?
             var postedStayLimitMinutes: Int?
             var areaDescription: String? = nil
-            var postedStayLimit: CatalogStayLimit? = nil
-            var resolvedStayLimit: CatalogStayLimit {
+            var postedStayLimit: CoolSpotStayLimit? = nil
+            var resolvedStayLimit: CoolSpotStayLimit {
                 postedStayLimit ?? postedStayLimitMinutes.map { .init(status: .limited, minutes: $0) } ?? .unknown
             }
         }
@@ -219,8 +221,8 @@ struct PrototypeCatalog: Codable {
             return appleMatch.placeID
         }
 
-        func makeSpot(catalogueSource: CatalogueSource? = nil, retaining previous: CoolSpot? = nil) -> CoolSpot {
-            let sourceKind: SpotSource = switch catalogueSource?.provider {
+        func makeSpot(sourceMetadata: SourceMetadata? = nil, retaining previous: CoolSpot? = nil) -> CoolSpot {
+            let sourceKind: SpotSource = switch sourceMetadata?.provider {
             case "gla": .gla
             case "community": .community
             default: sourceRecord == nil ? .unknown : .gla
@@ -247,14 +249,14 @@ struct PrototypeCatalog: Codable {
             spot.applePlaceID = matchedAppleID
             spot.photos = (photos ?? []).filter(\.isDisplayable)
             spot.entryRequirement = access.eligibilityDetails ?? ""
-            var sourceLabel = catalogueSource?.label ?? (sourceKind == .gla ? "GLA · 2025" : sourceKind.rawValue)
+            var sourceLabel = sourceMetadata?.label ?? (sourceKind == .gla ? "GLA · 2025" : sourceKind.rawValue)
             if sourceKind == .gla, provenance?.contains(where: { $0.sourceID == PrototypePublication.source.id }) == true,
                !sourceLabel.hasSuffix(" · Local edits") {
                 sourceLabel += " · Local edits"
             }
             spot.information = PlaceInformation(
                 source: .init(label: sourceLabel,
-                              url: catalogueSource?.url, isExample: catalogueSource?.isExample ?? false),
+                              url: sourceMetadata?.url, isExample: sourceMetadata?.isExample ?? false),
                 coolingDetails: coolingDetails, hours: hours?.text,
                 toilets: .init(rawValue: access.toilets.rawValue) ?? .unknown,
                 wheelchairAccessible: access.wheelchairAccess == .unknown ? nil : access.wheelchairAccess == .yes,
@@ -263,7 +265,7 @@ struct PrototypeCatalog: Codable {
                 areaDescription: access.areaDescription ?? access.instructions,
                 postedStayLimit: access.resolvedStayLimit, additionalInformation: additionalInformation,
                 drinkingWater: access.drinkingWater == .unknown ? nil : access.drinkingWater == .yes)
-            spot.catalogueItem = self
+            spot.publishedRecord = self
             return spot
         }
     }
@@ -272,7 +274,7 @@ struct PrototypeCatalog: Codable {
 
     static func decode(_ data: Data) throws -> Self {
         let response = try JSONDecoder().decode(Self.self, from: data)
-        guard [1, 2, 3].contains(response.schemaVersion) else { throw LoadError.unsupportedVersion }
+        guard [1, 2, 3, currentSchemaVersion].contains(response.schemaVersion) else { throw LoadError.unsupportedVersion }
         guard Set(response.items.map(\.id)).count == response.items.count,
               response.items.allSatisfy({ !$0.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                   !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -282,7 +284,7 @@ struct PrototypeCatalog: Codable {
         return response
     }
 
-    static func bundled(named name: String = "CoolSpotCatalog.prototype") throws -> Self {
+    static func bundled(named name: String = "CoolSpots.prototype") throws -> Self {
         guard let url = Bundle.main.url(forResource: name, withExtension: "json") else {
             throw CocoaError(.fileNoSuchFile)
         }
@@ -290,17 +292,50 @@ struct PrototypeCatalog: Codable {
     }
 }
 
+extension CoolSpotsResponse {
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion, datasetID, generatedAt, source, sources, items
+        // The old wire key is retained only for reading/writing legacy versions.
+        case legacyDatasetID = "catalogID"
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = try values.decode(Int.self, forKey: .schemaVersion)
+        if schemaVersion < Self.currentSchemaVersion {
+            datasetID = try values.decodeIfPresent(String.self, forKey: .datasetID)
+                ?? values.decode(String.self, forKey: .legacyDatasetID)
+        } else {
+            datasetID = try values.decode(String.self, forKey: .datasetID)
+        }
+        generatedAt = try values.decodeIfPresent(String.self, forKey: .generatedAt)
+        source = try values.decodeIfPresent(Source.self, forKey: .source)
+        sources = try values.decodeIfPresent([SourceMetadata].self, forKey: .sources)
+        items = try values.decode([Item].self, forKey: .items)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(schemaVersion, forKey: .schemaVersion)
+        try values.encode(datasetID, forKey: schemaVersion < Self.currentSchemaVersion ? .legacyDatasetID : .datasetID)
+        try values.encodeIfPresent(generatedAt, forKey: .generatedAt)
+        try values.encodeIfPresent(source, forKey: .source)
+        try values.encodeIfPresent(sources, forKey: .sources)
+        try values.encode(items, forKey: .items)
+    }
+}
+
 @MainActor
 extension PrototypeStore {
-    static func catalogStore(reportDefaults: UserDefaults?) -> PrototypeStore {
+    static func loadedCoolSpotsStore(reportDefaults: UserDefaults?) -> PrototypeStore {
         do {
-            let response = try PrototypeCatalog.bundled()
+            let response = try CoolSpotsResponse.bundled()
             let imported = response.items.map { item in
                 let source = response.sources?.first { $0.id == item.sourceReferences?.first?.sourceID }
-                return item.makeSpot(catalogueSource: source)
+                return item.makeSpot(sourceMetadata: source)
             }
             let store = PrototypeStore(reportDefaults: reportDefaults,
-                                       catalogSpots: imported + (try PrototypeComparisonPlaces.loadSpots()))
+                                       loadedCoolSpots: imported + (try PrototypeComparisonPlaces.loadSpots()))
             // Keep the ordinary-place case searchable without waiting for a network result.
             // Existing saved metadata takes precedence over this comparison seed.
             if store.place(PrototypeComparisonPlaces.ordinaryPlace.id) == nil {
@@ -308,8 +343,8 @@ extension PrototypeStore {
             }
             return store
         } catch {
-            let store = PrototypeStore(reportDefaults: reportDefaults, catalogSpots: [])
-            store.catalogError = "Cool Spots couldn’t load."
+            let store = PrototypeStore(reportDefaults: reportDefaults, loadedCoolSpots: [])
+            store.coolSpotsLoadError = "Cool Spots couldn’t load."
             return store
         }
     }
@@ -327,10 +362,10 @@ enum PrototypeComparisonPlaces {
     static var communitySpot: CoolSpot { communitySpots.first { $0.id == tateID }! }
 
     static func loadSpots() throws -> [CoolSpot] {
-        let response = try PrototypeCatalog.bundled(named: "CommunityCatalog.prototype")
+        let response = try CoolSpotsResponse.bundled(named: "CommunityCoolSpots.prototype")
         return response.items.map { item in
             let source = response.sources?.first { $0.id == item.sourceReferences?.first?.sourceID }
-            var spot = item.makeSpot(catalogueSource: source)
+            var spot = item.makeSpot(sourceMetadata: source)
             let reports = visitorReports.compactMap(\.report).filter { $0.spotID == item.id }
             spot.experienceReports = reports.reduce(into: [:]) { $0[$1.experience, default: 0] += 1 }
             spot.stayReports = reports.reduce(into: [:]) { counts, report in

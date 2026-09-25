@@ -1,8 +1,8 @@
 import Foundation
 import MapKit
 
-// Offline catalogue reconciliation tool. Run serially and checkpoint every lookup.
-// Candidate retrieval is not identity approval; build_catalogue.py makes that decision.
+// Offline Cool Spot reconciliation tool. Run serially and checkpoint every lookup.
+// Candidate retrieval is not identity approval; build_cool_spots.py makes that decision.
 @main struct MatchApplePlaces {
     @MainActor static func main() async throws {
         let args = CommandLine.arguments

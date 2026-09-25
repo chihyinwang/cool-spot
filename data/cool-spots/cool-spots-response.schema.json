@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://coolspot.example/schemas/catalogue-v3.json",
-  "title": "Cool Spot prototype catalogue response v3",
+  "$id": "https://coolspot.example/schemas/cool-spots-response-v4.json",
+  "title": "Cool Spots list response v4",
   "description": "Read representation, not a database schema or write request. Only published photos and accepted same-place map links are returned. Candidate reconciliation lives in a separate audit export. Unknown facts are explicit, and omitted future fields must not break readers.",
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "const": 3
+      "const": 4
     },
-    "catalogID": {
+    "datasetID": {
       "type": "string"
     },
     "generatedAt": {
@@ -94,7 +94,7 @@
   },
   "required": [
     "schemaVersion",
-    "catalogID",
+    "datasetID",
     "generatedAt",
     "sources",
     "items"

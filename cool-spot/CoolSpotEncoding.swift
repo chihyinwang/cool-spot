@@ -1,7 +1,7 @@
 import Foundation
 
 // A public response writes explicit nulls for nullable keys. Legacy aliases are read-only.
-extension PrototypeCatalog.Item {
+extension CoolSpotsResponse.Item {
     enum CodingKeys: String, CodingKey { case id, name, location, address, placeType, setting, coolingFeatures, additionalInformation, coolingDetails, access, hours, sourceRecord, appleMatch, sourceReferences, mapReferences, photos, provenance }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
@@ -23,7 +23,7 @@ extension PrototypeCatalog.Item {
     }
 }
 
-extension PrototypeCatalog.Item.Address {
+extension CoolSpotsResponse.Item.Address {
     enum CodingKeys: String, CodingKey { case formatted, line1, line2, locality, borough, postalCode, countryCode }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
@@ -37,7 +37,7 @@ extension PrototypeCatalog.Item.Address {
     }
 }
 
-extension PrototypeCatalog.Item.Location {
+extension CoolSpotsResponse.Item.Location {
     enum CodingKeys: String, CodingKey { case latitude, longitude, scope }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
@@ -47,7 +47,7 @@ extension PrototypeCatalog.Item.Location {
     }
 }
 
-extension PrototypeCatalog.Item.Access {
+extension CoolSpotsResponse.Item.Access {
     enum CodingKeys: String, CodingKey { case cost, eligibility, eligibilityDetails, seating, drinkingWater, toilets, wheelchairAccess, staffedWhenOpen, tables, instructions, postedStayLimitMinutes, areaDescription, postedStayLimit }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
@@ -65,7 +65,7 @@ extension PrototypeCatalog.Item.Access {
     }
 }
 
-extension PrototypeCatalog.Item.Provenance {
+extension CoolSpotsResponse.Item.Provenance {
     enum CodingKeys: String, CodingKey { case sourceID, recordID, method, fields, recordedAt }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
@@ -95,7 +95,7 @@ extension PlacePhotoAsset {
     }
 }
 
-extension CatalogStayLimit {
+extension CoolSpotStayLimit {
     enum CodingKeys: String, CodingKey { case status, minutes }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
@@ -104,7 +104,7 @@ extension CatalogStayLimit {
     }
 }
 
-extension PrototypeCatalog.Item.MapReference {
+extension CoolSpotsResponse.Item.MapReference {
     enum CodingKeys: String, CodingKey { case provider, placeID, relationship, verification, checkedAt }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)

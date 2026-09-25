@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 3,
-  "catalogID": "gla-2025-all",
+  "schemaVersion": 4,
+  "datasetID": "gla-2025-all",
   "generatedAt": "2026-09-19T00:16:05Z",
   "sources": [
     {

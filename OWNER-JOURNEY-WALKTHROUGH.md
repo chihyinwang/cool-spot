@@ -4,11 +4,61 @@
 
 ## 本輪狀態與起點
 
+**2026-09-26：Owner 要求提交目前批次。** Commit 訊息為 `Add local Cool Spots API handler and replace catalogue naming`，parent 為 `4b8f828`。範圍包含本機 handler／七個 tests、Swift／JSON／工具改名與舊資料相容、環境檔保護及現行文件。沿用下方 2026-09-25 的測試證據；程式未再改動，不為 commit 重跑測試。沒有部署、push 或修改 ViewCoolSpots；API-C05 仍未開始。
+
+**2026-09-25：Owner 委託全面命名調整，已實作與驗證。** 公開降溫場所資源稱為 Cool Spot；一般 Apple Maps 結果、私人 Pin、待審核提案仍是不同概念。API 清單 handler 改為 `createListCoolSpotsHandler`，完整讀取回應改為 `CoolSpotsResponse`／`coolSpotsResponse`，資料集識別欄位改為 `datasetID`，每個場所原本的 `id` 不變。Swift、TypeScript、fixture、schema、資料處理腳本、Xcode references 及現行文件路徑已同步更新；相關路徑見 AGENTS code map。新 JSON producer 為 v4；Swift 保留 v1–v3 讀取，舊本機發布欄位也能遷移為 `publishedCoolSpotRecords`，journey 儲存位置不變。舊 literal 只留在相容處理、回歸測試及原有 QA 啟動參數 alias；Xcode 系統設定名稱、歷史 snapshot 與歷史 log 路徑保留原文。未把資料來源的歷史上架紀錄解釋為目前仍涼爽的保證；三筆社群範例標示不變。
+
+驗證：Deno **7 passed／0 failed**；Python 配對規則 **11 passed**；v4 JSON Schema、250 GLA＋3 社群、來源／ID／配對／照片不變量通過。預設與 bundled Python 均缺少 jsonschema，改用 `/tmp/cool-spot-naming-validation` 獨立環境（jsonschema 4.26.0）完成 schema 驗證，未改全域 Python。與改名前逐值比較，兩份 app fixture 及完整 mapping 僅變更頂層版本／識別 key；raw GLA SHA-256 及其餘 11 個來源／registry／audit 檔 bytes 不變。
+
+在新建 **Cool Spot Naming QA**（iPhone 17 Pro Max／iOS 26.4，`A70648F1-74A6-4E5E-9CE3-D4323754D0CB`）執行必要的 app/test 編譯與模型測試：**88 passed／0 failed**，log `/tmp/cool-spot-naming-tests.log`。兩個新增回歸測試涵蓋 v4 輸出與 v1–v3 舊 key 讀取、舊本機發布資料載入／存新 key／重開保留。此次是明確委託的相容性 refactor，不宣稱新增功能的 Red → Green 證據。只使用隔離測試資料；沒有替換 owner 的 app、執行原生互動走查或裝置矩陣。API-C05、部署與登入接線仍未開始；未修改 ViewCoolSpots，未 commit／push。
+
+**2026-09-25：API 錯誤／方法限制批次 Red → Green，以及本機設定保護。** 已加入 API-C04 的 POST／PUT／PATCH／DELETE 四個參數化測試，和既有 API-C03 一起驗證。執行 `deno test --no-lock supabase/functions/cool-spots/handler_test.ts`：**2 passed／5 failed**。C01／C02 通過；C03 因 reader 的錯誤直接傳出而失敗；四個 C04 都回傳 200、預期 405。Red 階段尚未到達 Allow header、JSON body 與 reader 呼叫數 assertions。隨後 owner 親手輸入並儲存完整 Green，回報七個測試通過；agent 讀取實際 handler.ts，確認先以 method guard 拒絕非 GET，再以 try/catch 處理讀取，並用相同指令獨立驗證 **7 passed／0 failed**。所有 assertions 已到達並通過。無需重構，agent 未修改 production Green。下一步 API-C05 真實資料庫／Swift 整合尚未開始。
+
+設定保護：`.gitignore` 新增 `.env`／`.env.*`，保留 `!.env.example`；排除 `supabase/.temp/` 與 `supabase/.branches/`。新增 [.env.example](.env.example)，只含假 project URL 與 publishable key placeholder，標明目前單元測試不讀取此檔。以 `git check-ignore --no-index` 驗證 root／nested env 被排除，兩層 `.env.example` 和 handler.ts 仍可追蹤，CLI local state 被排除；目前沒有已追蹤的非範本 env 檔。這不是完整 Git 歷史 secret scan，沒有填入真實 key、建立實際 .env、連線、部署、commit 或 push。測試格式與 diff whitespace 檢查通過。
+
+**2026-09-24：Owner 完成 Supabase Auth／SQL／RLS 入門實驗。** Owner 已建立 Supabase 雲端專案，並在 Authentication → Users 手動建立兩個 email／password 測試帳號 A、B。建立畫面使用 Free organization、London region；指引為開啟 Data API、關閉自動暴露新表、開啟自動 RLS，agent 沒有讀取雲端設定確認最終 toggle 狀態。帳號、密碼、project keys 與 session tokens 不記入本文件。這是獨立練習，未開始實作 Cool Spot 資料表或接上 iOS。
+
+| 實驗 | 實際證據與結果 |
+|---|---|
+| 建立帳號與 SQL 查詢 | Owner 回報 SQL Editor 查到剛建立的 `auth.users` 紀錄。A 的 Terminal 截圖顯示 `Signed in` 與 user ID；之後 owner 回報 B 也能登入。 |
+| 錯誤密碼 | Owner 依指引重跑登入，確認錯誤密碼被拒絕。不是自動化測試結果。 |
+| 練習資料存在 | Owner 在 SQL Editor 執行建表／seed 指引，回報看到 A、B 各一筆筆記。表為 `public.rls_demo_notes`，欄位為 `id`、`owner_id`、`body`；`owner_id` references `auth.users(id)` with `on delete cascade`。 |
+| 未有 SELECT policy | 指引明確啟用 RLS、撤銷 PUBLIC／anon／authenticated 既有 table grants，只授予 authenticated SELECT。Owner 用 A 的真實登入 token 呼叫未加 owner filter 的 Data API GET，確認回傳 `[]` 與 HTTP 200。SQL Editor 的管理者查詢仍可見兩筆，不以管理者查詢驗證 RLS。 |
+| 只讀取自己的資料 | Owner 執行 policy `Users can read their own demo notes`：`FOR SELECT TO authenticated USING ((select auth.uid()) = owner_id)`。隨後用同一段登入＋GET 指令分別以 A／B 重跑；owner 回報兩者均符合只看到本人那筆筆記的預期。 |
+
+指令呼叫 `/auth/v1/token?grant_type=password` 登入，再以 publishable key 與該使用者的 Bearer token 呼叫 `/rest/v1/rls_demo_notes?select=owner_id,body&order=body`。密碼隱藏輸入，登入 JSON 留在 subshell 記憶體；token 經 stdin headers 傳入 curl，畫面只顯示 user ID、查詢資料與 HTTP status。Agent 的本機語法檢查和成功／失敗模擬 HTTP 檢查通過；**實際雲端結果依據 owner 操作回報**，agent 未以 credentials 連線重驗。未測匿名讀取、INSERT／UPDATE／DELETE、token lifecycle 或效能；不把此練習列為完整安全驗證。
+
+SQL 目前由 owner 在雲端 SQL Editor 執行，尚未存為 repository migration，也未建立正式 Cool Spot schema／seed 或 iOS Auth 接線。Owner 隨後安裝 Deno，並確認理解 API-C01「查詢成功但沒有場所」的情境；agent 補上 TypeScript handler 最小骨架並驗證行為 Red，owner 親手輸入並儲存 Green 後，agent 驗證 **1 passed／0 failed**，詳見下方。尚未連接資料庫或部署 API。這輪沒有修改 Swift、owner 模擬器資料或 ViewCoolSpots，沒有執行 app build／tests、commit 或 push。
+
+**2026-09-23：連線 prototype 範圍確認與第一個 API test 準備。** Owner 已完成 grilling 共識確認並要求繼續。在 Prototyping 接入 Supabase PostgreSQL/Auth、自寫 TypeScript Edge Functions API；場所與回報皆由 API 讀取。先以兩個預建帳戶及服務端測試到訪資格驗證 Report，之後接場所提案／審核／發布。免費方案優先，月費上限 GBP 25；具體產品規則見 PRODUCT 的 Agreed connected prototype slice。這不是 ViewCoolSpots 的重建進度。
+
+本輪起點 HEAD `4b8f828`、tracked working tree clean。唯讀核對發現現有 VisitReport 沒有作者 ID，所有本機回報均視為自己的，私人資料使用全裝置 snapshot；登入接線必須同時隔離帳戶資料，既有本機紀錄不自動上傳或歸戶。既有 questionnaire、草稿、期限及排序規則沿用；未修改 Swift 或 owner 裝置資料。
+
+第一組 API cases（2026-09-25 起依相近概念分批處理，保留各 case ID）：
+
+| ID | 可觀察行為 | 狀態 |
+|---|---|---|
+| API-C01 | 公開 GET 成功但無場所時，回傳 HTTP 200、JSON content type 與 v4 空 items 清單回應 | 2026-09-24 Red：實際 501／預期 200；owner 輸入並儲存 Green 後，1 passed／0 failed；無需重構；僅本機替身資料驗證 |
+| API-C02 | 成功讀取時，保留 Cool Spot list metadata、場所 ID、items 內容及來源資訊 | Owner 確認通過；2026-09-25 新批次執行時 agent 亦驗證通過，未改 production 或製造 Red |
+| API-C03 | Reader 失敗時，回傳可辨識的服務失敗，不冒充成功空結果或洩露內部錯誤 | 2026-09-25 行為 Red：reader 錯誤直接傳出，未產生預期 500 JSON；Owner 輸入 Green 後 agent 驗證通過；全批 7 passed／0 failed |
+| API-C04 | 不支援的 HTTP method 被拒絕，且不觸發 Cool Spot list 載入 | 2026-09-25 POST／PUT／PATCH／DELETE 四個案例 Red：實際 200／預期 405；預期另含 Allow: GET、固定 JSON 錯誤與零次 load；Owner 輸入 Green 後 agent 驗證通過；全批 7 passed／0 failed |
+| API-C05 | 真實 PostgreSQL reader、API 與 Swift decoder 的讀取契約相容 | 待整合；不以單元測試代替 |
+
+以下使用目前命名描述 API-C01–C04；最初 Red／Green 的 fixture 為 v3，2026-09-25 改名時升為 v4。測試介面為 `createListCoolSpotsHandler(reader)` 產生 Request → Response handler，reader 提供非同步 `load()`；API-C01 使用可控制的空 Cool Spot list 替身，不存取 Supabase、網路或使用者資料。測試檔為 [handler_test.ts](supabase/functions/cool-spots/handler_test.ts)。2026-09-24 已核對 Deno 2.9.7／TypeScript 6.0.3。第一次執行 `deno test --no-lock supabase/functions/cool-spots/handler_test.ts` 因缺少 handler.ts 而 TS2307 型別檢查失敗，未執行 test body，不算行為 Red。Owner 隨後表示理解；agent 新增 [handler.ts](supabase/functions/cool-spots/handler.ts) 最小骨架，接收 reader／Request 但僅回傳 HTTP 501。以相同指令重跑，型別檢查通過並執行一個測試，在 status assertion 失敗：`501 !== 200`，結果 **0 passed／1 failed，行為 Red 已驗證**。該次尚未到達 JSON content type／body assertions。
+
+Owner 親手輸入 Green，完成儲存後 agent 重新讀取檔案確認：`await reader.load()` 取得 Cool Spot list，`Response.json(coolSpotsResponse, { status: 200 })` 回傳資料。同一測試指令結果 **1 passed／0 failed**，HTTP status、JSON content type 與完整空 Cool Spot list body 三個 assertions 均通過。先前一次 owner 回報完成後，磁碟仍為 501 骨架，重跑仍失敗；僅在讀到實際儲存的 Green 並執行成功後才記錄通過。程式目前簡短清楚，無需重構，agent 未代寫 Green 或做 refactor。`Promise<unknown>` 只描述資料來源可非同步回傳值，尚未定義或驗證完整 v3 TypeScript schema。API-C02 隨後已寫入，owner 執行回報見下一段；資料來源失敗與 method 限制的批次 Red → Green 見本輪起點；未連線或部署。2026-09-23 準備當日未建立雲端資源、commit 或 push。
+
+API-C02：在同一個 handler_test.ts 加入 「成功時保留完整清單回應」測試（當時為 v3）。透過 JSON import 沿用 [CommunityCoolSpots.prototype.json](cool-spot/Resources/CommunityCoolSpots.prototype.json) 的三筆範例，未另定縮減場所 schema。測試先確認 fixture 非空；reader 回傳 `structuredClone(coolSpotsResponse)`，避免 handler 若修改輸入時同時改動預期值。Assertions 檢查 HTTP 200、JSON content type，以及完整 Cool Spot list 深度相等，包含 metadata、場所內容、來源、照片與 map references。這是回應資料保留測試，不驗證 schema 正確性、照片網址可連線或真實場所現況。2026-09-25 owner 明確確認兩個測試已通過；最初依 owner 本機執行回報記錄；在隨後新增 C03／C04 的七個測試批次中，agent 也實際確認 C02 通過。現有 handler 已涵蓋此 case，本步沒有新增 Red、修改 production code 或做 refactor。不要再將此 case 說成尚未執行，或要求 owner 重複回報同一階段。
+
+API-C03（2026-09-25）：新增 「讀取失敗回傳通用 JSON 錯誤」測試。假的 reader.load 拋出 `Database connection failed: internal diagnostic`，模擬資料來源讀取失敗；本步提出的具體回應預期為 HTTP 500、application/json，以及完整 body `{"error":{"code":"cool_spots_load_failed"}}`。完整 body 比較也防止把內部錯誤細節加進回應。這是本機替身，不曾中斷真實資料庫。已與 C04 一起執行，觀察到錯誤直接傳出，行為 Red 確認；其後 owner 已加入 catch／Green，agent 獨立確認七個測試通過。Owner 要求相關案例一批說明、測試，不再逐個等待「懂了」。C04 以同一段測試對 POST／PUT／PATCH／DELETE 分別建立 Request；預期 405、Allow: GET、application/json、完整 body {"error":{"code":"method_not_allowed"}}，並確認 reader.load 呼叫數為零。Red 時皆先在 status assertion 失敗；owner 輸入 Green 後，包含零次 load 在內的 assertions 全部通過。這批只驗證所列四種 method；HEAD／OPTIONS 或瀏覽器 CORS 不在這次測試證據內。
+
+Owner 選擇的合作方式（2026-09-25 更新）：同一概念的 cases 一批說明、由 agent 寫 tests 並一起驗證 Red，再提供一份完整的最小 Green，仍由 owner 親手輸入 SQL／API 核心實作。取消逐 test 的理解確認停頓；遇到實質未定決策或 owner 要求解釋時才停下釐清。這次速度調整本身沒有授權 agent 代寫 Green 或 refactor；隨後 owner 明確委託的全面命名 refactor 是獨立授權，新功能仍沿用教學協作方式。本輪同時研究選型與地圖 API 邊界；PostGIS／bbox／radius 是後續查詢設計候選，尚未實作或宣稱有效能測量。
+
 目前 app 程式基準：`42c0905` — `Improve GLA-to-Apple place matching and Cool Spot discovery`（2026-09-23，owner 委託提交）。16 個檔案包含搜尋排序／場館內降溫區發現、保守配對規則、已核對連結、查詢／抽查資料、測試、互動報表工具、PRODUCT 與 owner 要求的資料討論快照。未 push，未為 commit 重跑測試；staged diff 檢查通過。ViewCoolSpots 未改；此程式基準不代表後續文件 commit 的 HEAD。
 
 **2026-09-23：文件校正。** 依目前程式與目錄更新下方 A–E 現行步驟：改用正常啟動可找到的地點、明確區分持久化與預覽模式、修正審核控制及跨案例前提。40 個案例編號與以下有日期的歷史紀錄保留。本次只核對文件／程式、連結與編號，沒有執行 App、重跑測試或新增 owner 通過紀錄。這兩份文件在 Prototyping 已受 Git 追蹤，依 owner 要求一起提交。
 
-**2026-09-19：十筆真實搜尋／地點配對抽查（ec9fbf9 之上的變更，2026-09-23 提交為 42c0905）。** Owner 授權挑十筆代表案例，確認搜尋 → 正確地點 → 降溫卡／Place details。新增只讀、序列查詢的 `AuditDiscovery.swift`；真實名稱搜尋與必要的地址補查存於 `data/catalogue/apple-discovery-sample.json`，不把 API 回傳視為原生 UI 驗證。十筆案例及逐筆結果見 `data/catalogue/discovery-cases.json`、`data/catalogue/discovery-audit.json`。
+**2026-09-19：十筆真實搜尋／地點配對抽查（ec9fbf9 之上的變更，2026-09-23 提交為 42c0905）。** Owner 授權挑十筆代表案例，確認搜尋 → 正確地點 → 降溫卡／Place details。新增只讀、序列查詢的 `AuditDiscovery.swift`；真實名稱搜尋與必要的地址補查存於 `data/cool-spots/apple-discovery-sample.json`，不把 API 回傳視為原生 UI 驗證。十筆案例及逐筆結果見 `data/cool-spots/discovery-cases.json`、`data/cool-spots/discovery-audit.json`。
 
 修正：地址限定的 Street/St 正規化、門牌在第二行仍參與衝突檢查、公共交通／停車場／廁所候選不可自動當場所。原生 Beckton 搜尋重現兩筆相同圖書館，查 Newham 官方同址別名後接受連結。Green Street 新名稱查詢找到 337–341 Green Street 的正確 ID，拒絕 1.1 km 外的 7 Green Street；Willesden Green 採用官方 95 High Road 的 The Library，保留公車站、Library of Things、牙醫為不同身份；Harold Hill 以地址找到正確 Salvation Army 分點，系統卡電話／網站亦與官方相同，Apple 的 Thrift Store 分類未覆寫 GLA。Ham Library 的縮寫解決；同規則另外改善 Hampton Hill。Streatham 大廳只建立 within_place → 場館詳情，搜尋場館能列出大廳，場所身份不合併。實際搜尋 Ham Library 發現完整名稱埋在其他結果後，已改完整名稱優先。來源事實、250 UUID／座標皆未更動。
 
@@ -16,7 +66,7 @@
 
 驗證：Python 三個新增案例先失敗再修正，最終 **11 passed**；最終相關 Swift **7 passed, 0 failures**，含三個新增案例，log `/tmp/coolspot-discovery-final-tests.log`。初次 test 編譯因 optional sourceReferences 缺少 `?` 失敗，修正後相關六項通過；後續排序修正再跑七項，不把初次失敗算通過。v3 schema、250 GLA＋3 社群、穩定 ID、來源 facts 不變與來源保留檢查通過。安裝前 `/tmp/coolspot-discovery-backup` 備份本機資料，最終既有 preferences 原鍵值及 Documents／Application Support 檔案逐值／逐檔一致。未送出提案、未改收藏、未操作 owner 其他模擬器。結果總覽支援本輪10筆、完整250筆與待處理篩選，關係與原生限制分開呈現。未跑完整 suite／裝置矩陣；未修改 ViewCoolSpots。當日未 commit/push；2026-09-23 按 owner 要求提交為 42c0905，未 push。
 
-**2026-09-18：欄位契約修正與本機發布（已納入 ec9fbf9）。** Owner 授權修正逐欄稽核缺口。schema v3 保留 Water nearby、Limited seating、附近／不在現場／沒有廁所，以及 no_stated_limit／unknown／正整數分鐘；Other 與未知類型分開。公開補充使用 additionalInformation，特定區域使用 areaDescription；舊 instructions／postedStayLimitMinutes 可讀不再輸出。GLA 未逐筆提供的 scope／eligibility 保留 unknown，下載時間不再取 filesystem mtime，改為 hash-bound manifest（舊下載時間為 null）。三個社群範例移至 CommunityCatalog.prototype.json，與 250 GLA 共用 decoder；既有 UUID 與 133 自動／4 覆核／94 待覆核／19 無候選配對結果不變。
+**2026-09-18：欄位契約修正與本機發布（已納入 ec9fbf9）。** Owner 授權修正逐欄稽核缺口。schema v3 保留 Water nearby、Limited seating、附近／不在現場／沒有廁所，以及 no_stated_limit／unknown／正整數分鐘；Other 與未知類型分開。公開補充使用 additionalInformation，特定區域使用 areaDescription；舊 instructions／postedStayLimitMinutes 可讀不再輸出。GLA 未逐筆提供的 scope／eligibility 保留 unknown，下載時間不再取 filesystem mtime，改為 hash-bound manifest（舊下載時間為 null）。三個社群範例移至 CommunityCoolSpots.prototype.json，與 250 GLA 共用 decoder；既有 UUID 與 133 自動／4 覆核／94 待覆核／19 無候選配對結果不變。
 
 送審提案／狀態、已發布場所與照片均在正常啟動重開後保留。圖片原檔／縮圖放獨立 device-local 檔案，JSON/preferences 不塞圖片 bytes。You → Settings → Prototype controls → Publish locally 僅模擬本機審核決策；更新只套用 changed fields，保留其他 GLA 事實、身份、visitor evidence、presence 與私人資料；衝突為 Action needed，重複 Publish 不建立重複紀錄／照片。GLA 有本機修改會標 Local edits，欄位 evidence 保留 source record ID 和 recording time。移除僅改標籤、沒有資料套用的 Merge 控制，重複地點保留原 Review update 路徑。可填選項沒有增加新問題，只將 Toilets 原本 Yes/No 改為清楚的地點／可用性選項。未發布或拒絕的提案不進入公开卡；修改理由不公開，public note 在 More information 收合區。Optional area text 不會把已選場所拆成另一筆；只有明確 specific_area + within_place 的資料才引用父場所詳情而不合併身份。
 
@@ -28,7 +78,7 @@
 
 **2026-09-15 owner 指示：** Prototype 只在 iPhone 17 Pro Max 做簡短互動與必要編譯確認；不跑 iPad、多尺寸、Dynamic Type／外觀矩陣。下方歷史裝置證據不代表需要重跑。
 
-**2026-09-18：Photos B、完整 GLA 目錄與配對。** Owner 指定先研究 API 設計，再實作 B，將所有 Cool Spaces 轉為 Cool Spot 並交付完整 JSON／可查看的配對結果。正常啟動已有 250 個 GLA 2025 場所加 3 個既有社群範例。新 producer schema v2／adapter 支援來源參照、欄位 provenance、結構地址、explicit unknown、photos 與已接受 mapReferences；原十筆 UUID 保留。原始 snapshot／校驗碼、兩輪名稱搜尋及舊 ID 的重新解析均保留。結果為 133 自動接受、4 筆 Codex 另查官方來源後接受、94 筆候選待核對、19 筆查無候選，沒有尚未查詢或服務失敗的紀錄。四筆覆核有來源 fingerprint／candidate snapshot；不是 owner 人工驗收。完整輸出為 `data/catalogue/coolspot-catalogue-mapping.json`，app response 不帶候選稽核資料。76 筆有分類／未辨識降溫方式的轉換提醒，保留原資料而非補猜。
+**2026-09-18：Photos B、完整 GLA 目錄與配對。** Owner 指定先研究 API 設計，再實作 B，將所有 Cool Spaces 轉為 Cool Spot 並交付完整 JSON／可查看的配對結果。正常啟動已有 250 個 GLA 2025 場所加 3 個既有社群範例。新 producer schema v2／adapter 支援來源參照、欄位 provenance、結構地址、explicit unknown、photos 與已接受 mapReferences；原十筆 UUID 保留。原始 snapshot／校驗碼、兩輪名稱搜尋及舊 ID 的重新解析均保留。結果為 133 自動接受、4 筆 Codex 另查官方來源後接受、94 筆候選待核對、19 筆查無候選，沒有尚未查詢或服務失敗的紀錄。四筆覆核有來源 fingerprint／candidate snapshot；不是 owner 人工驗收。完整輸出為 `data/cool-spots/cool-spots-mapping.json`，app response 不帶候選稽核資料。76 筆有分類／未辨識降溫方式的轉換提醒，保留原資料而非補猜。
 
 B 的操作：搜尋 **Example Community Room → 照片縮圖 → 全螢幕照片 → Next／Previous → Done**；**See all → Photos 相簿 → 選照片 → Done → Back**。照片在 cooling/access 摘要後、Facilities & accessibility 前，最多三張 108 pt 縮圖；GLA 無圖不放空殼。三張圖均為產生的示意素材，caption/attribution 標明 illustration，沒有捏造拍攝時間。相簿兩欄初次檢查發現圖片壓縮欄距，已以明確欄寬修正後原生重看。使用者表單 photo 仍是本機待審提案，沒有新增上傳、自動發佈或遠端媒體服務。
 
@@ -48,7 +98,7 @@ B 的操作：搜尋 **Example Community Room → 照片縮圖 → 全螢幕照�
 
 限定驗證：四項測試通過（GLA 不製造證據、三類搜尋／身分、社群設施與七則回報一致且不污染私人資料、人數附近條件／加一／600 秒到期），`/tmp/cool-spot-community-examples-tests.log`。最終混合體感文案修正後建置成功，`/tmp/cool-spot-community-examples-final-build.log`。只用 iPhone 17 Pro Max；三個社群範例均展開設施確認，Tate 的 Read all reports 可讀三則標記範例的評論，地圖 0→1 已原生確認。Simulator AX 在測試後只有外框，改用原生截圖／座標完成操作，未因此調整 app 行為。截圖 `/tmp/cool-spot-community-examples-evidence/`；更新前備份 `/tmp/cool-spot-community-examples-backup`，原有偏好／文件已核對保留；defaults CLI 無法覆寫 app container 的快取資料，因此關閉此 QA 裝置後只還原此輪修改的 journey key，再正常啟動比對。最終 Community Room 原生截圖確認 Mixed experiences 文案。沒有裝置矩陣或完整 suite，ViewCoolSpots 未改，未 commit/push。
 
-**2026-09-18：時間／設施漸進展開（先前版本的限定驗證）。** Owner 確認後實作：摘要保留費用、座位與入場條件；Cooling space hours 及 Facilities & accessibility 依資料存在才顯示，預設收起、原地展開。設施集中廁所、輪椅通行、人員值守及桌子；已知「沒有」仍可顯示，未知不補值，只有輪椅資料也能顯示此列。飲水／座位不在設施中重複；Place details 固定接在這組補充資訊之後，Visitor reports 的條狀圖與評論保持原有行為。沒有變更 catalogue、表單、保存或回報規則。
+**2026-09-18：時間／設施漸進展開（先前版本的限定驗證）。** Owner 確認後實作：摘要保留費用、座位與入場條件；Cooling space hours 及 Facilities & accessibility 依資料存在才顯示，預設收起、原地展開。設施集中廁所、輪椅通行、人員值守及桌子；已知「沒有」仍可顯示，未知不補值，只有輪椅資料也能顯示此列。飲水／座位不在設施中重複；Place details 固定接在這組補充資訊之後，Visitor reports 的條狀圖與評論保持原有行為。沒有變更 Cool Spot list、表單、保存或回報規則。
 
 限定驗證：iPhone 17 Pro Max／Cool Spot Layout QA 正常持久化啟動，John Harvard Library 初始兩列收起，分別展開看到正確時間與廁所／輪椅／值守，再收合成功；Place details 開到同名圖書館系統卡，關閉回原降溫卡。Tate Modern 與 British Museum 均沒有空時間／設施列，保留相同 Place details。只做這一台的 A/B/C 原生畫面與互動確認；建置成功 `/tmp/cool-spot-disclosures-build.log`，UI-only 調整沒有新增或重跑模型測試。截圖在 `/tmp/cool-spot-disclosures-evidence/`。更新前 `/tmp/cool-spot-disclosures-backup` 備份的 12 個 preferences plist 既有鍵值及 Documents 檔案均保留。`git diff --check` 通過，40 個 A–E 編號與本機文件連結有效；ViewCoolSpots 仍乾淨，未 commit/push。這不是完整 journey 或真人 usability 驗收。
 
@@ -62,7 +112,7 @@ B 的操作：搜尋 **Example Community Room → 照片縮圖 → 全螢幕照�
 
 **2026-09-18：A／B／C 正常啟動比較初次驗證（下文記錄當時畫面）。** Owner 要求三種頁面可直接看，並拒絕在 app 按鈕中使用 Apple Maps 品牌。正常 Explore 現有十筆 GLA 加 Tate Modern（Example cooling info），另有可搜尋的 British Museum 普通場所。Tate Modern 的 Apple Place ID 已用 MapKit 查核，降溫／進入內容為明確標示的非 GLA 示範，不填假開放時間或訪客回報。`PlaceInformation` 將可顯示事實與來源分開；Hours & access 依資料存在與否呈現，B 缺 hours 仍可讀 instructions。三種詳情按鈕都叫 Place details；A/B 放在 access 資訊旁、訪客回報之前，街景仍在下方。C 保留 No cooling information yet／附近探索與原本操作。新 MapKit 搜尋結果優先於本機種子資料，保留電話／網站等資料。
 
-限定驗證：五項 catalogue 測試通過（含新增三種狀態、B 精確身分合併，以及原本四項相容檢查），`/tmp/cool-spot-three-states-tests.log`；沒有重跑全 suite。最終 UI 建置成功 `/tmp/cool-spot-three-states-final-build.log`。只用 Cool Spot Layout QA／iPhone 17 Pro Max／iOS 26.4：正常啟動顯示 11 Cool Spots；搜尋 Tate Modern 只有一筆該場所，半卡／展開卡標 Example cooling info，Hours & access 顯示 ground-floor seating 示範說明；Place details 開到真實 Tate Modern 並可關閉返回。Canning Town Library 顯示來源時間、廁所、無障礙與相鄰 Place details，原 Saved 狀態保留。搜尋 British Museum 開普通場所卡，有 Call／Website／Place details／Find nearby Cool Spots，沒有空的 Hours & access。未再逐一開 A/C 系統卡、未重做收藏／回報完整旅程，也未跑任何裝置矩陣。QA 更新前備份 `/tmp/cool-spot-three-states-backup`，安裝後持久化鍵值比對一致。沒有改 owner 其他模擬器或 ViewCoolSpots，未 commit/push。
+限定驗證：五項 Cool Spot list 測試通過（含新增三種狀態、B 精確身分合併，以及原本四項相容檢查），`/tmp/cool-spot-three-states-tests.log`；沒有重跑全 suite。最終 UI 建置成功 `/tmp/cool-spot-three-states-final-build.log`。只用 Cool Spot Layout QA／iPhone 17 Pro Max／iOS 26.4：正常啟動顯示 11 Cool Spots；搜尋 Tate Modern 只有一筆該場所，半卡／展開卡標 Example cooling info，Hours & access 顯示 ground-floor seating 示範說明；Place details 開到真實 Tate Modern 並可關閉返回。Canning Town Library 顯示來源時間、廁所、無障礙與相鄰 Place details，原 Saved 狀態保留。搜尋 British Museum 開普通場所卡，有 Call／Website／Place details／Find nearby Cool Spots，沒有空的 Hours & access。未再逐一開 A/C 系統卡、未重做收藏／回報完整旅程，也未跑任何裝置矩陣。QA 更新前備份 `/tmp/cool-spot-three-states-backup`，安裝後持久化鍵值比對一致。沒有改 owner 其他模擬器或 ViewCoolSpots，未 commit/push。
 
 畫面：`/tmp/cool-spot-three-states-evidence/a-gla.png`、`b-community.png`、`c-ordinary.png`。A05 已加入三種直接搜尋路徑，A–E 40 個固定編號不變。這些是 agent 的限定原生證據；owner 尚待判斷呈現感覺。
 
@@ -221,7 +271,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 `→` 是下一個點擊或動作；「返回」是左上角返回；「關閉地點」是 ×。Explore／Saved／You 是底部分頁，Places／Pins 是 Saved 內的分類。GPS 與審核仍為 prototype，限制見 PRODUCT。
 
-**現行 A–E 一律正常啟動，不加 `--shape-preview`、`--reports-test-fixtures` 或 `--example-catalog`。** 這些參數改用 memory-only store，不能驗證下方的重啟保存。正常啟動有 250 筆 GLA、三筆社群示例與 British Museum 普通場所，並讀取裝置原有紀錄；以下是未經本機修改的初始狀態：
+**現行 A–E 一律正常啟動，不加 `--shape-preview`、`--reports-test-fixtures` 或 `--example-cool-spots`。** 這些參數改用 memory-only store，不能驗證下方的重啟保存。正常啟動有 250 筆 GLA、三筆社群示例與 British Museum 普通場所，並讀取裝置原有紀錄；以下是未經本機修改的初始狀態：
 
 | 用途 | 可搜尋的地點 | 前提 |
 |---|---|---|

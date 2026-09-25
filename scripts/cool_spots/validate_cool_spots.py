@@ -4,16 +4,16 @@ from pathlib import Path
 import jsonschema
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA = ROOT / 'data/catalogue'
+DATA = ROOT / 'data/cool-spots'
 def load(path): return json.loads(path.read_text())
-export = load(DATA / 'coolspot-catalogue-mapping.json')
-response = load(ROOT / 'cool-spot/Resources/CoolSpotCatalog.prototype.json')
-schema = load(DATA / 'coolspot-catalogue.schema.json')
+export = load(DATA / 'cool-spots-mapping.json')
+response = load(ROOT / 'cool-spot/Resources/CoolSpots.prototype.json')
+schema = load(DATA / 'cool-spots-response.schema.json')
 jsonschema.Draft202012Validator.check_schema(schema)
 validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
 validator.validate(response)
 validator.validate(export)
-community = load(ROOT / "cool-spot/Resources/CommunityCatalog.prototype.json")
+community = load(ROOT / "cool-spot/Resources/CommunityCoolSpots.prototype.json")
 validator.validate(community)
 assert {i["id"] for i in community["items"]}.isdisjoint(i["id"] for i in response["items"])
 assert all(i["location"]["scope"] == "unknown" and i["access"]["eligibility"] == "unknown" for i in response["items"])
@@ -49,4 +49,4 @@ assert len(accepted) == len(set(accepted))
 assert sum(export['mapping']['summary']['byStatus'].values()) == len(items)
 photo_validator = jsonschema.Draft202012Validator(schema['$defs']['photo'], format_checker=jsonschema.FormatChecker())
 for photo in load(ROOT / 'cool-spot/Resources/ExamplePlacePhotos.json'): photo_validator.validate(photo)
-print('PASS: v3 JSON Schema, 250 GLA + 3 community records, unique IDs, provenance, accepted links, unknown source scope/eligibility, photos')
+print('PASS: v4 JSON Schema, 250 GLA + 3 community records, unique IDs, provenance, accepted links, unknown source scope/eligibility, photos')

@@ -1,5 +1,5 @@
 import unittest
-from build_catalogue import evaluate, availability
+from build_cool_spots import evaluate, availability
 
 class MappingTests(unittest.TestCase):
     def candidate(self, **changes):

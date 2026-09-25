@@ -270,7 +270,7 @@ struct PlaceInformation {
     var staffedWhenOpen: Bool? = nil
     var tables: Bool? = nil
     var areaDescription: String? = nil
-    var postedStayLimit = CatalogStayLimit.unknown
+    var postedStayLimit = CoolSpotStayLimit.unknown
     var additionalInformation: String? = nil
     var drinkingWater: Bool? = nil
 
@@ -304,11 +304,11 @@ struct CoolSpot: Identifiable {
     var information = PlaceInformation()
     var applePlaceID: String? = nil
     var photos: [PlacePhotoAsset] = []
-    var catalogueItem: PrototypeCatalog.Item? = nil
+    var publishedRecord: CoolSpotsResponse.Item? = nil
     var isExample: Bool { information.source.isExample }
     var sourceLabel: String { information.source.label }
     var detailsApplePlaceID: String? {
-        catalogueItem?.mapReferences?.first {
+        publishedRecord?.mapReferences?.first {
             $0.provider == "apple_maps" && ["same_place", "within_place"].contains($0.relationship) &&
             ["automatic", "reviewed"].contains($0.verification)
         }?.placeID ?? applePlaceID
@@ -334,7 +334,7 @@ struct RecognisedPlace: Identifiable, Codable, Equatable {
     var phoneNumber: String? = nil
     var websiteURL: URL? = nil
     var alternateApplePlaceIDs: [String]? = nil
-    var structuredAddress: PrototypeCatalog.Item.Address? = nil
+    var structuredAddress: CoolSpotsResponse.Item.Address? = nil
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 }
 
@@ -473,7 +473,46 @@ private struct ReportJourneySnapshot: Codable {
     // Optional so existing v1 journeys still decode without losing owner data.
     var savedPlaceDetails: [RecognisedPlace]? = nil
     var placeContributions: [Contribution]? = nil
-    var publishedCatalogue: [PrototypeCatalog.Item]? = nil
+    var publishedCoolSpotRecords: [CoolSpotsResponse.Item]? = nil
+}
+
+extension ReportJourneySnapshot {
+    private enum CodingKeys: String, CodingKey {
+        case confirmations, drafts, reports, savedLocations, nearbySpotIDs
+        case activePresenceSpotID, presenceEndsAt, savedPlaceDetails, placeContributions
+        case publishedCoolSpotRecords
+        // Read the previous persisted key so an upgrade preserves local publications.
+        case legacyPublishedRecords = "publishedCatalogue"
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        confirmations = try values.decode([String: Date].self, forKey: .confirmations)
+        drafts = try values.decode([String: VisitReportDraft].self, forKey: .drafts)
+        reports = try values.decode([VisitReport].self, forKey: .reports)
+        savedLocations = try values.decode([SavedLocation].self, forKey: .savedLocations)
+        nearbySpotIDs = try values.decode([String].self, forKey: .nearbySpotIDs)
+        activePresenceSpotID = try values.decodeIfPresent(String.self, forKey: .activePresenceSpotID)
+        presenceEndsAt = try values.decodeIfPresent(Date.self, forKey: .presenceEndsAt)
+        savedPlaceDetails = try values.decodeIfPresent([RecognisedPlace].self, forKey: .savedPlaceDetails)
+        placeContributions = try values.decodeIfPresent([Contribution].self, forKey: .placeContributions)
+        publishedCoolSpotRecords = try values.decodeIfPresent([CoolSpotsResponse.Item].self, forKey: .publishedCoolSpotRecords)
+            ?? values.decodeIfPresent([CoolSpotsResponse.Item].self, forKey: .legacyPublishedRecords)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(confirmations, forKey: .confirmations)
+        try values.encode(drafts, forKey: .drafts)
+        try values.encode(reports, forKey: .reports)
+        try values.encode(savedLocations, forKey: .savedLocations)
+        try values.encode(nearbySpotIDs, forKey: .nearbySpotIDs)
+        try values.encodeIfPresent(activePresenceSpotID, forKey: .activePresenceSpotID)
+        try values.encodeIfPresent(presenceEndsAt, forKey: .presenceEndsAt)
+        try values.encodeIfPresent(savedPlaceDetails, forKey: .savedPlaceDetails)
+        try values.encodeIfPresent(placeContributions, forKey: .placeContributions)
+        try values.encodeIfPresent(publishedCoolSpotRecords, forKey: .publishedCoolSpotRecords)
+    }
 }
 
 struct CoolingEvidence: Equatable {
@@ -505,12 +544,12 @@ struct CoolingEvidence: Equatable {
 @MainActor
 final class PrototypeStore: ObservableObject {
     @Published var spots: [CoolSpot]
-    @Published var catalogError: String?
-    let usesCatalog: Bool
+    @Published var coolSpotsLoadError: String?
+    let usesLoadedCoolSpots: Bool
     @Published var savedLocations = Fixtures.saved { didSet { persistJourneys() } }
     @Published var contributions = Fixtures.contributions
     @Published var contributionError: String?
-    private var publishedCatalogue: [PrototypeCatalog.Item] = []
+    private var publishedCoolSpotRecords: [CoolSpotsResponse.Item] = []
     @Published var visitReports: [VisitReport] = []
     @Published var activePresenceSpotID: String? { didSet { persistJourneys() } }
     @Published private(set) var presenceEndsAt: Date?
@@ -523,18 +562,18 @@ final class PrototypeStore: ObservableObject {
     var hasSeenPopsicleExplanation: Bool { popsicles.explanationSeen }
 
     @Published private var selectedPlaces: [RecognisedPlace] = []
-    var recognisedPlaces: [RecognisedPlace] { (usesCatalog ? [] : Fixtures.places) + selectedPlaces }
+    var recognisedPlaces: [RecognisedPlace] { (usesLoadedCoolSpots ? [] : Fixtures.places) + selectedPlaces }
     let currentCoordinate = CLLocationCoordinate2D(latitude: 51.5059, longitude: -0.0906)
     private let reportDefaults: UserDefaults?
     private var isRestoringJourneys = true
     private static let journeyKey = "prototype.reportJourneys.v1"
 
     // Tests use memory-only stores unless they explicitly exercise relaunch recovery.
-    init(reportDefaults: UserDefaults? = nil, catalogSpots: [CoolSpot]? = nil) {
+    init(reportDefaults: UserDefaults? = nil, loadedCoolSpots: [CoolSpot]? = nil) {
         self.reportDefaults = reportDefaults
-        usesCatalog = catalogSpots != nil
-        spots = catalogSpots ?? Fixtures.spots
-        if usesCatalog {
+        usesLoadedCoolSpots = loadedCoolSpots != nil
+        spots = loadedCoolSpots ?? Fixtures.spots
+        if usesLoadedCoolSpots {
             savedLocations = []
             contributions = []
             unlockedTypes = []
@@ -550,8 +589,8 @@ final class PrototypeStore: ObservableObject {
             visitReports = snapshot.reports
             savedLocations = snapshot.savedLocations
             selectedPlaces = snapshot.savedPlaceDetails ?? []
-            publishedCatalogue = snapshot.publishedCatalogue ?? []
-            for item in publishedCatalogue { applyPublished(item) }
+            publishedCoolSpotRecords = snapshot.publishedCoolSpotRecords ?? []
+            for item in publishedCoolSpotRecords { applyPublished(item) }
             let restored = (snapshot.placeContributions ?? []).map { record in
                 var record = record
                 if let photoID = record.photoID { record.placeDraft?.values.photo = PrototypePhotoStorage.original(id: photoID) }
@@ -581,7 +620,7 @@ final class PrototypeStore: ObservableObject {
                                              activePresenceSpotID: activePresenceSpotID, presenceEndsAt: presenceEndsAt,
                                              savedPlaceDetails: selectedPlaces.filter { isSaved(placeID: $0.id) },
                                              placeContributions: contributions.filter { $0.kind != .visitReport },
-                                             publishedCatalogue: publishedCatalogue)
+                                             publishedCoolSpotRecords: publishedCoolSpotRecords)
         if let data = try? JSONEncoder().encode(snapshot) {
             reportDefaults.set(data, forKey: Self.journeyKey)
         }
@@ -600,7 +639,7 @@ final class PrototypeStore: ObservableObject {
         simulateNearbySpot(nil)
     }
 
-    // Legacy example bookmarks/reports remain readable, outside the live catalogue.
+    // Legacy example bookmarks/reports remain readable, outside the live Cool Spots list.
     func spot(_ id: String) -> CoolSpot? { spots.first { $0.id == id } ?? Fixtures.spots.first { $0.id == id } }
     func place(_ id: String) -> RecognisedPlace? { recognisedPlaces.first { $0.id == id } ?? Fixtures.places.first { $0.id == id } }
     func remember(_ place: RecognisedPlace) {
@@ -954,13 +993,13 @@ final class PrototypeStore: ObservableObject {
             let item = try PrototypePublication.publish(draft, onto: draft.spotID.flatMap(spot),
                                                         photoID: contributions[index].photoID, at: date)
             // Exercise the same read contract used for imported places before applying any state.
-            let response = PrototypeCatalog(schemaVersion: 3, catalogID: "local-publication", generatedAt: ISO8601DateFormatter().string(from: date),
-                                            source: nil, sources: [PrototypePublication.source] + (try PrototypeCatalog.bundled().sources ?? [])
-                                                + (try PrototypeCatalog.bundled(named: "CommunityCatalog.prototype").sources ?? []), items: [item])
-            let decoded = try PrototypeCatalog.decode(JSONEncoder().encode(response))
+            let response = CoolSpotsResponse(schemaVersion: CoolSpotsResponse.currentSchemaVersion, datasetID: "local-publication", generatedAt: ISO8601DateFormatter().string(from: date),
+                                            source: nil, sources: [PrototypePublication.source] + (try CoolSpotsResponse.bundled().sources ?? [])
+                                                + (try CoolSpotsResponse.bundled(named: "CommunityCoolSpots.prototype").sources ?? []), items: [item])
+            let decoded = try CoolSpotsResponse.decode(JSONEncoder().encode(response))
             guard let published = decoded.items.first else { throw PrototypePublicationError.invalidContribution }
-            publishedCatalogue.removeAll { $0.id == published.id }
-            publishedCatalogue.append(published)
+            publishedCoolSpotRecords.removeAll { $0.id == published.id }
+            publishedCoolSpotRecords.append(published)
             applyPublished(published)
             contributions[index].status = .published
             persistJourneys()
@@ -973,15 +1012,15 @@ final class PrototypeStore: ObservableObject {
         }
     }
 
-    private func applyPublished(_ item: PrototypeCatalog.Item) {
+    private func applyPublished(_ item: CoolSpotsResponse.Item) {
         let previous = spots.first { $0.id == item.id }
-        let source: PrototypeCatalog.CatalogueSource
+        let source: CoolSpotsResponse.SourceMetadata
         if let previous {
             source = .init(id: item.sourceReferences?.first?.sourceID ?? PrototypePublication.source.id,
                            provider: previous.source == .gla ? "gla" : "community", label: previous.sourceLabel,
                            url: previous.information.source.url, isExample: previous.isExample)
         } else { source = PrototypePublication.source }
-        let updated = item.makeSpot(catalogueSource: source, retaining: previous)
+        let updated = item.makeSpot(sourceMetadata: source, retaining: previous)
         if let index = spots.firstIndex(where: { $0.id == item.id }) { spots[index] = updated }
         else { spots.append(updated) }
     }

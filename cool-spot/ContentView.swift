@@ -17,10 +17,12 @@ struct ContentView: View {
         #else
         usesReportExamples = false
         #endif
-        let usesExamples = usesReportExamples || arguments.contains("--shape-preview") || arguments.contains("--example-catalog")
+        // Preserve the previous launch argument for existing local QA shortcuts.
+        let usesExamples = usesReportExamples || arguments.contains("--shape-preview")
+            || arguments.contains("--example-cool-spots") || arguments.contains("--example-catalog")
         let initialStore = usesExamples
             ? PrototypeStore(reportDefaults: nil)
-            : PrototypeStore.catalogStore(reportDefaults: .standard)
+            : PrototypeStore.loadedCoolSpotsStore(reportDefaults: .standard)
         if usesReportExamples {
             // Isolated, memory-only examples: never overwrite saved places or real local reports.
             for (index, fixture) in initialStore.spots.enumerated() {

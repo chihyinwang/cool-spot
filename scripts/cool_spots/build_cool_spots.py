@@ -14,7 +14,7 @@ import unicodedata
 import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA = ROOT / 'data/catalogue'
+DATA = ROOT / 'data/cool-spots'
 SOURCE_URL = 'https://data.london.gov.uk/download/2z19p/blw/CoolSpaceSites_2025.json'
 DATASET_URL = 'https://data.london.gov.uk/dataset/cool-space-data-2025-2z19p'
 SOURCE_ID = 'gla-cool-spaces-2025'
@@ -191,16 +191,16 @@ def build():
     source={'id':SOURCE_ID,'provider':'gla','label':'GLA · 2025','dataset':'Cool Space Data 2025',
             'url':DATASET_URL,'downloadURL':SOURCE_URL,'retrievedAt':manifest['retrievedAt'],'sourceUpdatedAt':None,
             'sha256':hashlib.sha256(raw.read_bytes()).hexdigest()}
-    catalogue={'schemaVersion':3,'catalogID':'gla-2025-all','generatedAt':now,'sources':[source], 'items':items}
+    cool_spots_response={'schemaVersion':4,'datasetID':'gla-2025-all','generatedAt':now,'sources':[source], 'items':items}
     counts=dict(collections.Counter(r['status'] for r in results))
     summary={'sourceRecords':len(features),'converted':len(items),'lookupsCompleted':sum(r['status']!='not_checked' for r in results),
              'byStatus':counts,'recordsWithDataWarnings':sum(bool(r['dataWarnings']) for r in results)}
-    export={**catalogue,'mapping':{'algorithm':'conservative-v2','summary':summary,
+    export={**cool_spots_response,'mapping':{'algorithm':'conservative-v2','summary':summary,
           'automaticRule':'One compatible named POI with a Place ID, exact or >=0.94 normalised name similarity, agreeing street or postcode, no street-number (including numeric address line 2), postcode or transport/parking/restroom category conflict and within 150 m; duplicate Apple destinations require review. This is a heuristic, not a calibrated probability or human verification.',
           'results':results}}
     (DATA/'identity-registry.json').write_text(json.dumps(registry,indent=2,sort_keys=True)+'\n')
-    (DATA/'coolspot-catalogue-mapping.json').write_text(json.dumps(export,ensure_ascii=False,indent=2)+'\n')
-    (ROOT/'cool-spot/Resources/CoolSpotCatalog.prototype.json').write_text(json.dumps(catalogue,ensure_ascii=False,indent=2)+'\n')
+    (DATA/'cool-spots-mapping.json').write_text(json.dumps(export,ensure_ascii=False,indent=2)+'\n')
+    (ROOT/'cool-spot/Resources/CoolSpots.prototype.json').write_text(json.dumps(cool_spots_response,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(summary))
 
 if __name__=='__main__': build()

@@ -65,7 +65,7 @@ struct PlaceContributionValues: Equatable, Codable {
     var note = ""
     var sourceCorrection = ""
     var removalReason = ""
-    // Photo bytes live in device-local files, never in the catalogue or preferences JSON.
+    // Photo bytes live in device-local files, never in the Cool Spots response or preferences JSON.
     enum CodingKeys: String, CodingKey {
         case name, latitude, longitude, locationConfirmed, setting, type, features, access, accessibility, seating
         case tables, wheelchairAccess, staffedWhenOpen, stayLimit, toilets, wifi, power, laptop

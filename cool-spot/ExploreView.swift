@@ -193,7 +193,7 @@ struct ExploreView: View {
                     SearchBar(text: $search, submit: { searchPlaces(debounce: false) },
                               focusChanged: { searchFocused = $0 })
                     filterBar
-                    if let message = store.catalogError {
+                    if let message = store.coolSpotsLoadError {
                         Text(message).font(.subheadline).padding(12).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
 

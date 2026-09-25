@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 3,
-  "catalogID": "community-examples",
+  "schemaVersion": 4,
+  "datasetID": "community-examples",
   "generatedAt": "2026-09-18T22:32:22Z",
   "sources": [
     {

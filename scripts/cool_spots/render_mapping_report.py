@@ -3,8 +3,8 @@ import json
 import sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
-payload=json.loads((ROOT/'data/catalogue/coolspot-catalogue-mapping.json').read_text())
-audit_path=ROOT/'data/catalogue/discovery-audit.json'
+payload=json.loads((ROOT/'data/cool-spots/cool-spots-mapping.json').read_text())
+audit_path=ROOT/'data/cool-spots/discovery-audit.json'
 samples={r['sourceRecordID']:r for r in json.loads(audit_path.read_text())['cases']} if audit_path.exists() else {}
 rows=[]
 for row in payload['mapping']['results']:

@@ -1,7 +1,7 @@
 import Foundation
 
 // Public read values preserve answers independently of their English form labels.
-struct CatalogStayLimit: Codable, Equatable {
+struct CoolSpotStayLimit: Codable, Equatable {
     enum Status: String, Codable { case unknown, limited, noStatedLimit = "no_stated_limit" }
     var status: Status
     var minutes: Int?

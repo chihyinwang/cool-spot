@@ -6,11 +6,61 @@ import MapKit
 @MainActor
 final class CoolSpotTests: XCTestCase {
 
+    func testCoolSpotsResponseUsesV4DatasetIDAndReadsLegacyResponseIDs() throws {
+        let current = try CoolSpotsResponse.bundled()
+        let encoded = try JSONEncoder().encode(current)
+        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertEqual(payload["schemaVersion"] as? Int, 4)
+        XCTAssertEqual(payload["datasetID"] as? String, current.datasetID)
+        XCTAssertNil(payload["catalogID"])
+
+        for version in [1, 2, 3] {
+            var legacy = payload
+            legacy["schemaVersion"] = version
+            legacy["catalogID"] = legacy.removeValue(forKey: "datasetID")
+            let restored = try CoolSpotsResponse.decode(JSONSerialization.data(withJSONObject: legacy))
+            XCTAssertEqual(restored.datasetID, current.datasetID)
+            XCTAssertEqual(restored.items, current.items)
+        }
+
+        var invalidV4 = payload
+        invalidV4["catalogID"] = invalidV4.removeValue(forKey: "datasetID")
+        XCTAssertThrowsError(try CoolSpotsResponse.decode(JSONSerialization.data(withJSONObject: invalidV4)))
+    }
+
+    func testLegacyPublishedRecordsSurviveRenamingAndAreSavedUnderTheCurrentKey() throws {
+        let suite = "published-record-migration-test-\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        var item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first)
+        item.name = "Locally published cooling room"
+        let record = try JSONSerialization.jsonObject(with: JSONEncoder().encode(item))
+        let legacy: [String: Any] = [
+            "confirmations": [:], "drafts": [:], "reports": [],
+            "savedLocations": [], "nearbySpotIDs": [], "publishedCatalogue": [record],
+        ]
+        defaults.set(try JSONSerialization.data(withJSONObject: legacy), forKey: "prototype.reportJourneys.v1")
+
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: defaults)
+        let restored = try XCTUnwrap(store.spot(item.id))
+        XCTAssertEqual(restored.name, item.name)
+        XCTAssertTrue(store.toggleSaved(restored))
+
+        let data = try XCTUnwrap(defaults.data(forKey: "prototype.reportJourneys.v1"))
+        let saved = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let records = try XCTUnwrap(saved["publishedCoolSpotRecords"] as? [[String: Any]])
+        XCTAssertEqual(records.first?["id"] as? String, item.id)
+        XCTAssertNil(saved["publishedCatalogue"])
+        let reopened = PrototypeStore.loadedCoolSpotsStore(reportDefaults: defaults)
+        XCTAssertEqual(reopened.spot(item.id)?.name, item.name)
+        XCTAssertNotNil(reopened.savedLocation(for: restored))
+    }
+
     func testReviewedCommunityContributionPreservesAnswersPhotosAndIdentityAcrossRelaunch() throws {
         let suite = "publication-test-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        var store = PrototypeStore.catalogStore(reportDefaults: defaults)
+        var store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: defaults)
         var draft = PlaceContributionDraft(kind: .unlisted, anchor: .init(latitude: 51.48, longitude: -0.15))
         draft.values.name = "TEST Cooling room"
         draft.values.locationConfirmed = true
@@ -36,13 +86,13 @@ final class CoolSpotTests: XCTestCase {
         let photoID = try XCTUnwrap(store.contributions.first?.photoID)
         defer { try? FileManager.default.removeItem(at: PrototypePhotoStorage.directory.appendingPathComponent(photoID)) }
         XCTAssertEqual(store.spots.count, originalCount, "Pending facts and photos must not become public.")
-        store = PrototypeStore.catalogStore(reportDefaults: defaults)
+        store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: defaults)
         XCTAssertEqual(store.contributions.first?.id, draft.id)
         XCTAssertEqual(store.contributions.first?.status, .inReview)
         XCTAssertNotNil(store.contributions.first?.placeDraft?.values.photo)
         XCTAssertTrue(store.publishContribution(draft.id), store.contributionError ?? "")
         XCTAssertTrue(store.publishContribution(draft.id), "Publishing twice must be idempotent.")
-        store = PrototypeStore.catalogStore(reportDefaults: defaults)
+        store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: defaults)
         let spot = try XCTUnwrap(store.spot(draft.id.uuidString))
         XCTAssertEqual(store.spots.count, originalCount + 1)
         XCTAssertEqual(spot.features, [.fans, .waterFeature, .drinkingWater])
@@ -61,7 +111,7 @@ final class CoolSpotTests: XCTestCase {
         XCTAssertTrue(store.visitReports.isEmpty)
         XCTAssertTrue(store.visitConfirmedAt.isEmpty)
         XCTAssertNil(store.activePresenceSpotID)
-        let item = try XCTUnwrap(spot.catalogueItem)
+        let item = try XCTUnwrap(spot.publishedRecord)
         let data = try JSONEncoder().encode(item)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
         XCTAssertFalse(String(decoding: data, as: UTF8.self).contains("Private review reason"))
@@ -81,9 +131,9 @@ final class CoolSpotTests: XCTestCase {
     }
 
     func testReviewedEditsPatchOnlyChangedGLAFactsAndKeepFieldLevelEvidence() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         let spot = try XCTUnwrap(store.spots.first { $0.name == "Canning Town Library" })
-        let original = try XCTUnwrap(spot.catalogueItem)
+        let original = try XCTUnwrap(spot.publishedRecord)
         var first = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
         first.values.tables = .yes
         var second = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
@@ -92,7 +142,7 @@ final class CoolSpotTests: XCTestCase {
         XCTAssertTrue(store.submitPlaceContribution(second))
         XCTAssertTrue(store.publishContribution(first.id))
         XCTAssertTrue(store.publishContribution(second.id), store.contributionError ?? "")
-        let updated = try XCTUnwrap(store.spot(spot.id)?.catalogueItem)
+        let updated = try XCTUnwrap(store.spot(spot.id)?.publishedRecord)
         XCTAssertEqual(store.spot(spot.id)?.sourceLabel, "GLA · 2025 · Local edits")
         XCTAssertEqual(updated.id, original.id)
         XCTAssertEqual(updated.hours, original.hours)
@@ -108,7 +158,7 @@ final class CoolSpotTests: XCTestCase {
     }
 
     func testConflictingReviewedEditsDoNotSilentlyOverwritePublishedFacts() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         let spot = try XCTUnwrap(store.spots.first)
         var first = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
         var second = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
@@ -126,22 +176,22 @@ final class CoolSpotTests: XCTestCase {
     }
 
     func testUnchangedNegativeWaterFactSurvivesOtherFeatureEdits() throws {
-        var item = try XCTUnwrap(PrototypeCatalog.bundled().items.first)
+        var item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first)
         item.access.drinkingWater = .no
         let spot = item.makeSpot()
-        let store = PrototypeStore(catalogSpots: [spot])
+        let store = PrototypeStore(loadedCoolSpots: [spot])
         var draft = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
         draft.values.features.insert(.waterFeature)
         XCTAssertTrue(store.submitPlaceContribution(draft))
         XCTAssertTrue(store.publishContribution(draft.id))
         XCTAssertEqual(store.spot(spot.id)?.information.drinkingWater, false)
-        XCTAssertEqual(store.spot(spot.id)?.catalogueItem?.access.drinkingWater, .no)
+        XCTAssertEqual(store.spot(spot.id)?.publishedRecord?.access.drinkingWater, .no)
     }
 
     func testAreaDescriptionDoesNotSplitTheSelectedVenueIdentity() throws {
         let place = RecognisedPlace(id: "apple-maps:I7E8561E6022ED614", name: "Example building", address: "Example address",
                                     latitude: 51.48, longitude: -0.15, type: .unknown, distance: "", hasTrustedType: false)
-        let store = PrototypeStore(catalogSpots: [])
+        let store = PrototypeStore(loadedCoolSpots: [])
         var draft = PlaceContributionDraft(kind: .recognised, anchor: place.coordinate, place: place)
         draft.values.setting = .indoors
         draft.values.features = [.fans]
@@ -151,13 +201,13 @@ final class CoolSpotTests: XCTestCase {
         let spot = try XCTUnwrap(store.spot(draft.id.uuidString))
         XCTAssertEqual(spot.applePlaceID, "I7E8561E6022ED614")
         XCTAssertEqual(spot.detailsApplePlaceID, "I7E8561E6022ED614")
-        XCTAssertEqual(spot.catalogueItem?.location.scope, .venue)
+        XCTAssertEqual(spot.publishedRecord?.location.scope, .venue)
         XCTAssertEqual(spot.type, .unknown)
         XCTAssertEqual(store.existingSpot(for: place)?.id, spot.id, "Area text must not cause duplicate search results for the selected venue.")
     }
 
     func testExplicitAreaRelationshipUsesParentDetailsWithoutAliasingItsIdentity() throws {
-        var item = try XCTUnwrap(PrototypeCatalog.bundled().items.first { $0.matchedAppleID != nil })
+        var item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first { $0.matchedAppleID != nil })
         let parentID = try XCTUnwrap(item.matchedAppleID)
         item.location.scope = .specificArea
         item.mapReferences?[0].relationship = "within_place"
@@ -166,23 +216,23 @@ final class CoolSpotTests: XCTestCase {
         XCTAssertEqual(spot.detailsApplePlaceID, parentID)
         let parent = RecognisedPlace(id: "apple-maps:\(parentID)", name: item.name, address: item.address.display,
                                      latitude: item.location.latitude, longitude: item.location.longitude, type: .library, distance: "")
-        XCTAssertNil(PrototypeStore(catalogSpots: [spot]).existingSpot(for: parent))
+        XCTAssertNil(PrototypeStore(loadedCoolSpots: [spot]).existingSpot(for: parent))
     }
 
     func testStayLimitPreservesNoStatedLimitAndCustomDurationWithoutInventingUnknownValues() throws {
         for minutes in [1, 30, 60, 95, 120, 1499] {
-            let value = CatalogStayLimit(status: .limited, minutes: minutes)
-            XCTAssertEqual(try CatalogStayLimit.fromForm(value.formValue), value)
+            let value = CoolSpotStayLimit(status: .limited, minutes: minutes)
+            XCTAssertEqual(try CoolSpotStayLimit.fromForm(value.formValue), value)
         }
-        XCTAssertEqual(try CatalogStayLimit.fromForm("No stated limit").status, .noStatedLimit)
-        XCTAssertEqual(try CatalogStayLimit.fromForm("Not sure"), .unknown)
-        XCTAssertEqual(try CatalogStayLimit.fromForm(""), .unknown)
-        XCTAssertThrowsError(try CatalogStayLimit.fromForm("0 hr 0 min"))
-        XCTAssertThrowsError(try CatalogStayLimit.fromForm("invalid"))
+        XCTAssertEqual(try CoolSpotStayLimit.fromForm("No stated limit").status, .noStatedLimit)
+        XCTAssertEqual(try CoolSpotStayLimit.fromForm("Not sure"), .unknown)
+        XCTAssertEqual(try CoolSpotStayLimit.fromForm(""), .unknown)
+        XCTAssertThrowsError(try CoolSpotStayLimit.fromForm("0 hr 0 min"))
+        XCTAssertThrowsError(try CoolSpotStayLimit.fromForm("invalid"))
     }
 
-    func testLegacyCatalogueAccessAliasesStillReadButEncodeOnlyCurrentNames() throws {
-        let item = try XCTUnwrap(PrototypeCatalog.bundled().items.first)
+    func testLegacyCoolSpotAccessAliasesStillReadButEncodeOnlyCurrentNames() throws {
+        let item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first)
         var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(item)) as? [String: Any])
         var access = try XCTUnwrap(json["access"] as? [String: Any])
         access.removeValue(forKey: "postedStayLimit")
@@ -190,7 +240,7 @@ final class CoolSpotTests: XCTestCase {
         access["postedStayLimitMinutes"] = 60
         access["instructions"] = "Reading room"
         json["access"] = access
-        let decoded = try JSONDecoder().decode(PrototypeCatalog.Item.self, from: JSONSerialization.data(withJSONObject: json))
+        let decoded = try JSONDecoder().decode(CoolSpotsResponse.Item.self, from: JSONSerialization.data(withJSONObject: json))
         let spot = decoded.makeSpot()
         XCTAssertEqual(spot.information.areaDescription, "Reading room")
         XCTAssertEqual(spot.information.postedStayLimit.minutes, 60)
@@ -203,37 +253,37 @@ final class CoolSpotTests: XCTestCase {
     }
 
 
-    func testCatalogueSourceAdaptsCommunityWithoutRequiringGLADatasetMetadata() throws {
-        let source = try JSONDecoder().decode(PrototypeCatalog.CatalogueSource.self,
+    func testSourceMetadataAdaptsCommunityWithoutRequiringGLADatasetMetadata() throws {
+        let source = try JSONDecoder().decode(CoolSpotsResponse.SourceMetadata.self,
             from: Data(#"{"id":"community","provider":"community","label":"Community reports"}"#.utf8))
-        let item = try XCTUnwrap(PrototypeCatalog.bundled().items.first)
-        let community = item.makeSpot(catalogueSource: source)
+        let item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first)
+        let community = item.makeSpot(sourceMetadata: source)
         XCTAssertEqual(community.source, .community)
         XCTAssertEqual(community.sourceLabel, "Community reports")
         XCTAssertNil(community.information.source.url)
-        let future = item.makeSpot(catalogueSource: .init(id: "future", provider: "future_provider", label: "New source", url: nil))
+        let future = item.makeSpot(sourceMetadata: .init(id: "future", provider: "future_provider", label: "New source", url: nil))
         XCTAssertEqual(future.source, .unknown)
         XCTAssertEqual(future.sourceLabel, "New source")
     }
 
-    func testCatalogueKeepsExistingSourceIDsAndOnlyPublishesAcceptedMapLinks() throws {
-        let catalogue = try PrototypeCatalog.bundled()
-        let canning = try XCTUnwrap(catalogue.items.first { $0.name == "Canning Town Library" })
+    func testCoolSpotsKeepsExistingSourceIDsAndOnlyPublishesAcceptedMapLinks() throws {
+        let coolSpotsResponse = try CoolSpotsResponse.bundled()
+        let canning = try XCTUnwrap(coolSpotsResponse.items.first { $0.name == "Canning Town Library" })
         XCTAssertEqual(canning.id, "5873b0cb-25d4-43a8-93a8-d9ced4c8d3ab")
-        let john = try XCTUnwrap(catalogue.items.first { $0.name == "John Harvard Library" })
+        let john = try XCTUnwrap(coolSpotsResponse.items.first { $0.name == "John Harvard Library" })
         XCTAssertEqual(john.id, "244e6c13-f305-4aab-ae17-af70fe562470")
-        XCTAssertTrue(catalogue.items.allSatisfy { $0.photos?.isEmpty == true })
-        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpotCatalog.prototype", withExtension: "json"))
+        XCTAssertTrue(coolSpotsResponse.items.allSatisfy { $0.photos?.isEmpty == true })
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpots.prototype", withExtension: "json"))
         var response = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         var item = try XCTUnwrap((response["items"] as? [[String: Any]])?.first)
         item["mapReferences"] = [["provider": "apple_maps", "placeID": "pending-id", "relationship": "same_place", "verification": "pending"]]
         response["items"] = [item]
-        let decoded = try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response))
+        let decoded = try CoolSpotsResponse.decode(JSONSerialization.data(withJSONObject: response))
         XCTAssertNil(decoded.items.first?.matchedAppleID)
     }
 
     func testPhotosDecodeForExampleWithoutInventingPhotosForImportedPlaces() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         let room = try XCTUnwrap(store.spots.first { $0.name == "Example Community Room" })
         XCTAssertEqual(room.photos.count, 3)
         XCTAssertEqual(Set(room.photos.map(\.id)).count, 3)
@@ -246,17 +296,17 @@ final class CoolSpotTests: XCTestCase {
         }
         XCTAssertTrue(store.spots.filter { !$0.isExample }.allSatisfy { $0.photos.isEmpty })
 
-        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpotCatalog.prototype", withExtension: "json"))
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpots.prototype", withExtension: "json"))
         var response = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         var item = try XCTUnwrap((response["items"] as? [[String: Any]])?.first)
         item["photos"] = try JSONSerialization.jsonObject(with: JSONEncoder().encode(room.photos))
         response["items"] = [item]
-        let decoded = try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response))
+        let decoded = try CoolSpotsResponse.decode(JSONSerialization.data(withJSONObject: response))
         XCTAssertEqual(decoded.items.first?.makeSpot().photos, room.photos)
     }
 
-    func testCatalogMakesAllThreePlaceStatesSearchableAndLinksCommunityIdentity() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+    func testCoolSpotsMakesAllThreePlaceStatesSearchableAndLinksCommunityIdentity() throws {
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         let gla = try XCTUnwrap(store.searchCoolSpots(query: "Canning Town Library", including: []).first)
         let community = try XCTUnwrap(store.searchCoolSpots(query: "Tate Modern", including: []).first)
         let ordinary = try XCTUnwrap(PlaceSearchResults.matching(store.recognisedPlaces, query: "British Museum").first)
@@ -278,7 +328,7 @@ final class CoolSpotTests: XCTestCase {
     }
 
     func testCommunityExamplesKeepPublishedFactsAndVisitorEvidenceSeparateFromPersonalData() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         let examples = store.spots.filter(\.isExample)
         XCTAssertEqual(examples.count, 3)
         for spot in examples {
@@ -306,8 +356,8 @@ final class CoolSpotTests: XCTestCase {
         XCTAssertTrue(store.contributions.isEmpty)
     }
 
-    func testCatalogPresenceChangesOnlyAfterNearbySharingAndExpires() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+    func testCoolSpotsPresenceChangesOnlyAfterNearbySharingAndExpires() throws {
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         var spot = try XCTUnwrap(store.searchCoolSpots(query: "Tate Modern", including: []).first)
         let start = Date(timeIntervalSince1970: 1_000_000)
         XCTAssertEqual(store.presence(for: spot, at: start), 0)
@@ -323,7 +373,7 @@ final class CoolSpotTests: XCTestCase {
     }
 
     func testOptionalFacilitiesDecodeWithoutInventingMissingOrFutureValues() throws {
-        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpotCatalog.prototype", withExtension: "json"))
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpots.prototype", withExtension: "json"))
         var response = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         var items = try XCTUnwrap(response["items"] as? [[String: Any]])
         let sourceAccess = try XCTUnwrap(items[0]["access"] as? [String: Any])
@@ -333,13 +383,13 @@ final class CoolSpotTests: XCTestCase {
             access["staffedWhenOpen"] = value
             items[0]["access"] = access
             response["items"] = items
-            let catalog = try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response))
-            XCTAssertEqual(catalog.items[0].makeSpot().information.staffedWhenOpen, expected)
+            let coolSpotsResponse = try CoolSpotsResponse.decode(JSONSerialization.data(withJSONObject: response))
+            XCTAssertEqual(coolSpotsResponse.items[0].makeSpot().information.staffedWhenOpen, expected)
         }
     }
 
     func testPlaceFactCorrectionsPreserveSourceFactsUntilReview() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         let spot = try XCTUnwrap(store.searchCoolSpots(query: "John Harvard Library", including: []).first)
         var draft = PlaceContributionDraft(kind: .update, anchor: spot.coordinate, spot: spot)
         XCTAssertEqual(draft.values.wheelchairAccess, .yes)
@@ -363,9 +413,9 @@ final class CoolSpotTests: XCTestCase {
         XCTAssertEqual(reconciled.values.toilets, .onSite)
     }
 
-    func testCatalogLoadsAllSourcePlacesWithoutFabricatingVisitorEvidence() throws {
-        let catalog = try PrototypeCatalog.bundled()
-        let store = PrototypeStore(catalogSpots: catalog.items.map { $0.makeSpot() })
+    func testCoolSpotsLoadsAllSourcePlacesWithoutFabricatingVisitorEvidence() throws {
+        let coolSpotsResponse = try CoolSpotsResponse.bundled()
+        let store = PrototypeStore(loadedCoolSpots: coolSpotsResponse.items.map { $0.makeSpot() })
         XCTAssertEqual(store.spots.count, 250)
         XCTAssertEqual(Set(store.spots.map(\.id)).count, 250)
         XCTAssertTrue(store.spots.allSatisfy { !$0.isExample && !$0.features.isEmpty })
@@ -379,9 +429,9 @@ final class CoolSpotTests: XCTestCase {
         XCTAssertFalse(store.spots.contains { $0.id == "library" })
     }
 
-    func testCatalogResolvesAppleAliasesOnceWithoutMergingByProximityOrName() throws {
-        let item = try XCTUnwrap(PrototypeCatalog.bundled().items.first { $0.matchedAppleID != nil })
-        let store = PrototypeStore(catalogSpots: [item.makeSpot()])
+    func testCoolSpotsResolvesAppleAliasesOnceWithoutMergingByProximityOrName() throws {
+        let item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first { $0.matchedAppleID != nil })
+        let store = PrototypeStore(loadedCoolSpots: [item.makeSpot()])
         var apple = RecognisedPlace(id: "apple-maps:different-id", name: "Provider alias", address: "",
                                     latitude: item.location.latitude, longitude: item.location.longitude,
                                     type: .library, distance: "")
@@ -392,17 +442,17 @@ final class CoolSpotTests: XCTestCase {
     }
 
     func testExactPlaceNameRanksBeforeSubstringAndRelatedSearchResults() throws {
-        let store = PrototypeStore.catalogStore(reportDefaults: nil)
+        let store = PrototypeStore.loadedCoolSpotsStore(reportDefaults: nil)
         XCTAssertEqual(store.searchCoolSpots(query: "ham library", including: []).first?.name, "Ham Library")
         XCTAssertEqual(store.searchCoolSpots(query: "  HAM LIBRARY  ", including: []).first?.name, "Ham Library")
     }
 
     func testSearchingContainingVenueFindsCoolingAreaWithoutMergingIdentities() throws {
-        var item = try XCTUnwrap(PrototypeCatalog.bundled().items.first { $0.matchedAppleID != nil })
+        var item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first { $0.matchedAppleID != nil })
         let parentID = try XCTUnwrap(item.matchedAppleID)
         item.name = "Cooling lobby"
         item.mapReferences?[0].relationship = "within_place"
-        let store = PrototypeStore(catalogSpots: [item.makeSpot()])
+        let store = PrototypeStore(loadedCoolSpots: [item.makeSpot()])
         let parent = RecognisedPlace(id: "apple-maps:\(parentID)", name: "Sports centre", address: "",
                                      latitude: item.location.latitude, longitude: item.location.longitude,
                                      type: .leisure, distance: "")
@@ -413,8 +463,8 @@ final class CoolSpotTests: XCTestCase {
     }
 
     func testReviewedDiscoverySampleResolvesCorrectVenueAndRejectsNearbyServices() throws {
-        let catalog = try PrototypeCatalog.bundled()
-        let store = PrototypeStore(catalogSpots: catalog.items.map { $0.makeSpot() })
+        let coolSpotsResponse = try CoolSpotsResponse.bundled()
+        let store = PrototypeStore(loadedCoolSpots: coolSpotsResponse.items.map { $0.makeSpot() })
         let accepted = [("12", "IB58D044B3FE1218C"), ("11", "I36D6141A975EE64F"),
                         ("51", "I12FAFA373E0E5590"), ("710", "IC43F411D709A3A92"),
                         ("713", "I55C92C3205E557D6")]
@@ -423,7 +473,7 @@ final class CoolSpotTests: XCTestCase {
                             latitude: 51.5, longitude: 0, type: .unknown, distance: "")
         }
         for (recordID, appleID) in accepted {
-            let item = try XCTUnwrap(catalog.items.first { $0.sourceReferences?.first?.recordID == recordID })
+            let item = try XCTUnwrap(coolSpotsResponse.items.first { $0.sourceReferences?.first?.recordID == recordID })
             XCTAssertEqual(store.existingSpot(for: place(appleID))?.id, item.id)
             XCTAssertEqual(store.searchCoolSpots(query: "Provider search alias", including: [place(appleID)]).map(\.id), [item.id])
         }
@@ -432,8 +482,8 @@ final class CoolSpotTests: XCTestCase {
         }
     }
 
-    func testCatalogUnknownCodesStayUnknownAndUnsupportedVersionsFail() throws {
-        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpotCatalog.prototype", withExtension: "json"))
+    func testCoolSpotsUnknownCodesStayUnknownAndUnsupportedVersionsFail() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "CoolSpots.prototype", withExtension: "json"))
         var response = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         var items = try XCTUnwrap(response["items"] as? [[String: Any]])
         var access = try XCTUnwrap(items[0]["access"] as? [String: Any])
@@ -441,27 +491,27 @@ final class CoolSpotTests: XCTestCase {
         items[0]["access"] = access
         items[0]["coolingFeatures"] = ["new_cooling_feature"]
         response["items"] = items
-        let catalog = try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response))
-        XCTAssertEqual(catalog.items[0].makeSpot().seating, .unsure)
-        XCTAssertEqual(catalog.items[0].makeSpot().features, [.drinkingWater])
+        let coolSpotsResponse = try CoolSpotsResponse.decode(JSONSerialization.data(withJSONObject: response))
+        XCTAssertEqual(coolSpotsResponse.items[0].makeSpot().seating, .unsure)
+        XCTAssertEqual(coolSpotsResponse.items[0].makeSpot().features, [.drinkingWater])
         response["schemaVersion"] = 999
-        XCTAssertThrowsError(try PrototypeCatalog.decode(JSONSerialization.data(withJSONObject: response)))
+        XCTAssertThrowsError(try CoolSpotsResponse.decode(JSONSerialization.data(withJSONObject: response)))
     }
 
-    func testCatalogPreservesAnExistingAppleBookmarkAndKeepsReportsOnOurIdentity() throws {
-        let suite = "catalog-test-\(UUID())"
+    func testCoolSpotsPreservesAnExistingAppleBookmarkAndKeepsReportsOnOurIdentity() throws {
+        let suite = "cool-spots-test-\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        let item = try XCTUnwrap(PrototypeCatalog.bundled().items.first { $0.matchedAppleID != nil })
+        let item = try XCTUnwrap(CoolSpotsResponse.bundled().items.first { $0.matchedAppleID != nil })
         let apple = RecognisedPlace(id: "apple-maps:\(try XCTUnwrap(item.matchedAppleID))", name: item.name,
                                     address: item.address.display, latitude: item.location.latitude,
                                     longitude: item.location.longitude, type: .library, distance: "")
-        let old = PrototypeStore(reportDefaults: defaults, catalogSpots: [])
+        let old = PrototypeStore(reportDefaults: defaults, loadedCoolSpots: [])
         XCTAssertTrue(old.toggleSaved(apple))
         let saved = try XCTUnwrap(old.savedLocations.first)
         old.updateSaved(saved.id, title: "Private title", note: "Private note")
 
-        let current = PrototypeStore(reportDefaults: defaults, catalogSpots: [item.makeSpot()])
+        let current = PrototypeStore(reportDefaults: defaults, loadedCoolSpots: [item.makeSpot()])
         let spot = try XCTUnwrap(current.spots.first)
         XCTAssertEqual(current.savedLocation(for: spot)?.id, saved.id)
         XCTAssertEqual(current.savedLocation(for: spot)?.note, "Private note")
@@ -469,7 +519,7 @@ final class CoolSpotTests: XCTestCase {
         let nearby = try XCTUnwrap(current.spot(spot.id))
         XCTAssertTrue(current.submitReport(spot: nearby, experience: .muchCooler,
                                            helpedFeatures: [.airConditioning], stay: nil, comment: "Test visit"))
-        let restored = PrototypeStore(reportDefaults: defaults, catalogSpots: [item.makeSpot()])
+        let restored = PrototypeStore(reportDefaults: defaults, loadedCoolSpots: [item.makeSpot()])
         XCTAssertEqual(restored.visitReports.first?.spotID, item.id)
         XCTAssertEqual(restored.experienceReportTotal(for: spot), 1)
         XCTAssertEqual(restored.savedLocations.count, 1)

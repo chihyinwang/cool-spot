@@ -48,13 +48,13 @@ item=obj({
                               'checkedAt':nullable(string(format='date-time'))}))})
 schema={
     '$schema':'https://json-schema.org/draft/2020-12/schema',
-    '$id':'https://coolspot.example/schemas/catalogue-v3.json',
-    'title':'Cool Spot prototype catalogue response v3',
+    '$id':'https://coolspot.example/schemas/cool-spots-response-v4.json',
+    'title':'Cool Spots list response v4',
     'description':'Read representation, not a database schema or write request. Only published photos and accepted same-place map links are returned. Candidate reconciliation lives in a separate audit export. Unknown facts are explicit, and omitted future fields must not break readers.',
-    **obj({'schemaVersion':{'const':3},'catalogID':string(),'generatedAt':string(format='date-time'),
+    **obj({'schemaVersion':{'const':4},'datasetID':string(),'generatedAt':string(format='date-time'),
            'sources':array(obj({'id':string(),'provider':string(),'label':string(),'dataset':string(),'url':nullable(string(format='uri')),
                                 'isExample':{'type':'boolean'},'downloadURL':string(format='uri'),'retrievedAt':nullable(string(format='date-time')),
                                 'sourceUpdatedAt':nullable(string(format='date-time')),'sha256':string(pattern='^[0-9a-f]{64}$')},required=['id','provider','label'])),
            'items':array(ref('coolSpot'))}),
     '$defs':{'coolSpot':item,'photo':photo}}
-(ROOT/'data/catalogue/coolspot-catalogue.schema.json').write_text(json.dumps(schema,indent=2)+'\n')
+(ROOT/'data/cool-spots/cool-spots-response.schema.json').write_text(json.dumps(schema,indent=2)+'\n')
