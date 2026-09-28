@@ -39,7 +39,7 @@ Apple Maps and iOS conventions inform familiar map/navigation behavior; Google M
 | Concept | Meaning |
 |---|---|
 | Location anchor | Reference to a recognised place, a point inside a larger place, or an unmatched coordinate; no cooling claim by itself. |
-| Place / 場所 | A venue or an explicitly identified area with its own stable identity. It can exist without cooling information. The planned places table separates this identity and adopted basic facts from published cooling information; it is not implemented yet. A live search result, private Pin or pending proposal does not automatically create a public database record. |
+| Place / 場所 | A venue or an explicitly identified area with its own stable identity. It can exist without cooling information. The local places table now separates UUID identity, adopted name and location from Cool Spot identity; address and parent relationships remain unimplemented. It is not yet connected to the app. A live search result, private Pin or pending proposal does not automatically create a public database record. |
 | Recognised place | A named map/source place. It becomes a Cool Spot only when reviewed cooling information is published. Sources include live Apple Maps search results and retained prototype fixtures. |
 | Cool Spot | A public location record with published cooling information, either imported from an identified cooling-space source or published after contribution review. It may describe a whole venue or a specific cooling area within one. Normal launches show 250 GLA 2025 records and three labelled examples (Tate Modern and two fictional places). This name does not guarantee current cooling, opening or availability. Ordinary map results, private Pins and pending proposals are not Cool Spots. Older examples remain accessible through existing saved/report records and explicit example mode. |
 | Saved place / private Pin | A private bookmark or coordinate. Neither confirms a visit nor initiates a contribution. `SavedLocation` is the code model for both; the UI separates Places and Pins. |
@@ -186,7 +186,7 @@ The iOS implementation above remains local. On 2026-09-24 the owner created a Su
 
 ## 場所後端設計結論
 
-**2026-09-28：owner 要求保存本輪結論。核心方向是 places 保存地點、cool_spots 保存該地點的已發布降溫資訊，visitor_reports 分開保存多次造訪體驗；另保留來源與欄位來歷。** 一個 Place 可以有 **0 或 1 份 Cool Spot 資訊**，但可以有很多則回報；父子關係屬於 Places。這是設計方向，尚未轉成完整 SQL schema 或第六份 migration。
+**2026-09-28：owner 要求保存本輪結論。核心方向是 places 保存地點、cool_spots 保存該地點的已發布降溫資訊，visitor_reports 分開保存多次造訪體驗；另保留來源與欄位來歷。** 一個 Place 可以有 **0 或 1 份 Cool Spot 資訊**，但可以有很多則回報；父子關係屬於 Places。最小拆分規則已由 owner 確認，下方記錄其範圍；完整 schema 仍未定案；owner 已親手輸入第六份 migration，並授權 agent 在本機套用及驗證最小拆分。
 
 下文將已收斂的責任分工、agent 的具體建議與未決規則分開記錄。尤其「回報改連 Place、普通公開場所可回報、當次精確位置與父頁彙整」是目前建議方案，尚未完成產品規則、資料相容及實作驗證。記錄討論不代表已授權改動 iOS／JSON。產品仍先完成 Cool Spot；獨立廁所搜尋、酒吧賽事搜尋只是可能的未來用途，尚未決定開發。
 
@@ -196,9 +196,15 @@ The iOS implementation above remains local. On 2026-09-24 the owner created a Su
 
 | 資料責任 | 預計保存什麼 | 目前狀態 |
 |---|---|---|
-| places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 尚未建表；基本欄位預計從目前 cool_spots 拆出，父子欄位／限制與遷移待設計 |
-| cool_spots：已發布降溫資訊 | place_id 指向一個 Place；降溫設施、適用區域及使用條件；保留既有 Cool Spot ID | 現有表只有 id/name/location；建議 place_id 必填且唯一，確保一個 Place 最多一份目前的 Cool Spot 資訊，並非最多一則回報 |
+| places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 本機已建 id/name/location；地址、父子關係後續設計，尚未匯入場所資料或接 App |
+| cool_spots：已發布降溫資訊 | place_id 指向一個 Place；降溫設施、適用區域及使用條件；保留既有 Cool Spot ID | 本機現為 id/place_id；place_id 必填、唯一且為外鍵，確保一個 Place 最多一份目前的 Cool Spot 資訊，並非最多一則回報；降溫內容欄位尚待後續 |
 | visitor_reports：一次造訪的體驗 | 回報 ID、place_id、作者、造訪／發布時間、體感與選填答案；到訪／重試識別 | 尚未建表；建議改連 Place。現在 Swift VisitReport 仍以 spotID 連 CoolSpot，沒有作者或回報自己的座標 |
+
+**2026-09-28 最小拆分批次已實作並本機驗證：** owner 同意四項建議，親手輸入 [第六份 migration](supabase/migrations/20260928145903_split_places_from_cool_spots.sql) 並委託套用；新增身分規則見下方「ID 固定」。name/location 搬到 places 後移除 cool_spots 的重複欄位；既有名稱必填、1–300 字元、固定空白集拒絕／非空白原文保留，以及 geography 非空有效點規則全部保留。cool_spots 的舊 text ID 與其文字限制不變。遷移須保留既有 ID、名稱和座標，不按相同名稱／座標合併。places 的主鍵防止重複身分，不用名稱作唯一鍵。
+
+cool_spots.place_id 參照 places.id 且 NOT NULL／UNIQUE；有 Cool Spot 引用時，以 ON DELETE RESTRICT 拒絕刪除 Place。移除 Cool Spot 不連帶刪除 Place。這是本批資料庫關係規則，不是新增公開刪除 API 或完整未來資料生命週期。
+
+places 只保存已接納的公開場所，不放私人 Pin／待審提案。新表啟用 RLS、撤銷 PUBLIC／anon／authenticated 的直接存取；既有 cool_spots_reader 可 SELECT 全部已接納的 Places，包括沒有 Cool Spot 的 Place，但不能新增、修改、刪除或 TRUNCATE。Cool Spot 表的既有權限保持。如何接納新的公開 Place、真正後端登入／連線及 HTTP 免登入讀取仍未實作；批准本批權限不代表任何 Apple 搜尋結果立即可入表或接受回報。
 
 來源與地圖資料另外處理：
 
@@ -273,9 +279,9 @@ Apple 配對表示兩個識別碼之間有已確認的關係，不代表必須�
 
 ### 4. ID 固定，排序另外決定
 
-新場所的建議是由後端透過 PostgreSQL 產生 UUID v4 一次並保存；P1/P2 是教學代號。名稱或座標修改時沿用 ID。現有 Cool Spot ID、來源 ID、Apple ID、datasetID 各有用途，不能互換；新增 places 身分與既有 Cool Spot ID 的映射仍需設計，不能直接換掉既有 ID。
+Owner 已同意新 Place 使用 PostgreSQL 的 gen_random_uuid() 產生 UUID v4 一次並保存；P1/P2 是教學代號。名稱或座標修改時沿用 ID。拆分既有資料時，每筆 Cool Spot 取得獨立的新 Place UUID，由 cool_spots.place_id 永久保存對應，cool_spots.id 保持原值。現有 Cool Spot ID、來源 ID、Apple ID、datasetID 各有用途，不能互換。這不定義未來匯入的重試／重新辨認策略。
 
-目前 cool_spots.id 的 SQL 型別是 text，支援既有字串契約；新增 places.id 採 uuid 是待實作提案，不是已執行的型別變更。[匯入程式](scripts/cool_spots/build_cool_spots.py) 保留 [identity registry](data/cool-spots/identity-registry.json) 的既有 ID，缺少對照時使用固定 GLA 2025 來源輸入產生 UUID v5。新匯入不得重編舊 ID，也不能假定不同年度或來源的紀錄 ID 指同一場所。
+目前 cool_spots.id 的 SQL 型別是 text，支援既有字串契約；新增 places.id 已使用 uuid；既有 Cool Spot ID 的型別沒有改變。[匯入程式](scripts/cool_spots/build_cool_spots.py) 保留 [identity registry](data/cool-spots/identity-registry.json) 的既有 ID，缺少對照時使用固定 GLA 2025 來源輸入產生 UUID v5。新匯入不得重編舊 ID，也不能假定不同年度或來源的紀錄 ID 指同一場所。
 
 UUID 只處理識別碼，不判定兩筆是不是同一間店，也不代替重試防重複。場所辨認、同時新增、身分合併與舊 ID 保留須另設規則；既有 same_place／within_place 與 Apple primary/alternate ID 行為要保留。附近按距離、文字搜尋按匹配規則，Visitor reports 依既有產品規則按造訪時間由新到舊；先回報不代表搜尋排前面或取得場所管理權。
 
@@ -313,10 +319,10 @@ agent 推薦保留核心分工：Place 的身分與基本資料可獨立存在�
 
 一次 API 請求可用一次 SQL 組合多表，也可用少量整批查詢，不等於 App 必須發兩次 HTTP。PostgreSQL 依資料量、索引及條件選擇 JOIN／掃描策略，不必把兩表每一筆互相比對；實際順序由執行計畫決定。[官方 EXPLAIN 說明](https://www.postgresql.org/docs/17/using-explain.html)
 
-建議隨實際查詢設計下列措施，尚未新增到 migrations：
+查詢所需措施分為已完成的關係限制與仍待設計的索引／效能驗證：
 
 - places.location 的 GiST 空間索引，搭配可用索引的 ST_DWithin 半徑篩選；SQL 回傳直線距離排序與有界結果。[PostGIS 說明](https://postgis.net/docs/ST_DWithin.html)
-- cool_spots.place_id 的 NOT NULL／UNIQUE／外鍵；父子及報告查詢評估 parent_place_id 索引，以及以 place_id、visited_at、id 組成的回報索引。UNIQUE／主鍵會建立索引，外鍵的引用欄位不會自動有索引；是否適用跨子點排序仍需看計畫。[PostgreSQL 限制說明](https://www.postgresql.org/docs/17/ddl-constraints.html)
+- cool_spots.place_id 的 NOT NULL／UNIQUE／外鍵已由第六份 migration 實作，UNIQUE 同時建立索引。父子及報告查詢仍需評估 parent_place_id 索引，以及以 place_id、visited_at、id 組成的回報索引。外鍵的引用欄位不會僅因外鍵而自動有索引；是否適用跨子點排序仍需看計畫。[PostgreSQL 限制說明](https://www.postgresql.org/docs/17/ddl-constraints.html)
 - 清單只讀必要資訊；來源／照片整批載入，回報另行分頁。避免每找到一個場所就再送一次查詢（N+1），也避免同時 JOIN 多組一對多資料造成列數倍增。第一個 253 筆 reader 的完整 v4 契約仍保留。
 - 用接近預期資料量的查詢執行 EXPLAIN (ANALYZE, BUFFERS)，再測 API 延遲、傳輸、連線池與並發；之後才按瓶頸決定是否快取或做彙整表。公共場所快取與新回報可見性分開處理。
 
@@ -324,9 +330,9 @@ agent 推薦保留核心分工：Place 的身分與基本資料可獨立存在�
 
 ### 實作邊界與下一步
 
-現有五份 migration 保留，不重寫已套用歷史。最近一次本機驗證為 2026-09-27：儲存 78 項、權限 24 項通過，場所表 0 筆。七個 handler tests 是直接呼叫函式並使用替身，沒有真實資料庫 reader、網路端點、部署或 iOS 後端連線。
+六份 migration 已在本機套用，保留原五份歷史。2026-09-28 第六份套用前，三筆舊格式假資料的搬移演練 11 項通過並 rollback；依 owner 明確委託正式套用後，places 53 項、Cool Spot 身分／關係 51 項、兩表權限 40 項全部通過、無跳過。兩表皆為 0 筆，沒有 seed。七個 handler tests 仍是使用替身直接呼叫函式的歷史證據，沒有真實資料庫 reader、網路端點、部署或 iOS 後端連線。
 
-接下來先把 places／cool_spots 的最小欄位、既有 ID 對應、0／1 關係與座標搬移列成一批可驗證 cases；父子關係若進同批，先定循環／更正／刪除規則，再設計來源、欄位來歷、歷史與各表權限。第五份 migration 的權限只涵蓋現有 cool_spots，不能推論新表全部可公開讀取。回報改連 Place、普通公共 Place 的接納、父子到訪資格和選填位置的分享規則，在回報批次前集中確認；不為文件整理自行建立第六份 migration 或代寫 Green。
+本批完成最小結構、關係、既有資料搬移與兩表權限。父子關係、地址、來源、欄位來歷、歷史與其他表權限不在本批。轉型前座標輸入驗證及完整讀取欄位仍待後續；回報改連 Place、普通公共 Place 的接納、父子到訪資格和選填位置分享規則，在回報批次前集中確認。新的核心 Green 仍由 owner 輸入。
 
 依既有教學方式批次說明 cases，由 agent 寫 tests 並驗證 Red，再提供完整最小 Green 給 owner 輸入。結構與權限定案後，才批次初始化資料、接 reader 並驗證回應；登入與跨帳戶回報接續，場所提案／審核／發布在其後。未來廁所／賽事用途不改變這次的交付範圍，也不授權現在修改 iOS、JSON 格式、部署或操作雲端 SQL。
 

@@ -3,200 +3,210 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(24);
+select plan(40);
 
--- DB-C13: Public places are read through the custom API's dedicated role.
-select ok(
-  exists (select 1 from pg_roles where rolname = 'cool_spots_reader'),
-  'provides a dedicated role for the Cool Spots API reader'
-);
+select ok(exists (select 1 from pg_roles where rolname = 'cool_spots_reader'), 'DB-C13: provides the dedicated backend reader');
 
-select ok(
-  (select relrowsecurity from pg_class where oid = 'public.cool_spots'::regclass),
-  'enables row-level security on published Cool Spots'
-);
+select ok(coalesce((select relrowsecurity from pg_class where oid = to_regclass('public.cool_spots')), false), 'enables RLS on Cool Spots');
 
--- DB-C14: Valid fixtures ensure permission checks are not constraint failures.
-insert into public.cool_spots (id, name, location) values
-  ('db-permissions-anon-update', 'Original Place', 'SRID=4326;POINT(0 51)'),
-  ('db-permissions-anon-delete', 'Another Place', 'SRID=4326;POINT(1 52)');
+select ok(coalesce((select relrowsecurity from pg_class where oid = to_regclass('public.places')), false), 'DB-C20: enables RLS on public Places');
 
+select to_regclass('public.places') is not null and exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'cool_spots' and column_name = 'place_id') and exists (select 1 from pg_roles where rolname = 'cool_spots_reader') as schema_ready \gset
+\if :schema_ready
+
+-- Valid rows ensure permission failures are not missing-parent failures.
+insert into public.places (id, name, location) values
+  ('00000000-0000-4000-8000-000000000301', 'Published Cooling Place', 'SRID=4326;POINT(-0.125 51.5)'),
+  ('00000000-0000-4000-8000-000000000302', 'Public Place Without Cooling', 'SRID=4326;POINT(1 52)'),
+  ('00000000-0000-4000-8000-000000000303', 'Available Link Target', 'SRID=4326;POINT(2 53)');
+insert into public.cool_spots (id, place_id) values ('db-permissions-cooling', '00000000-0000-4000-8000-000000000301');
+
+-- DB-C14 / DB-C20: Execute as the actual client role.
 set local role anon;
 
-select is(current_user::text, 'anon', 'executes client checks as anon');
+select is(current_user::text, 'anon', 'executes checks as anon');
 
 select throws_ok(
-  $$select id, name from public.cool_spots;$$,
-  '42501', null, 'anon cannot directly read published places'
+  $$ select id, name from public.places; $$,
+  '42501', null, 'anon cannot directly read places'
 );
 
 select throws_ok(
-  $$
-    insert into public.cool_spots (id, name, location)
-    values ('db-permissions-anon-insert', 'New Place', 'SRID=4326;POINT(2 53)');
-  $$,
-  '42501', null, 'anon cannot insert published places'
+  $$ insert into public.places (name, location) values ('Unauthorized Place', 'SRID=4326;POINT(0 51)'); $$,
+  '42501', null, 'anon cannot directly insert places'
 );
 
 select throws_ok(
-  $$
-    update public.cool_spots set name = 'Changed Place'
-    where id = 'db-permissions-anon-update';
-  $$,
-  '42501', null, 'anon cannot update published places'
+  $$ update public.places set name = 'Unauthorized Change' where id = '00000000-0000-4000-8000-000000000301'; $$,
+  '42501', null, 'anon cannot directly update places'
 );
 
 select throws_ok(
-  $$delete from public.cool_spots where id = 'db-permissions-anon-delete';$$,
-  '42501', null, 'anon cannot delete published places'
+  $$ delete from public.places where id = '00000000-0000-4000-8000-000000000302'; $$,
+  '42501', null, 'anon cannot directly delete places'
 );
 
 select throws_ok(
-  $$truncate table public.cool_spots;$$,
-  '42501', null, 'anon cannot truncate published places'
+  $$ truncate table public.places; $$,
+  '42501', null, 'anon cannot directly truncate places'
+);
+
+select throws_ok(
+  $$ select id, place_id from public.cool_spots; $$,
+  '42501', null, 'anon cannot directly read cool_spots'
+);
+
+select throws_ok(
+  $$ insert into public.cool_spots (id, place_id) values ('db-permissions-new', '00000000-0000-4000-8000-000000000303'); $$,
+  '42501', null, 'anon cannot directly insert cool_spots'
+);
+
+select throws_ok(
+  $$ update public.cool_spots set place_id = '00000000-0000-4000-8000-000000000303' where id = 'db-permissions-cooling'; $$,
+  '42501', null, 'anon cannot directly update cool_spots'
+);
+
+select throws_ok(
+  $$ delete from public.cool_spots where id = 'db-permissions-cooling'; $$,
+  '42501', null, 'anon cannot directly delete cool_spots'
+);
+
+select throws_ok(
+  $$ truncate table public.cool_spots; $$,
+  '42501', null, 'anon cannot directly truncate cool_spots'
 );
 
 reset role;
 
--- DB-C14: Valid fixtures ensure permission checks are not constraint failures.
-insert into public.cool_spots (id, name, location) values
-  ('db-permissions-authenticated-update', 'Original Place', 'SRID=4326;POINT(0 51)'),
-  ('db-permissions-authenticated-delete', 'Another Place', 'SRID=4326;POINT(1 52)');
-
+-- DB-C14 / DB-C20: Execute as the actual client role.
 set local role authenticated;
 
-select is(current_user::text, 'authenticated', 'executes client checks as authenticated');
+select is(current_user::text, 'authenticated', 'executes checks as authenticated');
 
 select throws_ok(
-  $$select id, name from public.cool_spots;$$,
-  '42501', null, 'authenticated cannot directly read published places'
+  $$ select id, name from public.places; $$,
+  '42501', null, 'authenticated cannot directly read places'
 );
 
 select throws_ok(
-  $$
-    insert into public.cool_spots (id, name, location)
-    values ('db-permissions-authenticated-insert', 'New Place', 'SRID=4326;POINT(2 53)');
-  $$,
-  '42501', null, 'authenticated cannot insert published places'
+  $$ insert into public.places (name, location) values ('Unauthorized Place', 'SRID=4326;POINT(0 51)'); $$,
+  '42501', null, 'authenticated cannot directly insert places'
 );
 
 select throws_ok(
-  $$
-    update public.cool_spots set name = 'Changed Place'
-    where id = 'db-permissions-authenticated-update';
-  $$,
-  '42501', null, 'authenticated cannot update published places'
+  $$ update public.places set name = 'Unauthorized Change' where id = '00000000-0000-4000-8000-000000000301'; $$,
+  '42501', null, 'authenticated cannot directly update places'
 );
 
 select throws_ok(
-  $$delete from public.cool_spots where id = 'db-permissions-authenticated-delete';$$,
-  '42501', null, 'authenticated cannot delete published places'
+  $$ delete from public.places where id = '00000000-0000-4000-8000-000000000302'; $$,
+  '42501', null, 'authenticated cannot directly delete places'
 );
 
 select throws_ok(
-  $$truncate table public.cool_spots;$$,
-  '42501', null, 'authenticated cannot truncate published places'
+  $$ truncate table public.places; $$,
+  '42501', null, 'authenticated cannot directly truncate places'
+);
+
+select throws_ok(
+  $$ select id, place_id from public.cool_spots; $$,
+  '42501', null, 'authenticated cannot directly read cool_spots'
+);
+
+select throws_ok(
+  $$ insert into public.cool_spots (id, place_id) values ('db-permissions-new', '00000000-0000-4000-8000-000000000303'); $$,
+  '42501', null, 'authenticated cannot directly insert cool_spots'
+);
+
+select throws_ok(
+  $$ update public.cool_spots set place_id = '00000000-0000-4000-8000-000000000303' where id = 'db-permissions-cooling'; $$,
+  '42501', null, 'authenticated cannot directly update cool_spots'
+);
+
+select throws_ok(
+  $$ delete from public.cool_spots where id = 'db-permissions-cooling'; $$,
+  '42501', null, 'authenticated cannot directly delete cool_spots'
+);
+
+select throws_ok(
+  $$ truncate table public.cool_spots; $$,
+  '42501', null, 'authenticated cannot directly truncate cool_spots'
 );
 
 reset role;
 
--- DB-C15: Missing role is reported above; do not misreport skipped behavior as tested.
-select exists (
-  select 1 from pg_roles where rolname = 'cool_spots_reader'
-) as reader_exists \gset
+select ok((select not rolcanlogin and not rolsuper and not rolbypassrls and not rolcreatedb and not rolcreaterole and not rolreplication from pg_roles where rolname = 'cool_spots_reader'), 'DB-C15: reader has no login or administrative privileges');
 
-\if :reader_exists
-select ok(
-  (
-    select not rolcanlogin and not rolsuper and not rolbypassrls
-      and not rolcreatedb and not rolcreaterole and not rolreplication
-    from pg_roles where rolname = 'cool_spots_reader'
-  ),
-  'reader is a non-login permission role without administrative privileges'
-);
-
--- Test harness only: allow pgTAP calls, without granting access to place data.
+-- Test harness access only. Neither grant gives the reader domain-table access.
+-- Both grants are rolled back, including the test session's SET ROLE membership.
 grant usage on schema extensions to cool_spots_reader;
-
--- Supabase's postgres role can administer reader membership but cannot SET ROLE by default.
--- Temporarily allow the test session to switch identity; ROLLBACK restores membership.
 grant cool_spots_reader to current_user with inherit false, set true;
-
-insert into public.cool_spots (id, name, location) values
-  ('db-permissions-reader-a', 'First Reader Place', 'SRID=4326;POINT(-0.125 51.5)'),
-  ('db-permissions-reader-b', 'Second Reader Place', 'SRID=4326;POINT(1 52)');
-
 set local role cool_spots_reader;
 
-select is(
-  current_user::text, 'cool_spots_reader',
-  'executes API database checks as the dedicated reader'
+select is(current_user::text, 'cool_spots_reader', 'executes reads as the dedicated backend role');
+
+select results_eq(
+  $$ select id, name, gis.st_x(location::gis.geometry), gis.st_y(location::gis.geometry) from public.places where id in ('00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000000302') order by id; $$,
+  $$ values ('00000000-0000-4000-8000-000000000301'::uuid, 'Published Cooling Place'::text, -0.125::double precision, 51.5::double precision), ('00000000-0000-4000-8000-000000000302'::uuid, 'Public Place Without Cooling'::text, 1::double precision, 52::double precision); $$,
+  'reader sees accepted public Places with and without cooling information'
 );
 
 select results_eq(
-  $$
-    select id, name,
-      gis.st_x(location::gis.geometry),
-      gis.st_y(location::gis.geometry)
-    from public.cool_spots
-    where id in ('db-permissions-reader-a', 'db-permissions-reader-b')
-    order by id;
-  $$,
-  $$
-    values
-      ('db-permissions-reader-a'::text, 'First Reader Place'::text,
-        -0.125::double precision, 51.5::double precision),
-      ('db-permissions-reader-b'::text, 'Second Reader Place'::text,
-        1::double precision, 52::double precision);
-  $$,
-  'reader can retrieve published identities, names and coordinates'
+  $$ select c.id, p.name, gis.st_x(p.location::gis.geometry), gis.st_y(p.location::gis.geometry) from public.cool_spots c join public.places p on p.id = c.place_id where c.id = 'db-permissions-cooling'; $$,
+  $$ values ('db-permissions-cooling'::text, 'Published Cooling Place'::text, -0.125::double precision, 51.5::double precision); $$,
+  'reader joins published cooling information to the adopted Place facts'
 );
 
 select throws_ok(
-  $$
-    insert into public.cool_spots (id, name, location)
-    values ('db-permissions-reader-insert', 'New Place', 'SRID=4326;POINT(2 53)');
-  $$,
-  '42501', null, 'reader cannot insert published places'
+  $$ insert into public.places (name, location) values ('Unauthorized Place', 'SRID=4326;POINT(0 51)'); $$,
+  '42501', null, 'reader cannot insert places'
 );
 
 select throws_ok(
-  $$
-    update public.cool_spots set name = 'Changed Place'
-    where id = 'db-permissions-reader-a';
-  $$,
-  '42501', null, 'reader cannot update published places'
+  $$ update public.places set name = 'Unauthorized Change' where id = '00000000-0000-4000-8000-000000000301'; $$,
+  '42501', null, 'reader cannot update places'
 );
 
 select throws_ok(
-  $$delete from public.cool_spots where id = 'db-permissions-reader-b';$$,
-  '42501', null, 'reader cannot delete published places'
+  $$ delete from public.places where id = '00000000-0000-4000-8000-000000000302'; $$,
+  '42501', null, 'reader cannot delete places'
 );
 
 select throws_ok(
-  $$truncate table public.cool_spots;$$,
-  '42501', null, 'reader cannot truncate published places'
+  $$ truncate table public.places; $$,
+  '42501', null, 'reader cannot truncate places'
+);
+
+select throws_ok(
+  $$ insert into public.cool_spots (id, place_id) values ('db-permissions-new', '00000000-0000-4000-8000-000000000303'); $$,
+  '42501', null, 'reader cannot insert cool_spots'
+);
+
+select throws_ok(
+  $$ update public.cool_spots set place_id = '00000000-0000-4000-8000-000000000303' where id = 'db-permissions-cooling'; $$,
+  '42501', null, 'reader cannot update cool_spots'
+);
+
+select throws_ok(
+  $$ delete from public.cool_spots where id = 'db-permissions-cooling'; $$,
+  '42501', null, 'reader cannot delete cool_spots'
+);
+
+select throws_ok(
+  $$ truncate table public.cool_spots; $$,
+  '42501', null, 'reader cannot truncate cool_spots'
 );
 
 reset role;
 
--- Check named role membership: the test session itself belongs to the administrator.
-select ok(
-  not pg_has_role('anon', 'cool_spots_reader', 'MEMBER'),
-  'anonymous clients cannot inherit or assume the reader role'
-);
+select ok(not pg_has_role('anon', 'cool_spots_reader', 'MEMBER'), 'anon cannot inherit or assume the reader role');
 
-select ok(
-  not pg_has_role('authenticated', 'cool_spots_reader', 'MEMBER'),
-  'signed-in clients cannot inherit or assume the reader role'
-);
+select ok(not pg_has_role('authenticated', 'cool_spots_reader', 'MEMBER'), 'authenticated cannot inherit or assume the reader role');
 
-select ok(
-  not pg_has_role('authenticator', 'cool_spots_reader', 'MEMBER'),
-  'the Data API authenticator cannot assume the reader role'
-);
+select ok(not pg_has_role('authenticator', 'cool_spots_reader', 'MEMBER'), 'authenticator cannot inherit or assume the reader role');
+
 \else
-select skip('reader behavior requires the missing cool_spots_reader role', 10);
+select skip('behavior requires the missing places/cool_spots structure', 37);
 \endif
 
 select * from finish();

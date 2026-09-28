@@ -4,17 +4,56 @@
 
 ## 本輪狀態與起點
 
+**2026-09-28 後端教學接手核對：** 在 prototype 的 `Prototyping` 確認 HEAD 為 `8a0bae0`，訊息 `Add local Cool Spot database foundation and design notes`；讀取前 working tree clean，相對本機記錄的 origin/Prototyping 領先兩個 commits，未 fetch／push。完整讀取三份 active documents 與 owner 指定的 i-have-adhd／essential-tdd，沿用批次說明、agent 寫 tests／驗證 Red、owner 輸入核心 Green 的覆寫。
+
+Docker 查核只有 `supabase_db_cool-spot-prototype` 運行且 healthy。以 READ ONLY transaction 查得五份 migration history、cool_spots 的 id text／name text／location geography(Point,4326) 三欄皆 NOT NULL、既有主鍵與五個 CHECK、RLS 與 reader SELECT policy／grant；reader 仍為 NOLOGIN、非 superuser、無 BYPASSRLS。cool_spots 為 0 筆，places 不存在。這是本次唯讀狀態證據，沒有重跑歷史 78＋24 或七個 handler tests，也沒有啟動其他服務、套用 migration 或重設資料庫。
+
+接手時程式與 fixture 核對：當時只有五份 migrations，handler 仍使用注入的 load，沒有真實 reader／HTTP 入口；Canning Town Library 的既有 ID、GLA 18、Apple 配對與座標均保留。其後 owner 回覆「1–4 都同意」，最小拆分規則已記入 PRODUCT，下節記錄本批 tests 與 Red。沒有修改 Swift、TypeScript、JSON 或 ViewCoolSpots。
+
+**2026-09-28 Places 拆分批次：owner Green 已儲存，agent 依明確委託在本機套用，驗證通過。** 承接原 DB-C01–C15，依新資料責任調整兩份既有 tests，新增 [places.test.sql](supabase/tests/database/places.test.sql) 與 [migration rehearsal](supabase/tests/migrations/split_places_from_cool_spots.test.sql)。原名稱／座標限制搬到 places 的測試；舊 Cool Spot text ID／原文保存／JOIN 讀回留在 cool_spots；權限測試改用兩表的有效 fixture。既有 C01–C15 的下方 Green 紀錄保留為舊 schema 證據；新版 tests 的通過結果如下。
+
+| Case | 本批可觀察行為 | 本次證據 |
+|---|---|---|
+| DB-C16 | Place 獨立存在；預設產生不同 UUID v4；拒絕重複／無效／NULL ID，名稱或位置更改不換 ID；名稱與位置沿用原限制 | Green：places suite 53 項全部通過、無跳過；Red 曾為 2 結構失敗／51 跳過 |
+| DB-C17 | 舊 Cool Spot ID 經 JOIN 讀回；place_id 必填、唯一且指向存在的 Place，INSERT／UPDATE 均限制；名稱／位置只有 places 一份 | Green：cool_spots suite（含 C18 及舊 ID 回歸）51 項全部通過、無跳過；Red 曾為 4 結構失敗／47 跳過 |
+| DB-C18 | 有 Cool Spot 引用時拒絕刪 Place；刪 Cool Spot 保留 Place；修改 Place 事實時兩種 ID 不變 | Green：實際 FK 拒絕刪除、移除 Cool Spot 後 Place 保留及兩種 ID 不變均通過；不回溯宣稱曾有行為 Red |
+| DB-C19 | 真正 migration 搬移三筆假資料，保留 UUID 形狀／legacy／帶空白的 Cool Spot ID、名稱、座標和筆數；同名同座標不合併 | Green：永久套用前執行實際 owner SQL，11 項全部通過並 rollback；Red 曾為 2 通過／4 結構失敗／5 跳過 |
+| DB-C20 | places 啟用 RLS；anon／authenticated 不能直接存取兩表；reader 可讀有／無 Cool Spot 的 Place 與 JOIN，但不能寫入／清空 | Green：permissions suite 40 項全部通過、無跳過；Red 曾為 2 通過／1 結構失敗／37 跳過 |
+
+第一輪測試有兩個 harness 問題：places 的 schema_ready 別名放錯位置而中斷；Supabase pgTAP runner 只複製測試檔，無法以相對 include 讀取 migration。這些不算產品 Red。Agent 修正 SQL 別名，新增 [test_place_migration.py](scripts/test_place_migration.py) 作為測試執行器：讀取實際 migration（不複製實作），內嵌到既有 BEGIN／ROLLBACK suite，透過指定 Docker database 的 psql 輸出 TAP，由本機 prove 判讀。沒有增加 production SQL 或安裝工具。
+
+修正後執行：
+
+```sh
+SUPABASE_TELEMETRY_DISABLED=1 supabase test db --local --workdir . supabase/tests/database/places.test.sql supabase/tests/database/cool_spots.test.sql supabase/tests/database/cool_spots_permissions.test.sql
+prove --exec python3 scripts/test_place_migration.py
+```
+
+日常 schema tests 共 144 項：2 passed／7 failed／135 skipped，exit 1；migration rehearsal 共 11 項：2 passed／4 failed／5 skipped，exit 1。合計 **4 passed／11 結構失敗／140 skipped**；修正後沒有語法或執行器錯誤，不把缺少 schema 的跳過項目記為已驗證行為。原 78＋24 項沒有另為接手重跑；此次是因 schema 職責改變而執行更新的 tests。
+
+[20260928145903_split_places_from_cool_spots.sql](supabase/migrations/20260928145903_split_places_from_cool_spots.sql) 在 Red 階段由 CLI 建立，當時為 **0 bytes** 且未套用。該次測試後唯讀確認 history 仍為原五份、places 不存在、cool_spots 0 筆、pgTAP 未保留；postgres 對 reader 的 INHERIT／SET 與 reader 的測試 extensions USAGE 均為 false。假資料與暫時設定已 rollback。未重設資料庫、啟動 API/Auth/Studio、執行雲端 SQL、改 iOS／JSON、部署、commit 或 push。
+
+**本批 Green：** owner 儲存 SQL 後明確要求「你幫我 apply」。Agent 讀取實際檔案，確認完整最小拆分、資料搬移與權限內容，不代改 SQL。先執行 `prove --verbose --exec python3 scripts/test_place_migration.py`：**11 passed／0 failed，無跳過，exit 0**。唯讀核對演練後 history 仍五份、places 不存在、cool_spots 0 筆，確認 rollback。再在 prototype 執行 `SUPABASE_TELEMETRY_DISABLED=1 supabase migration up --local --workdir .`，exit 0，僅套用 `20260928145903_split_places_from_cool_spots.sql`。
+
+套用後執行上述三份 database tests：**144 passed／0 failed，無跳過，exit 0**，分別為 places 53、cool_spots 51、permissions 40。四次 Invalid Coordinate NOTICE 對應刻意輸入 NaN 的案例，不是測試失敗。SQL／assertions 無需修正，無需 refactor；没有重跑未受影響的 API／Python／Swift tests。
+
+最後唯讀核對：history 六份；places 為 id uuid（default gen_random_uuid()）／name text／location geography(Point,4326)，cool_spots 為 id text／place_id uuid，皆 NOT NULL；主鍵／CHECK／UNIQUE／FK 均 validated=true，FK 為 ON DELETE RESTRICT。兩表 RLS=true，各有 reader SELECT policy；PUBLIC／anon／authenticated 無兩表 grants，reader 僅 SELECT。兩表皆 **0 筆**，pgTAP 未保留，postgres 對 reader 的測試 INHERIT／SET 與 reader 的 extensions USAGE 均 false。未改 owner SQL、重設資料庫、操作雲端、啟動 API/Auth/Studio、改 iOS／JSON、部署、commit 或 push。
+
+**本批收尾：** owner 已在本機 psql 用 `\d public.cool_spots`／`\d public.places` 查看兩表，並要求先檢查隱私再提交一個 local commit。pre-application rehearsal 只適用舊 schema，永久套用後不重跑，也不重設資料庫製造舊狀態；後續驗證使用 database 下三份 tests。地址、來源／seed／reader／API-C05 與轉型前座標檢查仍待後續批次。
+
+**Places 拆分提交準備：** owner 授權以 `Separate Places from Cool Spot records` 提交一個 local commit，parent 為 `8a0bae0`。範圍共九個檔案：三份 active documents、第六份 migration、三份日常 database tests、migration rehearsal 與 Python runner。檢查這九份文字檔，未發現私鑰、憑證／密碼／token 或具名個人 home 路徑；這是本批內容檢查，不是完整安全稽核。另核對 Git 作者／提交者 email，owner 明確接受沿用現有設定；不把實際地址寫入文件，不修改 Git 身分設定或重寫歷史。SQL／tests 未變，沿用上述 144＋11 項實際 Green；未為 commit 重跑，未 push。
+
 **2026-09-28 提交 checkpoint：** owner 要求先整理安全檢查提出的本機路徑與排除規則，再 commit。本批訊息為 `Add local Cool Spot database foundation and design notes`，parent 為 `4ad70e3`；範圍是五份既有 migration、兩份 database tests、Supabase 設定／排除檔、三份 active documents 與 root .gitignore。移除 active documents 中具名 home／本機暫存目錄路徑，補排除私鑰、簽署憑證、資料庫檔與壓縮備份；SQL migrations／tests 與 .env.example 仍可追蹤。沿用 2026-09-27 的 78＋24 項 Green，SQL／API／Swift 未變，不為提交重跑。未 push、部署、操作 Docker／雲端或重寫 Git 歷史；舊快照中的路徑不屬於這次 active-document 清理。
 
 本輪提交前的檢查涵蓋原 12 個待提交檔、Git index、目前追蹤內容及 HEAD 可追溯的 17 個 commits，未確認到真實憑證外洩；這不是完整執行期安全審計，也未逐張檢查歷史截圖／影片。檢查紀錄保存在 repository 外。以下歷史指令的專案絕對路徑改寫為 `.`，表示在 `cool-spot-prototype` 根目錄執行；不代表另一次執行或新測試結果。
 
-**2026-09-28：owner 要求更新整輪討論結論；完整設計集中在 [PRODUCT：場所後端設計結論](PRODUCT.md#場所後端設計結論)。** 核心方向是 places 保存地點、各地點可有 0／1 份目前的 Cool Spot 資訊、多則回報另存，父子關係只屬於 Places。來源／欄位來歷／地圖身分仍分開保留。下一步是定 places／cool_spots 的最小欄位與既有 ID 對應，再整理 TDD cases；尚未建立第六份 migration 或下一批 tests。
+**2026-09-28：owner 要求更新整輪討論結論；完整設計集中在 [PRODUCT：場所後端設計結論](PRODUCT.md#場所後端設計結論)。** 核心方向是 places 保存地點、各地點可有 0／1 份目前的 Cool Spot 資訊、多則回報另存，父子關係只屬於 Places。來源／欄位來歷／地圖身分仍分開保留。當時的下一步是確認最小拆分；owner 隨後已同意，現行進度為本文件開頭的 DB-C16–C20 本機 Green，六份 migration 已套用。
 
 目前回報／旅程建議見 [PRODUCT：園內點位與地圖收合](PRODUCT.md#園內點位與地圖收合)：回報歸屬一個 Place，公園頁可彙整本身與子點回報、保留原歸屬；不強迫先選子 Cool Spot。普通公共 Place 的回報資格、選填公開座標、私人 Pin 入口、父子到訪資格及相容遷移仍需確認，不當成已完成或已批准的 UI。Owner 暫定同意地圖先收合細部點位；園內點數與 Cooling here 人數分開，22 個點只是示例。程式查核確認 VisitReport 仍連 spotID、沒有作者／自己的座標；handler tests 使用替身 reader，真實 reader 未實作；within_place 不等於一般父子表。原 A–E click paths 與 dated Green 證據保留，不改成未實作的流程。
 
 JOIN／附近查詢評估已記入 PRODUCT：核心拆表合理，但空間索引、配對唯一性、回報分頁、避免 N+1 與多組一對多 JOIN、查詢計畫及並發測量仍待實作。此次只讀 Mac 專案檔案、參照 PostgreSQL／PostGIS 官方資料並更新三份文件；沒有新的 SQL／效能／API 測試或原生互動證據。SQL／API／iOS／JSON 沒有變更，未操作 Docker 或雲端、未部署、commit 或 push。替換過時的建表／回報提案，保留以下 migration、測試及來源查核的實際證據。
 
-最近的本機驗證仍為 2026-09-27：五份 owner-written migration 已套用，資料限制 DB-C01–C12 共 78 項、權限 DB-C13–C15 共 24 項均 Green。權限測試的 SET ROLE 前置設定已修正，owner SQL 未改。這批教學於 2026-09-26 起點為 `Prototyping`／`4ad70e3`，當時 working tree clean；2026-09-28 重新核對 HEAD 未變，三份 active documents 已修改，Supabase 設定／migrations／tests 尚未追蹤，比已記錄的 `origin/Prototyping` 多一個 commit，未 fetch 或 push。Owner 要求先教基本概念，已討論 App／API／資料庫分工、表／列／欄、主鍵／外鍵、一對多、SELECT／WHERE／JOIN，以及型別／NULL／限制。對話中的 P1／P2、R1–R3 與訪客留言只是教學假資料，沒有寫入正式資料或代表回報 API 已定案。Canning Town Library 的內部 UUID 在初始 prototype 已存在並由 identity registry 保留；GLA 的 `18` 來自原始 `cs_indoor_site_id`，不是 objectid 或本機列號。
+接手前的本機驗證為 2026-09-27：當時五份 owner-written migration 已套用，資料限制 DB-C01–C12 共 78 項、權限 DB-C13–C15 共 24 項均 Green。權限測試的 SET ROLE 前置設定已修正，owner SQL 未改。這批教學於 2026-09-26 起點為 `Prototyping`／`4ad70e3`，當時 working tree clean；2026-09-28 重新核對 HEAD 未變，三份 active documents 已修改，Supabase 設定／migrations／tests 尚未追蹤，比已記錄的 `origin/Prototyping` 多一個 commit，未 fetch 或 push。Owner 要求先教基本概念，已討論 App／API／資料庫分工、表／列／欄、主鍵／外鍵、一對多、SELECT／WHERE／JOIN，以及型別／NULL／限制。對話中的 P1／P2、R1–R3 與訪客留言只是教學假資料，沒有寫入正式資料或代表回報 API 已定案。Canning Town Library 的內部 UUID 在初始 prototype 已存在並由 identity registry 保留；GLA 的 `18` 來自原始 `cs_indoor_site_id`，不是 objectid 或本機列號。
 
 Owner 確認附近／範圍搜尋是確定需求，並接受第一版資料庫採 PostGIS 的方向，具體邊界見 PRODUCT。先前分開 latitude／longitude 的型別示例不是已批准的儲存實作；places／cool_spots 的完整欄位、來源／身分關係、constraints、seed 與 reader 仍需逐批設計。「場所＋降溫資訊＋來源」是三類責任，不是已定案的三張 SQL 表。沿用由 agent 批次寫 tests／驗證 Red、owner 輸入核心 SQL／TypeScript Green 的方式；不逐小測試要求「懂了嗎」。已解釋 migration（記錄資料庫結構變更的 SQL 檔）與 seed（初始資料）的區別，以及 CLI／容器／psql／PostgreSQL 的連線路徑。Owner 回報已完成本機 psql 與 SELECT current_database(), current_user 的練習；此回報不代表 App 已連線。Owner 要求操作前說明目的與影響，操作後解釋結果，維持可理解的邏輯脈絡。
 
@@ -98,7 +137,7 @@ Red 後唯讀確認 cool_spots 為 **0 筆**、history 仍為原四個版本，r
 
 來源與 Apple mapping 設計查核（2026-09-27）：owner 已同意來源另建表，但尚未同意其完整欄位、關聯／原始紀錄／Apple 表或第六份 SQL。Owner 接著要求看完整 GLA 原始紀錄，再要求釐清轉換涵蓋範圍、Cool Spot 結構、建表取捨與搜尋重複問題。Agent 使用 domain-modeling 的概念區分方法，沿用現有三份文件，沒有新增 CONTEXT／ADR 或平行進度檔。以下是 source inspection，沒有重跑 tests、匯入資料或操作資料庫。
 
-現況共有三層：GLA Feature 是外部原始格式；[CoolSpotsResponse.Item](cool-spot/CoolSpotsResponse.swift) 是 v4 場所讀取格式；Swift CoolSpot 加入畫面／本機 journey 所需值。SQL 的 public.cool_spots 目前仍只有 id/name/location。不能將 Swift 的 distance、presenceCount、isNearby 或報告彙整當成 GLA 場所欄位照抄入資料庫。
+現況共有三層：GLA Feature 是外部原始格式；[CoolSpotsResponse.Item](cool-spot/CoolSpotsResponse.swift) 是 v4 場所讀取格式；Swift CoolSpot 加入畫面／本機 journey 所需值。當次查核的 SQL public.cool_spots 只有 id/name/location；2026-09-28 拆分後的結構見本文件開頭。不能將 Swift 的 distance、presenceCount、isNearby 或報告彙整當成 GLA 場所欄位照抄入資料庫。
 
 查閱 [adapter](scripts/cool_spots/build_cool_spots.py)、[原始 GeoJSON](data/cool-spots/gla-cool-spaces-2025.geojson)、[v4 fixture](cool-spot/Resources/CoolSpots.prototype.json) 與 schema，並唯讀掃描 250 筆 properties：全部具有相同的 26 個原始欄位，其中 15 個映射到 v4（包含 sourceReferences 的紀錄 ID），11 個沒有獨立 v4 欄位。geometry 另映射為經緯度。下表涵蓋全部 26 個 properties 及 geometry：
 
@@ -132,7 +171,7 @@ Canning Town 的現行資料串接：Cool Spot id 5873b0cb-25d4-43a8-93a8-d9ced4
 以上保留的是現有資料轉換與搜尋身分的查核證據。後續資料庫分工及未決項目統一見 [PRODUCT：場所後端設計結論](PRODUCT.md#場所後端設計結論)；不在走查文件另外維護一套表格設計。
 
 
-目前變更為三份 active documents、兩個 CLI 設定／排除檔、兩份 database tests，以及 owner 輸入並套用的五份 migration。API／Python／Swift tests 未因這次資料庫批次而重跑。沒有 seed／iOS／JSON 改動，沒有 Supabase login/link、操作雲端 SQL、部署、commit、push 或修改 ViewCoolSpots。API-C05 真實 reader／回應整合仍待實作。
+2026-09-27 資料庫批次結束時，變更為三份 active documents、兩個 CLI 設定／排除檔、兩份 database tests，以及 owner 輸入並套用的五份 migration；其後已於 2026-09-28 納入 `8a0bae0`。API／Python／Swift tests 未因這次資料庫批次而重跑。當時沒有 seed／iOS／JSON 改動，沒有 Supabase login/link、操作雲端 SQL、部署、commit、push 或修改 ViewCoolSpots。API-C05 真實 reader／回應整合仍待實作。
 
 **2026-09-26：Owner 要求提交目前批次。** Commit 訊息為 `Add local Cool Spots API handler and replace catalogue naming`，parent 為 `4b8f828`。範圍包含本機 handler／七個 tests、Swift／JSON／工具改名與舊資料相容、環境檔保護及現行文件。沿用下方 2026-09-25 的測試證據；程式未再改動，不為 commit 重跑測試。沒有部署、push 或修改 ViewCoolSpots；API-C05 仍未開始。
 
