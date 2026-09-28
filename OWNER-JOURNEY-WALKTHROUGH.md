@@ -4,6 +4,10 @@
 
 ## 本輪狀態與起點
 
+**2026-09-28 降溫內容 DB-C30–C33：Green。** 地址與已確認設計已提交 c69b3fd。新增 cooling_content.test.sql；結構 Red 為 18 failed／2 passed／1 skipped，沒有把缺欄位時未執行的行為算通過。第九份 migration 20260928220000_add_cooling_content.sql 加 places.place_type 與 17 個降溫／使用資訊欄位，不含 location_scope／eligibility_details。沿用 v4 固定代碼、unknown、空設施清單、選填非空白文字、正整數公告分鐘及成對 hours/time zone，不推論營業中。
+
+套用後本批 107 assertions 通過，連同既有四份 suite 共 **500 passed／0 failed／0 skipped**。測試涵蓋合法／非法代碼、NULL 與未知、七種設施及飲水分開、不可巢狀／含 NULL 的設施清單、可清空區域說明／補充、文字原樣保存、停留限制與時間成對；場所與 Cool Spot 身分保持。這是本機 schema Green，沒有 reader／HTTP／iOS 變更或效能宣稱。
+
 **2026-09-28 本輪委託：接 API 前的資料準備。** Owner 同意更新 PRODUCT 的完整結論並要求繼續本機實作與適當 commits。新 storage/API 不採用 location_scope／eligibility_details；保留選填 area_description、帶來源年代的 cooling_details；正式值以 places／cool_spots 為準，來源與歷史須一起保存。field_adoptions／14 表草案不是整體批准，Cooling here 身分及回報資格留待對應批次。原 v4／Swift 相容處理仍待後續，今天不刪 fixture 欄位。
 
 執行順序：先提交已 Green 的地址與設計 checkpoint，再分批完成降溫欄位、來源／配對保存、可重複且不覆寫更正的本機初始匯入。每批保留實際 Red／Green 與資料／權限證據。**在後端登入／唯讀連線、reader、v4 HTTP 回應／免登入 HTTP 實測之前停止**；同樣不開始 iOS 改讀 API。未授權 push、部署、雲端 SQL、reset 或另一 checkout 變更。

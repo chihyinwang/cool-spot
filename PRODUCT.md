@@ -197,7 +197,7 @@ The iOS implementation above remains local. On 2026-09-24 the owner created a Su
 | 資料責任 | 預計保存什麼 | 目前狀態 |
 |---|---|---|
 | places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 本機已建 id/name/location 與七個選填地址欄位；migration 八完成基本地址驗證。父子關係待後續，尚未匯入場所資料或接 App |
-| cool_spots：已發布降溫資訊 | place_id 指向一個 Place；降溫設施、適用區域及使用條件；保留既有 Cool Spot ID | 本機現為 id/place_id；place_id 必填、唯一且為外鍵，確保一個 Place 最多一份目前的 Cool Spot 資訊，並非最多一則回報；降溫內容欄位尚待後續 |
+| cool_spots：已發布降溫資訊 | place_id 指向一個 Place；降溫設施、適用區域及使用條件；保留既有 Cool Spot ID | 本機已有 id/place_id 與第九份 migration 的降溫／使用資訊；place_id 必填、唯一且為外鍵，確保一個 Place 最多一份目前資訊，並非最多一則回報；尚未匯入場所 |
 | visitor_reports：一次造訪的體驗 | 回報 ID、place_id、作者、造訪／發布時間、體感與選填答案；到訪／重試識別 | 尚未建表；建議改連 Place。現在 Swift VisitReport 仍以 spotID 連 CoolSpot，沒有作者或回報自己的座標 |
 
 **2026-09-28 最小拆分批次已實作並本機驗證：** owner 同意四項建議，親手輸入 [第六份 migration](supabase/migrations/20260928145903_split_places_from_cool_spots.sql) 並委託套用；新增身分規則見下方「ID 固定」。name/location 搬到 places 後移除 cool_spots 的重複欄位；既有名稱必填、1–300 字元、固定空白集拒絕／非空白原文保留，以及 geography 非空有效點規則全部保留。cool_spots 的舊 text ID 與其文字限制不變。遷移須保留既有 ID、名稱和座標，不按相同名稱／座標合併。places 的主鍵防止重複身分，不用名稱作唯一鍵。
@@ -362,7 +362,7 @@ agent 推薦保留核心分工：Place 的身分與基本資料可獨立存在�
 
 ### 實作邊界與下一步
 
-八份 migration 已在本機套用，保留先前歷史。2026-09-28 第八份完成地址基本驗證後，地址限制 223 項、places 72 項、Cool Spot 身分／關係 51 項、兩表權限 47 項，共 393 項全部通過、無跳過。第六份套用前的三筆舊格式假資料搬移演練 11 項通過仍是當時證據，未在新 schema 重跑。兩表皆為 0 筆，沒有 seed。七個 handler tests 仍是使用替身直接呼叫函式的歷史證據，沒有真實資料庫 reader、網路端點、部署或 iOS 後端連線。
+九份 migration 已在本機套用，保留先前歷史。2026-09-28 第九份完成降溫內容：107 項，加地址限制 223 項、places 72 項、Cool Spot 身分／關係 51 項、两表權限 47 項，共 500 項全部通過、無跳過。第六份套用前的三筆舊格式假資料搬移演練 11 項通過仍是當時證據，未在新 schema 重跑。兩表皆為 0 筆，沒有 seed。七個 handler tests 仍是使用替身直接呼叫函式的歷史證據，沒有真實資料庫 reader、網路端點、部署或 iOS 後端連線。
 
 Owner 已同意本節整理並明確委託 agent 更新三份 active documents、繼續完成接 API 前的本機工作，在完整批次 commit。這次授權包含 tests、Red／Green、本機 migration 與初始資料匯入；保留固定 ID、250 GLA＋3 個標示範例、來源／修改歷史與已接受的 Apple 配對。不能重設資料庫或把匯入當成重新驗證場所現況。
 
