@@ -4,6 +4,31 @@
 
 ## 本輪狀態與起點
 
+**2026-09-28 收尾：本機資料準備完成，停在 API 之前。** 先後提交 c69b3fd（地址／確認結論）、b47bd4f（降溫欄位）、9e8a04b（來源／權限）；本機 importer 與這份收尾紀錄一起提交。最終 revision 由 git log -1 查核，沒有 push。十一份 migration 已套用，最新為 20260928224500。
+
+| Case | 行為 | 本次實際證據 |
+|---|---|---|
+| DB-C39 | 原始座標在 geography 轉型前拒絕越界、NaN／Infinity、字串／bool／NULL；保留合法邊界、零與經緯順序 | importer tests 通過；首輪骨架未拒絕十個無效輸入，實際失敗 |
+| DB-C40 | 初始 253 筆的名稱／地址／降溫欄位、來源、完整 v4 item 與文件 metadata、原 ID／Apple 配對／照片保留 | 交易內全量比對、永久匯入後唯讀逐筆比對均通過；初輪缺少 records，後續另抓到 document_metadata 缺失並補存 |
+| DB-C41 | 同一輸入重試不新增、不換 Place ID、不覆寫後來的本機值；來源內容改變時拒絕 | namespaced 253 筆可重複演練，原資料不動；更正拒絕分支實際拋出預期錯誤。這不是更正發布 API |
+| DB-C42 | 資料／來源／首次快照一起提交；中途失敗全部 rollback；引號、反斜線、換行與類 SQL 文字維持資料；只可寫本機 | 故意在寫入後造成 division by zero，確認沒有殘留；remote Docker host/context 拒絕、local context 固定；11 個 importer tests 最終全部通過 |
+
+[import_catalogue.py](scripts/cool_spots/import_catalogue.py) 的起始骨架跑 7 個 tests：19 個 assertion/subtest failures，包含 10 個座標拒絕、6 個內容拒絕、空 catalogue 與兩個缺少匯入資料的案例；接受合法座標／回滾骨架原已通過，不製造 Red。後續合法 address_line1 evidence 在第十份 schema 被拒，新增 SQL cases 後以第十一份修正，見下一段。後加來源變動、引用文字和本機目標守衛的回歸案例直接通過，沒有回溯宣稱 Red。metadata 新 assertion 曾因缺少 key 中斷，補存原文件 schemaVersion／datasetID／generatedAt／sources 後通過。
+
+永久寫入前先以 BEGIN／ROLLBACK、db-import-test- 命名空間跑完整 253 筆演練，確認正式表仍 0 筆。然後執行：
+
+```sh
+python3 scripts/cool_spots/import_catalogue.py --apply-local
+python3 -m unittest discover -s scripts/cool_spots -p test_import_catalogue.py
+SUPABASE_TELEMETRY_DISABLED=1 supabase test db --local --workdir . supabase/tests/database
+```
+
+本機永久 transaction 成功；有真實資料後再確認 **11 importer tests passed**、**634 SQL assertions passed／0 failed／0 skipped**。SQL 四個 NaN NOTICE 是既有刻意無效輸入。測試 fixtures 與臨時 role grants 已 rollback，沒有 reset；未重跑拆分前 migration rehearsal、mapping tests、API／Swift 或 JSON Schema 工具（先前環境缺 jsonschema）。本批用 import validation、SQL tests 與全量資料比對驗證，不把它們稱為 HTTP／App 驗收。
+
+最後資料：253 places、253 cool_spots、2 sources、253 source_records／links、5,297 field_evidence、145 accepted map links、3 photo references、253 initial history。GLA 與三個範例標示、raw hash、原始／對照／mapping 快照、全部採用欄位及 metadata 均比對一致。Reader 的 LOGIN／superuser／BYPASSRLS 為 false；postgres 對 reader 的臨時 SET／USAGE 為 false；沒有 location_scope／eligibility_details domain columns。現有 Swift／JSON／handler 檔未變，沒有 API/Auth/Studio 啟動、雲端 SQL、部署或 ViewCoolSpots 編輯。
+
+**下一步但尚未授權執行：** 後端登入／唯讀連線、database reader、v4 相容 HTTP 回應與免登入 HTTP 實測。之後才討論 iOS 接 API 的檔案、影響與測試。這是 owner 指定的停止點，不能自動繼續。
+
 **2026-09-28 來源儲存 DB-C34–C38：134 assertions Green。** 降溫內容已提交 b47bd4f。第十份 preserve_catalogue_sources 新增七表、關聯、same_place 唯一索引及 RLS／限縮欄位 SELECT，沒有後端登入或 API reader。新表缺失時 Red 為 7 failed／1 skipped。首次 Green 檢查中三個 permission tests 誤用 generated identity 的 UPDATE，先遇到 428C9；改成合法 UPDATE 後各角色實際回 42501，未放寬權限斷言。補上 INSERT 拒絕後 132 項通過。
 
 匯入演練發現 field_key 的初始正規表示式不接受 address_line1。新增兩個獨立 cases，實際 Red 為合法地址鍵被拒、虛構欄位被接受（132 passed／2 failed）；不修改已套用 migration，新增第十一份 validate_evidence_field_keys 改成明確支援清單。最終 **134 passed／0 failed／0 skipped**。正式資料仍由 places／cool_spots 保存；欄位 evidence 不重複保存正式值，catalogue_import_history 只保留首次事件，未宣稱通用更正／審核歷史已完成。
@@ -16,9 +41,9 @@
 
 執行順序：先提交已 Green 的地址與設計 checkpoint，再分批完成降溫欄位、來源／配對保存、可重複且不覆寫更正的本機初始匯入。每批保留實際 Red／Green 與資料／權限證據。**在後端登入／唯讀連線、reader、v4 HTTP 回應／免登入 HTTP 實測之前停止**；同樣不開始 iOS 改讀 API。未授權 push、部署、雲端 SQL、reset 或另一 checkout 變更。
 
-以下地址與 Places 記錄是各批次當時證據；393 項是前一輪結果，本轮未為接手／commit 重跑。
+以下地址與 Places 記錄是各批次當時證據；393 項是前一輪結果，本輪未為接手／commit 重跑。
 
-**2026-09-28 地址基本驗證：DB-C26–C29 已本機 Green，393 項全通過。** Owner 明確要求「1 你直接幫我做完；2 跟我討論」，因此本批包含 agent 寫 tests、驗證 Red、寫 Green 並套用本機 migration；第 2 步的其他欄位／來源／Apple 關係只討論。起點仍為 Prototyping／edbcd5a 加第七份地址批次的未提交變更。先唯讀確認 history 七份、兩表均 0 筆；未 reset，未重跑歷史測試。
+**2026-09-28 地址基本驗證：DB-C26–C29 已本機 Green，393 項全通過。** Owner 明確要求「1 你直接幫我做完；2 跟我討論」，因此本批包含 agent 寫 tests、驗證 Red、寫 Green 並套用本機 migration；當時第 2 步的其他欄位／來源／Apple 關係只討論；後來 owner 已委託本文件開頭的 pre-API 批次。起點仍為 Prototyping／edbcd5a 加第七份地址批次的未提交變更。先唯讀確認 history 七份、兩表均 0 筆；未 reset，未重跑歷史測試。
 
 執行前已說明本批規則：未知維持 NULL，六個一般地址欄位拒絕空字串／純空白但保留有內容原文；國家代碼沿用 v4 的兩位 ASCII 大寫字母格式；沒有需求依據的地址長度上限不另外加入。唯讀掃描 250 GLA＋3 社群 JSON，違規地址值為 0；沒有重建 fixture 或 seed。
 
@@ -41,7 +66,7 @@ SUPABASE_TELEMETRY_DISABLED=1 supabase test db --local --workdir . supabase/test
 
 **393 passed／0 failed，無跳過，exit 0**（223＋72＋51＋47）。原地址的 NULL／清空、部分／完整地址、關聯與權限回歸也通過。既有四次 NaN NOTICE 仍屬刻意座標案例。沒有為通過而更動 assertions，無需 refactor；沒有重跑 API／Python／Swift 或拆分前的 migration rehearsal。
 
-最後唯讀核對 history 八份、最新 20260928204716；七個新增 CHECK 的 validated=true，七個地址欄仍 nullable。places／cool_spots 都 0 筆、pgTAP 未保留；postgres 對 reader 的 SET／INHERIT 與 reader 的 extensions USAGE 均 false。資料／暫時授權已 rollback。本批尚未 commit／push，未部署、操作雲端或更改 iOS／JSON／ViewCoolSpots。地址格式組合與更正一致性屬後續寫入流程，並未因基本驗證 Green 而完成。
+最後唯讀核對 history 八份、最新 20260928204716；七個新增 CHECK 的 validated=true，七個地址欄仍 nullable。places／cool_spots 都 0 筆、pgTAP 未保留；postgres 對 reader 的 SET／INHERIT 與 reader 的 extensions USAGE 均 false。資料／暫時授權已 rollback。當時尚未 commit／push；其後地址批次提交於 c69b3fd。未部署、操作雲端或更改 iOS／JSON／ViewCoolSpots。地址格式組合與更正一致性屬後續寫入流程，並未因基本驗證 Green 而完成。
 
 **該批後續：** owner 隨後確認欄位邊界並委託接 API 前的本機工作，見本節開頭。
 
@@ -77,7 +102,7 @@ SUPABASE_TELEMETRY_DISABLED=1 supabase test db --local --workdir . supabase/test
 
 最後唯讀查核：history 七份、最新 20260928201025；places 十欄，新增七欄皆 text／nullable／無預設值，原 id/name/location 保持。兩表 RLS=true，各保留 reader SELECT policy；PUBLIC／anon／authenticated 無兩表 grants，reader 只有 SELECT。兩表均 0 筆，pgTAP 未保留，postgres 對 reader 的 SET／INHERIT 與 reader 的 extensions USAGE 均 false。
 
-**本批後續：** 基本地址驗證後來由 owner 委託完成，見本文件開頭 DB-C26–C29。格式組合／更正一致性與來源保存仍待後續；本批不是 v4 reader Green。本批尚未 commit，未部署、操作雲端、重設資料庫或更改 iOS／JSON／ViewCoolSpots。這次代寫 Green 授權只涵蓋本批，後續仍沿用既有教學約定。
+**本批後續：** 基本地址驗證後來由 owner 委託完成，見本文件開頭 DB-C26–C29。格式組合／更正一致性與來源保存仍待後續；本批不是 v4 reader Green。當時尚未 commit；其後地址批次提交於 c69b3fd。未部署、操作雲端、重設資料庫或更改 iOS／JSON／ViewCoolSpots。這次代寫 Green 授權只涵蓋本批，後續仍沿用既有教學約定。
 
 **2026-09-28 後端教學接手核對：** 在 prototype 的 `Prototyping` 確認 HEAD 為 `8a0bae0`，訊息 `Add local Cool Spot database foundation and design notes`；讀取前 working tree clean，相對本機記錄的 origin/Prototyping 領先兩個 commits，未 fetch／push。完整讀取三份 active documents 與 owner 指定的 i-have-adhd／essential-tdd，沿用批次說明、agent 寫 tests／驗證 Red、owner 輸入核心 Green 的覆寫。
 
