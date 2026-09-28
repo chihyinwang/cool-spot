@@ -39,7 +39,7 @@ Apple Maps and iOS conventions inform familiar map/navigation behavior; Google M
 | Concept | Meaning |
 |---|---|
 | Location anchor | Reference to a recognised place, a point inside a larger place, or an unmatched coordinate; no cooling claim by itself. |
-| Place / 場所 | A venue or an explicitly identified area with its own stable identity. It can exist without cooling information. The local places table now separates UUID identity, adopted name and location from Cool Spot identity; address and parent relationships remain unimplemented. It is not yet connected to the app. A live search result, private Pin or pending proposal does not automatically create a public database record. |
+| Place / 場所 | A venue or an explicitly identified area with its own stable identity. It can exist without cooling information. The local places table now separates UUID identity, adopted name, location and seven optional address fields from Cool Spot identity; parent relationships remain unimplemented. It is not yet connected to the app. A live search result, private Pin or pending proposal does not automatically create a public database record. |
 | Recognised place | A named map/source place. It becomes a Cool Spot only when reviewed cooling information is published. Sources include live Apple Maps search results and retained prototype fixtures. |
 | Cool Spot | A public location record with published cooling information, either imported from an identified cooling-space source or published after contribution review. It may describe a whole venue or a specific cooling area within one. Normal launches show 250 GLA 2025 records and three labelled examples (Tate Modern and two fictional places). This name does not guarantee current cooling, opening or availability. Ordinary map results, private Pins and pending proposals are not Cool Spots. Older examples remain accessible through existing saved/report records and explicit example mode. |
 | Saved place / private Pin | A private bookmark or coordinate. Neither confirms a visit nor initiates a contribution. `SavedLocation` is the code model for both; the UI separates Places and Pins. |
@@ -196,7 +196,7 @@ The iOS implementation above remains local. On 2026-09-24 the owner created a Su
 
 | 資料責任 | 預計保存什麼 | 目前狀態 |
 |---|---|---|
-| places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 本機已建 id/name/location；地址、父子關係後續設計，尚未匯入場所資料或接 App |
+| places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 本機已建 id/name/location 與七個選填地址欄位；migration 八完成基本地址驗證。父子關係待後續，尚未匯入場所資料或接 App |
 | cool_spots：已發布降溫資訊 | place_id 指向一個 Place；降溫設施、適用區域及使用條件；保留既有 Cool Spot ID | 本機現為 id/place_id；place_id 必填、唯一且為外鍵，確保一個 Place 最多一份目前的 Cool Spot 資訊，並非最多一則回報；降溫內容欄位尚待後續 |
 | visitor_reports：一次造訪的體驗 | 回報 ID、place_id、作者、造訪／發布時間、體感與選填答案；到訪／重試識別 | 尚未建表；建議改連 Place。現在 Swift VisitReport 仍以 spotID 連 CoolSpot，沒有作者或回報自己的座標 |
 
@@ -218,7 +218,13 @@ places 只保存已接納的公開場所，不放私人 Pin／待審提案。新
 
 一則「今天覺得很涼」不會直接覆寫場所事實，也不會自動新增 Cool Spot。0／1 的限制只描述目前發布的降溫資訊；若日後要保留發布版本，另設歷史，不把 Visitor reports 當成版本。賽事等功能在需求確定後再設計，例如比賽需要場次與時間，不能先假定一個「有播比賽」布林值就足夠。
 
-`scope` 與 `place_type` 尚不是已批准的新 SQL 欄位。現有 v4 的 location.scope 表示 venue／specific_area／unknown，既不是公園邊界，也不能代替父子關係；保留讀取相容，是否入表及放在哪裡需按用途決定。placeType 是 App 的概略分類，不是 PostgreSQL 或 GLA 定義的標準；GLA 名稱規則推導與 Apple 類別映射要保留來源，未知不猜測。一般地點分類可由 places 負責，但分類集合／必填性待定；目前沒有獨立 pub／bar 代碼，新增前需另說明 Swift、schema、資料映射的影響。
+**2026-09-28 owner 確認的欄位邊界：** 新資料庫與新版 API 不採用 `location_scope`，也不新增 `eligibility_details`。既有 v4 `location.scope`、`access.eligibilityDetails` 與 Swift／本機旅程仍須整體處理相容性，不能只刪 JSON 欄位；本輪保留原始 fixtures 與 Swift。使用資格維持 Everyone／Limited access／Unknown，不新增資格細節問題，不把 GLA 的適合族群當成入場限制。
+
+保留選填 `area_description` 作為降溫區域說明，例如四樓閱讀室；它不會自動建立子 Place，也不要求每筆都有值。現有表單為 Specific area · Optional；場所卡有值時顯示 Cooling area。253 筆 bundled records 目前均未填值，這是程式／資料查核，沒有新增原生互動驗證。保留 `cooling_details` 與 GLA 原始文字，並與一般公開補充 `additional_information` 分開；來源中的「一直很涼」只能作為有來源與年代的描述，不是 App 對今天的保證。
+
+placeType 是 App 的概略分類，不是 PostgreSQL 或 GLA 定義的標準；GLA 名稱規則推導與 Apple 類別映射要保留來源，未知不猜測。初始匯入需要保留既有 v4 分類集合；分類屬於 Place，不新增 pub／bar 等代碼。父子關係只屬於 Place，具體關聯與資格規則仍待後續，不能用 Apple within_place 直接生成父子關係。
+
+本輪需要保存的降溫內容包括 setting、cooling_features、cooling_details、area_description；使用資訊包括 cost、eligibility、seating、drinking_water、toilets、wheelchair_access、staffed_when_open、tables、posted_stay_limit_status／minutes；另保留 additional_information、hours_text／hours_time_zone 與已發布照片。沿用現有值的意思；未知不是否定，來源 hours 不能用來宣稱 Open now。欄位限制／儲存形式按批次驗證，不把先前 14 張表草案當成整體批准。
 
 #### 園內點位與地圖收合
 
@@ -252,6 +258,30 @@ agent 建議已確認的公開 Place 即使沒有自己的 Cool Spot、也沒有
 
 ### 2. 名稱、地址與座標以誰為準
 
+**地址儲存決策與本機實作，2026-09-28：** owner 同意在 places 分欄保存下列七個可空的 text 值，不另建地址表或以 JSONB 取代它們。結構 Red 後，owner 明確委託 agent 代寫本批 Green；第七份 migration 完成地址儲存；owner 隨後委託 agent 完成基本驗證，第八份也已在本機套用，最新 393 項資料庫 assertions 全部通過、無跳過。這是目前 GLA／Apple／社群資料的保存結構，不是全球地址格式的完整模型，也不要求畫面顯示七行或使用者填七格。現有 v4 JSON 和 Swift 格式保持；本批不實作匯入、API mapping 或 UI。
+
+| SQL 欄位 | 現有 v4 address 對應 | 意義 |
+|---|---|---|
+| address_line1 | line1 | 地址主要部分 |
+| address_line2 | line2 | 地址補充部分，不限定為房號，也不與 Apple subThoroughfare 等同 |
+| address_locality | locality | 城市／城鎮名稱，不以 borough 取代 |
+| address_borough | borough | 有來源依據的倫敦行政區；不把其他層級行政區強制套入 |
+| address_postal_code | postalCode | 郵遞區號文字；未知不補猜 |
+| address_country_code | countryCode | 國家代碼文字，例如 GB |
+| address_formatted | formatted | 已採用的完整顯示地址，可在沒有拆分組件時單獨保存 |
+
+未知的部分以 NULL 保存，欄位省略時也保持 NULL，沒有 London／GB／空字串預設值。允許全部未知、部分已知、只有完整文字或完整組件；有值時原樣保存，之後可以更正或清回 NULL，且不改變 Place 身分、名稱、座標或 Cool Spot 關聯。地址沿用 places 的 RLS／grants：reader 可讀，anon／authenticated 不直接存取；reader 不能寫入。這不是新增公開寫入入口。
+
+現有 GLA 原始 address_one／address_two／borough／postcode 分別保留；目前 JSON 的 London／GB 是 adapter 記錄為 dataset_context 的補充，不是每筆 GLA 原始欄位。Apple 的地址組件與行政層級不保證和 GLA 相同，缺少的 borough 留空。GLA 配對不授權 Apple 覆蓋採用地址。
+
+顯示沿用既有方向：有完整地址則使用它，否則組合已知部分；組合結果不必重複儲存。未來修改地址組件時，寫入流程需同步更新或清除舊的 formatted，避免內容矛盾。本批只新增儲存欄位，尚未實作此一致性流程、formatter 或來源追蹤，也不宣稱 SQL 會自動解析地址或清除舊文字。第八份 migration 已完成下述基本值限制；格式組合與整包 v4 輸出驗證仍未實作。
+
+**地址基本驗證，2026-09-28（owner 委託完成）：** [第八份 migration](supabase/migrations/20260928204716_validate_place_addresses.sql) 使用七個 CHECK，INSERT／UPDATE 都生效。六個一般地址欄位允許 NULL；拒絕空字串或完全由已約定的 26 種空白字元構成的值，沿用 Place 名稱的固定字元集。有內容的地址原樣保存，包含周圍空白、Unicode、標點和內部換行，不自動 trim／轉寫／截斷。未知應存 NULL，這些 CHECK 不會把空白自動改成 NULL。
+
+address_country_code 允許 NULL 或恰好兩個 ASCII 大寫英文字母，沿用 v4 的格式要求；GB／TW／US 等可保存，gb／混合大小寫／數字／前後空白／全形英文字母等拒絕。不自動 uppercase，也未驗證實際國家代碼名單。地址文字目前沒有產品或 v4 的字數上限，本批保留 text，不套用名稱的 300 字限制；沒有新增各國郵遞區號格式規則或聲稱地址真實有效。未來公開寫入入口仍需另外設計請求大小限制。
+
+來源相容檢查：唯讀掃描現有 250 筆 GLA＋3 筆社群 JSON，沒有違反上述規則的地址值；沒有改寫 JSON 或匯入資料。本批不新增來源、降溫欄位、父子關係、Apple mapping 或公開寫入入口。
+
 places 保存的是我們目前採用的值。初始值按建立途徑決定，不設定 Apple 永遠優先、GLA 永遠優先或最後傳入者優先。
 
 | 建立途徑 | 初始採用規則 |
@@ -267,7 +297,7 @@ Apple 配對表示兩個識別碼之間有已確認的關係，不代表必須�
 
 ### 3. 一萬筆資料也能查到每個欄位的來源
 
-只替整個 Place 標記「來自 GLA」不夠。資料庫需能查詢「欄位 → 採用的來源紀錄 → 原始內容及依據」。匯入或發布更新時，同時保存採用的值和來歷，避免值已變更、來源仍指向舊資料。
+只替整個 Place 標記「來自 GLA」不夠。資料庫需能查詢「欄位 → 採用的來源紀錄 → 原始內容及依據」。**目前正式值以 places／cool_spots 為準**；來源保存採用依據，歷史保存過去的值，不能反過來把歷史表當成每次讀場所的唯一資料來源。原 field_adoptions 草案未獲整表批准，需按這個責任重新整理。匯入或發布更正時，正式值、採用依據與歷史須在同一交易一起成功或一起撤回，不能留下互相矛盾的資料。
 
 例如 Canning Town Library 目前名稱、地址、座標都來自 GLA 2025 的紀錄 18。**假設**日後某筆地址更正通過審核：地址改連到那筆更正及審核依據，名稱與座標仍指向 GLA。這只是說明欄位來源可以不同，不是已有這筆更正。
 
@@ -289,7 +319,9 @@ UUID 只處理識別碼，不判定兩筆是不是同一間店，也不代替重
 
 「附近 Cool Spots」使用 places 的座標，搭配 cool_spots 的已發布資訊；一個 SQL 可完成範圍篩選、JOIN、距離排序與結果限制。假設樹蔭有 Cool Spot、父公園沒有，樹蔭仍可被找到，距離按樹蔭自己的座標計算，不因父公園代表點較遠而排除。這是點到點距離，不是到公園邊界／入口或步行路線的距離。查所有公共 Places 則不要求有 Cool Spot，但只能查到自有資料庫已收錄的地點；Apple 搜尋仍負責其他地圖結果。
 
-後端先找符合條件的場所／已發布降溫資訊，再整批補上需要的來源與地圖關係，組成現有 v4 CoolSpotsResponse，包括 sources/items/sourceReferences/provenance/mapReferences。App 不需要知道內部分成幾張表；raw source、私人提案與無上限的回報歷史不塞進每筆地圖結果。
+後端先找符合條件的場所／已發布降溫資訊，再整批補上需要的來源與地圖關係，組成一份 JSON 給 iOS；App 不需要知道內部分成幾張表。新版方向以 Place 為外層、明確給 Place ID，可選的 coolSpot 包含原 Cool Spot ID，沒有降溫資訊時為 null；新版不含 location_scope 或 eligibility_details。raw source、私人提案與無上限的回報歷史不塞進每筆地圖結果。確切路由、版本號與完整 payload 尚未定案。
+
+現有 v4 CoolSpotsResponse 保留作為資料／相容性對照與過渡契約，包括 sources/items/sourceReferences/provenance/mapReferences；不是新版 Place API 的最終格式。後續要一起處理 Swift 解析、舊欄位、兩種 ID 和收藏／回報等身分關聯，不能以新 Place ID 直接取代舊 id。v4 HTTP reader 與 App 改讀 API 均屬本輪停止點之外，尚未開始。
 
 | App 需求 | 後端還需要完成的設計 |
 |---|---|
@@ -330,11 +362,13 @@ agent 推薦保留核心分工：Place 的身分與基本資料可獨立存在�
 
 ### 實作邊界與下一步
 
-六份 migration 已在本機套用，保留原五份歷史。2026-09-28 第六份套用前，三筆舊格式假資料的搬移演練 11 項通過並 rollback；依 owner 明確委託正式套用後，places 53 項、Cool Spot 身分／關係 51 項、兩表權限 40 項全部通過、無跳過。兩表皆為 0 筆，沒有 seed。七個 handler tests 仍是使用替身直接呼叫函式的歷史證據，沒有真實資料庫 reader、網路端點、部署或 iOS 後端連線。
+八份 migration 已在本機套用，保留先前歷史。2026-09-28 第八份完成地址基本驗證後，地址限制 223 項、places 72 項、Cool Spot 身分／關係 51 項、兩表權限 47 項，共 393 項全部通過、無跳過。第六份套用前的三筆舊格式假資料搬移演練 11 項通過仍是當時證據，未在新 schema 重跑。兩表皆為 0 筆，沒有 seed。七個 handler tests 仍是使用替身直接呼叫函式的歷史證據，沒有真實資料庫 reader、網路端點、部署或 iOS 後端連線。
 
-本批完成最小結構、關係、既有資料搬移與兩表權限。父子關係、地址、來源、欄位來歷、歷史與其他表權限不在本批。轉型前座標輸入驗證及完整讀取欄位仍待後續；回報改連 Place、普通公共 Place 的接納、父子到訪資格和選填位置分享規則，在回報批次前集中確認。新的核心 Green 仍由 owner 輸入。
+Owner 已同意本節整理並明確委託 agent 更新三份 active documents、繼續完成接 API 前的本機工作，在完整批次 commit。這次授權包含 tests、Red／Green、本機 migration 與初始資料匯入；保留固定 ID、250 GLA＋3 個標示範例、來源／修改歷史與已接受的 Apple 配對。不能重設資料庫或把匯入當成重新驗證場所現況。
 
-依既有教學方式批次說明 cases，由 agent 寫 tests 並驗證 Red，再提供完整最小 Green 給 owner 輸入。結構與權限定案後，才批次初始化資料、接 reader 並驗證回應；登入與跨帳戶回報接續，場所提案／審核／發布在其後。未來廁所／賽事用途不改變這次的交付範圍，也不授權現在修改 iOS、JSON 格式、部署或操作雲端 SQL。
+**本輪硬停止點：開始真正 API 接通之前停止。** 不完成後端登入／唯讀連線、database reader、v4 HTTP 回應或免登入 HTTP 實測；不修改 iOS 接 API。後續開始 iOS 工作前須先說明檔案、影響與測試。不得 push、部署、執行雲端 SQL、啟用 plugin hooks 或改另一個 ViewCoolSpots checkout。
+
+回報改連 Place、普通公共 Place 的接納、父子到訪資格、精確位置分享在回報批次確認。Cooling here 的 participant_id 不定案：帳號／裝置／匿名參與者和去重規則留待該批次；「對外匿名」與「不用登入」分開決定。投稿審核／照片上傳和私人收藏、Pin、筆記、草稿跨裝置同步也未定案；私人資料目前仍留裝置。未來廁所／賽事用途不擴張本輪範圍。
 
 ## Unresolved questions, not approved features
 

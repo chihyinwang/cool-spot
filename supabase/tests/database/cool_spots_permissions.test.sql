@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(40);
+select plan(47);
 
 select ok(exists (select 1 from pg_roles where rolname = 'cool_spots_reader'), 'DB-C13: provides the dedicated backend reader');
 
@@ -205,8 +205,59 @@ select ok(not pg_has_role('authenticated', 'cool_spots_reader', 'MEMBER'), 'auth
 
 select ok(not pg_has_role('authenticator', 'cool_spots_reader', 'MEMBER'), 'authenticator cannot inherit or assume the reader role');
 
+-- DB-C25: New address columns keep the existing public-place access boundary.
+select count(*) = 7 as address_ready from information_schema.columns where table_schema = 'public' and table_name = 'places' and column_name in ('address_line1', 'address_line2', 'address_locality', 'address_borough', 'address_postal_code', 'address_country_code', 'address_formatted') \gset
+\if :address_ready
+
+update public.places set address_line1 = '10 Example Road', address_line2 = 'Room 2', address_locality = 'Example Town', address_borough = 'Example Borough', address_postal_code = 'EX1 2AB', address_country_code = 'GB', address_formatted = 'Room 2, 10 Example Road, Example Town EX1 2AB' where id = '00000000-0000-4000-8000-000000000301';
+update public.places set address_formatted = 'Example Garden, Example Town' where id = '00000000-0000-4000-8000-000000000302';
+
+set local role anon;
+select throws_ok(
+  $$ select address_line1, address_line2, address_locality, address_borough, address_postal_code, address_country_code, address_formatted from public.places; $$,
+  '42501', null, 'DB-C25: anon cannot directly read address columns'
+);
+select throws_ok(
+  $$ update public.places set address_formatted = 'Unauthorized Address' where id = '00000000-0000-4000-8000-000000000301'; $$,
+  '42501', null, 'anon cannot directly change an address'
+);
+reset role;
+
+set local role authenticated;
+select throws_ok(
+  $$ select address_line1, address_line2, address_locality, address_borough, address_postal_code, address_country_code, address_formatted from public.places; $$,
+  '42501', null, 'authenticated cannot directly read address columns'
+);
+select throws_ok(
+  $$ update public.places set address_formatted = 'Unauthorized Address' where id = '00000000-0000-4000-8000-000000000301'; $$,
+  '42501', null, 'authenticated cannot directly change an address'
+);
+reset role;
+
+set local role cool_spots_reader;
+select results_eq(
+  $$ select id, address_line1, address_line2, address_locality, address_borough, address_postal_code, address_country_code, address_formatted from public.places where id in ('00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000000302') order by id; $$,
+  $$ values ('00000000-0000-4000-8000-000000000301'::uuid, '10 Example Road'::text, 'Room 2'::text, 'Example Town'::text, 'Example Borough'::text, 'EX1 2AB'::text, 'GB'::text, 'Room 2, 10 Example Road, Example Town EX1 2AB'::text), ('00000000-0000-4000-8000-000000000302'::uuid, null::text, null::text, null::text, null::text, null::text, null::text, 'Example Garden, Example Town'::text); $$,
+  'reader sees address values for public Places with and without cooling information'
+);
+select throws_ok(
+  $$ update public.places set address_formatted = 'Unauthorized Address' where id = '00000000-0000-4000-8000-000000000301'; $$,
+  '42501', null, 'reader cannot change an address'
+);
+reset role;
+
+select results_eq(
+  $$ select address_formatted from public.places where id = '00000000-0000-4000-8000-000000000301'; $$,
+  $$ values ('Room 2, 10 Example Road, Example Town EX1 2AB'::text); $$,
+  'rejected address changes leave the published value intact'
+);
+
 \else
-select skip('behavior requires the missing places/cool_spots structure', 37);
+select skip('address permissions require the seven missing address columns', 7);
+\endif
+
+\else
+select skip('behavior requires the missing places/cool_spots structure', 44);
 \endif
 
 select * from finish();
