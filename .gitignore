@@ -66,6 +66,35 @@ fastlane/test_output
 .env.*
 !.env.example
 
+# Private keys and signing credentials
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+*.mobileprovision
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# Local database files and exported backups; keep SQL migrations trackable
+*.dump
+*.backup
+*.sql.gz
+*.sql.bz2
+*.sql.xz
+*.sql.zip
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
 # Supabase CLI local state
 supabase/.temp/
 supabase/.branches/

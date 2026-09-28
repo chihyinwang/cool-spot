@@ -12,7 +12,7 @@ ios
 
 Cool Spot helps people discover places in London where they could cool down, understand the available evidence, and decide whether to go. Private saving, reviewed place information, a visitor's experience and current use are different signals.
 
-This document records current implemented behavior and agreed product intent. Implementation is not proof of usability. The source baseline and working instructions are in [AGENTS.md](AGENTS.md); verification status and owner tests are in [OWNER-JOURNEY-WALKTHROUGH.md](OWNER-JOURNEY-WALKTHROUGH.md).
+This document records current implemented behavior and agreed product intent. Implementation is not proof of usability. The source baseline and working instructions are in [AGENTS.md](AGENTS.md); verification status and owner tests are in [OWNER-JOURNEY-WALKTHROUGH.md](OWNER-JOURNEY-WALKTHROUGH.md). The current backend discussion is recorded in [場所後端設計結論](#場所後端設計結論).
 
 ## Users
 
@@ -39,6 +39,7 @@ Apple Maps and iOS conventions inform familiar map/navigation behavior; Google M
 | Concept | Meaning |
 |---|---|
 | Location anchor | Reference to a recognised place, a point inside a larger place, or an unmatched coordinate; no cooling claim by itself. |
+| Place / 場所 | A venue or an explicitly identified area with its own stable identity. It can exist without cooling information. The planned places table separates this identity and adopted basic facts from published cooling information; it is not implemented yet. A live search result, private Pin or pending proposal does not automatically create a public database record. |
 | Recognised place | A named map/source place. It becomes a Cool Spot only when reviewed cooling information is published. Sources include live Apple Maps search results and retained prototype fixtures. |
 | Cool Spot | A public location record with published cooling information, either imported from an identified cooling-space source or published after contribution review. It may describe a whole venue or a specific cooling area within one. Normal launches show 250 GLA 2025 records and three labelled examples (Tate Modern and two fictional places). This name does not guarantee current cooling, opening or availability. Ordinary map results, private Pins and pending proposals are not Cool Spots. Older examples remain accessible through existing saved/report records and explicit example mode. |
 | Saved place / private Pin | A private bookmark or coordinate. Neither confirms a visit nor initiates a contribution. `SavedLocation` is the code model for both; the UI separates Places and Pins. |
@@ -88,7 +89,7 @@ The v4 producer schema and adapter are implemented (v1/v2/v3 reads remain compat
 
 The owner-requested naming change on 2026-09-25 separates the resource from its transport: `CoolSpot` is one domain record; `CoolSpotsResponse` is the complete list response, and `coolSpotsResponse` is its TypeScript value. `items` contains the individual public records, while `sources` describes their origins. The current handler is `createListCoolSpotsHandler`; its generic read failure code is `cool_spots_load_failed`. `datasetID` identifies the dataset, not a place, response page or HTTP request; each place keeps its own `items[].id`. Renaming this wire key makes the producer contract v4. Swift continues to decode the previous key for versions 1–3. Existing local publications are read through a legacy storage-key alias and saved under `publishedCoolSpotRecords`; place IDs and other journey data are preserved.
 
-This naming leaves room for distinct operations: a list at `GET /cool-spots`, one record at `GET /cool-spots/{id}`, reports associated with that record at `/cool-spots/{id}/reports`, and reviewable proposals at `/place-contributions`. These paths illustrate resource boundaries; routing, pagination and write contracts are still to be implemented and agreed in their own slices. A mixed search across ordinary places and Cool Spots must preserve the distinction between result types. Separate list/detail or write payloads can evolve without renaming the Cool Spot resource.
+This naming leaves room for distinct operations: a list at `GET /cool-spots`, one record at `GET /cool-spots/{id}`, and reviewable proposals at `/place-contributions`. The current recommendation for future reports targets Place identity, including a public place without its own Cool Spot; see [the backend read/write examples](#5-查詢與-api-怎麼讀). These paths illustrate resource boundaries; routing, pagination and write contracts are still to be implemented and agreed in their own slices. A mixed search across ordinary places and Cool Spots must preserve the distinction between result types. Separate list/detail or write payloads can evolve without renaming the Cool Spot resource.
 
 | Field group | Type and purpose | Ownership / display |
 |---|---|---|
@@ -171,13 +172,163 @@ Send a popsicle is a local demo thank-you for an example report: first-use confi
 On 2026-09-23 the owner confirmed the first connected slice in this prototype worktree: load places from an API, sign in, publish a Visitor report, and read it with a second independent test account. Place contributions, authorized review and publication follow this slice. The separate ViewCoolSpots rebuild is unchanged.
 
 - Use Supabase-hosted PostgreSQL and Auth, plus a custom TypeScript API in Supabase Edge Functions. Start on the free plan; any paid move requires a new cost assessment within the owner's GBP 25/month ceiling. The Cool Spot API still needs implementation; choosing the free plan does not promise that future operation is free.
+- On 2026-09-26 the owner confirmed that nearby/range discovery is a definite requirement and accepted using PostGIS from the first place database schema. The owner-written [first migration](supabase/migrations/20260926221052_create_cool_spots.sql) is applied locally: PostGIS in gis, with public.cool_spots storing id text primary key, name text not null and location geography(Point, 4326) not null. The owner-written [second migration](supabase/migrations/20260926225900_add_cool_spot_text_constraints.sql), applied locally on 2026-09-27, adds CHECK constraints for an ID of at least one character and a name of 1–300 characters, matching the existing v4 length limits. The original twelve database assertions still pass. The planned reader must return latitude/longitude in the existing v4 response; it is not implemented. The complete table layout, remaining content validation, source relations, permissions and further migrations remain to be finalized through the teaching workflow. Radius/bounds query contracts, distance ordering and spatial-index behavior need separate implementation and evidence; none are implemented by these storage steps.
+- Agreed text validation, 2026-09-27: reject IDs/names made entirely of whitespace/newline characters on insertion and update; preserve nonblank input exactly, including surrounding whitespace. Do not trim, normalize or merge identities. The fixed whitespace set follows the current reader's Foundation whitespacesAndNewlines reference, enumerated locally as 26 code points: U+0009–000D, U+0020, U+0085, U+00A0, U+1680, U+2000–200B, U+2028–2029, U+202F, U+205F and U+3000. Name length still counts the original input. The owner wrote and personally applied the [third migration](supabase/migrations/20260927101339_reject_blank_cool_spot_text.sql) locally; agent independently verified both new CHECK constraints and all 70 database assertions passing, after the whitespace batch's 14 passed / 56 failed behavioral Red. Detailed evidence is in the walkthrough; no iOS or JSON-format change was made.
+- Location validation batch, 2026-09-27: a stored place needs a nonempty, valid point; empty points and NaN in either coordinate are rejected on INSERT and UPDATE. Valid geographic limits and (0, 0) remain acceptable, with coordinates preserved. This follows the existing [v4 coordinate contract](data/cool-spots/cool-spots-response.schema.json) and Swift coordinate validation; it does not introduce a London-only geographic restriction. The owner wrote and personally applied the [fourth migration](supabase/migrations/20260927104448_validate_cool_spot_locations.sql) locally. Agent independently verified its constraint/history and all 78 database assertions passing, after the observed 72 passed / 6 failed Red. A stored-point CHECK cannot detect original out-of-range values after geography has coerced them into range. The future import/write boundary must validate finite latitude within [-90, 90] and longitude within [-180, 180] before conversion, and explicitly map longitude first when constructing a PostGIS point. Both checks remain unimplemented; valid-looking swapped coordinates cannot be identified by range checks alone. This batch does not claim complete location-input coverage, introduce an API write route or change the response format.
 - Initialize place data from the existing bundled Cool Spot list, preserving stable Cool Spot IDs, source distinctions and the v4 read contract. Existing source/Apple identity relationships remain intact. New source refresh, name arbitration and contribution-review policies are not implied by this read integration.
 - Public places and published reports are readable without sign-in. Pre-create two test accounts; the app needs real sign-in/sign-out, but public self-registration is outside this first slice. Submitted author identity comes from verified authentication. The server checks a designated test visit entitlement; real GPS-based eligibility is not implemented by seeding those records.
+- Agreed place-read architecture, 2026-09-27: the owner chose A, making the custom TypeScript API the sole client entry for public place reads. Anonymous and signed-in clients must not directly SELECT/INSERT/UPDATE/DELETE/TRUNCATE public.cool_spots through Supabase Data API. A dedicated backend role may SELECT published places and their coordinates, but cannot modify or truncate them, bypass RLS or administer the database. Client roles and the Data API authenticator must not inherit or assume that role. This preserves reading published places without sign-in through the custom API. The owner-written [fifth migration](supabase/migrations/20260927151756_restrict_cool_spot_access.sql) is now applied locally: cool_spots_reader is a NOLOGIN permission role with the required schema access and table SELECT, RLS is enabled and its policy is limited to SELECT. This is a backend service permission role, not an app account or a requirement for visitors to sign in. The owner confirmed continuation after discussing the user-flow rationale. Choosing a sole API entry is separate from deciding that published data is public. A future HTTP integration test must verify that a request without user sign-in credentials can retrieve the public place list; the current database permission tests do not establish that behavior. Since cool_spots holds already published places, this reader may see every row; pending proposals remain separate. Actual backend login credentials, the database connection and HTTP integration remain unimplemented. Agent verified 24 permission assertions passing with no skips after correcting a test-only role-switch setup error; the original 78 storage assertions also passed. The test grants were rolled back and the table remains empty. These are local SQL permission checks, not a deployed or connected API boundary. The walkthrough records the initial test interruption and its correction.
 - Preserve the existing report questionnaire, visit-time ordering, private draft behavior and one-report-per-confirmed-visit rule. A successful write requires server persistence; retries, including a lost success response, must not create duplicate reports. Server constraints and atomic operations must uphold the same-visit rule under concurrent requests.
 - The second account can refresh the same place to read the first account's report; the author can sign in after relaunch and retrieve their own history. Account switching must isolate private drafts, eligibility and personal views. Existing device-local records must not be silently assigned to the first signed-in account or uploaded; verification uses isolated test data.
 - Code, SQL migrations and tests may be public. Secret/admin credentials, database passwords, account passwords and session tokens stay out of source control and the shipped app. Public client configuration does not replace server authorization.
 
 The iOS implementation above remains local. On 2026-09-24 the owner created a Supabase project and two Auth test accounts, then manually exercised login and RLS reads on a separate `public.rls_demo_notes` learning table. The owner reports that each account reads only its own seeded note after adding a SELECT policy. This practice table does not define the Cool Spot domain schema or change the agreed public visibility of published reports. The custom Cool Spot API now has a local handler that loads data from an injected source and returns HTTP 200 JSON. The two success tests originally covered empty and nonempty v3 Cool Spot list responses using local test sources; the owner reported them passing, and the agent confirmed both during the next test batch. That batch adds a generic HTTP 500 JSON error for failed reads and HTTP 405 JSON with Allow: GET and no data-source read for POST/PUT/PATCH/DELETE. After the observed 2 passed / 5 failed Red, the owner implemented and saved the error/method handling. The owner reported all seven tests passing; the agent inspected the saved code and independently confirmed 7 passed / 0 failed. These local behaviors are implemented, without a live database connection. The owner-requested naming refactor subsequently updated both fixtures to v4, named the operation createListCoolSpotsHandler and retained the same seven HTTP behaviors. Local env files are excluded from Git; .env.example contains placeholders only and is not used by the current unit tests. A database reader, hosted endpoint, app Auth integration and connected report acceptance result remain unimplemented. The walkthrough records the manual evidence separately from this local API test; cloud exercise SQL has not been added as a versioned migration.
+
+## 場所後端設計結論
+
+**2026-09-28：owner 要求保存本輪結論。核心方向是 places 保存地點、cool_spots 保存該地點的已發布降溫資訊，visitor_reports 分開保存多次造訪體驗；另保留來源與欄位來歷。** 一個 Place 可以有 **0 或 1 份 Cool Spot 資訊**，但可以有很多則回報；父子關係屬於 Places。這是設計方向，尚未轉成完整 SQL schema 或第六份 migration。
+
+下文將已收斂的責任分工、agent 的具體建議與未決規則分開記錄。尤其「回報改連 Place、普通公開場所可回報、當次精確位置與父頁彙整」是目前建議方案，尚未完成產品規則、資料相容及實作驗證。記錄討論不代表已授權改動 iOS／JSON。產品仍先完成 Cool Spot；獨立廁所搜尋、酒吧賽事搜尋只是可能的未來用途，尚未決定開發。
+
+### 1. 場所與降溫資訊分開
+
+同一間酒吧可以有降溫資訊，也可能日後有賽事資訊。共用的是場所身分；每種資訊有自己的內容、時間與發布規則。沒有降溫資訊的場所不會出現在 Cool Spot 清單。整棟建築與其中的降溫區域也不能混為同一範圍。
+
+| 資料責任 | 預計保存什麼 | 目前狀態 |
+|---|---|---|
+| places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 尚未建表；基本欄位預計從目前 cool_spots 拆出，父子欄位／限制與遷移待設計 |
+| cool_spots：已發布降溫資訊 | place_id 指向一個 Place；降溫設施、適用區域及使用條件；保留既有 Cool Spot ID | 現有表只有 id/name/location；建議 place_id 必填且唯一，確保一個 Place 最多一份目前的 Cool Spot 資訊，並非最多一則回報 |
+| visitor_reports：一次造訪的體驗 | 回報 ID、place_id、作者、造訪／發布時間、體感與選填答案；到訪／重試識別 | 尚未建表；建議改連 Place。現在 Swift VisitReport 仍以 spotID 連 CoolSpot，沒有作者或回報自己的座標 |
+
+來源與地圖資料另外處理：
+
+| 資料責任 | 預計保存什麼 | 目前狀態 |
+|---|---|---|
+| 來源介紹與原始紀錄 | 例如 data_sources 保存 GLA 2025 的介紹；source_records 保存各筆原始內容 | 尚未建表；來源不只限 GLA，社群範例保留明確標示 |
+| 來源關聯與欄位來歷 | 哪個公開欄位採用哪筆來源、如何取得或推導、何時採用 | 已有 JSON provenance；資料庫關聯、欄位及歷史保存方式待設計 |
+| 地圖身分關係 | 已接受的 Apple ID、同一場所或位於其中、配對依據 | 已有 JSON mapReferences；資料庫結構與唯一性限制待設計 |
+
+因此「places＋cool_spots＋GLA 資料」是三類資料的理解方式，**不代表最後只有三張表**。來源介紹、原始紀錄與對應關係有不同責任；確切表數及名稱要隨欄位和查詢設計定案。不要為了固定表數，把所有來源或未知的未來功能塞進一張萬用表。
+
+一則「今天覺得很涼」不會直接覆寫場所事實，也不會自動新增 Cool Spot。0／1 的限制只描述目前發布的降溫資訊；若日後要保留發布版本，另設歷史，不把 Visitor reports 當成版本。賽事等功能在需求確定後再設計，例如比賽需要場次與時間，不能先假定一個「有播比賽」布林值就足夠。
+
+`scope` 與 `place_type` 尚不是已批准的新 SQL 欄位。現有 v4 的 location.scope 表示 venue／specific_area／unknown，既不是公園邊界，也不能代替父子關係；保留讀取相容，是否入表及放在哪裡需按用途決定。placeType 是 App 的概略分類，不是 PostgreSQL 或 GLA 定義的標準；GLA 名稱規則推導與 Apple 類別映射要保留來源，未知不猜測。一般地點分類可由 places 負責，但分類集合／必填性待定；目前沒有獨立 pub／bar 代碼，新增前需另說明 Swift、schema、資料映射的影響。
+
+#### 園內點位與地圖收合
+
+**owner 暫時同意地圖不要一開始展開所有細部點位，並提出在海德公園標記提示園內地點數的想法。** 找公園、分享當次體驗和提案建立永久子地點應分開處理；不能強迫使用者先建立一棵樹的 Place 才能分享。下方海德公園／樹蔭／22 個點均為討論例子，沒有新增正式資料；具體圖示、文案、縮放與計數範圍待畫面驗證。
+
+建議將海德公園作為上層 Place，可辨認且值得再次找到的樹蔭區作為子 Place。例：P1 海德公園沒有父地點，P2 東門樹蔭與 P3 湖邊涼亭的父地點都是 P1；三者是不同 Place。各自只有在具備自己的已發布降溫資訊時才有 Cool Spot；P1 不必先成為 Cool Spot 才能包含 P2。父子關係描述地理包含，不是營運所有權；子點的設施、體驗或人數不會自動成為整座公園的事實。
+
+建議第一版採可空的 parent_place_id，一個 Place 最多一個直接父地點，可形成多層。使用者可提出「位於哪個地點內」，來源／審核也可提供依據；未確認時留空，不因離公園代表點近就自動建立。自我引用外鍵只能確認父 ID 存在，還需防止自指／循環，並定義更正、合併、刪除及權限規則。既有 Apple within_place 證據要保留，但不自動等同已建立的 Place 父子外鍵；跨多個父場所的需求再另評估。
+
+| 呈現層級 | 目前提案 |
+|---|---|
+| 搜尋或地圖收合時 | 先找到海德公園，提示園內有已發布的降溫點；例如標記顯示 `22 spots` 搭配多地點圖示，避免只有裸數字 `22` |
+| 點開公園時 | 顯示公園本身及園內子點的公開回報，逐則標明所屬地點；另可查看園內已發布降溫點，公園沒有自己的 Cool Spot 也能作為入口 |
+| 選定單一樹蔭時 | 閱讀該降溫點自己的回報與 Cooling here 資訊；地圖放大後可顯示細部點位 |
+
+`22 spots` 的意思是園內已發布的降溫點數，不是樹木總數、回報數或使用者人數。地點數提示與 Cooling here 的「最近十分鐘主動分享正在使用的人數」必須區分；建議公園集合標記先只呈現地點數，不同時疊人數。不得把園內各點的人數直接解釋成公園總人數。這是 UI 提案，尚未移除或更改現有單點標記的 `person.fill`＋人數徽章；具體樣式及計數／篩選範圍需另定。
+
+**目前建議：一則回報只存一次、歸屬一個 Place。** A 回報公園但未指定細部位置，只在公園頁顯示；B 回報東門樹蔭，在樹蔭頁及公園彙整頁顯示，均標明東門樹蔭；C 回報湖邊涼亭，在涼亭頁及公園頁顯示，不出現在樹蔭頁。父頁透過查詢顯示同一筆，不複製回報，不把子點回報改歸父點，也不將混合體感變成「整座公園都涼」的評分。預計按造訪時間排序並分頁；多層後代查詢／可見性與完整分頁規則仍待實作。
+
+阿明的兩種入口，建議如下；這不是目前可操作的 App click path：
+
+| 入口／目的 | 提案中的流程與保存方式 |
+|---|---|
+| 搜海德公園，分享樹下體驗 | 預設對公園回報，可選已有子地點；沒有合適子點時，可選填當次點位／位置說明，回報仍歸公園，不自動新增 Place。精確位置公開前需讓作者明確選擇及預覽，不能默默上傳 GPS |
+| 先存目前位置 | 仍是私人 Pin；之後可進入公開提案，或在具備回報資格並確認公共地點身分後走回報流程。私人名稱／備註不自動公開；收藏不會取得到訪資格，離開後無確認仍受既有資格限制 |
+| 希望別人日後能找到這片樹蔭 | 先問是否為既有同一地點，已有就沿用；沒有才提出新地點，再選填「位於哪裡」。選海德公園為父地點不取代樹蔭的名稱／座標，也不改私人 Pin；新公開點依現有名稱、點位、降溫資訊／照片規則送審。審核可採用新點、指向既有點或要求補充；不因鄰近自動合併 |
+
+agent 建議已確認的公開 Place 即使沒有自己的 Cool Spot、也沒有子點，仍可接收合資格的 Visitor report；否則第一位使用者仍會被迫先建立降溫點。這不表示任意 Apple 搜尋結果、私人 Pin 或未審提案立即可公開回報；身分接納、到訪資格、精確位置分享與審核邊界需先定案。一次回報的座標不同於 Place 代表座標，不代表永久子地點；子地點日後成立也不能只按距離搬移舊回報，需保留原歸屬與更正依據。
+
+**實作差距：** 現在普通場所不能寫 Visitor report，VisitReport 只有 spotID、沒有作者或自己的座標，父頁彙整與子點選擇也不存在。改成 place_id 涉及既有本機報告、草稿、到訪資格、API、Swift 與 JSON 相容；尤其父場所的到訪確認能否用於子點尚未決定，不能因父子關係就自動授權或繞過同次防重複。上述改動須在回報批次前說明並確認，不改寫現有 A–E 行為或把此提案算作驗收完成。
+
+### 2. 名稱、地址與座標以誰為準
+
+places 保存的是我們目前採用的值。初始值按建立途徑決定，不設定 Apple 永遠優先、GLA 永遠優先或最後傳入者優先。
+
+| 建立途徑 | 初始採用規則 |
+|---|---|
+| 目前 250 筆 GLA 場所 | 從既有 [CoolSpots.prototype.json](cool-spot/Resources/CoolSpots.prototype.json) 批次初始化，沿用已整理的 GLA 2025 名稱、地址、座標及既有身分／配對；不重新抓 Apple 自動覆蓋 |
+| 目前 3 筆社群範例 | 沿用 [CommunityCoolSpots.prototype.json](cool-spot/Resources/CommunityCoolSpots.prototype.json)，繼續標示 Example，不冒充 GLA 或目前真實狀態 |
+| 未來從 Apple Maps 選到場所 | 選中的名稱、地址與座標作為提案起點；先辨認是否已有對應場所，確認／審核後才採用為公開值 |
+| 未來從定位或地圖點位新增 | 使用者確認／調整點位並輸入名稱；地址可由座標查詢取得候選後確認，查不到保留未知。這是未來流程方向，不代表已有 GPS／地址查詢實作或新增必填規則 |
+
+首次匯入由程式處理 250 筆，不要求人工逐筆重建。既有重複身分疑點另行審查，不在匯入時按名稱或距離猜測合併。GLA 2025 是歷史來源，不保證今天仍涼爽、有空位或開放。
+
+Apple 配對表示兩個識別碼之間有已確認的關係，不代表必須改用 Apple 的全部欄位。手機定位只代表手機位置，不必然是場所入口或範圍。兩條新增途徑都要先查既有場所；已有對應就沿用，搜尋、私人 Pin、待審核提案不會自行變成公開 Cool Spot。
+
+### 3. 一萬筆資料也能查到每個欄位的來源
+
+只替整個 Place 標記「來自 GLA」不夠。資料庫需能查詢「欄位 → 採用的來源紀錄 → 原始內容及依據」。匯入或發布更新時，同時保存採用的值和來歷，避免值已變更、來源仍指向舊資料。
+
+例如 Canning Town Library 目前名稱、地址、座標都來自 GLA 2025 的紀錄 18。**假設**日後某筆地址更正通過審核：地址改連到那筆更正及審核依據，名稱與座標仍指向 GLA。這只是說明欄位來源可以不同，不是已有這筆更正。
+
+需要區分直接匯入、資料集假設、名稱規則推導與審核採用；沒有證據的值維持未知，不虛構來源或驗證日期。記錄資料集／版本、原始紀錄 ID、方法及已知的採用時間；下載、採用與實地驗證是不同時間。
+
+原始下載檔及 hash 繼續保留；JSONB 即使保存完整內容，也不等於保留下載檔的原始 bytes。初始來源快照不就地覆寫。**目前來源**與**修改歷史**是兩種能力：設計方向包括保留已採用更正的舊值、新值與依據；版本／歷史表及關聯尚未設計，不能宣稱現有 provenance 已提供完整後端歷史。
+
+來源更新或衝突先保留證據，核實後才更正公開值。未知不等於沒有；GLA 降溫區域的時間、設施或使用條件不能自動升格為整棟場所的事實。座位容量、來源溫度描述及目標族群留在原始內容，新增產品欄位需另外決定。
+
+### 4. ID 固定，排序另外決定
+
+新場所的建議是由後端透過 PostgreSQL 產生 UUID v4 一次並保存；P1/P2 是教學代號。名稱或座標修改時沿用 ID。現有 Cool Spot ID、來源 ID、Apple ID、datasetID 各有用途，不能互換；新增 places 身分與既有 Cool Spot ID 的映射仍需設計，不能直接換掉既有 ID。
+
+目前 cool_spots.id 的 SQL 型別是 text，支援既有字串契約；新增 places.id 採 uuid 是待實作提案，不是已執行的型別變更。[匯入程式](scripts/cool_spots/build_cool_spots.py) 保留 [identity registry](data/cool-spots/identity-registry.json) 的既有 ID，缺少對照時使用固定 GLA 2025 來源輸入產生 UUID v5。新匯入不得重編舊 ID，也不能假定不同年度或來源的紀錄 ID 指同一場所。
+
+UUID 只處理識別碼，不判定兩筆是不是同一間店，也不代替重試防重複。場所辨認、同時新增、身分合併與舊 ID 保留須另設規則；既有 same_place／within_place 與 Apple primary/alternate ID 行為要保留。附近按距離、文字搜尋按匹配規則，Visitor reports 依既有產品規則按造訪時間由新到舊；先回報不代表搜尋排前面或取得場所管理權。
+
+### 5. 查詢與 API 怎麼讀
+
+「附近 Cool Spots」使用 places 的座標，搭配 cool_spots 的已發布資訊；一個 SQL 可完成範圍篩選、JOIN、距離排序與結果限制。假設樹蔭有 Cool Spot、父公園沒有，樹蔭仍可被找到，距離按樹蔭自己的座標計算，不因父公園代表點較遠而排除。這是點到點距離，不是到公園邊界／入口或步行路線的距離。查所有公共 Places 則不要求有 Cool Spot，但只能查到自有資料庫已收錄的地點；Apple 搜尋仍負責其他地圖結果。
+
+後端先找符合條件的場所／已發布降溫資訊，再整批補上需要的來源與地圖關係，組成現有 v4 CoolSpotsResponse，包括 sources/items/sourceReferences/provenance/mapReferences。App 不需要知道內部分成幾張表；raw source、私人提案與無上限的回報歷史不塞進每筆地圖結果。
+
+| App 需求 | 後端還需要完成的設計 |
+|---|---|
+| 名稱／地址搜尋 | 搜尋欄位、排序、文字索引、是否容許拼字錯誤 |
+| 附近場所與設施篩選 | PostGIS 半徑、距離排序、篩選組合及空間索引 |
+| 地圖移動與縮放 | 畫面範圍查詢、結果上限／分頁及園內點位收合／展開；地點數與人數分開，不能默默省略大量結果 |
+| Apple 結果對應 Cool Spot | 查完整身分關係，不只比對手機已下載的某一頁結果 |
+| 詳情與回報 | Place 可連到 0／1 份 Cool Spot；公開回報另行分頁讀取，父頁可彙整子點但保留實際歸屬；私人歷史依登入者隔離，B 刷新能看到 A 剛發布的回報 |
+
+這些後端查詢都還沒完成。現有附近搜尋使用手機已載入的資料；Search this area 只重設 UI 狀態。PostGIS 型別不會自動完成查詢或建立所需索引。第一個 reader 先維持現有 253 筆的完整讀取契約；新搜尋／分頁介面與 iOS 變更要先解釋及設計。
+
+以下是本輪用來解釋責任的 API 草案，不是已存在的網址或已批准的路由／payload：
+
+| 草案 | 資料庫責任與回應 |
+|---|---|
+| GET /places/{id} | 讀 Place，LEFT JOIN 可選的 Cool Spot；例如 P1 的 coolSpot 為 null，P2 有自己的降溫資訊 |
+| GET /places/{id}/reports?includeChildren=true | 查該 Place 及公開子孫地點的回報，JOIN Places 取得所屬名稱，回傳分頁 items；每則帶實際 placeID／名稱，不改成父 ID |
+| POST /visitor-reports | 草案輸入 placeID、visitID、experience 及選填答案；作者來自驗證過的 session，伺服器核對資格與同次／重試防重複後原子寫入。回報時地點選擇與資格的關係仍待定案 |
+
+例如公園回報頁可組成 items 裡的兩筆：R2 → P2 東門樹蔭、R1 → P1 海德公園；P1/P2/R1/R2 均是教學代號。SQL 的「p.id = 公園 ID OR p.parent_place_id = 公園 ID」只涵蓋本身與一層子點；若採多層父子，需要遞迴查詢或其他已驗證方案，不把一層示例當成完整實作。
+
+#### JOIN 的取捨與效能驗證
+
+agent 推薦保留核心分工：Place 的身分與基本資料可獨立存在，Cool Spot 是可選的降溫資訊，多次回報有自己的生命週期。代價是需要 JOIN、外鍵與唯一性限制，並管理跨表寫入／來源一致性，以及父子回報的查詢與權限。這是可演進的方向，不代表所有欄位／流程已定案或效能已驗證。
+
+把 Place 與 Cool Spot 的一對一內容放同表，確實能少一些 JOIN、初期更簡單，不會僅因合表就必然重複資料；但普通地點也得承載降溫專用欄位，功能更緊密綁定。若再把多則回報或多個來源攤成同一大表，才會反覆複製地點資料或產生難查詢的大型巢狀內容。因此不為省一次 JOIN 合併所有責任；也不為未知未來功能先建萬用模型。
+
+一次 API 請求可用一次 SQL 組合多表，也可用少量整批查詢，不等於 App 必須發兩次 HTTP。PostgreSQL 依資料量、索引及條件選擇 JOIN／掃描策略，不必把兩表每一筆互相比對；實際順序由執行計畫決定。[官方 EXPLAIN 說明](https://www.postgresql.org/docs/17/using-explain.html)
+
+建議隨實際查詢設計下列措施，尚未新增到 migrations：
+
+- places.location 的 GiST 空間索引，搭配可用索引的 ST_DWithin 半徑篩選；SQL 回傳直線距離排序與有界結果。[PostGIS 說明](https://postgis.net/docs/ST_DWithin.html)
+- cool_spots.place_id 的 NOT NULL／UNIQUE／外鍵；父子及報告查詢評估 parent_place_id 索引，以及以 place_id、visited_at、id 組成的回報索引。UNIQUE／主鍵會建立索引，外鍵的引用欄位不會自動有索引；是否適用跨子點排序仍需看計畫。[PostgreSQL 限制說明](https://www.postgresql.org/docs/17/ddl-constraints.html)
+- 清單只讀必要資訊；來源／照片整批載入，回報另行分頁。避免每找到一個場所就再送一次查詢（N+1），也避免同時 JOIN 多組一對多資料造成列數倍增。第一個 253 筆 reader 的完整 v4 契約仍保留。
+- 用接近預期資料量的查詢執行 EXPLAIN (ANALYZE, BUFFERS)，再測 API 延遲、傳輸、連線池與並發；之後才按瓶頸決定是否快取或做彙整表。公共場所快取與新回報可見性分開處理。
+
+十萬名註冊者不等於十萬人同時請求。不能從表數、253 筆範例或目前的單元測試推論容量；目前沒有地理查詢效能、十萬人並發或 GBP 25/月容量／成本保證。即使 JOIN 很快，無上限回報、寬廣地圖結果、排序與傳輸仍可能成為瓶頸。
+
+### 實作邊界與下一步
+
+現有五份 migration 保留，不重寫已套用歷史。最近一次本機驗證為 2026-09-27：儲存 78 項、權限 24 項通過，場所表 0 筆。七個 handler tests 是直接呼叫函式並使用替身，沒有真實資料庫 reader、網路端點、部署或 iOS 後端連線。
+
+接下來先把 places／cool_spots 的最小欄位、既有 ID 對應、0／1 關係與座標搬移列成一批可驗證 cases；父子關係若進同批，先定循環／更正／刪除規則，再設計來源、欄位來歷、歷史與各表權限。第五份 migration 的權限只涵蓋現有 cool_spots，不能推論新表全部可公開讀取。回報改連 Place、普通公共 Place 的接納、父子到訪資格和選填位置的分享規則，在回報批次前集中確認；不為文件整理自行建立第六份 migration 或代寫 Green。
+
+依既有教學方式批次說明 cases，由 agent 寫 tests 並驗證 Red，再提供完整最小 Green 給 owner 輸入。結構與權限定案後，才批次初始化資料、接 reader 並驗證回應；登入與跨帳戶回報接續，場所提案／審核／發布在其後。未來廁所／賽事用途不改變這次的交付範圍，也不授權現在修改 iOS、JSON 格式、部署或操作雲端 SQL。
 
 ## Unresolved questions, not approved features
 
