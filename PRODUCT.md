@@ -196,7 +196,7 @@ The iOS implementation above remains local. On 2026-09-24 the owner created a Su
 
 | 資料責任 | 預計保存什麼 | 目前狀態 |
 |---|---|---|
-| places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 本機已建 id/name/location 與七個選填地址欄位；migration 八完成基本地址驗證。父子關係待後續，尚未匯入場所資料或接 App |
+| places：場所本身 | 穩定 ID、採用的名稱、地址、PostGIS 座標；可選的父 Place 關聯 | 本機已建 id/name/location、七個選填地址欄位與 place_type；地址與降溫批次已驗證。父子關係待後續，尚未接 App |
 | cool_spots：已發布降溫資訊 | place_id 指向一個 Place；降溫設施、適用區域及使用條件；保留既有 Cool Spot ID | 本機已有 id/place_id 與第九份 migration 的降溫／使用資訊；place_id 必填、唯一且為外鍵，確保一個 Place 最多一份目前資訊，並非最多一則回報；尚未匯入場所 |
 | visitor_reports：一次造訪的體驗 | 回報 ID、place_id、作者、造訪／發布時間、體感與選填答案；到訪／重試識別 | 尚未建表；建議改連 Place。現在 Swift VisitReport 仍以 spotID 連 CoolSpot，沒有作者或回報自己的座標 |
 
@@ -210,9 +210,9 @@ places 只保存已接納的公開場所，不放私人 Pin／待審提案。新
 
 | 資料責任 | 預計保存什麼 | 目前狀態 |
 |---|---|---|
-| 來源介紹與原始紀錄 | 例如 data_sources 保存 GLA 2025 的介紹；source_records 保存各筆原始內容 | 尚未建表；來源不只限 GLA，社群範例保留明確標示 |
-| 來源關聯與欄位來歷 | 哪個公開欄位採用哪筆來源、如何取得或推導、何時採用 | 已有 JSON provenance；資料庫關聯、欄位及歷史保存方式待設計 |
-| 地圖身分關係 | 已接受的 Apple ID、同一場所或位於其中、配對依據 | 已有 JSON mapReferences；資料庫結構與唯一性限制待設計 |
+| 來源介紹與原始紀錄 | data_sources 保存來源 metadata／原始檔相對位置／hash；source_records 保存 source_id＋record_id、raw_data、mapped_data、mapping_evidence | migration 十已建；mapped_data 是受限的原始 v4 相容快照，不是正式場所欄位，也不直接當 API 回應 |
+| 來源關聯與欄位來歷 | place_source_links 保存有序來源關聯；place_field_evidence 保存目前欄位的來源／方法／已知 recorded_at | migration 十／十一已建；使用明確的 places／cool_spots 欄位鍵，不複製正式值；未來一般更正／歷史流程仍待設計 |
+| 地圖身分關係 | place_map_links 保存 provider／external_place_id／relationship／verification／checked_at 與受限 evidence | migration 十已建；same_place 的 provider＋external ID 唯一；within_place 可共享父地點外部 ID，不生成 Place 父子關係 |
 
 因此「places＋cool_spots＋GLA 資料」是三類資料的理解方式，**不代表最後只有三張表**。來源介紹、原始紀錄與對應關係有不同責任；確切表數及名稱要隨欄位和查詢設計定案。不要為了固定表數，把所有來源或未知的未來功能塞進一張萬用表。
 
@@ -298,6 +298,12 @@ Apple 配對表示兩個識別碼之間有已確認的關係，不代表必須�
 ### 3. 一萬筆資料也能查到每個欄位的來源
 
 只替整個 Place 標記「來自 GLA」不夠。資料庫需能查詢「欄位 → 採用的來源紀錄 → 原始內容及依據」。**目前正式值以 places／cool_spots 為準**；來源保存採用依據，歷史保存過去的值，不能反過來把歷史表當成每次讀場所的唯一資料來源。原 field_adoptions 草案未獲整表批准，需按這個責任重新整理。匯入或發布更正時，正式值、採用依據與歷史須在同一交易一起成功或一起撤回，不能留下互相矛盾的資料。
+
+本機儲存採最小責任拆分：目前欄位依據放 place_field_evidence，首次匯入的正式 Place／Cool Spot 值與 evidence 快照放 catalogue_import_history。同一個初始資料重跑不重建 Place ID／歷史、不覆寫之後的值；輸入來源或 metadata 改變時停止，交給未來來源更新審查。這是初始匯入事件保存，不是已完成任意修改、審核或歷史還原 API。後續更正必須加入原子保存值／依據／歷史的寫入流程後才能開放。
+
+原始紀錄與對照快照由管理用途保存；reader 只能 SELECT source_records 的 source_id／record_id，以及公開來源、欄位依據、配對公開欄位與照片。raw_data／mapped_data／mapping_evidence、配對的 evidence 及 catalogue_import_history 不給 reader 直接讀取；anon／authenticated 不直接存取任何新表。未來 v4 相容輸出需設計限縮的舊欄位投影，不因需要相容而開放整份歷史／raw source。沒有建立後端登入或連線。
+
+place_photos 保存已發布資源 ID、Place 關聯、有序圖片／縮圖參照、尺寸、caption、已知 capture/publication 時間、attribution、來源類型及 contribution ID。既有三張 bundle 圖仍是明確 illustration 的本機範例；保存參照不代表上傳／HTTPS 圖片服務已完成。
 
 例如 Canning Town Library 目前名稱、地址、座標都來自 GLA 2025 的紀錄 18。**假設**日後某筆地址更正通過審核：地址改連到那筆更正及審核依據，名稱與座標仍指向 GLA。這只是說明欄位來源可以不同，不是已有這筆更正。
 

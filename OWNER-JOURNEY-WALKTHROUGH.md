@@ -4,6 +4,10 @@
 
 ## 本輪狀態與起點
 
+**2026-09-28 來源儲存 DB-C34–C38：134 assertions Green。** 降溫內容已提交 b47bd4f。第十份 preserve_catalogue_sources 新增七表、關聯、same_place 唯一索引及 RLS／限縮欄位 SELECT，沒有後端登入或 API reader。新表缺失時 Red 為 7 failed／1 skipped。首次 Green 檢查中三個 permission tests 誤用 generated identity 的 UPDATE，先遇到 428C9；改成合法 UPDATE 後各角色實際回 42501，未放寬權限斷言。補上 INSERT 拒絕後 132 項通過。
+
+匯入演練發現 field_key 的初始正規表示式不接受 address_line1。新增兩個獨立 cases，實際 Red 為合法地址鍵被拒、虛構欄位被接受（132 passed／2 failed）；不修改已套用 migration，新增第十一份 validate_evidence_field_keys 改成明確支援清單。最終 **134 passed／0 failed／0 skipped**。正式資料仍由 places／cool_spots 保存；欄位 evidence 不重複保存正式值，catalogue_import_history 只保留首次事件，未宣稱通用更正／審核歷史已完成。
+
 **2026-09-28 降溫內容 DB-C30–C33：Green。** 地址與已確認設計已提交 c69b3fd。新增 cooling_content.test.sql；結構 Red 為 18 failed／2 passed／1 skipped，沒有把缺欄位時未執行的行為算通過。第九份 migration 20260928220000_add_cooling_content.sql 加 places.place_type 與 17 個降溫／使用資訊欄位，不含 location_scope／eligibility_details。沿用 v4 固定代碼、unknown、空設施清單、選填非空白文字、正整數公告分鐘及成對 hours/time zone，不推論營業中。
 
 套用後本批 107 assertions 通過，連同既有四份 suite 共 **500 passed／0 failed／0 skipped**。測試涵蓋合法／非法代碼、NULL 與未知、七種設施及飲水分開、不可巢狀／含 NULL 的設施清單、可清空區域說明／補充、文字原樣保存、停留限制與時間成對；場所與 Cool Spot 身分保持。這是本機 schema Green，沒有 reader／HTTP／iOS 變更或效能宣稱。
