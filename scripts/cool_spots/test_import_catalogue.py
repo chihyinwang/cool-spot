@@ -89,6 +89,22 @@ class LocalTargetTests(unittest.TestCase):
                     with self.assertRaises(ValueError): require_local_docker()
 
 class LocalImportTests(unittest.TestCase):
+    def test_original_catalogue_retry_preserves_all_existing_rows_and_snapshots(self):
+        # Original records were imported before the naming migration. A retry
+        # must recognize their existing hashes, not manufacture a new import.
+        tables = ['places', 'cool_spots', 'data_sources', 'source_records',
+                  'place_source_links', 'place_field_inference_records',
+                  'place_map_links', 'place_photos', 'catalogue_import_history']
+        before = '\n'.join('create temporary table retry_before_'+table+
+            ' as select to_jsonb(t) as row from public.'+table+' t;' for table in tables)
+        after = '\n'.join("do $$ begin if exists ((select row from retry_before_"+table+
+            ") except all (select to_jsonb(t) from public."+table+" t)) or exists ((select to_jsonb(t) from public."+table+
+            " t) except all (select row from retry_before_"+table+")) then raise exception 'Retry changed "+table+
+            "'; end if; end $$;" for table in tables)
+        imported = render_import(load_catalogue(), commit=False).removeprefix('begin;\n').removesuffix('rollback;\n')
+        result = sql('begin;\n'+before+'\n'+imported+'\n'+after+'\nrollback;')
+        self.assertEqual(result.returncode,0,result.stderr)
+
     def test_imports_full_content_evidence_photos_and_stable_id_links_then_rolls_back(self):
         checks = """
 do $$ begin
@@ -96,23 +112,24 @@ do $$ begin
  if not exists(select 1 from places p join cool_spots c on c.place_id=p.id where c.id='db-import-test-5873b0cb-25d4-43a8-93a8-d9ced4c8d3ab' and p.name='Canning Town Library' and p.address_borough='Newham' and c.cooling_features=array['air_conditioning'] and c.drinking_water='yes' and abs(gis.st_x(p.location::gis.geometry)-0.010439996)<0.000000001 and abs(gis.st_y(p.location::gis.geometry)-51.516829995)<0.000000001) then raise exception 'incorrect adopted facts or coordinates'; end if;
 
  if exists (
-  select 1 from source_records s join place_source_links l on l.source_id=s.source_id and l.record_id=s.record_id
+  select 1 from source_records s join place_source_links l on l.source_id=s.source_id and l.source_record_id=s.source_record_id
   join places p on p.id=l.place_id join cool_spots c on c.place_id=p.id
+  join catalogue_import_history h on h.cool_spot_id=c.id
   where s.source_id like 'db-import-test-%' and (
    (p.name,p.place_type,p.address_line1,p.address_line2,p.address_locality,p.address_borough,p.address_postal_code,p.address_country_code,p.address_formatted)
-   is distinct from (s.mapped_data->>'name',s.mapped_data->>'placeType',s.mapped_data#>>'{address,line1}',s.mapped_data#>>'{address,line2}',s.mapped_data#>>'{address,locality}',s.mapped_data#>>'{address,borough}',s.mapped_data#>>'{address,postalCode}',s.mapped_data#>>'{address,countryCode}',s.mapped_data#>>'{address,formatted}')
-   or abs(gis.st_x(p.location::gis.geometry)-(s.mapped_data#>>'{location,longitude}')::double precision)>1e-9
-   or abs(gis.st_y(p.location::gis.geometry)-(s.mapped_data#>>'{location,latitude}')::double precision)>1e-9
+   is distinct from ((h.evidence_snapshot->'item')->>'name',(h.evidence_snapshot->'item')->>'placeType',(h.evidence_snapshot->'item')#>>'{address,line1}',(h.evidence_snapshot->'item')#>>'{address,line2}',(h.evidence_snapshot->'item')#>>'{address,locality}',(h.evidence_snapshot->'item')#>>'{address,borough}',(h.evidence_snapshot->'item')#>>'{address,postalCode}',(h.evidence_snapshot->'item')#>>'{address,countryCode}',(h.evidence_snapshot->'item')#>>'{address,formatted}')
+   or abs(gis.st_x(p.location::gis.geometry)-((h.evidence_snapshot->'item')#>>'{location,longitude}')::double precision)>1e-9
+   or abs(gis.st_y(p.location::gis.geometry)-((h.evidence_snapshot->'item')#>>'{location,latitude}')::double precision)>1e-9
    or (to_jsonb(c)-'id'-'place_id') is distinct from jsonb_build_object(
-     'setting',s.mapped_data->'setting','cooling_features',s.mapped_data->'coolingFeatures',
-     'cooling_details',s.mapped_data->'coolingDetails','additional_information',s.mapped_data->'additionalInformation',
-     'area_description',s.mapped_data#>'{access,areaDescription}','cost',s.mapped_data#>'{access,cost}',
-     'eligibility',s.mapped_data#>'{access,eligibility}','seating',s.mapped_data#>'{access,seating}',
-     'drinking_water',s.mapped_data#>'{access,drinkingWater}','toilets',s.mapped_data#>'{access,toilets}',
-     'wheelchair_access',s.mapped_data#>'{access,wheelchairAccess}','staffed_when_open',s.mapped_data#>'{access,staffedWhenOpen}',
-     'tables',s.mapped_data#>'{access,tables}','posted_stay_limit_status',s.mapped_data#>'{access,postedStayLimit,status}',
-     'posted_stay_limit_minutes',s.mapped_data#>'{access,postedStayLimit,minutes}',
-     'hours_text',s.mapped_data#>'{hours,text}','hours_time_zone',s.mapped_data#>'{hours,timeZone}')
+     'setting',(h.evidence_snapshot->'item')->'setting','cooling_features',(h.evidence_snapshot->'item')->'coolingFeatures',
+     'cooling_details',(h.evidence_snapshot->'item')->'coolingDetails','additional_information',(h.evidence_snapshot->'item')->'additionalInformation',
+     'area_description',(h.evidence_snapshot->'item')#>'{access,areaDescription}','cost',(h.evidence_snapshot->'item')#>'{access,cost}',
+     'eligibility',(h.evidence_snapshot->'item')#>'{access,eligibility}','seating',(h.evidence_snapshot->'item')#>'{access,seating}',
+     'drinking_water',(h.evidence_snapshot->'item')#>'{access,drinkingWater}','toilets',(h.evidence_snapshot->'item')#>'{access,toilets}',
+     'wheelchair_access',(h.evidence_snapshot->'item')#>'{access,wheelchairAccess}','staffed_when_open',(h.evidence_snapshot->'item')#>'{access,staffedWhenOpen}',
+     'tables',(h.evidence_snapshot->'item')#>'{access,tables}','posted_stay_limit_status',(h.evidence_snapshot->'item')#>'{access,postedStayLimit,status}',
+     'posted_stay_limit_minutes',(h.evidence_snapshot->'item')#>'{access,postedStayLimit,minutes}',
+     'hours_text',(h.evidence_snapshot->'item')#>'{hours,text}','hours_time_zone',(h.evidence_snapshot->'item')#>'{hours,timeZone}')
   )
  ) then raise exception 'one or more adopted fields differ from the input'; end if;
  if (select count(*) from place_photos where id like 'db-import-test-%') <> 3 then raise exception 'expected three labelled photos'; end if;
@@ -153,6 +170,15 @@ end $$;"""
         self.assertNotEqual(result.returncode,0)
         self.assertIn('Changed catalogue input requires review',result.stderr)
         self.assertEqual(sql('select count(*) from places; select count(*) from catalogue_import_history;').stdout,before)
+
+    def test_changed_source_header_rejects_retry_without_overwriting_existing_metadata(self):
+        plan = disposable_catalogue()
+        changed = copy.deepcopy(plan)
+        changed['sources'][0]['metadata']['url'] = 'https://example.org/a-different-source'
+        second = render_import(changed,commit=False).removeprefix('begin;\n').removesuffix('rollback;\n')
+        result = sql(render_import(plan,commit=False,checks=second))
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('Changed source metadata requires a separate source revision',result.stderr)
 
     def test_quotes_backslashes_and_sql_like_text_remain_data(self):
         plan=disposable_catalogue()

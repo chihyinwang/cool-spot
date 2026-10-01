@@ -6,23 +6,23 @@ select has_table('public','data_sources','DB-C34: provides data_sources');
 select has_table('public','source_records','DB-C34: provides source_records');
 select has_table('public','place_source_links','DB-C34: provides place_source_links');
 select has_table('public','place_map_links','DB-C34: provides place_map_links');
-select has_table('public','place_field_evidence','DB-C34: provides place_field_evidence');
+select has_table('public','place_field_inference_records','DB-C34: provides place_field_inference_records');
 select has_table('public','place_photos','DB-C34: provides place_photos');
 select has_table('public','catalogue_import_history','DB-C34: provides catalogue_import_history');
-select to_regclass('public.data_sources') is not null and to_regclass('public.source_records') is not null and to_regclass('public.place_source_links') is not null and to_regclass('public.place_map_links') is not null and to_regclass('public.place_field_evidence') is not null and to_regclass('public.place_photos') is not null and to_regclass('public.catalogue_import_history') is not null as ready \gset
+select to_regclass('public.data_sources') is not null and to_regclass('public.source_records') is not null and to_regclass('public.place_source_links') is not null and to_regclass('public.place_map_links') is not null and to_regclass('public.place_field_inference_records') is not null and to_regclass('public.place_photos') is not null and to_regclass('public.catalogue_import_history') is not null as ready \gset
 \if :ready
 insert into places(id,name,location) values
  ('00000000-0000-4000-8000-000000000501','Source Test One','SRID=4326;POINT(0 51)'),
  ('00000000-0000-4000-8000-000000000502','Source Test Two','SRID=4326;POINT(1 52)');
-insert into data_sources(id,provider,label,metadata) values ('db-source','gla','Test source','{"id":"db-source"}');
-insert into source_records(source_id,record_id,raw_data,mapped_data,mapping_evidence) values ('db-source','18','{"cs_name":"Original source name"}','{"id":"old-cool-id","location":{"scope":"unknown"}}','{}');
-insert into place_source_links(place_id,source_id,record_id,position) values ('00000000-0000-4000-8000-000000000501','db-source','18',0);
-select throws_ok($$insert into place_source_links(place_id,source_id,record_id,position) values ('00000000-0000-4000-8000-000000000502','db-source','missing',0)$$,'23503',null,'DB-C35: cannot link a missing source record');
-select throws_ok($$insert into source_records(source_id,record_id,raw_data,mapped_data,mapping_evidence) values ('db-source','18','{}','{}','{}')$$,'23505',null,'source record identities cannot silently replace earlier evidence');
-select lives_ok($$insert into place_field_evidence(place_id,field_key,source_id,record_id,method) values ('00000000-0000-4000-8000-000000000501','places.name','db-source','18','imported')$$,'records the current name evidence');
-select throws_ok($$insert into place_field_evidence(place_id,field_key,source_id,record_id,method) values ('00000000-0000-4000-8000-000000000502','places.name','db-source','18','imported')$$,'23503',null,'field evidence must belong to a source linked to the same Place');
-select lives_ok($$insert into place_field_evidence(place_id,field_key,source_id,record_id,method) values ('00000000-0000-4000-8000-000000000501','places.address_line1','db-source','18','imported')$$,'tracks address line 1 evidence');
-select throws_ok($$insert into place_field_evidence(place_id,field_key,source_id,record_id,method) values ('00000000-0000-4000-8000-000000000501','places.made_up','db-source','18','imported')$$,'23514',null,'rejects evidence pointing to a nonexistent adopted field');
+insert into data_sources(id,provider,label,is_example) values ('db-source','gla','Test source',false);
+insert into source_records(source_id,source_record_id,raw_record,import_audit) values ('db-source','18','{"cs_name":"Original source name"}','{}');
+insert into place_source_links(place_id,source_id,source_record_id,position) values ('00000000-0000-4000-8000-000000000501','db-source','18',0);
+select throws_ok($$insert into place_source_links(place_id,source_id,source_record_id,position) values ('00000000-0000-4000-8000-000000000502','db-source','missing',0)$$,'23503',null,'DB-C35: cannot link a missing source record');
+select throws_ok($$insert into source_records(source_id,source_record_id,raw_record,import_audit) values ('db-source','18','{}','{}')$$,'23505',null,'source record identities cannot silently replace earlier evidence');
+select lives_ok($$insert into place_field_inference_records(place_id,field_key,source_id,source_record_id,derivation_method) values ('00000000-0000-4000-8000-000000000501','places.name','db-source','18','mapped_from_source')$$,'records the current name evidence');
+select throws_ok($$insert into place_field_inference_records(place_id,field_key,source_id,source_record_id,derivation_method) values ('00000000-0000-4000-8000-000000000502','places.name','db-source','18','mapped_from_source')$$,'23503',null,'field evidence must belong to a source linked to the same Place');
+select lives_ok($$insert into place_field_inference_records(place_id,field_key,source_id,source_record_id,derivation_method) values ('00000000-0000-4000-8000-000000000501','places.address_line1','db-source','18','mapped_from_source')$$,'tracks address line 1 evidence');
+select throws_ok($$insert into place_field_inference_records(place_id,field_key,source_id,source_record_id,derivation_method) values ('00000000-0000-4000-8000-000000000501','places.made_up','db-source','18','mapped_from_source')$$,'23514',null,'rejects evidence pointing to a nonexistent adopted field');
 select lives_ok($$insert into place_map_links(place_id,provider,external_place_id,relationship,verification) values ('00000000-0000-4000-8000-000000000501','apple_maps','test-apple-id','same_place','reviewed')$$,'DB-C36: stores an accepted same-place identity');
 select throws_ok($$insert into place_map_links(place_id,provider,external_place_id,relationship,verification) values ('00000000-0000-4000-8000-000000000502','apple_maps','test-apple-id','same_place','automatic')$$,'23505',null,'the same external identity cannot mean two public Places');
 select lives_ok($$insert into place_map_links(place_id,provider,external_place_id,relationship,verification) values ('00000000-0000-4000-8000-000000000502','apple_maps','test-apple-id','within_place','reviewed')$$,'a containing venue reference does not merge two Places');
@@ -34,7 +34,7 @@ select ok((select relrowsecurity from pg_class where oid='public.data_sources'::
 select ok((select relrowsecurity from pg_class where oid='public.source_records'::regclass),'DB-C38: RLS protects source_records');
 select ok((select relrowsecurity from pg_class where oid='public.place_source_links'::regclass),'DB-C38: RLS protects place_source_links');
 select ok((select relrowsecurity from pg_class where oid='public.place_map_links'::regclass),'DB-C38: RLS protects place_map_links');
-select ok((select relrowsecurity from pg_class where oid='public.place_field_evidence'::regclass),'DB-C38: RLS protects place_field_evidence');
+select ok((select relrowsecurity from pg_class where oid='public.place_field_inference_records'::regclass),'DB-C38: RLS protects place_field_inference_records');
 select ok((select relrowsecurity from pg_class where oid='public.place_photos'::regclass),'DB-C38: RLS protects place_photos');
 select ok((select relrowsecurity from pg_class where oid='public.catalogue_import_history'::regclass),'DB-C38: RLS protects catalogue_import_history');
 grant usage on schema extensions to cool_spots_reader;
@@ -44,10 +44,10 @@ select throws_ok($$insert into data_sources default values$$,'42501',null,'anon 
 select throws_ok($$insert into source_records default values$$,'42501',null,'anon cannot insert source_records');
 select throws_ok($$insert into place_source_links default values$$,'42501',null,'anon cannot insert place_source_links');
 select throws_ok($$insert into place_map_links default values$$,'42501',null,'anon cannot insert place_map_links');
-select throws_ok($$insert into place_field_evidence default values$$,'42501',null,'anon cannot insert place_field_evidence');
+select throws_ok($$insert into place_field_inference_records default values$$,'42501',null,'anon cannot insert place_field_inference_records');
 select throws_ok($$insert into place_photos default values$$,'42501',null,'anon cannot insert place_photos');
 select throws_ok($$insert into catalogue_import_history default values$$,'42501',null,'anon cannot insert catalogue_import_history');
-select throws_ok($$select * from data_sources$$,'42501',null,'anon cannot directly read data_sources');
+select throws_ok($$select id,provider,label,dataset_name,source_url,download_url,retrieved_at,source_updated_at,is_example,raw_file_sha256 from data_sources$$,'42501',null,'anon cannot directly read data_sources');
 select throws_ok($$update data_sources set id=id$$,'42501',null,'anon cannot update data_sources');
 select throws_ok($$delete from data_sources$$,'42501',null,'anon cannot delete data_sources');
 select throws_ok($$truncate table data_sources$$,'42501',null,'anon cannot truncate data_sources');
@@ -63,10 +63,10 @@ select throws_ok($$select * from place_map_links$$,'42501',null,'anon cannot dir
 select throws_ok($$update place_map_links set place_id=place_id$$,'42501',null,'anon cannot update place_map_links');
 select throws_ok($$delete from place_map_links$$,'42501',null,'anon cannot delete place_map_links');
 select throws_ok($$truncate table place_map_links$$,'42501',null,'anon cannot truncate place_map_links');
-select throws_ok($$select * from place_field_evidence$$,'42501',null,'anon cannot directly read place_field_evidence');
-select throws_ok($$update place_field_evidence set source_id=source_id$$,'42501',null,'anon cannot update place_field_evidence');
-select throws_ok($$delete from place_field_evidence$$,'42501',null,'anon cannot delete place_field_evidence');
-select throws_ok($$truncate table place_field_evidence$$,'42501',null,'anon cannot truncate place_field_evidence');
+select throws_ok($$select * from place_field_inference_records$$,'42501',null,'anon cannot directly read place_field_inference_records');
+select throws_ok($$update place_field_inference_records set source_id=source_id$$,'42501',null,'anon cannot update place_field_inference_records');
+select throws_ok($$delete from place_field_inference_records$$,'42501',null,'anon cannot delete place_field_inference_records');
+select throws_ok($$truncate table place_field_inference_records$$,'42501',null,'anon cannot truncate place_field_inference_records');
 select throws_ok($$select * from place_photos$$,'42501',null,'anon cannot directly read place_photos');
 select throws_ok($$update place_photos set id=id$$,'42501',null,'anon cannot update place_photos');
 select throws_ok($$delete from place_photos$$,'42501',null,'anon cannot delete place_photos');
@@ -81,10 +81,10 @@ select throws_ok($$insert into data_sources default values$$,'42501',null,'authe
 select throws_ok($$insert into source_records default values$$,'42501',null,'authenticated cannot insert source_records');
 select throws_ok($$insert into place_source_links default values$$,'42501',null,'authenticated cannot insert place_source_links');
 select throws_ok($$insert into place_map_links default values$$,'42501',null,'authenticated cannot insert place_map_links');
-select throws_ok($$insert into place_field_evidence default values$$,'42501',null,'authenticated cannot insert place_field_evidence');
+select throws_ok($$insert into place_field_inference_records default values$$,'42501',null,'authenticated cannot insert place_field_inference_records');
 select throws_ok($$insert into place_photos default values$$,'42501',null,'authenticated cannot insert place_photos');
 select throws_ok($$insert into catalogue_import_history default values$$,'42501',null,'authenticated cannot insert catalogue_import_history');
-select throws_ok($$select * from data_sources$$,'42501',null,'authenticated cannot directly read data_sources');
+select throws_ok($$select id,provider,label,dataset_name,source_url,download_url,retrieved_at,source_updated_at,is_example,raw_file_sha256 from data_sources$$,'42501',null,'authenticated cannot directly read data_sources');
 select throws_ok($$update data_sources set id=id$$,'42501',null,'authenticated cannot update data_sources');
 select throws_ok($$delete from data_sources$$,'42501',null,'authenticated cannot delete data_sources');
 select throws_ok($$truncate table data_sources$$,'42501',null,'authenticated cannot truncate data_sources');
@@ -100,10 +100,10 @@ select throws_ok($$select * from place_map_links$$,'42501',null,'authenticated c
 select throws_ok($$update place_map_links set place_id=place_id$$,'42501',null,'authenticated cannot update place_map_links');
 select throws_ok($$delete from place_map_links$$,'42501',null,'authenticated cannot delete place_map_links');
 select throws_ok($$truncate table place_map_links$$,'42501',null,'authenticated cannot truncate place_map_links');
-select throws_ok($$select * from place_field_evidence$$,'42501',null,'authenticated cannot directly read place_field_evidence');
-select throws_ok($$update place_field_evidence set source_id=source_id$$,'42501',null,'authenticated cannot update place_field_evidence');
-select throws_ok($$delete from place_field_evidence$$,'42501',null,'authenticated cannot delete place_field_evidence');
-select throws_ok($$truncate table place_field_evidence$$,'42501',null,'authenticated cannot truncate place_field_evidence');
+select throws_ok($$select * from place_field_inference_records$$,'42501',null,'authenticated cannot directly read place_field_inference_records');
+select throws_ok($$update place_field_inference_records set source_id=source_id$$,'42501',null,'authenticated cannot update place_field_inference_records');
+select throws_ok($$delete from place_field_inference_records$$,'42501',null,'authenticated cannot delete place_field_inference_records');
+select throws_ok($$truncate table place_field_inference_records$$,'42501',null,'authenticated cannot truncate place_field_inference_records');
 select throws_ok($$select * from place_photos$$,'42501',null,'authenticated cannot directly read place_photos');
 select throws_ok($$update place_photos set id=id$$,'42501',null,'authenticated cannot update place_photos');
 select throws_ok($$delete from place_photos$$,'42501',null,'authenticated cannot delete place_photos');
@@ -118,14 +118,14 @@ select throws_ok($$insert into data_sources default values$$,'42501',null,'cool_
 select throws_ok($$insert into source_records default values$$,'42501',null,'cool_spots_reader cannot insert source_records');
 select throws_ok($$insert into place_source_links default values$$,'42501',null,'cool_spots_reader cannot insert place_source_links');
 select throws_ok($$insert into place_map_links default values$$,'42501',null,'cool_spots_reader cannot insert place_map_links');
-select throws_ok($$insert into place_field_evidence default values$$,'42501',null,'cool_spots_reader cannot insert place_field_evidence');
+select throws_ok($$insert into place_field_inference_records default values$$,'42501',null,'cool_spots_reader cannot insert place_field_inference_records');
 select throws_ok($$insert into place_photos default values$$,'42501',null,'cool_spots_reader cannot insert place_photos');
 select throws_ok($$insert into catalogue_import_history default values$$,'42501',null,'cool_spots_reader cannot insert catalogue_import_history');
-select lives_ok($$select * from data_sources$$,'reader can read public metadata from data_sources');
+select lives_ok($$select id,provider,label,dataset_name,source_url,download_url,retrieved_at,source_updated_at,is_example,raw_file_sha256 from data_sources$$,'reader can read public metadata from data_sources');
 select throws_ok($$update data_sources set id=id$$,'42501',null,'cool_spots_reader cannot update data_sources');
 select throws_ok($$delete from data_sources$$,'42501',null,'cool_spots_reader cannot delete data_sources');
 select throws_ok($$truncate table data_sources$$,'42501',null,'cool_spots_reader cannot truncate data_sources');
-select lives_ok($$select source_id,record_id from source_records$$,'reader can read public metadata from source_records');
+select lives_ok($$select source_id,source_record_id from source_records$$,'reader can read public metadata from source_records');
 select throws_ok($$update source_records set source_id=source_id$$,'42501',null,'cool_spots_reader cannot update source_records');
 select throws_ok($$delete from source_records$$,'42501',null,'cool_spots_reader cannot delete source_records');
 select throws_ok($$truncate table source_records$$,'42501',null,'cool_spots_reader cannot truncate source_records');
@@ -137,10 +137,10 @@ select lives_ok($$select place_id,external_place_id from place_map_links$$,'read
 select throws_ok($$update place_map_links set place_id=place_id$$,'42501',null,'cool_spots_reader cannot update place_map_links');
 select throws_ok($$delete from place_map_links$$,'42501',null,'cool_spots_reader cannot delete place_map_links');
 select throws_ok($$truncate table place_map_links$$,'42501',null,'cool_spots_reader cannot truncate place_map_links');
-select lives_ok($$select * from place_field_evidence$$,'reader can read public metadata from place_field_evidence');
-select throws_ok($$update place_field_evidence set source_id=source_id$$,'42501',null,'cool_spots_reader cannot update place_field_evidence');
-select throws_ok($$delete from place_field_evidence$$,'42501',null,'cool_spots_reader cannot delete place_field_evidence');
-select throws_ok($$truncate table place_field_evidence$$,'42501',null,'cool_spots_reader cannot truncate place_field_evidence');
+select lives_ok($$select * from place_field_inference_records$$,'reader can read public metadata from place_field_inference_records');
+select throws_ok($$update place_field_inference_records set source_id=source_id$$,'42501',null,'cool_spots_reader cannot update place_field_inference_records');
+select throws_ok($$delete from place_field_inference_records$$,'42501',null,'cool_spots_reader cannot delete place_field_inference_records');
+select throws_ok($$truncate table place_field_inference_records$$,'42501',null,'cool_spots_reader cannot truncate place_field_inference_records');
 select lives_ok($$select * from place_photos$$,'reader can read public metadata from place_photos');
 select throws_ok($$update place_photos set id=id$$,'42501',null,'cool_spots_reader cannot update place_photos');
 select throws_ok($$delete from place_photos$$,'42501',null,'cool_spots_reader cannot delete place_photos');
@@ -151,7 +151,7 @@ select throws_ok($$delete from catalogue_import_history$$,'42501',null,'cool_spo
 select throws_ok($$truncate table catalogue_import_history$$,'42501',null,'cool_spots_reader cannot truncate catalogue_import_history');
 reset role;
 set local role cool_spots_reader;
-select throws_ok($$select raw_data,mapped_data,mapping_evidence from source_records$$,'42501',null,'raw source and compatibility snapshots are not readable by the public reader');
+select throws_ok($$select raw_record,import_audit from source_records$$,'42501',null,'raw source and import audit are not readable by the public reader');
 select throws_ok($$select evidence from place_map_links$$,'42501',null,'private reconciliation evidence is not part of map metadata');
 reset role;
 \else

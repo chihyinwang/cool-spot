@@ -45,6 +45,9 @@ FIELD_KEYS = {
 }
 # Retained exclusively in the immutable input snapshot, never as new domain columns.
 LEGACY_POINTERS = {'/location/scope','/access/eligibilityDetails'}
+# The input plan deliberately keeps its original keys/method codes. Existing
+# import hashes and immutable snapshots use this canonical format. SQL maps it
+# to the current storage names; renaming the input would break identical retries.
 
 def require(condition, message):
     if not condition: raise ValueError(message)
@@ -155,6 +158,8 @@ def load_catalogue(root=ROOT):
             fields=[]; field_keys=set()
             for entry in item['provenance']:
                 require(entry['sourceID']==sid and entry['recordID']==rid,'unrelated field evidence')
+                require(entry['method']!='reviewed_contribution' or document is community,
+                        'legacy reviewed_contribution is reserved for labelled examples')
                 for pointer in entry['fields']:
                     value=item
                     for part in pointer.lstrip('/').split('/'): value=value[part]
@@ -194,18 +199,35 @@ do $$ begin
  if exists(select 1 from cs_import_rows r join public.cool_spots c on c.id=r.payload->'item'->>'id' where r.is_new) then
   raise exception 'Existing Cool Spot has no initial import history; review before importing';
  end if;
- if exists(select 1 from cs_import_rows r join public.catalogue_import_history h on h.cool_spot_id=r.payload->'item'->>'id' where h.input_sha256<>r.payload->>'fingerprint') then
+ if exists(select 1 from cs_import_rows r join public.catalogue_import_history h on h.cool_spot_id=r.payload->'item'->>'id' where h.import_payload_sha256<>r.payload->>'fingerprint') then
   raise exception 'Changed catalogue input requires review; existing facts were not overwritten';
  end if;
- if exists(select 1 from cs_import_document d cross join lateral jsonb_array_elements(d.data->'sources') s(value) join public.data_sources old on old.id=s.value->>'id' where to_jsonb(old)<>s.value) then
+ if exists(
+  select 1 from cs_import_document d
+  cross join lateral jsonb_array_elements(d.data->'sources') s(value)
+  join public.data_sources old on old.id=s.value->>'id'
+  where (old.provider,old.label,old.raw_file_path,old.raw_file_sha256,
+         old.dataset_name,old.source_url,old.download_url,old.retrieved_at,
+         old.source_updated_at,old.is_example)
+  is distinct from
+        (s.value->>'provider',s.value->>'label',s.value->>'raw_file_path',s.value->>'raw_sha256',
+         s.value#>>'{metadata,dataset}',s.value#>>'{metadata,url}',s.value#>>'{metadata,downloadURL}',
+         (s.value#>>'{metadata,retrievedAt}')::timestamptz,
+         (s.value#>>'{metadata,sourceUpdatedAt}')::timestamptz,
+         coalesce((s.value#>>'{metadata,isExample}')::boolean,false))
+ ) then
   raise exception 'Changed source metadata requires a separate source revision';
  end if;
 end $$;
-insert into public.data_sources(id,provider,label,metadata,raw_file_path,raw_sha256)
-select value->>'id',value->>'provider',value->>'label',value->'metadata',value->>'raw_file_path',value->>'raw_sha256'
+insert into public.data_sources(id,provider,label,raw_file_path,raw_file_sha256,
+ dataset_name,source_url,download_url,retrieved_at,source_updated_at,is_example)
+select value->>'id',value->>'provider',value->>'label',value->>'raw_file_path',value->>'raw_sha256',
+ value#>>'{metadata,dataset}',value#>>'{metadata,url}',value#>>'{metadata,downloadURL}',
+ (value#>>'{metadata,retrievedAt}')::timestamptz,(value#>>'{metadata,sourceUpdatedAt}')::timestamptz,
+ coalesce((value#>>'{metadata,isExample}')::boolean,false)
 from cs_import_document cross join lateral jsonb_array_elements(data->'sources') on conflict do nothing;
-insert into public.source_records(source_id,record_id,raw_data,mapped_data,mapping_evidence)
-select payload->>'source_id',payload->>'record_id',payload->'raw_data',payload->'item',payload->'mapping_evidence'
+insert into public.source_records(source_id,source_record_id,raw_record,import_audit)
+select payload->>'source_id',payload->>'record_id',payload->'raw_data',payload->'mapping_evidence'
 from cs_import_rows where is_new;
 insert into public.places(id,name,location,place_type,address_line1,address_line2,address_locality,address_borough,address_postal_code,address_country_code,address_formatted)
 select place_id,item->>'name',gis.st_setsrid(gis.st_makepoint((item->'location'->>'longitude')::double precision,(item->'location'->>'latitude')::double precision),4326)::gis.geography,
@@ -214,10 +236,18 @@ from cs_import_rows cross join lateral (select payload->'item' as item) i where 
 insert into public.cool_spots(id,place_id,setting,cooling_features,cooling_details,area_description,cost,eligibility,seating,drinking_water,toilets,wheelchair_access,staffed_when_open,tables,posted_stay_limit_status,posted_stay_limit_minutes,additional_information,hours_text,hours_time_zone)
 select item->>'id',place_id,item->>'setting',array(select jsonb_array_elements_text(item->'coolingFeatures')),item->>'coolingDetails',item->'access'->>'areaDescription',item->'access'->>'cost',item->'access'->>'eligibility',item->'access'->>'seating',item->'access'->>'drinkingWater',item->'access'->>'toilets',item->'access'->>'wheelchairAccess',item->'access'->>'staffedWhenOpen',item->'access'->>'tables',item->'access'->'postedStayLimit'->>'status',(item->'access'->'postedStayLimit'->>'minutes')::integer,item->>'additionalInformation',item->'hours'->>'text',item->'hours'->>'timeZone'
 from cs_import_rows cross join lateral (select payload->'item' as item) i where is_new;
-insert into public.place_source_links(place_id,source_id,record_id,position)
+insert into public.place_source_links(place_id,source_id,source_record_id,position)
 select place_id,payload->>'source_id',payload->>'record_id',0 from cs_import_rows where is_new;
-insert into public.place_field_evidence(place_id,field_key,source_id,record_id,method,recorded_at)
-select place_id,value->>'field_key',value->>'source_id',value->>'record_id',value->>'method',(value->>'recorded_at')::timestamptz
+insert into public.place_field_inference_records(place_id,field_key,source_id,source_record_id,derivation_method,recorded_at)
+select place_id,value->>'field_key',value->>'source_id',value->>'record_id',
+ case value->>'method'
+  when 'imported' then 'mapped_from_source'
+  when 'dataset_context' then 'inferred_from_context'
+  when 'name_rule' then 'inferred_from_name'
+  when 'reviewed_contribution' then case when
+   (select is_example from public.data_sources where id=value->>'source_id') then 'example_data' end
+ end,
+ (value->>'recorded_at')::timestamptz
 from cs_import_rows cross join lateral jsonb_array_elements(payload->'fields') where is_new;
 insert into public.place_map_links(place_id,provider,external_place_id,relationship,verification,checked_at,evidence)
 select place_id,value->>'provider',value->>'placeID',value->>'relationship',value->>'verification',(value->>'checkedAt')::timestamptz,payload->'mapping_evidence'
@@ -225,7 +255,7 @@ from cs_import_rows cross join lateral jsonb_array_elements(payload->'item'->'ma
 insert into public.place_photos(id,place_id,thumbnail_ref,image_ref,width,height,caption,captured_at,published_at,attribution,source_kind,contribution_id,position)
 select photo->>'id',place_id,photo->>'thumbnailURL',photo->>'imageURL',(photo->>'width')::integer,(photo->>'height')::integer,photo->>'caption',(photo->>'capturedAt')::timestamptz,(photo->>'publishedAt')::timestamptz,photo->>'attribution',photo->>'source',photo->>'contributionID',(position-1)::integer
 from cs_import_rows cross join lateral jsonb_array_elements(payload->'item'->'photos') with ordinality as photos(photo,position) where is_new;
-insert into public.catalogue_import_history(place_id,cool_spot_id,input_sha256,place_snapshot,cool_spot_snapshot,evidence_snapshot)
+insert into public.catalogue_import_history(place_id,cool_spot_id,import_payload_sha256,place_snapshot,cool_spot_snapshot,evidence_snapshot)
 select r.place_id,c.id,r.payload->>'fingerprint',to_jsonb(p),to_jsonb(c),jsonb_build_object('document_metadata',r.payload->'document_metadata','item',r.payload->'item','fields',r.payload->'fields','sourceID',r.payload->>'source_id','recordID',r.payload->>'record_id')
 from cs_import_rows r join public.places p on p.id=r.place_id join public.cool_spots c on c.id=r.payload->'item'->>'id' where r.is_new;
 drop table cs_import_rows;
