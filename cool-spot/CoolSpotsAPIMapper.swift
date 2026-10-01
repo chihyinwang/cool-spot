@@ -1,5 +1,48 @@
 import Foundation
 
+struct CoolSpotAPIRecord {
+    let schemaVersion: Int
+    let datasetID: String
+    let generatedAt: String
+    let sources: [CoolSpotsAPIResponse.Source]
+    let item: CoolSpotsAPIResponse.Item
+
+    var applePlaceID: String? {
+        acceptedMapReferences.first {
+            $0.relationship == "same_place"
+        }?.placeID
+    }
+
+    var detailsApplePlaceID: String? {
+        applePlaceID ?? acceptedMapReferences.first {
+            $0.relationship == "within_place"
+        }?.placeID
+    }
+
+    var displayablePhotos: [PlacePhotoAsset] {
+        let isExample = sources.first?.isExample == true
+
+        return item.photos.filter { photo in
+            guard photo.isDisplayable else { return false }
+
+            return [photo.thumbnailURL, photo.imageURL].allSatisfy { url in
+                url.scheme == "https" ||
+                (url.scheme == "bundle" &&
+                 isExample &&
+                 photo.source == "illustration")
+            }
+        }
+    }
+
+    private var acceptedMapReferences: [CoolSpotsAPIResponse.Item.MapReference] {
+        item.mapReferences.filter {
+            $0.provider == "apple_maps" &&
+            ["automatic", "reviewed"].contains($0.verification) &&
+            !$0.placeID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+}
+
 extension CoolSpotsAPIResponse {
     func makeSpots() -> [CoolSpot] {
         let sourceByID = Dictionary(
@@ -7,9 +50,25 @@ extension CoolSpotsAPIResponse {
         )
 
         return items.map { item in
-            let primarySource = item.sourceReferences.first.flatMap {
-                sourceByID[$0.sourceID]
-            }
+            var linkedSourceIDs = Set<String>()
+
+            let linkedSources: [CoolSpotsAPIResponse.Source] =
+                item.sourceReferences.compactMap { reference in
+                    guard linkedSourceIDs.insert(reference.sourceID).inserted else {
+                        return nil
+                    }
+                    return sourceByID[reference.sourceID]
+                }
+
+            let record = CoolSpotAPIRecord(
+                schemaVersion: schemaVersion,
+                datasetID: datasetID,
+                generatedAt: generatedAt,
+                sources: linkedSources,
+                item: item
+            )
+
+            let primarySource = record.sources.first
 
             let sourceKind: SpotSource = switch primarySource?.provider {
             case "gla": .gla
@@ -66,6 +125,9 @@ extension CoolSpotsAPIResponse {
             )
 
             spot.placeID = item.placeID
+            spot.apiRecord = record
+            spot.applePlaceID = record.applePlaceID
+            spot.photos = record.displayablePhotos
             spot.entryEligibility = switch item.access.eligibility {
             case .everyone: .everyone
             case .limited: .limited

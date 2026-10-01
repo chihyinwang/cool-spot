@@ -303,14 +303,20 @@ struct CoolSpot: Identifiable {
     var entryInformation = ""
     var information = PlaceInformation()
     var placeID: UUID? = nil
+    var apiRecord: CoolSpotAPIRecord? = nil
     var applePlaceID: String? = nil
     var photos: [PlacePhotoAsset] = []
     var publishedRecord: CoolSpotsResponse.Item? = nil
     var isExample: Bool { information.source.isExample }
     var sourceLabel: String { information.source.label }
     var detailsApplePlaceID: String? {
-        publishedRecord?.mapReferences?.first {
-            $0.provider == "apple_maps" && ["same_place", "within_place"].contains($0.relationship) &&
+        if let apiRecord {
+            return apiRecord.detailsApplePlaceID
+        }
+
+        return publishedRecord?.mapReferences?.first {
+            $0.provider == "apple_maps" &&
+            ["same_place", "within_place"].contains($0.relationship) &&
             ["automatic", "reviewed"].contains($0.verification)
         }?.placeID ?? applePlaceID
     }

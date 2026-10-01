@@ -4,6 +4,27 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：v5 → 畫面模型的第二批已 Green，相關測試 37 passed／0 failed。** 起點 Prototyping／5c895ce。Owner 先要求維持相同教學原則繼續；收到 verified Red 與完整最小 Green 後，明確委託「你幫我做吧」。開始時 project 的 owner test-plan reference／格式修改、已 staged 的 cool-spot.xctestplan 與 untracked shared scheme 均保留。Xcode 仍開啟 prototype／Cool Spot Contract QA；之前的執行已停止，loader 第 43 行的本機中斷點仍在，沒有操作 owner App 資料。
+
+先說明影響與取捨，再於既有 [CoolSpotsAPIMapperTests.swift](cool-spotTests/CoolSpotsAPIMapperTests.swift) 寫八項 tests／合成 helpers，在 [CoolSpotsAPIMapper.swift](cool-spot/CoolSpotsAPIMapper.swift) 只加入 CoolSpotAPIRecord 的五個儲存欄位介面，並在 [PrototypeModels.swift](cool-spot/PrototypeModels.swift) 加上 optional apiRecord。Red 階段沒有實作來源關聯／map／photo Green；整批沒有改正常入口或重建 v4 DTO。完整公開 item/context 沿用 typed v5，避免鏡像全部欄位；這是 prototype 的明確型別耦合取捨，不把它宣稱為通用 domain 架構。
+
+| Case | 預期 | 實際 Red 證據 |
+|---|---|---|
+| IOS-MAP-C09–C10 | accepted same_place 給身分／詳情；within_place 只讓 parent 詳情／既有 discovery 可用，不合併身分；same 優先 | 兩項失敗：Apple ID／details 為 nil；既有 store 身分與 discovery assertions 會在 Green 後完整驗證 |
+| IOS-MAP-C11–C12 | 未採用／未知／空白 map 不使用但 metadata 保留；完整 public item／多來源有序去重／日期與時區保留 | 兩項失敗：apiRecord 為 nil。同 record ID 18 的不同來源仍獨立；未知方法碼不重寫；generatedAt 不替換來源或紀錄日期 |
+| IOS-MAP-C13–C15 | HTTPS 照片順序與 metadata 保留，不造 reports；壞尺寸／不允許 transport 不進 display；bundle 僅例子插圖 | 三項失敗：spot.photos 為空；不下載圖片或讀 owner 檔案。原 public photo metadata 仍應完整保留在 apiRecord |
+| IOS-MAP-C16 | 空來源／maps／photos 與未知日期合法，不插 fixtures／legacy record | 失敗：apiRecord 為 nil；不為 missing context 補來源或時間 |
+
+只在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4 執行十六項 mapper、十七項 decoder 與四項受影響 legacy map/photo regressions：編譯成功，xcodebuild exit 65，xcresult **37 執行／29 passed／8 failed／0 skipped**。八項新 cases 都因目標未實作而失敗；原有二十九項都通過。九個 program／project／test-plan／scheme 檔案測試前後 SHA-256 一致。Logs／xcresult／fingerprints 留在 Git 外；owner 的三個 project/test files 內容及正常索引 entries 均另行核對。沒有重跑 backend／SQL／完整歷史 suite，沒有 HTTP、圖片下載、正常 App 互動或性能證據。
+
+委託 Green 後，agent 在 CoolSpotsAPIMapper.swift 完成記憶體中的 API record／有序來源去重／accepted map 選擇／photo display 投影；PrototypeModels.swift 的 detailsApplePlaceID 先讀 apiRecord，沒有 API record 時沿用原有流程。既有 source dates、provenance、hours timezone、全部公開 item 與照片 metadata 原樣保留，不讀 raw source/history，也不把 contributionID 當 reportID。same_place 優先於 within_place；parent 不成為身分 alias。照片不下載，只投影 structurally displayable HTTPS 或 primary-labelled example illustrations 的 bundle refs；prototype-photo 等不進 display assets。
+
+第一輪 Green 在同一 QA 執行相同三十七項：35 passed／2 failed／0 skipped。兩個失敗來自測試的 test-parent／帶空白假 ID 被 MKMapItem.Identifier 拒絕，沒有走到 store 身分／discovery 比對；本機 Swift／MapKit parser probe 確認兩個假 ID 回 nil、兩個現有公開 ID 能解析。修正合成 fixtures 使用可解析的公開 ID，新增 parser 非 nil 的前置 assertion；原始不透明字串保持不變的 mapper assertion 另行保留，未放寬身分規則或改 production。重新執行同一組：xcodebuild exit 0，xcresult **37 passed／0 failed／0 skipped**；九個相關檔案測試前後 SHA-256 一致。所有 store assertions 完整執行，沒有新 HTTP、圖片下載、正常 App 原生互動或容量證據。
+
+Green 後檢查：純轉換沒有 HTTP／儲存副作用，既有 photo structural check 可共用，來源用 dictionary/Set 查找與去重；不為 SOLID 加無用途 protocol，也無需再重構。本批提交範圍限兩個 production files、一個 test file 與三份既有 active documents；owner 的 project／test plan／scheme 不納入，檔案內容與 staging 保留。測試輸出與 fingerprints 留在 Git 外；提交前檢查實際 patch、敏感值／本機憑證比對、local links 與 40 個 A–E IDs，不 push。
+
+下一批先討論正常啟動 loading／empty／error／Try again 與個人 journeys 的保護，再進行 API-only 接線。本批沒有改 bundled JSON、DB/backend、ATS、signing、endpoint 或正常 App 行為；未將當批代寫委託延伸到下一個 Green。Owner 新要求的回報格式已記入既有 AGENTS：列點解釋測試概念／edge cases、具體檔案與程式用途，再報實際驗證與提交狀態。
+
 **2026-10-01：v5 → 畫面模型的第一批已 Green，相關測試 26 passed／0 failed。** 起點 Prototyping／2df5242，working tree 乾淨。先檢視 ContentView／CoolSpotsResponse 的 bundled 入口、CoolSpot／PrototypeStore 的資料與個人儲存、Explore 清單與搜尋、PrototypePublication 的舊契約耦合，再向 owner 說明檔案與影響。沒有直接替換正常 App 入口；先建立純資料轉換，再處理關聯與載入狀態，避免在接線時遺失事實、身分或誤用 containing venue。
 
 新增 [CoolSpotsAPIMapperTests.swift](cool-spotTests/CoolSpotsAPIMapperTests.swift) 的八項合成 cases、[CoolSpotsAPIMapper.swift](cool-spot/CoolSpotsAPIMapper.swift) 的空 makeSpots() 編譯骨架，以及 CoolSpot.placeID 的 nil 預設介面。後者讓沒有 DB Place 的舊 fixtures 能繼續編譯；v5 decoder 的 placeID 仍是必填 UUID，未放寬 API。Project 只加入這兩個 source files 的 group／target membership。
@@ -22,7 +43,7 @@ Owner 在收到完整 Green 後明確委託「幫我做」，agent 寫入當批�
 
 開始 Green 時發現 owner 新增已 staged 的 cool-spot.xctestplan、untracked shared scheme，以及 project 的 test-plan reference／格式調整；全部保留原始檔案與 staging。提交只包含當批七個檔案，project 僅本批八行 group／target membership。使用獨立暫存索引準備 patch，核對程式 fingerprints／新增個資與憑證／本機設定值／文件 links 後本機 commit；正常索引的 owner 工作保留，不納入設定／logs／裝置資料。這不是 repo-wide security audit。
 
-Apple same／within 配對、photos、完整來源／evidence context 是下一批，完成前不接正常 App。之後才處理 loading／empty／failure／Try again、API-only 啟動與個人 journeys 的保護。這批沒有修改 ContentView／Explore／store 行為、bundled JSON、backend／DB、ATS、endpoint 或 signing；不 push、部署或改 sibling checkout。A–E 點擊流程保持原樣。
+第一批後續的 Apple same／within 配對、photos、完整來源／evidence context 已進入上方第二批 Red，完成前不接正常 App。之後才處理 loading／empty／failure／Try again、API-only 啟動與個人 journeys 的保護。這批沒有修改 ContentView／Explore／store 行為、bundled JSON、backend／DB、ATS、endpoint 或 signing；不 push、部署或改 sibling checkout。A–E 點擊流程保持原樣。
 
 **2026-10-01：Swift 已真正讀取本機 API，兩項整合測試通過。** 起點 Prototyping／8d0ecb5，working tree 乾淨；owner 要求下一步。重新確認 DB／Studio／pg_meta 都 running／healthy，但 loopback API 沒有回應。只執行既有 `python3 scripts/run_backend_local.py serve` 啟動 Deno，沒有重啟容器、匯入、migration 或資料寫入。獨立免登入 GET 確認正確 route 200／v5／253 items／2 sources／473,658 bytes，未知 route 404；這是環境前置查核，不把 listener 未啟動說成行為 Red。
 

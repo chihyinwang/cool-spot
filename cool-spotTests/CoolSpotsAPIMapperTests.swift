@@ -227,6 +227,214 @@ final class CoolSpotsAPIMapperTests: XCTestCase {
         XCTAssertFalse(spot.isNearby)
     }
 
+    @MainActor
+    func testMappingAcceptedSamePlaceLinksUsesTheVenueIdentityBeforeItsContainingPlace() throws {
+        for verification in ["automatic", "reviewed"] {
+            var item = makeItem()
+            item["mapReferences"] = [
+                makeMap(placeID: "IB58D044B3FE1218C", relationship: "within_place"),
+                makeMap(placeID: "I7E8561E6022ED614", verification: verification)
+            ]
+            let spot = try firstSpot(item)
+
+            XCTAssertEqual(spot.applePlaceID, "I7E8561E6022ED614", verification)
+            XCTAssertEqual(spot.detailsApplePlaceID, "I7E8561E6022ED614", verification)
+            let place = makeRecognisedPlace(appleID: "I7E8561E6022ED614")
+            XCTAssertNotNil(place.appleMapItemIdentifier)
+            XCTAssertEqual(PrototypeStore(loadedCoolSpots: [spot]).existingSpot(for: place)?.id, spot.id)
+        }
+
+        var opaqueItem = makeItem()
+        opaqueItem["mapReferences"] = [makeMap(placeID: " test-same-place ")]
+        let opaqueSpot = try firstSpot(opaqueItem)
+        XCTAssertEqual(opaqueSpot.applePlaceID, " test-same-place ")
+        XCTAssertEqual(opaqueSpot.detailsApplePlaceID, " test-same-place ")
+    }
+
+    @MainActor
+    func testMappingWithinPlaceLinksAllowsParentDiscoveryWithoutMergingIdentities() throws {
+        var item = makeItem(name: "Test Cooling Lobby")
+        item["mapReferences"] = [makeMap(placeID: "IB58D044B3FE1218C", relationship: "within_place")]
+        let spot = try firstSpot(item)
+        let store = PrototypeStore(loadedCoolSpots: [spot])
+        let parent = makeRecognisedPlace(appleID: "IB58D044B3FE1218C")
+
+        XCTAssertNotNil(parent.appleMapItemIdentifier)
+        XCTAssertNil(spot.applePlaceID)
+        XCTAssertEqual(spot.detailsApplePlaceID, "IB58D044B3FE1218C")
+        XCTAssertNil(store.existingSpot(for: parent))
+        XCTAssertEqual(store.searchCoolSpots(query: parent.name, including: [parent]).map(\.id), [spot.id])
+        XCTAssertTrue(store.searchCoolSpots(query: parent.name, including: []).isEmpty)
+    }
+
+    func testMappingDoesNotUseUnacceptedUnsupportedOrBlankMapLinksButPreservesTheirMetadata() throws {
+        let links = [
+            makeMap(verification: "pending"), makeMap(verification: "rejected"),
+            makeMap(verification: "future-verification"), makeMap(provider: "future-provider"),
+            makeMap(relationship: "nearby"), makeMap(relationship: "future-relationship"),
+            makeMap(placeID: ""), makeMap(placeID: " \n\t ")
+        ]
+        for link in links {
+            var item = makeItem()
+            item["mapReferences"] = [link]
+            let response = try makeResponse(items: [item])
+            let spot = try XCTUnwrap(response.makeSpots().first)
+
+            XCTAssertNil(spot.applePlaceID, String(describing: link))
+            XCTAssertNil(spot.detailsApplePlaceID, String(describing: link))
+            let record = try XCTUnwrap(spot.apiRecord)
+            XCTAssertEqual(record.item.mapReferences, response.items[0].mapReferences)
+        }
+    }
+
+    func testMappingRetainsThePublicItemAndOnlyItsLinkedSourceContextWithoutReplacingDates() throws {
+        var item = makeItem()
+        item["address"] = ["line1": "Test Street", "borough": "Test Borough", "countryCode": "GB"]
+        item["sourceReferences"] = [
+            ["sourceID": "test-gla", "recordID": "18"],
+            ["sourceID": "test-other", "recordID": "18"],
+            ["sourceID": "test-gla", "recordID": "19"]
+        ]
+        item["provenance"] = [
+            ["sourceID": "test-gla", "recordID": "18", "method": "mapped_from_source",
+             "recordedAt": "2025-06-01T09:00:00Z", "fields": ["/name", "/access/drinkingWater"]],
+            ["sourceID": "test-other", "recordID": "18", "method": "future-method",
+             "recordedAt": NSNull(), "fields": ["/address/borough"]]
+        ]
+        var gla = makeSource(id: "test-gla", provider: "gla", label: "GLA · 2025")
+        gla["dataset"] = "Test 2025 dataset"
+        gla["downloadURL"] = "https://example.com/test-2025.csv"
+        gla["retrievedAt"] = "2025-06-02T09:00:00Z"
+        gla["sourceUpdatedAt"] = "2025-06-01T09:00:00Z"
+        gla["sha256"] = String(repeating: "a", count: 64)
+        let other = makeSource(id: "test-other", provider: "future-provider", label: "Test other source")
+        let unrelated = makeSource(id: "test-unrelated", provider: "community", label: "Test unrelated source")
+        let response = try makeResponse(items: [item], sources: [unrelated, other, gla])
+        let spot = try XCTUnwrap(response.makeSpots().first)
+        let record = try XCTUnwrap(spot.apiRecord)
+
+        XCTAssertEqual(record.schemaVersion, 5)
+        XCTAssertEqual(record.datasetID, "test-catalogue")
+        XCTAssertEqual(record.generatedAt, "2026-10-01T12:00:00.000Z")
+        XCTAssertEqual(record.sources, [response.sources[2], response.sources[1]])
+        XCTAssertEqual(record.item, response.items[0])
+        XCTAssertEqual(record.item.hours?.timeZone, "Europe/London")
+        XCTAssertEqual(record.item.provenance[0].recordedAt, "2025-06-01T09:00:00Z")
+        XCTAssertNil(record.item.provenance[1].recordedAt)
+        XCTAssertNil(spot.publishedRecord)
+    }
+
+    func testMappingPublishedHTTPSPhotosPreservesOrderAndMetadataWithoutInventingAReport() throws {
+        var item = makeItem()
+        var second = makePhoto(id: "test-second-photo")
+        second["caption"] = "Test source caption"
+        second["capturedAt"] = "2025-06-01T09:00:00Z"
+        second["publishedAt"] = "2025-06-02T09:00:00Z"
+        second["contributionID"] = "test-contribution"
+        item["photos"] = [second, makePhoto(id: "test-first-photo")]
+        let response = try makeResponse(items: [item])
+        let spot = try XCTUnwrap(response.makeSpots().first)
+
+        XCTAssertEqual(spot.photos, response.items[0].photos)
+        XCTAssertEqual(spot.photos.map(\.id), ["test-second-photo", "test-first-photo"])
+        let photo = try XCTUnwrap(spot.photos.first)
+        XCTAssertEqual(photo.caption, "Test source caption")
+        XCTAssertEqual(photo.capturedAt, "2025-06-01T09:00:00Z")
+        XCTAssertEqual(photo.publishedAt, "2025-06-02T09:00:00Z")
+        XCTAssertEqual(photo.attribution, "Test public attribution")
+        XCTAssertEqual(photo.source, "community")
+        XCTAssertEqual(photo.contributionID, "test-contribution")
+        let last = try XCTUnwrap(spot.photos.last)
+        XCTAssertNil(last.caption)
+        XCTAssertNil(last.capturedAt)
+        XCTAssertNil(last.publishedAt)
+        XCTAssertNil(last.contributionID)
+        XCTAssertTrue(spot.comments.isEmpty)
+        XCTAssertTrue(spot.experienceReports.isEmpty)
+    }
+
+    func testMappingFiltersUnusableAndDeviceLocalPhotosWhileKeepingPublicMetadata() throws {
+        var item = makeItem()
+        var emptyID = makePhoto(id: "")
+        emptyID["caption"] = "Test rejected display metadata"
+        var zeroWidth = makePhoto(id: "test-zero-width")
+        zeroWidth["width"] = 0
+        var negativeHeight = makePhoto(id: "test-negative-height")
+        negativeHeight["height"] = -1
+        var insecureThumbnail = makePhoto(id: "test-http-thumbnail")
+        insecureThumbnail["thumbnailURL"] = "http://example.com/test-thumb.jpg"
+        var localImage = makePhoto(id: "test-local-image")
+        localImage["imageURL"] = "prototype-photo://00000000-0000-4000-8000-000000000003/image.jpg"
+        var localThumbnail = makePhoto(id: "test-local-thumbnail")
+        localThumbnail["thumbnailURL"] = "prototype-photo://00000000-0000-4000-8000-000000000003/thumb.jpg"
+        var fileImage = makePhoto(id: "test-file-image")
+        fileImage["imageURL"] = "file:///test-photo.jpg"
+        item["photos"] = [emptyID, zeroWidth, makePhoto(id: "test-valid"), negativeHeight,
+                          insecureThumbnail, localImage, localThumbnail, fileImage]
+        let response = try makeResponse(items: [item])
+        let spot = try XCTUnwrap(response.makeSpots().first)
+
+        XCTAssertEqual(spot.photos.map(\.id), ["test-valid"])
+        let record = try XCTUnwrap(spot.apiRecord)
+        XCTAssertEqual(record.item.photos, response.items[0].photos)
+    }
+
+    func testMappingBundlePhotosRequiresBothAnExampleSourceAndIllustrationAttribution() throws {
+        for (isExample, photoSource, expectedIDs) in [
+            (true, "illustration", ["test-bundle"]),
+            (false, "illustration", []),
+            (true, "community", [])
+        ] {
+            var item = makeItem()
+            var photo = makePhoto(id: "test-bundle")
+            photo["thumbnailURL"] = "bundle://TestIllustration.png"
+            photo["imageURL"] = "bundle://TestIllustration.png"
+            photo["source"] = photoSource
+            item["photos"] = [photo]
+            let source = makeSource(id: "test-gla", provider: "community", label: "Test source", isExample: isExample)
+            let spot = try XCTUnwrap(makeResponse(items: [item], sources: [source]).makeSpots().first)
+
+            XCTAssertEqual(spot.photos.map(\.id), expectedIDs, "example=\(isExample), source=\(photoSource)")
+            XCTAssertEqual(try XCTUnwrap(spot.apiRecord).item.photos.count, 1)
+        }
+    }
+
+    func testMappingEmptyRelationsKeepsUnknownMetadataWithoutAddingFixturesOrLegacyRecords() throws {
+        var item = makeItem()
+        item["sourceReferences"] = []
+        item["hours"] = NSNull()
+        let response = try makeResponse(items: [item])
+        let spot = try XCTUnwrap(response.makeSpots().first)
+        let record = try XCTUnwrap(spot.apiRecord)
+
+        XCTAssertTrue(record.sources.isEmpty)
+        XCTAssertEqual(record.item, response.items[0])
+        XCTAssertNil(record.item.hours)
+        XCTAssertTrue(record.item.provenance.isEmpty)
+        XCTAssertNil(spot.applePlaceID)
+        XCTAssertNil(spot.detailsApplePlaceID)
+        XCTAssertTrue(spot.photos.isEmpty)
+        XCTAssertNil(spot.publishedRecord)
+    }
+
+    private func makeMap(placeID: String = "test-apple-place", provider: String = "apple_maps",
+                         relationship: String = "same_place", verification: String = "reviewed") -> [String: Any] {
+        ["provider": provider, "placeID": placeID, "relationship": relationship,
+         "verification": verification, "checkedAt": "2025-06-01T09:00:00Z"]
+    }
+
+    private func makePhoto(id: String) -> [String: Any] {
+        ["id": id, "thumbnailURL": "https://example.com/test-thumb.jpg",
+         "imageURL": "https://example.com/test-image.jpg", "width": 640, "height": 480,
+         "caption": NSNull(), "capturedAt": NSNull(), "publishedAt": NSNull(),
+         "attribution": "Test public attribution", "source": "community", "contributionID": NSNull()]
+    }
+
+    private func makeRecognisedPlace(appleID: String) -> RecognisedPlace {
+        .init(id: "apple-maps:\(appleID)", name: "Test Parent Venue", address: "",
+              latitude: 51.5, longitude: -0.1, type: .library, distance: "")
+    }
+
     private func firstSpot(_ item: [String: Any]) throws -> CoolSpot {
         try XCTUnwrap(makeResponse(items: [item]).makeSpots().first)
     }
