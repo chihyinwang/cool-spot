@@ -4,6 +4,25 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：Swift 已真正讀取本機 API，兩項整合測試通過。** 起點 Prototyping／8d0ecb5，working tree 乾淨；owner 要求下一步。重新確認 DB／Studio／pg_meta 都 running／healthy，但 loopback API 沒有回應。只執行既有 `python3 scripts/run_backend_local.py serve` 啟動 Deno，沒有重啟容器、匯入、migration 或資料寫入。獨立免登入 GET 確認正確 route 200／v5／253 items／2 sources／473,658 bytes，未知 route 404；這是環境前置查核，不把 listener 未啟動說成行為 Red。
+
+新增 [CoolSpotsAPILocalIntegrationTests.swift](cool-spotTests/CoolSpotsAPILocalIntegrationTests.swift)，project 只增加一個 test file 的 group／target membership，沒有 production Swift／API／DB／Info.plist／ATS／signing 更改。沿用完整 loader 與 decoder；沒有 URLProtocol、替身或 bundled catalogue 介入這兩項整合測試。真正 URLSession 使用 ephemeral session、nil credential/cookie storage、不存 cookie、不使用本機 cache、5 秒 request／10 秒 resource timeout，teardown 關閉 session。端點固定為 127.0.0.1:8000，只讀 JSON／照片 metadata，不下載圖片或操作 owner 裝置資料。
+
+| Case | 預期 | 實際證據 |
+|---|---|---|
+| IOS-API-C01 | 免登入真正 GET → 現有 loader → v5 decoder，完整讀取本機初始匯入清單 | 第一輪就通過，不製造 Red。253 個獨立 Cool Spot／Place 身分、250 GLA＋3 examples、GLA 2025 label／未知來源日期、generatedAt 位於本次請求時間內；5,297 pointers／145 maps／3 bundle illustrations；Canning Town Library 的既有 ID、正式座標、GLA record 18／時區背景依據及已知 within_place 都有 assertions |
+| IOS-API-C02 | 現有 loader 拒絕本機未知路徑，回傳 invalidResponse | 第一輪就通過；獨立前置 HTTP 先確認該 route 的實際 status 為 404。Swift case 驗證 loader 的錯誤映射，不依賴真正資料庫故障或修改密碼 |
+
+在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4，僅執行新 integration class：xcodebuild exit 0，xcresult **2 執行／2 passed／0 failed／0 skipped**；測試前後 loader／decoder／integration tests／project 四檔 SHA-256 一致。既有正式碼已具備所需行為，因此沒有新 production Green／Refactor；上輪二十九個 unit tests 是既有證據，本批不重跑。沒有重跑 SQL／Deno／舊 Swift suite 或裝置矩陣，沒有自稱 App UI／照片傳送／部署／容量驗證。
+
+平常 unit runs 不應要求啟動 server：新 integration cases 只有 `COOL_SPOTS_LOCAL_API_TESTS=1` 才執行，否則明確 XCTSkip。實測透過已安裝 xcodebuild 的 TEST_RUNNER_ 環境傳遞規則，把一個非秘密開關傳入 test host。從 prototype 根目錄、確認本機 API 健康後重現：
+
+```sh
+TEST_RUNNER_COOL_SPOTS_LOCAL_API_TESTS=1 xcodebuild -project cool-spot.xcodeproj -scheme cool-spot -destination 'platform=iOS Simulator,id=D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852' -derivedDataPath /tmp/cool-spot-v5-decoder -only-testing:cool_spotTests/CoolSpotsAPILocalIntegrationTests -parallel-testing-enabled NO -quiet test
+```
+
+App 正常啟動／Explore／PrototypeStore 尚未接 API，仍使用既有 catalogue 流程；這次只證明測試中的 Swift loader 能從真正 API 取得完整資料。下一批先說明 App 入口／domain mapping／loading、empty、error、retry 的檔案影響與測試，再按教學流程開始。提交限新測試、test target membership 與三份原有文件；安全檢查後本機 commit，不納入設定／logs／裝置資料、不 push 或部署。新 App 仍以 API-only／無 bundled fallback 為方向，不默默改個人資料或舊本機發布的生命週期。
+
 **2026-10-01：Swift HTTP 批次已 Green，相關測試 29 passed／0 failed。** 起點 Prototyping／9ea62ce；先發現 CoolSpotsAPIResponse.swift 有未提交改動，移除了已完成的欄位／關聯解析。Agent 沒有覆蓋；owner 回報恢復後，重新核對 git working tree 乾淨、HEAD 未變。先按教學方式由 agent 寫成批 tests／驗證 Red 並提供完整 Green；owner 再明確委託「你幫我弄吧」，要求權衡 SOLID，由 agent 完成當批實作與設計 review。此委託不延伸到下一批或 App 接線。
 
 本批新增 [CoolSpotsAPILoader.swift](cool-spot/CoolSpotsAPILoader.swift)、[CoolSpotsAPILoaderTests.swift](cool-spotTests/CoolSpotsAPILoaderTests.swift)，Xcode project 只加入兩檔的 group／target membership。入口為注入 URL 與 URLSession 的 async load，回傳完整 CoolSpotsAPIResponse；最初可編譯占位實作固定 throw invalidResponse，委託後改為 GET／HTTP 200 檢查／v5 decode／兩種錯誤映射與 CancellationError。URLProtocol 替身只套到每個測試的 ephemeral session，以各自 URL 隔離、鎖保護 registry／requests，teardown 關閉 session 並移除註冊；不使用真實網路、資料庫或裝置資料。
@@ -577,7 +596,7 @@ SQL 目前由 owner 在雲端 SQL Editor 執行，尚未存為 repository migrat
 | API-C02 | 成功讀取時，保留 Cool Spot list metadata、場所 ID、items 內容及來源資訊 | Owner 確認通過；2026-09-25 新批次執行時 agent 亦驗證通過，未改 production 或製造 Red |
 | API-C03 | Reader 失敗時，回傳可辨識的服務失敗，不冒充成功空結果或洩露內部錯誤 | 2026-09-25 行為 Red：reader 錯誤直接傳出，未產生預期 500 JSON；Owner 輸入 Green 後 agent 驗證通過；全批 7 passed／0 failed |
 | API-C04 | 不支援的 HTTP method 被拒絕，且不觸發 Cool Spot list 載入 | 2026-09-25 POST／PUT／PATCH／DELETE 四個案例 Red：實際 200／預期 405；預期另含 Allow: GET、固定 JSON 錯誤與零次 load；Owner 輸入 Green 後 agent 驗證通過；全批 7 passed／0 failed |
-| API-C05 | 真實 PostgreSQL reader、免登入 HTTP 與新版 Swift decoder 的 v5 讀取契約相容 | 2026-10-01 真正 reader／HTTP 已完成，見 DB-C77–C78／API-C06–C11；新版 Swift decoder／App 尚未開始，此跨層 case 仍未完成 |
+| API-C05 | 真實 PostgreSQL reader、免登入 HTTP 與新版 Swift decoder 的 v5 讀取契約相容 | 2026-10-01 跨層讀取已驗證：DB-C77–C78／API-C06–C11 的後端 reader／HTTP，加上 IOS-API-C01–C02 的真正 Swift URLSession／v5 decoder，兩項本機整合通過；App UI／store 接線仍是下一批，未宣稱畫面或部署完成 |
 
 以下使用目前命名描述 API-C01–C04；最初 Red／Green 的 fixture 為 v3，2026-09-25 改名時升為 v4。測試介面為 `createListCoolSpotsHandler(reader)` 產生 Request → Response handler，reader 提供非同步 `load()`；API-C01 使用可控制的空 Cool Spot list 替身，不存取 Supabase、網路或使用者資料。測試檔為 [handler_test.ts](supabase/functions/cool-spots/handler_test.ts)。2026-09-24 已核對 Deno 2.9.7／TypeScript 6.0.3。第一次執行 `deno test --no-lock supabase/functions/cool-spots/handler_test.ts` 因缺少 handler.ts 而 TS2307 型別檢查失敗，未執行 test body，不算行為 Red。Owner 隨後表示理解；agent 新增 [handler.ts](supabase/functions/cool-spots/handler.ts) 最小骨架，接收 reader／Request 但僅回傳 HTTP 501。以相同指令重跑，型別檢查通過並執行一個測試，在 status assertion 失敗：`501 !== 200`，結果 **0 passed／1 failed，行為 Red 已驗證**。該次尚未到達 JSON content type／body assertions。
 

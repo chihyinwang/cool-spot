@@ -11,6 +11,7 @@
 		A50100032D000001001D0001 /* CoolSpotsAPIResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50100042D000001001D0001 /* CoolSpotsAPIResponseTests.swift */; };
 		A50200012D000001001D0001 /* CoolSpotsAPILoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50200022D000001001D0001 /* CoolSpotsAPILoader.swift */; };
 		A50200032D000001001D0001 /* CoolSpotsAPILoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50200042D000001001D0001 /* CoolSpotsAPILoaderTests.swift */; };
+		A50300012D000001001D0001 /* CoolSpotsAPILocalIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50300022D000001001D0001 /* CoolSpotsAPILocalIntegrationTests.swift */; };
         6D011D642C000001001D0001 /* CoolSpotsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D652C000001001D0001 /* CoolSpotsResponse.swift */; };
         6D011D662C000001001D0001 /* CoolSpots.prototype.json in Resources */ = {isa = PBXBuildFile; fileRef = 6D011D672C000001001D0001 /* CoolSpots.prototype.json */; };
 		6D011D632C000001001D0001 /* PlaceSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D622C000001001D0001 /* PlaceSearch.swift */; };
@@ -52,6 +53,7 @@
 		A50100042D000001001D0001 /* CoolSpotsAPIResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPIResponseTests.swift; sourceTree = "<group>"; };
 		A50200022D000001001D0001 /* CoolSpotsAPILoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPILoader.swift; sourceTree = "<group>"; };
 		A50200042D000001001D0001 /* CoolSpotsAPILoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPILoaderTests.swift; sourceTree = "<group>"; };
+		A50300022D000001001D0001 /* CoolSpotsAPILocalIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPILocalIntegrationTests.swift; sourceTree = "<group>"; };
         6D011D652C000001001D0001 /* CoolSpotsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsResponse.swift; sourceTree = "<group>"; };
         6D011D672C000001001D0001 /* CoolSpots.prototype.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Resources/CoolSpots.prototype.json; sourceTree = "<group>"; };
 		6D011D622C000001001D0001 /* PlaceSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSearch.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				6D011D3C2C000001001D0001 /* cool_spotTests.swift */,
 				A50100042D000001001D0001 /* CoolSpotsAPIResponseTests.swift */,
 				A50200042D000001001D0001 /* CoolSpotsAPILoaderTests.swift */,
+				A50300022D000001001D0001 /* CoolSpotsAPILocalIntegrationTests.swift */,
 			);
 			path = "cool-spotTests";
 			sourceTree = "<group>";
@@ -291,6 +294,7 @@
 			files = (
 				A50100032D000001001D0001 /* CoolSpotsAPIResponseTests.swift in Sources */,
 				A50200032D000001001D0001 /* CoolSpotsAPILoaderTests.swift in Sources */,
+				A50300012D000001001D0001 /* CoolSpotsAPILocalIntegrationTests.swift in Sources */,
 				6D011D3D2C000001001D0001 /* cool_spotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
