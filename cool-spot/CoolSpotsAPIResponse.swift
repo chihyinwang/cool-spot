@@ -36,6 +36,32 @@ struct CoolSpotsAPIResponse: Decodable {
         let access: Access
         let hours: Hours?
 
+        let sourceReferences: [SourceReference]
+        let provenance: [Provenance]
+        let mapReferences: [MapReference]
+        let photos: [PlacePhotoAsset]
+
+        struct SourceReference: Decodable, Hashable {
+            let sourceID: String
+            let recordID: String
+        }
+
+        struct Provenance: Decodable, Equatable {
+            let sourceID: String
+            let recordID: String
+            let method: String
+            let recordedAt: String?
+            let fields: [String]
+        }
+
+        struct MapReference: Decodable, Equatable {
+            let provider: String
+            let placeID: String
+            let relationship: String
+            let verification: String
+            let checkedAt: String?
+        }
+
         struct Address: Decodable, Equatable {
             let formatted: String?
             let line1: String?
@@ -94,13 +120,31 @@ struct CoolSpotsAPIResponse: Decodable {
             throw LoadError.unsupportedVersion
         }
 
-        guard Set(response.items.map(\.id)).count == response.items.count,
+        let sourceIDs = Set(response.sources.map(\.id))
+
+        guard sourceIDs.count == response.sources.count,
+              response.sources.allSatisfy({
+                  !$0.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+              }),
+              Set(response.items.map(\.id)).count == response.items.count,
               Set(response.items.map(\.placeID)).count == response.items.count,
               response.items.allSatisfy({ item in
-                  !item.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                  let linkedRecords = Set(item.sourceReferences)
+
+                  return !item.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                   !item.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                   CLLocationCoordinate2DIsValid(item.location.coordinate) &&
-                  item.access.postedStayLimit.isValid
+                  item.access.postedStayLimit.isValid &&
+                  item.sourceReferences.allSatisfy({ reference in
+                      sourceIDs.contains(reference.sourceID) &&
+                      !reference.recordID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                  }) &&
+                  item.provenance.allSatisfy({ evidence in
+                      linkedRecords.contains(.init(
+                          sourceID: evidence.sourceID,
+                          recordID: evidence.recordID
+                      ))
+                  })
               }) else {
             throw LoadError.invalidItems
         }

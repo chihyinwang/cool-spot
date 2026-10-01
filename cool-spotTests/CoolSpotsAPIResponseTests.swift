@@ -319,6 +319,219 @@ final class CoolSpotsAPIResponseTests: XCTestCase {
         }
     }
 
+    func testDecodePreservesSourceEvidenceMapRelationshipsAndOrderedPhotoMetadata() throws {
+        let response = try decode(makePayload(items: [makeItemWithRelations()]))
+        let item = try XCTUnwrap(response.items.first)
+
+        XCTAssertEqual(item.sourceReferences, [
+            .init(sourceID: "test-examples", recordID: "18"),
+            .init(sourceID: "test-source-2025", recordID: "18")
+        ])
+        XCTAssertEqual(item.provenance, [
+            .init(sourceID: "test-source-2025", recordID: "18", method: "mapped_from_source",
+                  recordedAt: "2026-09-01T00:00:00.000Z", fields: ["/name", "/access/cost"]),
+            .init(sourceID: "test-examples", recordID: "18", method: "example_data",
+                  recordedAt: "2026-09-02T00:00:00.000Z", fields: ["/coolingDetails"]),
+            .init(sourceID: "test-source-2025", recordID: "18", method: "inferred_from_context",
+                  recordedAt: "2026-09-01T00:00:00.000Z", fields: ["/hours/timeZone"]),
+            .init(sourceID: "test-source-2025", recordID: "18", method: "inferred_from_name",
+                  recordedAt: "2026-09-01T00:00:00.000Z", fields: ["/placeType"])
+        ])
+        XCTAssertEqual(item.mapReferences, [
+            .init(provider: "apple_maps", placeID: "test-containing-apple-id", relationship: "within_place",
+                  verification: "reviewed", checkedAt: "2026-09-03T00:00:00.000Z"),
+            .init(provider: "apple_maps", placeID: "test-same-apple-id", relationship: "same_place",
+                  verification: "automatic", checkedAt: "2026-09-04T00:00:00.000Z")
+        ])
+        XCTAssertEqual(item.photos.count, 2)
+        XCTAssertEqual(item.photos.map(\.id), ["test-second-photo", "test-first-photo"])
+        let photo = try XCTUnwrap(item.photos.first)
+        XCTAssertEqual(photo.thumbnailURL, URL(string: "https://example.com/test-thumbnail.jpg"))
+        XCTAssertEqual(photo.imageURL, URL(string: "https://example.com/test-image.jpg"))
+        XCTAssertEqual(photo.width, 800)
+        XCTAssertEqual(photo.height, 600)
+        XCTAssertEqual(photo.caption, "Test photo caption")
+        XCTAssertEqual(photo.capturedAt, "2025-06-01T00:00:00.000Z")
+        XCTAssertEqual(photo.publishedAt, "2026-09-02T00:00:00.000Z")
+        XCTAssertEqual(photo.attribution, "Test illustration credit")
+        XCTAssertEqual(photo.source, "illustration")
+        XCTAssertEqual(photo.contributionID, "test-contribution")
+        XCTAssertEqual(item.photos.last?.imageURL, URL(string: "bundle://TestIllustration.jpg"))
+        XCTAssertEqual(item.placeID, UUID(uuidString: "00000000-0000-4000-8000-000000000001"))
+    }
+
+    func testDecodeAcceptsEmptyRelationArraysWithoutInventingEvidenceMapsOrPhotos() throws {
+        let response = try decode(makePayload(items: [makeItem()]))
+        let item = try XCTUnwrap(response.items.first)
+
+        XCTAssertTrue(item.sourceReferences.isEmpty)
+        XCTAssertTrue(item.provenance.isEmpty)
+        XCTAssertTrue(item.mapReferences.isEmpty)
+        XCTAssertTrue(item.photos.isEmpty)
+        XCTAssertEqual(item.id, "test-cool-spot")
+        XCTAssertEqual(item.name, "Test Library")
+    }
+
+    func testDecodePreservesUnknownRelationDatesAndOptionalPhotoValuesAsNil() throws {
+        var payloadItem = makeItemWithRelations()
+        payloadItem["provenance"] = [["sourceID": "test-source-2025", "recordID": "18",
+                                      "method": "mapped_from_source", "recordedAt": NSNull(),
+                                      "fields": ["/name"]]]
+        payloadItem["mapReferences"] = [["provider": "apple_maps", "placeID": "test-apple-id",
+                                         "relationship": "same_place", "verification": "reviewed",
+                                         "checkedAt": NSNull()]]
+        var photo = makePhoto(id: "test-photo")
+        for key in ["caption", "capturedAt", "publishedAt", "contributionID"] {
+            photo[key] = NSNull()
+        }
+        payloadItem["photos"] = [photo]
+
+        let item = try XCTUnwrap(decode(makePayload(items: [payloadItem])).items.first)
+
+        let provenance = try XCTUnwrap(item.provenance.first)
+        let map = try XCTUnwrap(item.mapReferences.first)
+        let decodedPhoto = try XCTUnwrap(item.photos.first)
+        XCTAssertNil(provenance.recordedAt)
+        XCTAssertNil(map.checkedAt)
+        XCTAssertNil(decodedPhoto.caption)
+        XCTAssertNil(decodedPhoto.capturedAt)
+        XCTAssertNil(decodedPhoto.publishedAt)
+        XCTAssertNil(decodedPhoto.contributionID)
+        XCTAssertEqual(decodedPhoto.attribution, "Test illustration credit")
+    }
+
+    func testDecodeRejectsMissingRelationArraysAndMalformedRelationOrPhotoFields() throws {
+        var invalidItems: [[String: Any]] = []
+        for key in ["sourceReferences", "provenance", "mapReferences", "photos"] {
+            var item = makeItemWithRelations()
+            item.removeValue(forKey: key)
+            invalidItems.append(item)
+            item[key] = NSNull()
+            invalidItems.append(item)
+            item[key] = "not-an-array"
+            invalidItems.append(item)
+        }
+        let requiredKeys: [String: [String]] = [
+            "sourceReferences": ["sourceID", "recordID"],
+            "provenance": ["sourceID", "recordID", "method", "fields"],
+            "mapReferences": ["provider", "placeID", "relationship", "verification"],
+            "photos": ["id", "thumbnailURL", "imageURL", "width", "height", "attribution", "source"]
+        ]
+        for group in ["sourceReferences", "provenance", "mapReferences", "photos"] {
+            let validItem = makeItemWithRelations()
+            let records = try XCTUnwrap(validItem[group] as? [[String: Any]])
+            let first = try XCTUnwrap(records.first)
+            for key in requiredKeys[group] ?? [] {
+                var record = first
+                record.removeValue(forKey: key)
+                var item = validItem
+                item[group] = [record]
+                invalidItems.append(item)
+                record[key] = NSNull()
+                item[group] = [record]
+                invalidItems.append(item)
+            }
+        }
+        for (group, key, value) in [
+            ("sourceReferences", "recordID", 18 as Any),
+            ("provenance", "fields", "/name" as Any),
+            ("provenance", "recordedAt", 1 as Any),
+            ("mapReferences", "checkedAt", true as Any),
+            ("photos", "width", "800" as Any),
+            ("photos", "caption", 1 as Any),
+            ("photos", "imageURL", false as Any)
+        ] {
+            var item = makeItemWithRelations()
+            var records = try XCTUnwrap(item[group] as? [[String: Any]])
+            records[0][key] = value
+            item[group] = records
+            invalidItems.append(item)
+        }
+        for (index, item) in invalidItems.enumerated() {
+            XCTAssertThrowsError(try decode(makePayload(items: [item])), "item \(index)") {
+                XCTAssertTrue($0 is DecodingError, "Expected a decoding error, received \($0)")
+            }
+        }
+    }
+
+    func testDecodeRejectsAmbiguousOrUnlinkedSourceIdentities() throws {
+        var missingSource = makeItemWithRelations()
+        missingSource["sourceReferences"] = [["sourceID": "missing-source", "recordID": "18"]]
+        var wrongRecord = makeItemWithRelations()
+        wrongRecord["provenance"] = [["sourceID": "test-source-2025", "recordID": "other-record",
+                                      "method": "mapped_from_source", "recordedAt": NSNull(),
+                                      "fields": ["/name"]]]
+        var wrongSource = makeItemWithRelations()
+        wrongSource["sourceReferences"] = [["sourceID": "test-examples", "recordID": "18"]]
+        var invalidPayloads = [missingSource, wrongRecord, wrongSource].map { makePayload(items: [$0]) }
+
+        var duplicateSource = makePayload(items: [makeItemWithRelations()])
+        var sources = try XCTUnwrap(duplicateSource["sources"] as? [[String: Any]])
+        sources.append(try XCTUnwrap(sources.first))
+        duplicateSource["sources"] = sources
+        invalidPayloads.append(duplicateSource)
+
+        var blankSource = makePayload(items: [makeItem()])
+        var blankSources = try XCTUnwrap(blankSource["sources"] as? [[String: Any]])
+        blankSources[0]["id"] = " \n"
+        blankSource["sources"] = blankSources
+        invalidPayloads.append(blankSource)
+
+        var blankRecord = makeItemWithRelations()
+        blankRecord["sourceReferences"] = [["sourceID": "test-source-2025", "recordID": " \n"]]
+        invalidPayloads.append(makePayload(items: [blankRecord]))
+
+        var firstPlace = makeItemWithRelations()
+        firstPlace["sourceReferences"] = [["sourceID": "test-source-2025", "recordID": "19"]]
+        var secondPlace = makeItem(id: "another-cool-spot",
+                                   placeID: "00000000-0000-4000-8000-000000000002")
+        secondPlace["sourceReferences"] = [["sourceID": "test-source-2025", "recordID": "18"]]
+        invalidPayloads.append(makePayload(items: [firstPlace, secondPlace]))
+
+        for (index, payload) in invalidPayloads.enumerated() {
+            XCTAssertThrowsError(try decode(payload), "payload \(index)") {
+                XCTAssertEqual($0 as? CoolSpotsAPIResponse.LoadError, .invalidItems)
+            }
+        }
+    }
+
+    private func makeItemWithRelations() -> [String: Any] {
+        var item = makeItem()
+        item["sourceReferences"] = [["sourceID": "test-examples", "recordID": "18"],
+                                     ["sourceID": "test-source-2025", "recordID": "18"]]
+        item["provenance"] = [
+            ["sourceID": "test-source-2025", "recordID": "18", "method": "mapped_from_source",
+             "recordedAt": "2026-09-01T00:00:00.000Z", "fields": ["/name", "/access/cost"]],
+            ["sourceID": "test-examples", "recordID": "18", "method": "example_data",
+             "recordedAt": "2026-09-02T00:00:00.000Z", "fields": ["/coolingDetails"]],
+            ["sourceID": "test-source-2025", "recordID": "18", "method": "inferred_from_context",
+             "recordedAt": "2026-09-01T00:00:00.000Z", "fields": ["/hours/timeZone"]],
+            ["sourceID": "test-source-2025", "recordID": "18", "method": "inferred_from_name",
+             "recordedAt": "2026-09-01T00:00:00.000Z", "fields": ["/placeType"]]
+        ]
+        item["mapReferences"] = [
+            ["provider": "apple_maps", "placeID": "test-containing-apple-id",
+             "relationship": "within_place", "verification": "reviewed",
+             "checkedAt": "2026-09-03T00:00:00.000Z"],
+            ["provider": "apple_maps", "placeID": "test-same-apple-id",
+             "relationship": "same_place", "verification": "automatic",
+             "checkedAt": "2026-09-04T00:00:00.000Z"]
+        ]
+        var bundledPhoto = makePhoto(id: "test-first-photo")
+        bundledPhoto["thumbnailURL"] = "bundle://TestThumbnail.jpg"
+        bundledPhoto["imageURL"] = "bundle://TestIllustration.jpg"
+        item["photos"] = [makePhoto(id: "test-second-photo"), bundledPhoto]
+        return item
+    }
+
+    private func makePhoto(id: String) -> [String: Any] {
+        ["id": id, "thumbnailURL": "https://example.com/test-thumbnail.jpg",
+         "imageURL": "https://example.com/test-image.jpg", "width": 800, "height": 600,
+         "caption": "Test photo caption", "capturedAt": "2025-06-01T00:00:00.000Z",
+         "publishedAt": "2026-09-02T00:00:00.000Z", "attribution": "Test illustration credit",
+         "source": "illustration", "contributionID": "test-contribution"]
+    }
+
     private func makeItem(id: String = "test-cool-spot",
                           placeID: String = "00000000-0000-4000-8000-000000000001",
                           name: String = "Test Library",
@@ -333,7 +546,8 @@ final class CoolSpotsAPIResponseTests: XCTestCase {
          "coolingFeatures": ["air_conditioning", "fans"],
          "coolingDetails": " Test cooling details ",
          "additionalInformation": "Test additional information",
-         "access": makeAccess(), "hours": ["text": "Test hours", "timeZone": "Europe/London"]]
+         "access": makeAccess(), "hours": ["text": "Test hours", "timeZone": "Europe/London"],
+         "sourceReferences": [], "provenance": [], "mapReferences": [], "photos": []]
     }
 
     private func makeAccess() -> [String: Any] {

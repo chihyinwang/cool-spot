@@ -4,6 +4,20 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：Swift v5 第三批已 Green，相關測試 18 passed／0 failed。** 起點是 Prototyping／7bed3f6，working tree 乾淨；owner 同意下一步。Agent 解釋完整關聯契約與來源對應規則後，新增 IOS-V5-C13–C17 tests／合成 helpers，及 SourceReference／Provenance／MapReference types 與四個空陣列占位介面；照片沿用 PlacePhotoAsset。確認 Red 後，owner 明確委託「你幫我弄吧」，由 agent 完成當批 Green。Swift HTTP 與 Explore 尚未接線。
+
+| Case | 預期 | 實際證據 |
+|---|---|---|
+| IOS-V5-C13–C14 | 保留主來源順序、來源＋record 身分、四種取得方法與 pointers、same／within 外部 ID、照片順序及 metadata；空陣列合法 | C13 Red → Green，C14 在占位階段已通過，真正讀取後仍通過，不製造 Red。合成兩個 source 共用 record ID 18，仍是不同來源紀錄；日期不替換成 generatedAt |
+| IOS-V5-C15–C16 | 關聯日期／caption／contributionID 的 null 保持 nil；四個 arrays 及必要 nested 欄位必須存在且型別正確 | 兩項 Red → Green。只解析 metadata，不下載圖片；合成 HTTPS／bundle refs 與既有 optional contributionID 的讀取測試不代表 Report／媒體服務已實作 |
+| IOS-V5-C17 | registry source ID 唯一且非空白，record ID 非空白；reference 必須指向 registry，provenance tuple 必須在同一 item 的 references | Red → Green；包含來源不存在、錯 record、同 record 的錯來源、重複／空白 source、空白 record，以及 record 只連到另一個 Place 的案例 |
+
+在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4，僅執行 CoolSpotsAPIResponseTests：編譯成功，xcodebuild exit 65，xcresult 十七項執行、十三項通過、四項失敗、零跳過。原十二項仍通過；失敗為關聯資料未讀入、nullable 有紀錄卻得到空陣列、缺欄位未拒絕與錯來源關聯未拒絕。新欄位目前只是 computed placeholders，不能把過關的空陣列 case 當成完整讀取證據。
+
+委託 Green 後，四個占位 var 已改為儲存 let；decode 以 registry ID Set 和每個 item 的 SourceReference Set 檢查對應，拒絕錯誤署名而非改寫來源。method／provider／relationship／verification 保留原 API 字串，不在讀取時重新推斷或把 within 改成 same。於同一隔離 simulator 執行十七項 v5 tests，另加既有 v4 decoder 回歸：xcodebuild exit 0，xcresult 十八項通過、零失敗、零跳過。實作直接，沒有額外重構。全部為合成 fixture；未用真正 HTTP payload 或聲稱效能／照片下載證據。
+
+完整 v5 read model 的三批解析已通過；下一步先解釋與測試 Swift HTTP client／loader，再以本機匿名 GET 與真實 253 筆 payload 整合驗證，最後接 App 清單入口。這批沒有修改舊 v4 DTO／bundled JSON／photos renderer／project／DB／backend，也沒有 HTTP request／UI／圖片下載或 Report schema。提交限 decoder／tests 與既有文件，通過實際 staged diff／個資與憑證／本機設定值／文件 links 檢查後才 commit；不納入本機設定、device 資料或測試輸出，不 push。
+
 **2026-10-01：Swift v5 第二批已 Green，相關測試 13 passed／0 failed。** 第一批 checkpoint 是 Prototyping／e1633f2；開始時 working tree 乾淨。Owner 詢問 App 是否已打 API 並同意下一步；確認 Swift 仍沒有 HTTP request 後，agent 依教學流程新增 IOS-V5-C07–C12 tests、必要 nested types 和新欄位占位介面，保留前六項行為。確認 Red 後，owner 明確委託「你幫我弄吧」，由 agent 完成當批 Green。沒有將此委託延伸到下一批或 App 接線。
 
 | Case | 預期 | 實際證據 |
