@@ -4,6 +4,20 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：Swift v5 第二批已 Green，相關測試 13 passed／0 failed。** 第一批 checkpoint 是 Prototyping／e1633f2；開始時 working tree 乾淨。Owner 詢問 App 是否已打 API 並同意下一步；確認 Swift 仍沒有 HTTP request 後，agent 依教學流程新增 IOS-V5-C07–C12 tests、必要 nested types 和新欄位占位介面，保留前六項行為。確認 Red 後，owner 明確委託「你幫我弄吧」，由 agent 完成當批 Green。沒有將此委託延伸到下一批或 App 接線。
+
+| Case | 預期 | 實際證據 |
+|---|---|---|
+| IOS-V5-C07–C08 | 保留完整地址／場所分類／降溫描述／access／hours；unknown 與 nullable 值不杜撰 | C07 Red → Green。C08 在占位階段已通過，因 default 恰為 unknown／nil／空 features；不製造 Red，真正解碼後仍通過 |
+| IOS-V5-C09–C10 | 新分類碼降為 unknown，但保留認識的 features；保留三種合法停留限制 | 兩項 Red → Green；沿用已有 wire enums 的 fallback，入場資格新增同樣的 typed fallback；停留狀態沿用 CoolSpotStayLimit 的 strict Status |
+| IOS-V5-C11–C12 | limited 要正數分鐘，其他狀態不能帶分鐘；缺必要 object／enum／access key 或錯誤型別要拒絕 | 兩項 Red → Green；未知停留狀態或壞 minutes 型別是 DecodingError，已知狀態的矛盾組合是 invalidItems |
+
+在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4，僅執行 CoolSpotsAPIResponseTests：編譯成功、xcodebuild exit 65，xcresult 為十二項執行、七項通過、五項失敗、零跳過。六個舊 cases 全通過，新增六個有五個因目標未實作而失敗。只改新 decoder／tests，並維護既有文件；沒有舊 Swift consumer／bundled JSON／project 設定／DB／backend／Explore／HTTP／UI 變更，沒有重跑其他歷史 suite。測試全部為合成內容，敏感值 pattern 檢查無發現。
+
+Agent 受委託完成 Green 後，在 CoolSpotsAPIResponse.swift 把 Item 的占位 var 改為儲存 let，交由合成 Decodable 讀取；補 Eligibility 的未知分類解碼，在 decode guard 加上 postedStayLimit.isValid。沒有從名稱判斷分類或補倫敦時區，缺少的描述／hours 保持 nil；新 model 不含 scope／eligibilityDetails。於同一隔離 simulator 執行十二項 v5 tests，另加既有 v4 decoder 回歸：xcodebuild exit 0，xcresult 十三項通過、零失敗、零跳過。實作直接，沒有額外重構。
+
+下一步是來源關聯、欄位依據、地圖與照片的 Swift 解析，之後才接 URLSession／App 清單入口。這批提交限 decoder／tests 與既有文件；真正 staged diff、敏感值 pattern、本機設定值與文件 links 檢查後才 commit，不納入本機設定、device 資料或測試輸出，不 push。一般更正歷史／Report／照片傳送與上傳仍未實作；沒有讓舊 catalogue 成為 fallback。
+
 **2026-10-01：Swift v5 第一批已 Green，相關測試 7 passed／0 failed。** Owner 同意繼續下一步與適當 commit，要求提交前檢查個資／安全；在 agent 寫 tests／可編譯介面並確認六項 Red 後，owner 明確委託「你幫我弄」，由 agent 完成當批 decode Green。新增 [CoolSpotsAPIResponse.swift](cool-spot/CoolSpotsAPIResponse.swift)、[CoolSpotsAPIResponseTests.swift](cool-spotTests/CoolSpotsAPIResponseTests.swift)，Xcode project 只增加兩檔的 group／target membership，沒有 signing／帳號設定變更。這次委託不自動擴張到其他產品批次。
 
 | Case | 預期 | 實際證據 |

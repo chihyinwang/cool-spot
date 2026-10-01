@@ -27,6 +27,52 @@ struct CoolSpotsAPIResponse: Decodable {
         let name: String
         let location: Location
 
+        let address: Address
+        let placeType: CoolSpotPlaceType
+        let setting: CoolSpotSetting
+        let coolingFeatures: [CoolSpotFeature]
+        let coolingDetails: String?
+        let additionalInformation: String?
+        let access: Access
+        let hours: Hours?
+
+        struct Address: Decodable, Equatable {
+            let formatted: String?
+            let line1: String?
+            let line2: String?
+            let locality: String?
+            let borough: String?
+            let postalCode: String?
+            let countryCode: String?
+        }
+
+        struct Access: Decodable, Equatable {
+            let cost: CoolSpotCost
+            let eligibility: Eligibility
+            let seating: CoolSpotSeating
+            let toilets: CoolSpotToilets
+            let drinkingWater: CoolSpotAvailability
+            let wheelchairAccess: CoolSpotAvailability
+            let staffedWhenOpen: CoolSpotAvailability
+            let tables: CoolSpotAvailability
+            let areaDescription: String?
+            let postedStayLimit: CoolSpotStayLimit
+        }
+
+        enum Eligibility: String, Decodable {
+            case everyone, limited, unknown
+
+            init(from decoder: Decoder) throws {
+                let code = try decoder.singleValueContainer().decode(String.self)
+                self = Self(rawValue: code) ?? .unknown
+            }
+        }
+
+        struct Hours: Decodable, Equatable {
+            let text: String
+            let timeZone: String
+        }
+
         struct Location: Decodable, Equatable {
             let latitude: Double
             let longitude: Double
@@ -53,7 +99,8 @@ struct CoolSpotsAPIResponse: Decodable {
               response.items.allSatisfy({ item in
                   !item.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                   !item.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-                  CLLocationCoordinate2DIsValid(item.location.coordinate)
+                  CLLocationCoordinate2DIsValid(item.location.coordinate) &&
+                  item.access.postedStayLimit.isValid
               }) else {
             throw LoadError.invalidItems
         }
