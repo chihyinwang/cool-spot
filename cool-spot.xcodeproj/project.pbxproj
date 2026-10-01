@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		A50100012D000001001D0001 /* CoolSpotsAPIResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50100022D000001001D0001 /* CoolSpotsAPIResponse.swift */; };
 		A50100032D000001001D0001 /* CoolSpotsAPIResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50100042D000001001D0001 /* CoolSpotsAPIResponseTests.swift */; };
+		A50200012D000001001D0001 /* CoolSpotsAPILoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50200022D000001001D0001 /* CoolSpotsAPILoader.swift */; };
+		A50200032D000001001D0001 /* CoolSpotsAPILoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50200042D000001001D0001 /* CoolSpotsAPILoaderTests.swift */; };
         6D011D642C000001001D0001 /* CoolSpotsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D652C000001001D0001 /* CoolSpotsResponse.swift */; };
         6D011D662C000001001D0001 /* CoolSpots.prototype.json in Resources */ = {isa = PBXBuildFile; fileRef = 6D011D672C000001001D0001 /* CoolSpots.prototype.json */; };
 		6D011D632C000001001D0001 /* PlaceSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D622C000001001D0001 /* PlaceSearch.swift */; };
@@ -48,6 +50,8 @@
 /* Begin PBXFileReference section */
 		A50100022D000001001D0001 /* CoolSpotsAPIResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPIResponse.swift; sourceTree = "<group>"; };
 		A50100042D000001001D0001 /* CoolSpotsAPIResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPIResponseTests.swift; sourceTree = "<group>"; };
+		A50200022D000001001D0001 /* CoolSpotsAPILoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPILoader.swift; sourceTree = "<group>"; };
+		A50200042D000001001D0001 /* CoolSpotsAPILoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsAPILoaderTests.swift; sourceTree = "<group>"; };
         6D011D652C000001001D0001 /* CoolSpotsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoolSpotsResponse.swift; sourceTree = "<group>"; };
         6D011D672C000001001D0001 /* CoolSpots.prototype.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Resources/CoolSpots.prototype.json; sourceTree = "<group>"; };
 		6D011D622C000001001D0001 /* PlaceSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSearch.swift; sourceTree = "<group>"; };
@@ -128,6 +132,7 @@
                 7A031D042C000001001D0001 /* CommunityCoolSpots.prototype.json */,
                 6D011D652C000001001D0001 /* CoolSpotsResponse.swift */,
 				A50100022D000001001D0001 /* CoolSpotsAPIResponse.swift */,
+				A50200022D000001001D0001 /* CoolSpotsAPILoader.swift */,
                 6D022D042C000001001D0001 /* CommunityPhoto3.jpg */,
                 6D022D032C000001001D0001 /* CommunityPhoto2.jpg */,
                 6D022D022C000001001D0001 /* CommunityPhoto1.jpg */,
@@ -148,6 +153,7 @@
 			children = (
 				6D011D3C2C000001001D0001 /* cool_spotTests.swift */,
 				A50100042D000001001D0001 /* CoolSpotsAPIResponseTests.swift */,
+				A50200042D000001001D0001 /* CoolSpotsAPILoaderTests.swift */,
 			);
 			path = "cool-spotTests";
 			sourceTree = "<group>";
@@ -271,6 +277,7 @@
                 7A031E032C000001001D0001 /* PrototypePhotoStorage.swift in Sources */,
                 6D011D642C000001001D0001 /* CoolSpotsResponse.swift in Sources */,
 				A50100012D000001001D0001 /* CoolSpotsAPIResponse.swift in Sources */,
+				A50200012D000001001D0001 /* CoolSpotsAPILoader.swift in Sources */,
 				6D011D572C000001001D0001 /* PlaceDetailView.swift in Sources */,
 				6D011D592C000001001D0001 /* ContributionView.swift in Sources */,
 				6D011D5B2C000001001D0001 /* SavedYouViews.swift in Sources */,
@@ -283,6 +290,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A50100032D000001001D0001 /* CoolSpotsAPIResponseTests.swift in Sources */,
+				A50200032D000001001D0001 /* CoolSpotsAPILoaderTests.swift in Sources */,
 				6D011D3D2C000001001D0001 /* cool_spotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

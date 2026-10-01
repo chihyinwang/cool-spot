@@ -4,6 +4,26 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：Swift HTTP 批次已 Green，相關測試 29 passed／0 failed。** 起點 Prototyping／9ea62ce；先發現 CoolSpotsAPIResponse.swift 有未提交改動，移除了已完成的欄位／關聯解析。Agent 沒有覆蓋；owner 回報恢復後，重新核對 git working tree 乾淨、HEAD 未變。先按教學方式由 agent 寫成批 tests／驗證 Red 並提供完整 Green；owner 再明確委託「你幫我弄吧」，要求權衡 SOLID，由 agent 完成當批實作與設計 review。此委託不延伸到下一批或 App 接線。
+
+本批新增 [CoolSpotsAPILoader.swift](cool-spot/CoolSpotsAPILoader.swift)、[CoolSpotsAPILoaderTests.swift](cool-spotTests/CoolSpotsAPILoaderTests.swift)，Xcode project 只加入兩檔的 group／target membership。入口為注入 URL 與 URLSession 的 async load，回傳完整 CoolSpotsAPIResponse；最初可編譯占位實作固定 throw invalidResponse，委託後改為 GET／HTTP 200 檢查／v5 decode／兩種錯誤映射與 CancellationError。URLProtocol 替身只套到每個測試的 ephemeral session，以各自 URL 隔離、鎖保護 registry／requests，teardown 關閉 session 並移除註冊；不使用真實網路、資料庫或裝置資料。
+
+| Case | 預期 | Red → Green 實際證據 |
+|---|---|---|
+| IOS-HTTP-C01–C02 | 建立 loader 不發 request；每次 load 對指定 URL 發 GET，Accept application/json，不帶 Authorization／apikey／body | C01 已通過，不製造 Red；C02 原零次 request，Green 兩次 GET，所有指定 header／URL／method／body assertions 通過 |
+| IOS-HTTP-C03–C04 | HTTP 200 解析完整 v5 envelope／facts／relations，合法空清單也成功 | 兩項 Red → Green；來源年份不替換成生成時間，兩種 ID 保持獨立；完整欄位解碼另由既有十七項驗證 |
+| IOS-HTTP-C05–C07 | 非 200／非 HTTP response／空或壞 JSON／舊版本／非法正式值都回 invalidResponse | 三項在占位階段已通過，不製造 Red；Green 真正經 URLSession 的替身 response 與 decoder 後仍正確拒絕 |
+| IOS-HTTP-C08–C11 | transport failures 為 connectivity；URLError.cancelled 與取消 in-flight Task 保留 CancellationError；已取消 Task 不發 request | 四項 Red → Green；包含 timeout／cannotConnectToHost／networkConnectionLost。in-flight Red 未送 request，started expectation 到期；Green 送出後取消成功，已取消 Task 不送 request |
+| IOS-HTTP-C12 | 同一 loader 兩次並行 load，先完成第二次，再完成第一次，各拿自己的 response | Red → Green；實際先完成第二次，兩次拿到各自的 Cool Spot ID，不把連續 request count 當成獨立 completion 證據 |
+
+僅在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4 執行十二項新 loader tests 與十七項 decoder tests：編譯成功，xcodebuild exit 65，xcresult **29 執行／21 passed／8 failed／0 skipped**。十七項 decoder 全通過；loader 四項已通過、八項為目標未實作的行為失敗。沒有把編譯錯誤當作 Red，也沒有重跑舊 v4 regression／歷史 Swift suite／SQL／backend。此結果不代表 Swift 已向真實 API 送 GET。
+
+委託 Green 後，同一隔離 simulator 執行十二項 loader 與十七項 decoder：xcodebuild exit 0，xcresult **29 執行／29 passed／0 failed／0 skipped**。正式 loader 只協調 HTTP 與既有 decoder，沒有重複欄位驗證、保存最後回應或混用兩次 load 的結果；依賴注入讓 transport 可受控測試。它仍依賴具體 URLSession，沒有把依賴注入說成完全符合 DIP；目前這是 Foundation 邊界，另建 transport protocol 尚無實際收益，未為湊齊 SOLID 加抽象。Green 後檢查發現 non-HTTP 測試的 handler closure 捕捉其 owning SessionStub；改為捕捉 URL 值以移除循環引用，再單獨執行該 case：1 passed／0 failed／0 skipped，xcodebuild exit 0。沒有變更正式行為或測試預期。
+
+提交前又發現 loader 磁碟內容回到完全相同的初始占位介面，原因未確定；沒有提交這個不一致狀態。先保存 owner-only 暫存副本，再重新套用已委託的 Green。因 source 與早先 Green 證據不一致，重新執行整批二十九項：xcodebuild exit 0、29 passed／0 failed／0 skipped；核對 loader／loader tests／decoder／decoder tests／project 五檔在測試前後 SHA-256 一致，提交時再比對。暫存副本、fingerprints 與 logs 均留在 Git 外。
+
+下一步用真實本機 endpoint 驗證 253 筆；本批結果只包含 URLProtocol 合成回應，不代表 Swift 已向後端送 GET。Explore／App 入口與 UI error／retry 行為仍待下一批；沒有 bundled fallback、預先加入快取／retry／附近搜尋／登入，沒有修改 decoder／舊 Swift consumer／JSON／signing／DB／backend 或 sibling checkout。延續 owner 的適當本機 commit 與安全檢查授權；提交限 source／tests／target membership／三份既有文件，不提交本機設定、測試輸出或 device 資料，不 push。
+
 **2026-10-01：Swift v5 第三批已 Green，相關測試 18 passed／0 failed。** 起點是 Prototyping／7bed3f6，working tree 乾淨；owner 同意下一步。Agent 解釋完整關聯契約與來源對應規則後，新增 IOS-V5-C13–C17 tests／合成 helpers，及 SourceReference／Provenance／MapReference types 與四個空陣列占位介面；照片沿用 PlacePhotoAsset。確認 Red 後，owner 明確委託「你幫我弄吧」，由 agent 完成當批 Green。Swift HTTP 與 Explore 尚未接線。
 
 | Case | 預期 | 實際證據 |
