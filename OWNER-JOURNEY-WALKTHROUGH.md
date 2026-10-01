@@ -4,6 +4,30 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：正常 App 已接本機 v5 API；止於遠端 API 之前。** 起點 Prototyping／8f7ae05。Owner 委託完成剩餘接線、tests 與適當 commit，並同意正常 API 模式停用 Publish locally；私人提案保留，明確 QA／範例模式仍可本機發布。沒有新增 API 契約、登入、上傳、部署或資料庫變更。
+
+| Case | 檢查重點 | 證據 |
+|---|---|---|
+| IOS-STORE-C01–C03 | API store 初始／合法空清單無 legacy fallback；目前值更新；歷史發布只保存不套用 | 初始 skeleton 行為 Red；完整欄位 archive 與現行名稱、重啟／原資料不改寫 assertions |
+| IOS-STORE-C04 | API 清單移除／重載／重啟不丟收藏筆記、回報、草稿、確認、presence deadline 或 nearby 模擬 ID | 空清單期間另存私人 pin，再重開並載入新名稱；原身分／私人值／期限保留 |
+| IOS-STORE-C05–C06 | 正常 API 模式拒絕本機發布，明確範例模式不被 API replacement 改寫 | 提案保持 In review；既有兩項 legacy publication regressions 一併通過 |
+| IOS-STORE-C07 | API mode 不額外加入 fixture peer reports／presence | 單一 case verified Red；自己的回報與明確 fixture mode 不刪除 |
+| IOS-LOAD-C11–C13 | 成功／空結果交給 store；失敗／取消不交付；view reappearance 不自動載入 | 補上 didLoad 與 loadIfNeeded；前十項 loading/cancellation cases 保留 |
+| IOS-LOAD-C14 | 明確 retry 只重開 failed；連點不重新開放；重試後 reappearance 仍不自動 retry | 單一 case verified Red；requestRetry 改 idle，HTTP 由 view-owned task 執行 |
+| IOS-API-C03 | 真正匿名 HTTP → decoder → mapper → ViewModel → Store → 收藏筆記 → 重開 → 真正 HTTP | 沿用已完成元件，首次通過，不製造 Red；253 筆、Canning 身分／來源 context 與私人資料保留 |
+
+第一輪 Store/交付 skeleton 的 related Red：19 executed／12 passed／7 failed／0 skipped；五項 Store 與兩項交付/初始載入因目標未實作而失敗。初始提案 test 前置改成有效的 update，避免把缺少新場所必填照片當成目標 Red。Green：21 passed／0 failed／0 skipped（六項 Store、十三項 ViewModel、兩項舊發布回歸）。接上畫面後初次完整 scoped validation：40 passed／0 failed／0 skipped；十一項 program/tests/project/owner plan/scheme fingerprints 不變。
+
+Code review 再補 retry 生命周期與 fixture peer-report 邊界；各單項 Red 的 xcresult 均為 1 executed／0 passed／1 failed／0 skipped。Final Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4: 42 passed／0 failed／0 skipped（7 API-store, 14 ViewModel, 16 mapper, 3 actual HTTP integration, 2 legacy publication regressions）；eleven tested source/test/project/owner-plan/scheme fingerprints unchanged.。
+
+正常 App 原生證據只在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4：真實本機 API 的 253 places；搜尋 Canning Town Library、打開詳情與 GLA · 2025；Save，私人 editor 寫入 QA note 並保存；重啟斷線時 Saved／location／note 仍在，顯示 Cooling information is currently unavailable，無舊 cooling facts。API 恢復時 failure 仍在，手動 Try again 才回 253；You／Settings／Prototype controls 正常，沒有 Publish locally 按鈕且有說明。Loading 經 accessibility tree 觀察、合法空清單經 screenshot 觀察：使用暫時 loopback HTTP fixture（3 秒回應、200 v5 empty），未清空資料庫；fixture 停止後恢復真正 Deno reader。這些是 bounded 本機互動，不等於 A–E 全套、owner UX 接受、實體 iPhone、圖片配送、GPS、效能或雲端驗證。
+
+QA app data 在安裝前備份至 Git 外；本輪只新增自己的 QA bookmark/note，原紀錄保留。只暫停／恢復專用 prototype API listener，未重啟容器、migration、匯入或 reset。測試、logs、results、credentials、QA backup 均不納入 commit；owner test-plan/scheme/project 格式與 staging 保留。候選 project 只含新增 Store test 的四行 membership；使用獨立 index 做精準提交，核對 secrets、文件 links 與全部 40 個 A–E IDs，不 push。
+
+下一個界線是遠端 endpoint／設定與部署設計；本輪停在此之前。Report、Cooling here、popsicle、提案仍是既有本機 prototype 生命周期，沒有假稱寫入後端。原始 bundled JSON 未改。
+
+### 上一批載入 ViewModel：歷史 Red／Green
+
 **2026-10-01：API 清單載入狀態第一批已 Green，相關測試 26 passed／0 failed。** 起點 Prototyping／f7a038d。Owner 先同意 Loading／成功清單／合法空清單／失敗＋Try again、無自動重試與無 bundled fallback；公開清單由 API 提供，個人資料另行保留。收到 verified Red 與完整最小 Green 後，owner 明確委託改為 CoolSpotsCatalogueViewModel 命名並完成 Green。開始時保留 AGENTS 的 code-snapshot 回報偏好、owner project／已 staged test plan／untracked scheme。
 
 新增 [CoolSpotsCatalogueViewModelTests.swift](cool-spotTests/CoolSpotsCatalogueViewModelTests.swift) 的十個 cases／可控制回應的 MainActor LoaderSpy；新增 [CoolSpotsCatalogueViewModel.swift](cool-spot/CoolSpotsCatalogueViewModel.swift) 的 ObservableObject、四種 State、idle 初始值、注入 loader 與空 load() 介面。Project 僅新增兩檔的八行 group／target membership；移除該八行後與 owner 原 project bytes 完全一致，test plan／scheme 內容及原 staging 保留。ViewModel、spy 與呼叫均在 MainActor；callback 傳入 load count，沒有捕捉 owning spy 的循環引用。
@@ -26,7 +50,7 @@ Owner 追問 Model 的職責後，agent 判斷此物件管理公開目錄的可�
 
 本批提交範圍限 ViewModel／tests、project 的八行 target membership 與三份既有 active documents；使用獨立暫存 index，owner 的 test-plan reference／project 格式與其他 staging 不納入。候選 project 除 owner 的 test-plan reference 外，和實際測試 project 語意一致；原 owner 檔案內容與 staging 保留。提交前檢查測試 fingerprints、實際 patch、敏感值／本機憑證比對、local links 與 40 個 A–E IDs；logs／xcresult 留在 Git 外，不 push。
 
-下一批處理個人資料保存／local publication 不覆蓋 API 的 store 邊界，再接 ContentView／Explore 的正常 App 載入 UI。本批沒有修改這些 consumer、bundled JSON、endpoint、ATS 或 signing；不把 state tests 當成已完成 App 接線，未將本批 Green 委託延伸到下一批。
+當批止點（歷史）：只完成載入 ViewModel，未修改 consumer／bundled JSON／endpoint／ATS／signing；Store 與 App 接線由 owner 本次另行委託並完成，現行證據見本節起點。
 
 **2026-10-01：v5 → 畫面模型的第二批已 Green，相關測試 37 passed／0 failed。** 起點 Prototyping／5c895ce。Owner 先要求維持相同教學原則繼續；收到 verified Red 與完整最小 Green 後，明確委託「你幫我做吧」。開始時 project 的 owner test-plan reference／格式修改、已 staged 的 cool-spot.xctestplan 與 untracked shared scheme 均保留。Xcode 仍開啟 prototype／Cool Spot Contract QA；之前的執行已停止，loader 第 43 行的本機中斷點仍在，沒有操作 owner App 資料。
 
@@ -870,7 +894,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 截圖：[名稱及錯誤定位](.impeccable/review/form-refinement-2026-09-08/phone-required-errors.png)、[欄位標籤](.impeccable/review/form-refinement-2026-09-08/phone-fields.png)、[Entry and seating](.impeccable/review/form-refinement-2026-09-08/phone-entry.png)、[iPad 最大字級設施](.impeccable/review/form-refinement-2026-09-08/tablet-features-large-dark.png)、[新位置送審成功](.impeccable/review/form-refinement-2026-09-08/phone-submitted.png)。
 
-以上 DEBUG flows 使用 memory-only store，不是正式保存／上傳／審核服务證據，也不是首次使用者的完成時間或點擊數測量。
+以上 DEBUG flows 使用 memory-only store，不是正式保存／上傳／審核服務證據，也不是首次使用者的完成時間或點擊數測量。
 
 ## 怎麼跑
 
@@ -890,13 +914,13 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 `→` 是下一個點擊或動作；「返回」是左上角返回；「關閉地點」是 ×。Explore／Saved／You 是底部分頁，Places／Pins 是 Saved 內的分類。GPS 與審核仍為 prototype，限制見 PRODUCT。
 
-**現行 A–E 一律正常啟動，不加 `--shape-preview`、`--reports-test-fixtures` 或 `--example-cool-spots`。** 這些參數改用 memory-only store，不能驗證下方的重啟保存。正常啟動有 250 筆 GLA、三筆社群示例與 British Museum 普通場所，並讀取裝置原有紀錄；以下是未經本機修改的初始狀態：
+**現行 A–E 使用正常本機 API 啟動，先確認 `python3 scripts/run_backend_local.py serve` 的本機服務可用。** 明確例外為 E01 的舊發布模擬，只能使用隔離 memory-only fixture mode；不能拿它證明 API 或重啟保存。正常清單為 API 的 250 筆 GLA＋3 labelled examples；British Museum 必須由 live MapKit search 或既有私人收藏取得。正常模式不重播本機發布、不補 fixture visitor reports 或 peer presence；其餘個人回報流程仍是本機 prototype。
 
 | 用途 | 可搜尋的地點 | 前提 |
 |---|---|---|
 | GLA 資訊／修正 | John Harvard Library、Canning Town Library | 初始沒有 visitor reports 或示範人數；沒有填的資格／設施不應推測。 |
-| 非 GLA 降溫資訊 | Tate Modern | 三則 Example 回報、零示範人數，可開真實場所的 Place details。 |
-| 個人回報／人數／草稿 | Example Community Room、Example Shaded Garden | 各有兩則 Example 回報；固定示範人數分別為二、一。示範回報不給目前使用者到訪資格。 |
+| 非 GLA 降溫資訊 | Tate Modern | API mode 初始無訪客回報／示範人數，可開真實場所的 Place details。 |
+| 個人回報／人數／草稿 | Example Community Room、Example Shaded Garden | API mode 初始無 fixture 回報／示範人數；QA 附近模擬和個人回報仍可使用。 |
 | 普通場所／新增提案 | British Museum | 應顯示 No cooling information yet。British Library 已在 GLA 目錄，不能用來測這個分支。 |
 
 既有本機回報／發布可能改變上述狀態，先確認前提再測。B11／E01 會持久化測試提案，C03／D04 的日期模擬會修改所有「已確認、尚未開始回報」的造訪；需要這些情境時使用隔離 QA iPhone 17 Pro Max，只建立本輪資料，不重置 owner 裝置。若 British Museum 已在該 QA 本機發布成 Cool Spot，改用另一個明確顯示 No cooling information yet 的普通場所，整組相關步驟使用同一個名稱。
@@ -908,17 +932,17 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 1. Explore → 搜尋 `John Harvard Library` → 點同名 Cool Spot；也可從底部 **Cool Spots** 或地圖標記開啟。
 2. 確認地圖移到場所、半卡上方仍看得見標記。讀名稱、GLA · 2025、降溫設施與費用／座位；上滑展開。
 3. 降溫特色下方讀有資料的費用、座位與使用資格；未知資格不應顯示 Open to everyone。不再顯示 Cooling space hours；**Facilities & accessibility** 預設收起，點開讀廁所／輪椅通行／人員值守。再次點擊可收合，座位／飲水不重複。來源在分類旁；同組的 **Place details** 開同一場所的補充資訊，關閉回原降溫卡；**View nearby streets** 緊接其後，第一區末端是較輕的 **Suggest an edit**。
-4. 場所資訊、Visitor reports、目前人數／分享操作三區之間均有淡分隔線；人數與 Here to cool down? 共用白底，沒有內層藍色卡片。新場所 **Visitor reports → No reports yet**；沒有捏造體感條狀圖。A05 的社群示例在正常啟動即可檢查回報分布，常駐顯示而非按鈕收合。
+4. 場所資訊、Visitor reports、目前人數／分享操作三區之間均有淡分隔線；人數與 Here to cool down? 共用白底，沒有內層藍色卡片。新場所 **Visitor reports → No reports yet**；沒有捏造體感條狀圖。有自己的已發布回報才顯示相應分布；正常 API mode 不額外加入 fixture 訪客證據。
 
 **觀察：** 是否足以決定去不去、還缺什麼？GLA 時間仍留在資料中但不在 app 卡顯示；要看場所時間可開 Place details，資料依系統卡提供。座位表示設有座位，並非現在有空位。
 
 ### A02｜比較兩個地點
 
 1. 關閉地點 → Explore 搜尋 **Example Shaded Garden** → 開啟同名 Cool Spot。
-2. 比較降溫特色、入場／座位資訊與 Visitor reports；體感分布預設顯示。
+2. 比較降溫特色、入場／座位資訊與 Visitor reports；初始無回報時顯示 No reports yet，有自己回報時才有分布。
 3. 關閉 → 搜尋 **Example Community Room** → 開啟並讀 Visitor reports 與目前人數。
 
-**觀察：** 哪些是場所資訊、哪些是一次造訪的經驗？這兩個虛構場所各有兩則 Example 回報，統計應來自同一批個別紀錄；有本機回報時再加上本機資料。花園／社區空間的固定示範人數是一／二，不是遠端即時使用者。
+**觀察：** 哪些是場所資訊、哪些是一次造訪的經驗？正常 API mode 的兩個虛構場所只有 labelled place facts，初始沒有 fixture 訪客回報／示範人數。個人已發布回報加入後，統計應與同一批實際本機回報相符；這不是遠端同步。
 
 ### A03｜用篩選縮小範圍
 
@@ -1245,9 +1269,9 @@ A/B/C 的搜尋結果可能另有 MapKit 近似場所。B 同一場所不應同�
 ### D08｜最新預覽、全部回報、自己的與範例格式
 
 1. Explore → **Example Shaded Garden** → **Visitor reports**：同區讀體感統計、分布、最新預覽，再點 **Read all reports**。
-2. 核對 D07 新報告與 Example visitor report 是否使用相同內容順序；有填的資料才出現。
+2. 核對 D07 本機新回報的 Visit time／答案／文字；有填的資料才出現，正常 API mode 不補 Example visitor report。
 3. 返回地點頁 → 直接點預覽文字應留在原卡；只有 **Read all reports** 開啟回報清單，統計標題旁沒有另一個 View all。
-4. 再打開 **Example Community Room** 的 Visitor reports，比較示例格式；返回 You → Your reports → Published 查看 D07 自己的版本。
+4. 返回 You → Your reports → Published 查看 D07 自己的版本；若要比較 Example visitor report，另用明確 fixture preview，不把它視為正常 API 回報。
 
 **排序：** 依 Visit time，最新在前，不分作者；不是依按下發布的時間。造訪時間填得較早的新回報不一定占預覽。範例有固定日期和 Example 標示；未填的選填欄位可略過，不應改成另一套格式。
 
@@ -1255,15 +1279,14 @@ A/B/C 的搜尋結果可能另有 MapKit 近似場所。B 同一場所不應同�
 
 ## E：審核狀態、感謝、帳戶與設定
 
-### E01｜場所提案的審核與本機發布
+### E01｜提案保存與 API 發布界線
 
-1. 接 B11 剛送出的提案（重開仍保留）。You → Places you’ve added or updated → In progress／In review。
-2. You → Settings → Prototype controls → 核對畫面列出的最新場所提案名稱與狀態 → **Publish locally**。控制器只針對最新一筆場所提案；只有它是 In review 時可發布，不會跳過已發布案去找較早的待審案。完成後發布按鈕應不可用。
-3. Explore 搜尋該地點；新增案應出現地點，修改案保留原身份並只變更提案欄位。有送照片才在 Photos 查看；有一般補充才在 More information 查看；修改理由不公開。
-4. 重開 App 後確認場所、照片、審核狀態保留，原有 Saved/private notes/visitor reports/presence 不受影響。
-5. 要試 **Needs clarification** 或 **Do not publish**，各自重新準備一筆最新待審提案；核對相應結果為 Action needed 或 Not published，公開場所資訊仍未套用。已發布紀錄不能用狀態按鈕撤回。
+1. 先在隔離 QA 依 B11 送出一筆本輪 TEST 場所提案；核對 You → Places you’ve added or updated 中最新提案為 **In review**。
+2. You → Settings → Prototype controls：正常 API 模式不應有 **Publish locally**，應有 Public place publishing requires the backend 的說明。
+3. 返回提案詳情，原答案／照片仍保留，狀態仍為 In review；Explore 的 API 清單不應因提案而新增／覆蓋場所。
+4. 關閉表單後正常重啟，再確認私人提案仍在；只有正常 API 清單從服務重新載入。
 
-**目前止點：** 這是本機審核／發布模擬，沒有伺服器、跨裝置同步、補件／申訴服務。沒有選擇任意舊提案或實際合併的 Merge 按鈕；重複地點仍走 Review update。衝突保護與重複發布的模型證據見上方歷史紀錄，不能把按鈕已停用當成這些模型分支的新測試。
+**界線：** Needs clarification／Do not publish 仍是本機狀態模擬，沒有遠端送審／上傳或真正發布。舊 Publish locally 只在明確 memory-only 範例模式保留；其 idempotence／identity／photos／archive 行為由本輪兩項 legacy regressions 驗證，不把它們說成正常 API UI 或跨裝置服務。原提案／私人照片不刪除，歷史公開快照保存但不重播。
 
 ### E02｜對別人的範例回報送感謝、取消
 

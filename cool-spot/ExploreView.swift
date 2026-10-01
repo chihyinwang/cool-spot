@@ -46,6 +46,8 @@ enum LocationRequestPurpose: Equatable {
 struct ExploreView: View {
     @ObservedObject var store: PrototypeStore
     @Binding var nearbyPlaceRequest: RecognisedPlace?
+    let catalogueState: CoolSpotsCatalogueViewModel.State?
+    let retryCatalogue: () -> Void
     @State private var nearbyOrigin: RecognisedPlace?
     @State private var nearbyRadius: CLLocationDistance = 1_000
     @State private var camera: MapCameraPosition = .region(.init(
@@ -73,9 +75,13 @@ struct ExploreView: View {
     @State private var savedDetail: SavedLocation?
     @State private var acceptMapMovementAfter = Date.distantFuture
 
-    init(store: PrototypeStore, nearbyPlaceRequest: Binding<RecognisedPlace?> = .constant(nil)) {
+    init(store: PrototypeStore, nearbyPlaceRequest: Binding<RecognisedPlace?> = .constant(nil),
+         catalogueState: CoolSpotsCatalogueViewModel.State? = nil,
+         retryCatalogue: @escaping () -> Void = {}) {
         self.store = store
         _nearbyPlaceRequest = nearbyPlaceRequest
+        self.catalogueState = catalogueState
+        self.retryCatalogue = retryCatalogue
     }
 
     private var nearbyResults: [NearbyCoolSpotResult] {
@@ -193,6 +199,7 @@ struct ExploreView: View {
                     SearchBar(text: $search, submit: { searchPlaces(debounce: false) },
                               focusChanged: { searchFocused = $0 })
                     filterBar
+                    catalogueStatus
                     if let message = store.coolSpotsLoadError {
                         Text(message).font(.subheadline).padding(12).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
@@ -248,7 +255,9 @@ struct ExploreView: View {
                     }
                     .padding(.horizontal, 16)
                     if !searchFocused || query.isEmpty {
-                        NearbyPanel(spots: filteredSpots) { select($0) }
+                        if showsCataloguePanel {
+                            NearbyPanel(spots: filteredSpots) { select($0) }
+                        }
                     }
                 }
                 .padding(.top, 8)
@@ -324,6 +333,41 @@ struct ExploreView: View {
         }
         .sheet(item: $savedDetail) { saved in
             SavedDetail(store: store, savedID: saved.id)
+        }
+    }
+
+    private var showsCataloguePanel: Bool {
+        guard let catalogueState else { return true }
+        if case let .loaded(spots) = catalogueState { return !spots.isEmpty }
+        return false
+    }
+
+    @ViewBuilder private var catalogueStatus: some View {
+        switch catalogueState {
+        case .idle?, .loading?:
+            HStack(spacing: 10) {
+                ProgressView()
+                Text("Loading Cool Spots…")
+            }
+            .font(.subheadline)
+            .padding(12)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        case .failed?:
+            VStack(spacing: 8) {
+                Text("Couldn’t load Cool Spots")
+                Button("Try again", action: retryCatalogue)
+                    .fontWeight(.semibold)
+            }
+            .font(.subheadline)
+            .padding(12)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        case let .loaded(spots)? where spots.isEmpty:
+            Text("No Cool Spots available")
+                .font(.subheadline)
+                .padding(12)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        default:
+            EmptyView()
         }
     }
 

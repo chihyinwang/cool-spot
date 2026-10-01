@@ -186,7 +186,12 @@ struct SavedDetail: View {
                         } else {
                             coordinateOverview
                             privateDetails
-                            shareCoordinateOptions
+                            if store.usesAPICatalogue, case .coolSpot = saved.kind {
+                                Label("Cooling information is currently unavailable", systemImage: "info.circle")
+                                    .font(.subheadline).foregroundStyle(.secondary)
+                            } else {
+                                shareCoordinateOptions
+                            }
                         }
                     }
                     .padding(20)
@@ -221,7 +226,7 @@ struct SavedDetail: View {
                 Map(initialPosition: .region(.init(
                     center: .init(latitude: saved.latitude, longitude: saved.longitude),
                     span: .init(latitudeDelta: 0.004, longitudeDelta: 0.004)))) {
-                        Marker("Saved pin", coordinate: .init(latitude: saved.latitude,
+                        Marker(saved.kind == .coordinate ? "Saved pin" : "Saved place", coordinate: .init(latitude: saved.latitude,
                                                                     longitude: saved.longitude))
                             .tint(.blue)
                     }
@@ -690,8 +695,13 @@ struct PrototypeControlsView: View {
                 if let latest = latestPlaceContribution {
                     Text("\(latest.title) · \(latest.status.title)").font(.subheadline)
                 }
-                Button("Publish locally") { store.simulate(.published) }
-                    .disabled(latestPlaceContribution?.status != .inReview)
+                if store.usesAPICatalogue {
+                    Text("Public place publishing requires the backend. Proposals remain saved on this device.")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    Button("Publish locally") { store.simulate(.published) }
+                        .disabled(latestPlaceContribution?.status != .inReview)
+                }
                 if let error = store.contributionError { Text(error).font(.footnote).foregroundStyle(.red) }
                 Button("Do not publish") { store.simulate(.notPublished("This spot is not open to visitors.")) }
                     .disabled(latestPlaceContribution == nil || latestPlaceContribution?.status == .published)

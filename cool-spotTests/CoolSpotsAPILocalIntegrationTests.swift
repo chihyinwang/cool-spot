@@ -2,6 +2,43 @@ import XCTest
 @testable import cool_spot
 
 final class CoolSpotsAPILocalIntegrationTests: XCTestCase {
+    @MainActor
+    func testRealAPIReachesTheStoreAndSavedNotesSurviveRelaunchWithoutCatalogueFallback() async throws {
+        try requireLocalIntegration()
+        let suite = "CoolSpotsAppIntegrationTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = PrototypeStore(reportDefaults: defaults, catalogueMode: .api)
+        let loader = makeSUT()
+        let catalogue = CoolSpotsCatalogueViewModel(load: loader.load, didLoad: store.replaceAPICatalogue)
+        XCTAssertTrue(store.spots.isEmpty)
+
+        await catalogue.loadIfNeeded()
+
+        XCTAssertEqual(store.spots.count, 253)
+        let library = try XCTUnwrap(store.spot("5873b0cb-25d4-43a8-93a8-d9ced4c8d3ab"))
+        XCTAssertEqual(library.name, "Canning Town Library")
+        XCTAssertEqual(library.apiRecord?.datasetID, "cool-spot-prototype")
+        XCTAssertNotNil(library.placeID)
+        XCTAssertNil(library.publishedRecord)
+        XCTAssertTrue(store.toggleSaved(library))
+        let saved = try XCTUnwrap(store.savedLocations.first)
+        store.updateSaved(saved.id, title: "Test Private Bookmark", note: "Test Private Note")
+        let reopened = PrototypeStore(reportDefaults: defaults, catalogueMode: .api)
+        XCTAssertTrue(reopened.spots.isEmpty)
+        XCTAssertNil(reopened.spot(library.id))
+        XCTAssertEqual(reopened.savedLocations.first?.id, saved.id)
+        XCTAssertEqual(reopened.savedLocations.first?.note, "Test Private Note")
+        let reloaded = CoolSpotsCatalogueViewModel(load: loader.load, didLoad: reopened.replaceAPICatalogue)
+
+        await reloaded.loadIfNeeded()
+
+        XCTAssertEqual(reopened.spots.count, 253)
+        XCTAssertEqual(reopened.spot(library.id)?.name, "Canning Town Library")
+        XCTAssertEqual(reopened.savedLocations.first?.title, "Test Private Bookmark")
+        XCTAssertEqual(reopened.savedLocations.first?.note, "Test Private Note")
+    }
+
     func testAnonymousLocalGETLoadsTheCompleteImportedV5Catalogue() async throws {
         try requireLocalIntegration()
         let sut = makeSUT()

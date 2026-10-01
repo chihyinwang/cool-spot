@@ -14,11 +14,25 @@ final class CoolSpotsCatalogueViewModel: ObservableObject {
 
     private let loadCatalogue:
         @MainActor () async throws -> CoolSpotsAPIResponse
+    private let didLoad: @MainActor ([CoolSpot]) -> Void
 
     init(
-        load: @escaping @MainActor () async throws -> CoolSpotsAPIResponse
+        load: @escaping @MainActor () async throws -> CoolSpotsAPIResponse,
+        didLoad: @escaping @MainActor ([CoolSpot]) -> Void = { _ in }
     ) {
         loadCatalogue = load
+        self.didLoad = didLoad
+    }
+
+    func loadIfNeeded() async {
+        guard case .idle = state else { return }
+        await load()
+    }
+
+    func requestRetry() -> Bool {
+        guard case .failed = state else { return false }
+        state = .idle
+        return true
     }
 
     func load() async {
@@ -30,7 +44,9 @@ final class CoolSpotsCatalogueViewModel: ObservableObject {
         do {
             let response = try await loadCatalogue()
             try Task.checkCancellation()
-            state = .loaded(response.makeSpots())
+            let spots = response.makeSpots()
+            didLoad(spots)
+            state = .loaded(spots)
         } catch {
             if Task.isCancelled || error is CancellationError {
                 state = .idle

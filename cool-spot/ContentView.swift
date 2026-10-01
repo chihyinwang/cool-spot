@@ -3,6 +3,8 @@ import SwiftUI
 struct ContentView: View {
     @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .light
     @StateObject private var store: PrototypeStore
+    @StateObject private var catalogue: CoolSpotsCatalogueViewModel
+    @State private var catalogueLoadAttempt = 0
     @State private var selectedTab: Int
     @State private var nearbyPlaceRequest: RecognisedPlace?
     @State private var showDetailPreview: Bool
@@ -22,7 +24,7 @@ struct ContentView: View {
             || arguments.contains("--example-cool-spots") || arguments.contains("--example-catalog")
         let initialStore = usesExamples
             ? PrototypeStore(reportDefaults: nil)
-            : PrototypeStore.loadedCoolSpotsStore(reportDefaults: .standard)
+            : PrototypeStore(reportDefaults: .standard, catalogueMode: .api)
         if usesReportExamples {
             // Isolated, memory-only examples: never overwrite saved places or real local reports.
             for (index, fixture) in initialStore.spots.enumerated() {
@@ -38,6 +40,19 @@ struct ContentView: View {
             initialStore.simulateNearbySpot(nil)
         }
         _store = StateObject(wrappedValue: initialStore)
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpCookieStorage = nil
+        configuration.urlCredentialStorage = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.timeoutIntervalForRequest = 5
+        configuration.timeoutIntervalForResource = 10
+        let loader = CoolSpotsAPILoader(
+            url: URL(string: "http://127.0.0.1:8000/functions/v1/cool-spots")!,
+            session: URLSession(configuration: configuration)
+        )
+        _catalogue = StateObject(wrappedValue: CoolSpotsCatalogueViewModel(
+            load: loader.load, didLoad: initialStore.replaceAPICatalogue
+        ))
         if let index = arguments.firstIndex(of: "--detail-spot"), arguments.indices.contains(index + 1) {
             detailPreviewSpotID = arguments[index + 1]
         } else {
@@ -69,7 +84,11 @@ struct ContentView: View {
 
     var mainApp: some View {
         TabView(selection: $selectedTab) {
-            ExploreView(store: store, nearbyPlaceRequest: $nearbyPlaceRequest)
+            ExploreView(store: store, nearbyPlaceRequest: $nearbyPlaceRequest,
+                        catalogueState: store.usesAPICatalogue ? catalogue.state : nil,
+                        retryCatalogue: {
+                            if catalogue.requestRetry() { catalogueLoadAttempt += 1 }
+                        })
                 .tabItem { Label("Explore", systemImage: "map") }
                 .tag(0)
 
@@ -94,6 +113,10 @@ struct ContentView: View {
             ContributionFlow(store: store, source: .currentLocation)
         }
         .preferredColorScheme(appearance.colorScheme)
+        .task(id: catalogueLoadAttempt) {
+            guard store.usesAPICatalogue else { return }
+            await catalogue.loadIfNeeded()
+        }
         .task {
             while !Task.isCancelled {
                 store.endExpiredPresence()

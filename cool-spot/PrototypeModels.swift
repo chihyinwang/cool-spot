@@ -550,9 +550,12 @@ struct CoolingEvidence: Equatable {
 
 @MainActor
 final class PrototypeStore: ObservableObject {
+    enum CatalogueMode { case local, api }
     @Published var spots: [CoolSpot]
     @Published var coolSpotsLoadError: String?
     let usesLoadedCoolSpots: Bool
+    let usesAPICatalogue: Bool
+    private var nearbySpotIDs: Set<String> = []
     @Published var savedLocations = Fixtures.saved { didSet { persistJourneys() } }
     @Published var contributions = Fixtures.contributions
     @Published var contributionError: String?
@@ -576,10 +579,13 @@ final class PrototypeStore: ObservableObject {
     private static let journeyKey = "prototype.reportJourneys.v1"
 
     // Tests use memory-only stores unless they explicitly exercise relaunch recovery.
-    init(reportDefaults: UserDefaults? = nil, loadedCoolSpots: [CoolSpot]? = nil) {
+    init(reportDefaults: UserDefaults? = nil, loadedCoolSpots: [CoolSpot]? = nil,
+         catalogueMode: CatalogueMode = .local) {
         self.reportDefaults = reportDefaults
-        usesLoadedCoolSpots = loadedCoolSpots != nil
-        spots = loadedCoolSpots ?? Fixtures.spots
+        usesAPICatalogue = catalogueMode == .api
+        usesLoadedCoolSpots = usesAPICatalogue || loadedCoolSpots != nil
+        spots = usesAPICatalogue ? [] : (loadedCoolSpots ?? Fixtures.spots)
+        nearbySpotIDs = Set(spots.filter(\.isNearby).map(\.id))
         if usesLoadedCoolSpots {
             savedLocations = []
             contributions = []
@@ -597,7 +603,9 @@ final class PrototypeStore: ObservableObject {
             savedLocations = snapshot.savedLocations
             selectedPlaces = snapshot.savedPlaceDetails ?? []
             publishedCoolSpotRecords = snapshot.publishedCoolSpotRecords ?? []
-            for item in publishedCoolSpotRecords { applyPublished(item) }
+            if !usesAPICatalogue {
+                for item in publishedCoolSpotRecords { applyPublished(item) }
+            }
             let restored = (snapshot.placeContributions ?? []).map { record in
                 var record = record
                 if let photoID = record.photoID { record.placeDraft?.values.photo = PrototypePhotoStorage.original(id: photoID) }
@@ -608,6 +616,7 @@ final class PrototypeStore: ObservableObject {
                 activePresenceSpotID = snapshot.activePresenceSpotID
                 presenceEndsAt = end
             }
+            nearbySpotIDs = Set(snapshot.nearbySpotIDs)
             for index in spots.indices {
                 spots[index].isNearby = snapshot.nearbySpotIDs.contains(spots[index].id)
             }
@@ -619,11 +628,20 @@ final class PrototypeStore: ObservableObject {
         isRestoringJourneys = false
     }
 
+    func replaceAPICatalogue(_ items: [CoolSpot]) {
+        guard usesAPICatalogue else { return }
+        spots = items.map { item in
+            var item = item
+            item.isNearby = nearbySpotIDs.contains(item.id)
+            return item
+        }
+    }
+
     private func persistJourneys() {
         guard !isRestoringJourneys, let reportDefaults else { return }
         let snapshot = ReportJourneySnapshot(confirmations: visitConfirmedAt, drafts: reportDrafts,
                                              reports: visitReports, savedLocations: savedLocations,
-                                             nearbySpotIDs: spots.filter(\.isNearby).map(\.id),
+                                             nearbySpotIDs: usesAPICatalogue ? nearbySpotIDs.sorted() : spots.filter(\.isNearby).map(\.id),
                                              activePresenceSpotID: activePresenceSpotID, presenceEndsAt: presenceEndsAt,
                                              savedPlaceDetails: selectedPlaces.filter { isSaved(placeID: $0.id) },
                                              placeContributions: contributions.filter { $0.kind != .visitReport },
@@ -634,6 +652,7 @@ final class PrototypeStore: ObservableObject {
     }
 
     func simulateNearbySpot(_ id: String?) {
+        nearbySpotIDs = Set(id.map { [$0] } ?? [])
         for index in spots.indices { spots[index].isNearby = spots[index].id == id }
         persistJourneys()
     }
@@ -646,8 +665,10 @@ final class PrototypeStore: ObservableObject {
         simulateNearbySpot(nil)
     }
 
-    // Legacy example bookmarks/reports remain readable, outside the live Cool Spots list.
-    func spot(_ id: String) -> CoolSpot? { spots.first { $0.id == id } ?? Fixtures.spots.first { $0.id == id } }
+    // API mode never treats a private bookmark or old fixture as current public facts.
+    func spot(_ id: String) -> CoolSpot? {
+        spots.first { $0.id == id } ?? (usesAPICatalogue ? nil : Fixtures.spots.first { $0.id == id })
+    }
     func place(_ id: String) -> RecognisedPlace? { recognisedPlaces.first { $0.id == id } ?? Fixtures.places.first { $0.id == id } }
     func remember(_ place: RecognisedPlace) {
         guard !Fixtures.places.contains(where: { $0.id == place.id }) else { return }
@@ -922,6 +943,7 @@ final class PrototypeStore: ObservableObject {
     func visitorReportItems(for spot: CoolSpot) -> [VisitorReportItem] {
         let own = visitReports.filter { $0.spotID == spot.id }
             .map { VisitorReportItem(id: $0.id.uuidString, comment: $0.comment, report: $0, provenance: .own) }
+        guard !usesAPICatalogue else { return VisitorReportItem.newestFirst(own) }
         let examples = (Fixtures.visitorReports + PrototypeComparisonPlaces.visitorReports)
             .filter { $0.report?.spotID == spot.id }
         return VisitorReportItem.newestFirst(own + examples)
@@ -988,6 +1010,10 @@ final class PrototypeStore: ObservableObject {
     @discardableResult
     func publishContribution(_ id: UUID, at date: Date = .now) -> Bool {
         contributionError = nil
+        guard !usesAPICatalogue else {
+            contributionError = "Public place publishing requires the backend. Your proposal remains saved on this device."
+            return false
+        }
         guard let index = contributions.firstIndex(where: { $0.id == id }),
               let draft = contributions[index].placeDraft else { return false }
         if contributions[index].status == .published { return true }

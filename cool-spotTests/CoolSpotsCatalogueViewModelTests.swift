@@ -160,6 +160,85 @@ final class CoolSpotsCatalogueViewModelTests: XCTestCase {
         XCTAssertEqual(loader.loadCount, 0)
     }
 
+    func testSuccessfulLoadsDeliverCurrentAndEmptyCataloguesToTheAPIStore() async throws {
+        let store = PrototypeStore(catalogueMode: .api)
+        let loader = LoaderSpy()
+        loader.immediateResult = .success(try makeResponse(id: "test-store-spot"))
+        let sut = CoolSpotsCatalogueViewModel(load: loader.load, didLoad: store.replaceAPICatalogue)
+        XCTAssertTrue(store.spots.isEmpty)
+
+        await sut.load()
+
+        XCTAssertEqual(store.spots.map(\.id), ["test-store-spot"])
+        XCTAssertEqual(store.spots.first?.apiRecord?.datasetID, "test-catalogue")
+        loader.immediateResult = .success(try makeResponse())
+        await sut.load()
+        XCTAssertTrue(store.spots.isEmpty)
+        XCTAssertTrue(try loadedSpots(sut).isEmpty)
+    }
+
+    func testFailuresAndLateCancelledResultsNeverDeliverACatalogue() async throws {
+        for error: Swift.Error in [CoolSpotsAPILoader.Error.connectivity, CancellationError()] {
+            let loader = LoaderSpy()
+            loader.immediateResult = .failure(error)
+            var deliveries = 0
+            let sut = CoolSpotsCatalogueViewModel(load: loader.load, didLoad: { _ in deliveries += 1 })
+            await sut.load()
+            XCTAssertEqual(deliveries, 0)
+        }
+        let loader = LoaderSpy()
+        var deliveries = 0
+        let sut = CoolSpotsCatalogueViewModel(load: loader.load, didLoad: { _ in deliveries += 1 })
+        let started = expectation(description: "Load started")
+        loader.onStart = { _ in started.fulfill() }
+        let task = Task { await sut.load() }
+        defer { loader.cancelPendingLoads(); task.cancel() }
+        await fulfillment(of: [started], timeout: 1)
+        task.cancel()
+        loader.completePendingLoads(with: .success(try makeResponse(id: "test-late-spot")))
+        await task.value
+        XCTAssertEqual(deliveries, 0)
+        assertIdle(sut)
+    }
+
+    func testViewReappearanceDoesNotReloadSuccessfulEmptyOrFailedCatalogues() async throws {
+        let results: [Result<CoolSpotsAPIResponse, Swift.Error>] = [
+            .success(try makeResponse(id: "test-initial-spot")),
+            .success(try makeResponse()), .failure(CoolSpotsAPILoader.Error.connectivity)
+        ]
+        for result in results {
+            let (sut, loader) = makeSUT()
+            loader.immediateResult = result
+            await sut.loadIfNeeded()
+            await sut.loadIfNeeded()
+            XCTAssertEqual(loader.loadCount, 1, "Reappearance must not cause an automatic retry or reload.")
+        }
+    }
+
+    func testRetryRequestOnlyReopensFailureAndReappearanceNeverRepeatsThatRetry() async throws {
+        let (sut, loader) = makeSUT()
+        XCTAssertFalse(sut.requestRetry())
+        XCTAssertEqual(loader.loadCount, 0)
+        loader.immediateResult = .failure(CoolSpotsAPILoader.Error.connectivity)
+        await sut.loadIfNeeded()
+        XCTAssertTrue(sut.requestRetry())
+        assertIdle(sut)
+        XCTAssertFalse(sut.requestRetry(), "A repeated tap must not reopen or cancel an in-flight attempt.")
+        XCTAssertEqual(loader.loadCount, 1, "The view task owns the request, not the button callback.")
+
+        await sut.loadIfNeeded()
+        await sut.loadIfNeeded()
+
+        XCTAssertEqual(loader.loadCount, 2, "Reappearance after a failed retry must not retry again.")
+        XCTAssertTrue(sut.requestRetry())
+        loader.immediateResult = .success(try makeResponse(id: "test-recovered-spot"))
+        await sut.loadIfNeeded()
+        XCTAssertFalse(sut.requestRetry())
+        await sut.loadIfNeeded()
+        XCTAssertEqual(loader.loadCount, 3)
+        XCTAssertEqual(try loadedSpots(sut).map(\.id), ["test-recovered-spot"])
+    }
+
     private func makeSUT() -> (CoolSpotsCatalogueViewModel, LoaderSpy) {
         let loader = LoaderSpy()
         return (CoolSpotsCatalogueViewModel(load: loader.load), loader)
