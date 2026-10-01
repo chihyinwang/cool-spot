@@ -4,6 +4,30 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：API 清單載入狀態第一批已 Green，相關測試 26 passed／0 failed。** 起點 Prototyping／f7a038d。Owner 先同意 Loading／成功清單／合法空清單／失敗＋Try again、無自動重試與無 bundled fallback；公開清單由 API 提供，個人資料另行保留。收到 verified Red 與完整最小 Green 後，owner 明確委託改為 CoolSpotsCatalogueViewModel 命名並完成 Green。開始時保留 AGENTS 的 code-snapshot 回報偏好、owner project／已 staged test plan／untracked scheme。
+
+新增 [CoolSpotsCatalogueViewModelTests.swift](cool-spotTests/CoolSpotsCatalogueViewModelTests.swift) 的十個 cases／可控制回應的 MainActor LoaderSpy；新增 [CoolSpotsCatalogueViewModel.swift](cool-spot/CoolSpotsCatalogueViewModel.swift) 的 ObservableObject、四種 State、idle 初始值、注入 loader 與空 load() 介面。Project 僅新增兩檔的八行 group／target membership；移除該八行後與 owner 原 project bytes 完全一致，test plan／scheme 內容及原 staging 保留。ViewModel、spy 與呼叫均在 MainActor；callback 傳入 load count，沒有捕捉 owning spy 的循環引用。
+
+| Case | 預期 | 實際 Red 證據 |
+|---|---|---|
+| IOS-LOAD-C01 | 初始化 idle，不請求／不插 fixtures | 已通過；不製造 Red |
+| IOS-LOAD-C02–C04 | 請求進行時 loading，成功用現有 mapper 保留目前事實／API context，合法空清單仍是 loaded | 三項失敗：未呼叫 loader、load-start expectation 到期，或沒有 loaded state |
+| IOS-LOAD-C05–C07 | connectivity／invalidResponse 失敗不自動重試；明確重試清除 failure；in-flight 重複操作不多送請求 | 三項失敗：沒有 failed／loading state 或未送第一個請求；重複操作 assertion 會在 Green 後完整驗證 |
+| IOS-LOAD-C08–C09 | loader cancellation 回 idle 且可重試；取消 Task 後晚到的 success／failure 不公開結果或錯誤 | 兩項失敗：請求數為零或 started expectation 到期；spy 故意在 cancellation 後仍完成，以驗證 model 不只相信依賴會取消 |
+| IOS-LOAD-C10 | 已取消的 Task 不開始請求，也不切 loading | 已通過；不製造 Red |
+
+只在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4 執行十項 model 加十六項 mapper：編譯成功，xcodebuild exit 65，xcresult **26 執行／18 passed／8 failed／0 skipped**。所有 mapper regressions 通過；model 兩項已覆蓋、八項因空 load() 未實作而失敗。十個相關 source／tests／project／test-plan／scheme 檔案在測試前後 SHA-256 一致。合成資料和 controlled continuations，不做任意 sleep；pending continuations 在 teardown 取消／完成以避免掛住。1 秒 expectation 是有界等待載入開始或 duplicate return，未把它當成真實網路時間保證。Logs／xcresult／fingerprints 留在 Git 外；沒有新 HTTP、圖片下載、DB/backend 或正常 App 原生互動證據，沒有重跑歷史全套 tests。
+
+Owner 追問 Model 的職責後，agent 判斷此物件管理公開目錄的可觀察畫面狀態與載入，因此 CoolSpotsCatalogueViewModel 比泛稱 Model 更清楚；Catalogue 對應 Explore 地圖共用整份目錄的用途。原 Red 時命名是 CoolSpotsCatalogueModel；本批同步改 source／tests 檔名、類別與 helper references、project／文件 links，case IDs／assertions 未變。這是職責命名，不是全 App 採用 MVVM 的決定。
+
+委託 Green 後，ViewModel 保存注入的 async loader；load() 先拒絕已取消或已有 in-flight 的操作，再發布 loading，成功以既有 makeSpots() 發布 loaded。合法空清單仍是 loaded([])。取消／CancellationError 回 idle，其他錯誤只發布 failed；沒有重試循環、raw diagnostics、task 所有權或持久化。await 後再檢查 cancellation，因此不合作的依賴即使晚到成功也不能覆蓋畫面。
+
+只在同一隔離 QA 執行相同十項 ViewModel 與十六項 mapper：xcodebuild exit 0，xcresult **26 passed／0 failed／0 skipped**；十個 program／tests／project／test-plan／scheme 檔案測試前後 SHA-256 一致。retry／duplicate／取消後晚到 success 與 failure assertions 均實際完成。注入函式已提供測試所需控制，state 只有一個真實來源，沒有為 SOLID 加無用途 protocol；目前無需再重構。沒有新 HTTP、圖片下載、DB/backend、正常 App 原生互動或效能證據。
+
+本批提交範圍限 ViewModel／tests、project 的八行 target membership 與三份既有 active documents；使用獨立暫存 index，owner 的 test-plan reference／project 格式與其他 staging 不納入。候選 project 除 owner 的 test-plan reference 外，和實際測試 project 語意一致；原 owner 檔案內容與 staging 保留。提交前檢查測試 fingerprints、實際 patch、敏感值／本機憑證比對、local links 與 40 個 A–E IDs；logs／xcresult 留在 Git 外，不 push。
+
+下一批處理個人資料保存／local publication 不覆蓋 API 的 store 邊界，再接 ContentView／Explore 的正常 App 載入 UI。本批沒有修改這些 consumer、bundled JSON、endpoint、ATS 或 signing；不把 state tests 當成已完成 App 接線，未將本批 Green 委託延伸到下一批。
+
 **2026-10-01：v5 → 畫面模型的第二批已 Green，相關測試 37 passed／0 failed。** 起點 Prototyping／5c895ce。Owner 先要求維持相同教學原則繼續；收到 verified Red 與完整最小 Green 後，明確委託「你幫我做吧」。開始時 project 的 owner test-plan reference／格式修改、已 staged 的 cool-spot.xctestplan 與 untracked shared scheme 均保留。Xcode 仍開啟 prototype／Cool Spot Contract QA；之前的執行已停止，loader 第 43 行的本機中斷點仍在，沒有操作 owner App 資料。
 
 先說明影響與取捨，再於既有 [CoolSpotsAPIMapperTests.swift](cool-spotTests/CoolSpotsAPIMapperTests.swift) 寫八項 tests／合成 helpers，在 [CoolSpotsAPIMapper.swift](cool-spot/CoolSpotsAPIMapper.swift) 只加入 CoolSpotAPIRecord 的五個儲存欄位介面，並在 [PrototypeModels.swift](cool-spot/PrototypeModels.swift) 加上 optional apiRecord。Red 階段沒有實作來源關聯／map／photo Green；整批沒有改正常入口或重建 v4 DTO。完整公開 item/context 沿用 typed v5，避免鏡像全部欄位；這是 prototype 的明確型別耦合取捨，不把它宣稱為通用 domain 架構。
@@ -23,7 +47,7 @@
 
 Green 後檢查：純轉換沒有 HTTP／儲存副作用，既有 photo structural check 可共用，來源用 dictionary/Set 查找與去重；不為 SOLID 加無用途 protocol，也無需再重構。本批提交範圍限兩個 production files、一個 test file 與三份既有 active documents；owner 的 project／test plan／scheme 不納入，檔案內容與 staging 保留。測試輸出與 fingerprints 留在 Git 外；提交前檢查實際 patch、敏感值／本機憑證比對、local links 與 40 個 A–E IDs，不 push。
 
-下一批先討論正常啟動 loading／empty／error／Try again 與個人 journeys 的保護，再進行 API-only 接線。本批沒有改 bundled JSON、DB/backend、ATS、signing、endpoint 或正常 App 行為；未將當批代寫委託延伸到下一個 Green。Owner 新要求的回報格式已記入既有 AGENTS：列點解釋測試概念／edge cases、具體檔案與程式用途，再報實際驗證與提交狀態。
+其後 owner 已同意正常啟動 loading／empty／error／Try again 與 API-owned catalogue／個人資料分工；上方記錄第一批載入狀態 Red，store 邊界與 API-only 接線仍待後續整合。本批沒有改 bundled JSON、DB/backend、ATS、signing、endpoint 或正常 App 行為；未將當批代寫委託延伸到下一個 Green。Owner 新要求的回報格式已記入既有 AGENTS：列點解釋測試概念／edge cases、具體檔案與程式用途，再報實際驗證與提交狀態。
 
 **2026-10-01：v5 → 畫面模型的第一批已 Green，相關測試 26 passed／0 failed。** 起點 Prototyping／2df5242，working tree 乾淨。先檢視 ContentView／CoolSpotsResponse 的 bundled 入口、CoolSpot／PrototypeStore 的資料與個人儲存、Explore 清單與搜尋、PrototypePublication 的舊契約耦合，再向 owner 說明檔案與影響。沒有直接替換正常 App 入口；先建立純資料轉換，再處理關聯與載入狀態，避免在接線時遺失事實、身分或誤用 containing venue。
 
