@@ -4,6 +4,20 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：Swift v5 第一批已 Green，相關測試 7 passed／0 failed。** Owner 同意繼續下一步與適當 commit，要求提交前檢查個資／安全；在 agent 寫 tests／可編譯介面並確認六項 Red 後，owner 明確委託「你幫我弄」，由 agent 完成當批 decode Green。新增 [CoolSpotsAPIResponse.swift](cool-spot/CoolSpotsAPIResponse.swift)、[CoolSpotsAPIResponseTests.swift](cool-spotTests/CoolSpotsAPIResponseTests.swift)，Xcode project 只增加兩檔的 group／target membership，沒有 signing／帳號設定變更。這次委託不自動擴張到其他產品批次。
+
+| Case | 預期 | 實際證據 |
+|---|---|---|
+| IOS-V5-C01–C02 | 保留 v5 datasetID／生成時間／來源年代與範例標示／兩種獨立身分，允許空清單 | 合成 payload，來源日期不等於 generatedAt；nullable metadata 保持 nil，Place ID 讀為 UUID；兩項 Red → Green |
+| IOS-V5-C03–C04 | 拒絕 v1–v4／未知版本、malformed JSON、缺少必要封套／身分欄位、非 UUID Place ID、錯誤座標型別 | 區分 unsupportedVersion 與 DecodingError，不以任意 throw 當作正確拒絕；兩項 Red → Green |
+| IOS-V5-C05–C06 | 拒絕空白 ID／名稱、重複 Cool Spot／Place 身分、越界座標；保留有效邊界與原文 | 空白包含 NBSP／zero-width space；(0,0) 和經緯度端點合法，非空白名稱不 trim；兩項 Red → Green |
+
+第一次執行因測試檔目錄拼字不同於 Xcode group 而無法編譯，不算 behavioral Red；修正位置到 cool-spotTests 後，僅執行新 class，編譯通過。Cool Spot Contract QA 是 iPhone 17 Pro Max／iOS 26.4；xcodebuild exit 65，xcresult summary 為六項執行、六項失敗、零跳過，全部由尚未實作的 decode 骨架造成。沒有跑歷史 Swift 全套、UI 走查或 backend suite，沒有更換 owner 使用中的 simulator App。
+
+Green 在同一隔離 simulator 執行新 class 六項，並加入既有 testCoolSpotsResponseUsesV4DatasetIDAndReadsLegacyResponseIDs 作為舊 consumer 的回歸檢查：xcodebuild exit 0，xcresult 為七項通過、零失敗、零跳過。JSONDecoder 負責型別／必要欄位，decode 再檢查版本、兩種身分各自唯一、非空白文字與有效座標；合法原文保持不變。實作已小且直接，不為儀式額外重構。
+
+這只是第一批讀取封套、來源與 id／placeID／name／location 的 Green；尚未完成地址、降溫、access、hours、欄位依據、來源關聯、地圖和照片解析。舊 v4 consumer／bundled JSON／Explore／保存與發布流程未改，未發 HTTP／引入 fallback。下一批是其餘場所資訊與關聯的 Swift 解析，再接真正 HTTP。提交限這批 source／tests／target membership 與既有文件；不納入本機設定、測試結果或 device 資料，不 push。
+
 **2026-10-01：真正本機免登入 v5 API 已完成，相關 Deno tests 54 passed／0 failed。** Owner 明確委託「繼續做，該 commit 就 commit」，本批由 agent 完成 Green、入口與文件；沒有把此委託延伸到 Swift、部署或其他功能。來源匯入 baseline 是 Prototyping／2907708；來源結構／唯讀登入 checkpoint 已提交為 1138d97（Clarify catalogue sources and add a read-only backend login），API 提交見 git log。十三份 migration，沒有新 migration／重啟服務／重匯資料／reset。App 仍未讀 API。
 
 實際路徑：HTTP → server.ts 路由 → handler.ts → reader.ts → 六種 database_reader.ts 查詢 → PostgreSQL → response.ts 組 v5 → HTTP JSON。六種讀取共用 REPEATABLE READ／READ ONLY transaction，避免一份回應混用不同次資料狀態。依 Place ID 整批分組，沒有逐場所追加查詢或把多組一對多 JOIN 成倍增的結果。
@@ -26,7 +40,7 @@
 
 安全 runner 只讀 ignored／regular／owner-owned／0600 的 .env.backend.local，拒絕非 loopback／非專用角色或 Docker 遠端 override，檢查本機 DB healthy；只把設定透過 child environment 傳入，不放 command arguments，捕捉並遮蔽輸出。執行 `python3 scripts/run_backend_local.py test` 可重現上述 suites。停止 serve 用 Ctrl-C，關閉 listener／連線，不 stop/reset Supabase。最後唯讀確認 DB／Studio／pg_meta 都 healthy，migration 13 份；九張表筆數與既有 253／253／2／253／253／5,297／145／3／253 一致。這次沒有重啟容器。
 
-**下一步停點：App 尚未改讀 API。** 先說明 Swift 檔案、v5 model／唯一 API 來源／失敗行為與測試，待對齊該批後再動 iOS。照片仍為既有 bundle:// illustration 參照，沒有圖片 HTTP／上傳服務；未建立 Report／作者／登入／附近查詢／分頁／Cooling here。photo contribution_id 去留與其餘尚未核准命名維持待議。
+**API 完成時停點：App 尚未改讀 API。** 後續 owner 同意先開始上方 Swift decoder 批次；HTTP client 與清單入口仍未修改。照片仍為既有 bundle:// illustration 參照，沒有圖片 HTTP／上傳服務；未建立 Report／作者／登入／附近查詢／分頁／Cooling here。photo contribution_id 去留與其餘尚未核准命名維持待議。
 
 **2026-10-01：照片 reader DB-C73–C76 已 Green。** Owner 明確委託「好喔你幫我做」後，agent 補上完整唯讀 SELECT／JOIN／ORDER BY；同一受限本機 integration suite 為 **26 passed／0 failed，Deno exit 0**，包括原二十二個 TCP／reader cases。原 Red 是 23 passed／3 failed；DB-C76 空骨架時已通過，不製造 Red。這次委託限於 photo Green；下一批恢復 owner 輸入核心 Green 的教學方式。分支仍 Prototyping／2907708，保留 working changes，未 commit／push；十三份 migration，無新 schema／服務／Swift／bundled JSON／handler 變更，尚無 v5 HTTP／App 接線。
 
