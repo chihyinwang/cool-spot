@@ -4,6 +4,26 @@
 
 ## 本輪狀態與起點
 
+**2026-10-01：v5 → 畫面模型的第一批已 Green，相關測試 26 passed／0 failed。** 起點 Prototyping／2df5242，working tree 乾淨。先檢視 ContentView／CoolSpotsResponse 的 bundled 入口、CoolSpot／PrototypeStore 的資料與個人儲存、Explore 清單與搜尋、PrototypePublication 的舊契約耦合，再向 owner 說明檔案與影響。沒有直接替換正常 App 入口；先建立純資料轉換，再處理關聯與載入狀態，避免在接線時遺失事實、身分或誤用 containing venue。
+
+新增 [CoolSpotsAPIMapperTests.swift](cool-spotTests/CoolSpotsAPIMapperTests.swift) 的八項合成 cases、[CoolSpotsAPIMapper.swift](cool-spot/CoolSpotsAPIMapper.swift) 的空 makeSpots() 編譯骨架，以及 CoolSpot.placeID 的 nil 預設介面。後者讓沒有 DB Place 的舊 fixtures 能繼續編譯；v5 decoder 的 placeID 仍是必填 UUID，未放寬 API。Project 只加入這兩個 source files 的 group／target membership。
+
+| Case | 預期 | Red → Green 證據 |
+|---|---|---|
+| IOS-MAP-C01 | 合法空清單不插入 fixtures | 骨架已通過，不製造 Red；正式轉換後仍通過 |
+| IOS-MAP-C02–C03 | 保留 item 順序、兩種獨立身分、目前名稱／分類／座標及 formatted 或組合地址 | 兩項 Red → Green；保留原有順序／文字／座標及獨立 UUID，完整或稀疏地址 assertions 都通過 |
+| IOS-MAP-C04–C05 | 降溫與補充文字、known yes／no／unknown、費用／座位／資格、三種停留限制正確轉換 | 兩項 Red → Green；各種 yes／no／unknown、費用／座位／資格與三種停留狀態都實際走完 assertions |
+| IOS-MAP-C06–C07 | 依第一筆有序 reference 的 sourceID 找主來源，不拿 registry 第一筆；保留 GLA 2025／例子標示；未知 provider 不變成 GLA | 兩項 Red → Green；registry 刻意與 references 不同順序，仍取得對應來源；未知與 community provider 不冒充 GLA |
+| IOS-MAP-C08 | 未知值保持 unknown／nil，不造入場說明、來源、距離、回報或人數 | Red → Green；unknown／nil 與中性 visitor state 通過，不把 generatedAt 當來源或到訪時間，不重建 v4 publishedRecord |
+
+僅在既有 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4 執行八項 mapper、十七項 decoder 與一項受影響 legacy source adapter regression：編譯成功，xcodebuild exit 65，xcresult **26 執行／19 passed／7 failed／0 skipped**。十七項 decoder 與既有 source adapter 都通過；mapper 七項為目標未實作的行為失敗。六個相關檔案測試前後 SHA-256 一致，沒有把 compile failure 當 Red。日志在 Git 外；沒有新 HTTP／native UI 證據，也沒有重跑 backend／SQL／歷史全套 tests。
+
+Owner 在收到完整 Green 後明確委託「幫我做」，agent 寫入當批正式 mapper，再於同一隔離 simulator 執行同一組二十六項：xcodebuild exit 0，xcresult **26 passed／0 failed／0 skipped**。十個相關 program／project／test-plan／scheme 檔案在測試前後 SHA-256 一致。Mapper 只做記憶體中的 read-model 轉換，以 source-ID dictionary 查主來源，將 yes／no／unknown 轉成 true／false／nil；沒有 transport、儲存或 UI 副作用。共用一個 private knownBool helper 避免四處重複，沒有為 SOLID 添加無用途 protocol；目前無需再 refactor。
+
+開始 Green 時發現 owner 新增已 staged 的 cool-spot.xctestplan、untracked shared scheme，以及 project 的 test-plan reference／格式調整；全部保留原始檔案與 staging。提交只包含當批七個檔案，project 僅本批八行 group／target membership。使用獨立暫存索引準備 patch，核對程式 fingerprints／新增個資與憑證／本機設定值／文件 links 後本機 commit；正常索引的 owner 工作保留，不納入設定／logs／裝置資料。這不是 repo-wide security audit。
+
+Apple same／within 配對、photos、完整來源／evidence context 是下一批，完成前不接正常 App。之後才處理 loading／empty／failure／Try again、API-only 啟動與個人 journeys 的保護。這批沒有修改 ContentView／Explore／store 行為、bundled JSON、backend／DB、ATS、endpoint 或 signing；不 push、部署或改 sibling checkout。A–E 點擊流程保持原樣。
+
 **2026-10-01：Swift 已真正讀取本機 API，兩項整合測試通過。** 起點 Prototyping／8d0ecb5，working tree 乾淨；owner 要求下一步。重新確認 DB／Studio／pg_meta 都 running／healthy，但 loopback API 沒有回應。只執行既有 `python3 scripts/run_backend_local.py serve` 啟動 Deno，沒有重啟容器、匯入、migration 或資料寫入。獨立免登入 GET 確認正確 route 200／v5／253 items／2 sources／473,658 bytes，未知 route 404；這是環境前置查核，不把 listener 未啟動說成行為 Red。
 
 新增 [CoolSpotsAPILocalIntegrationTests.swift](cool-spotTests/CoolSpotsAPILocalIntegrationTests.swift)，project 只增加一個 test file 的 group／target membership，沒有 production Swift／API／DB／Info.plist／ATS／signing 更改。沿用完整 loader 與 decoder；沒有 URLProtocol、替身或 bundled catalogue 介入這兩項整合測試。真正 URLSession 使用 ephemeral session、nil credential/cookie storage、不存 cookie、不使用本機 cache、5 秒 request／10 秒 resource timeout，teardown 關閉 session。端點固定為 127.0.0.1:8000，只讀 JSON／照片 metadata，不下載圖片或操作 owner 裝置資料。

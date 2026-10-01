@@ -302,6 +302,7 @@ struct CoolSpot: Identifiable {
     var entryRequirement = ""
     var entryInformation = ""
     var information = PlaceInformation()
+    var placeID: UUID? = nil
     var applePlaceID: String? = nil
     var photos: [PlacePhotoAsset] = []
     var publishedRecord: CoolSpotsResponse.Item? = nil
