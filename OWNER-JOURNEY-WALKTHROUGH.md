@@ -4,7 +4,211 @@
 
 ## 本輪狀態與起點
 
-**2026-09-28 收尾：本機資料準備完成，停在 API 之前。** 先後提交 c69b3fd（地址／確認結論）、b47bd4f（降溫欄位）、9e8a04b（來源／權限）；本機 importer 與這份收尾紀錄一起提交。最終 revision 由 git log -1 查核，沒有 push。十一份 migration 已套用，最新為 20260928224500。
+**2026-10-01：真正本機免登入 v5 API 已完成，相關 Deno tests 54 passed／0 failed。** Owner 明確委託「繼續做，該 commit 就 commit」，本批由 agent 完成 Green、入口與文件；沒有把此委託延伸到 Swift、部署或其他功能。來源匯入 baseline 是 Prototyping／2907708；來源結構／唯讀登入 checkpoint 已提交為 1138d97（Clarify catalogue sources and add a read-only backend login），API 提交見 git log。十三份 migration，沒有新 migration／重啟服務／重匯資料／reset。App 仍未讀 API。
+
+實際路徑：HTTP → server.ts 路由 → handler.ts → reader.ts → 六種 database_reader.ts 查詢 → PostgreSQL → response.ts 組 v5 → HTTP JSON。六種讀取共用 REPEATABLE READ／READ ONLY transaction，避免一份回應混用不同次資料狀態。依 Place ID 整批分組，沒有逐場所追加查詢或把多組一對多 JOIN 成倍增的結果。
+
+| Case | 組裝預期 | 實際證據 |
+|---|---|---|
+| V5-C01–C04 | v5 封套、兩種身分、正式值／null／unknown、明確公開欄位 | 原 Red 0 passed／4 failed；委託最小 Green 後 4 passed。後續新增空關聯欄位並維持通過；名稱原文、(0,0)、退休欄位／synthetic raw／archive／audit 排除均有 exact assertions |
+| V5-C05–C08 | 來源年代／範例、已知或未知日期、hash、多來源主次順序、Place 關聯、缺失來源拒絕、無關來源排除 | Red 5 passed／3 failed（含前四項）；C08 已通過，不製造 Red。Green 8 passed；合成已知日期轉 UTC，來源空日期沒有替換成回應時間 |
+| V5-C09–C13 | 欄位取得方式組成 public pointers；地圖 same／within 與外部 ID；有序照片／credit／日期；空關聯保留場所 | 先修正 synthetic extra map evidence 的 TypeScript excess-property compile error，才觀察 Red 9 passed／4 failed；C13 已通過。Green 13 passed。未知 field key／未連結來源拒絕，沒有杜撰 report／author；合成已知照片日期與 null caption 只證明 assembler，不聲稱真實 reader 有這些資料 |
+
+| Case | 整合／入口預期 | 實際證據 |
+|---|---|---|
+| DB-C77–C78 | 真正資料庫組完整 v5；每次 load 產生獨立回應時間，不更改來源時間 | 與 API-C06–C08 同批 Red 2 passed／3 failed；先排除 runner 未允許 postgres.js PGSSL 環境讀取的設定錯誤。真正 Red 是 adapter 空骨架／GET 500；Green 5 passed，full counts／固定 library 值／來源身分／公開 keys 驗證 |
+| API-C06–C08 | 免登入真正 HTTP GET 200 完整 v5、錯誤 DB 密碼 500 通用訊息、四種寫入方法 405 且不呼叫 reader | 真正 loopback HTTP，回應 body 全讀完、server／connections 收尾；handler 原失敗／method 行為在 Red 已通過。Green 時真正錯誤密碼仍回通用 500，沒有印診斷／URL／密碼 |
+| API-C09–C11 | 非 function 路徑 404、正確路由傳回 v5、設定限專用本機登入並隱藏錯誤值 | Red 1 passed／2 failed；Green 3 passed。既有 route／setting 合法值不為製造 Red 而破壞 |
+
+最終同批執行：7 handler＋13 assembler＋26 TCP/projection＋5 adapter/HTTP＋3 route/config = **54 passed／0 failed，Deno exit 0**。Deno format／型別與 git diff 檢查通過。既有 handler unit tests 的 v4 fixture 只驗證通用 JSON 傳輸；production 不 import 舊 catalogue JSON。沒有重跑 634 歷史 SQL 全套、舊 schema 演練、Swift 或 mapping；先前 migration／importer 的驗證仍為下方 dated evidence。
+
+另外啟動真正的 standalone 本機程序：`python3 scripts/run_backend_local.py serve`，維持 `http://127.0.0.1:8000/functions/v1/cool-spots`。獨立 HTTP client 未附 Authorization，GET 200：253 items／2 sources／250 GLA＋3 examples／5,297 pointers／145 maps／3 photos；當次 body **473,658 bytes**。POST 405、其他路徑 404。這是本機整合證據，不是 Edge Functions／Kong／雲端部署或容量測試；`functions/v1` 是沿用 function 路由前綴，payload schemaVersion 是 5。
+
+安全 runner 只讀 ignored／regular／owner-owned／0600 的 .env.backend.local，拒絕非 loopback／非專用角色或 Docker 遠端 override，檢查本機 DB healthy；只把設定透過 child environment 傳入，不放 command arguments，捕捉並遮蔽輸出。執行 `python3 scripts/run_backend_local.py test` 可重現上述 suites。停止 serve 用 Ctrl-C，關閉 listener／連線，不 stop/reset Supabase。最後唯讀確認 DB／Studio／pg_meta 都 healthy，migration 13 份；九張表筆數與既有 253／253／2／253／253／5,297／145／3／253 一致。這次沒有重啟容器。
+
+**下一步停點：App 尚未改讀 API。** 先說明 Swift 檔案、v5 model／唯一 API 來源／失敗行為與測試，待對齊該批後再動 iOS。照片仍為既有 bundle:// illustration 參照，沒有圖片 HTTP／上傳服務；未建立 Report／作者／登入／附近查詢／分頁／Cooling here。photo contribution_id 去留與其餘尚未核准命名維持待議。
+
+**2026-10-01：照片 reader DB-C73–C76 已 Green。** Owner 明確委託「好喔你幫我做」後，agent 補上完整唯讀 SELECT／JOIN／ORDER BY；同一受限本機 integration suite 為 **26 passed／0 failed，Deno exit 0**，包括原二十二個 TCP／reader cases。原 Red 是 23 passed／3 failed；DB-C76 空骨架時已通過，不製造 Red。這次委託限於 photo Green；下一批恢復 owner 輸入核心 Green 的教學方式。分支仍 Prototyping／2907708，保留 working changes，未 commit／push；十三份 migration，無新 schema／服務／Swift／bundled JSON／handler 變更，尚無 v5 HTTP／App 接線。
+
+**2026-10-01 照片用途討論：** Owner 確認未來 Report 需要附圖，Place 頁也需要照片總覽；同一張 Report 照片在總覽保留原 Report／公開作者脈絡。推薦共用照片資源，不複製圖片檔、不把造訪照片當成已確認場所事實。已記入 PRODUCT；完整 schema、攝影者／提交者署名與總覽／上傳／可見性流程留待 Report 批次。現有 Swift VisitReport 沒有照片欄位；place_photos 是既有場所資訊照片，三張插圖沒有真實 Report 或作者。討論階段只記錄決定並提供 owner Green，未因討論重跑 Red；之後委託的 reader Green 見下方證據。沒有新增 Report／photo 關聯、刪 contribution_id 或修改 Swift。
+
+Owner 同意的讀取方向見 [PRODUCT 的 connected slice](PRODUCT.md#agreed-connected-prototype-slice--app-integration-pending)：v5 移除 scope／eligibilityDetails，不建相容 view；新 App 只從 API 讀場所，不需舊版解碼／bundled fallback／舊本機場所發布還原。原始 v4 輸入與資料庫快照仍保留作來源證據。尚未實作新 App；不把這個方向當成刪除或上傳裝置資料的授權。
+
+**照片 reader DB-C73–C76：Green。** 先查核 place_photos schema、公開照片與其獨立上傳／審核生命週期、initial importer、現有 Swift consumer／兩份 inputs 和本機正式值。唯讀確認 DB healthy、migration 13、places／cool_spots 253、photos 3、只有一個已收錄 Place 有照片，沒有 ordinary-Place photo fixture；API login 有 SELECT。三張只屬 Example Community Room，皆為 illustration，position 0／1／2；caption 非 null、captured_at／published_at／contribution_id 全為 null，URL 參照均 bundle://，不是已提供 HTTPS 圖片服務。
+
+本批明確讀取現有十三欄 id／place_id／thumbnail_ref／image_ref／width／height／caption／captured_at／published_at／attribution／source_kind／contribution_id／position。型別日期為 Date | null，其他選填為 string | null。這些是 internal metadata rows，不是新 wire 契約；未將位置／圖片參照當成照片 ID。position 是既有展示順序，query 排序採 place_id／position；JOIN cool_spots 限定現行 list 關聯。保留既有 contribution_id placeholder（目前全 null），先前移除推薦未套用；不在 reader 批次默默刪欄。無 upload、bytes／EXIF、私人 uploader 或待審照片加入清單。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C73 | 三張穩定資源 ID 連到 Example Community Room，position 0–2 排序且回傳指定十三欄 | Green：三張 identity／position 與十三欄 shape 通過；原 Red 是 [] 對三張 |
+| DB-C74 | 第二張 Indoor seating 的圖片／縮圖 refs、尺寸 1448×1086、caption／attribution／source／其他 metadata 原樣保存 | Green：精確十三欄通過；原 Red 是 undefined。未證明圖片 bytes 已可下載 |
+| DB-C75 | 三張皆 illustration，拍攝／發布時間及未指定 contribution ID 保留 null，不補生成時間 | Green：三張指定 metadata／null assertions 通過；原 Red 是 []，非空預期避免真空通過 |
+| DB-C76 | 沒照片的 Canning Town Library 仍在 253 筆 list，不製造照片 | Green：完整照片結果下該圖書館仍無照片；原空骨架即通過，沒有人工 Red |
+
+Agent 只新增 PlacePhotoRow／Promise.resolve([]) loader 和四個 tests；以同一 credentials-safe runner 執行，型別檢查通過，**23 passed／3 failed，Deno exit 1**。失敗都是目標 metadata 未實作，不是連線／permission／SQL 錯誤；stub 階段不發 photo SQL。原二十二項全通過，未重跑來源 SQL／importer／Swift／handler suites，無資料寫入或新 migration。
+
+Owner 委託本批 Green 後，agent 確認磁碟仍是空骨架，再補上先前提供的完整 async 查詢。沿用 capture／filter runner 與 ignored owner-only settings，以 --frozen lock、受限 env／127.0.0.1:54322 network permissions 執行，DB healthy；**26 passed／0 failed，Deno exit 0**。此前未到達的 identity／shape／精確 metadata／null assertions 全部通過；原二十二個 cases 保持 Green。deno fmt --check 與 git diff --check 通過，查詢無需 refactor。只讀既有資料，沒有新增 fixture 或資料寫入；沒有重跑來源 SQL／importer／Swift／handler suites，沒有 migration、restart、cloud SQL、commit／push 或部署。
+
+**本批下一步：** 對齊 v5 assembler cases，寫 tests／驗證 Red，再提供 owner 輸入的完整最小 Green；之後才接本機 HTTP。三張目前都在同 Place、null 日期、nonnull caption、illustration／bundle refs，因此 known dates、null caption、其他 source_kind／HTTPS／跨 Place 排序、全空表與排除 ordinary-Place photos 尚未覆蓋，不宣稱圖片下載、Report 附圖／總覽、發布／上傳或 iOS 接線已完成。
+
+
+**地圖 reader DB-C68–C72：Green。** 先查核現有 place_map_links schema／欄位權限、PRODUCT 的兩種關係、bundled accepted identity ledger、匯入程式與 owner reader。唯讀確認 DB healthy、places／cool_spots 253、migration 13、accepted links 145／distinct Place 145；144 same_place／1 within_place、136 automatic／9 reviewed、1 null checked_at。沒有 ordinary Place 的 map fixture；API login 可 SELECT external_place_id，不能讀 evidence。沒有重新搜尋 Apple、重新配對或 migration。
+
+這批沿用目前六個公開欄位 place_id／provider／external_place_id／relationship／verification／checked_at；後兩個 physical names 的 review 推薦尚未套用。checked_at 型別 Date | null，保留原始配對時點；reviewed 是既有來源覆核／範例標記，不宣稱 owner 或實地確認。內部排序採 place_id／provider／external_place_id，只使輸出穩定，不新增配對可信度或 primary 排序規則。JOIN cool_spots 限定這份 Cool Spot list 的關聯，不定案新的 Place-first API。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C68 | 145 accepted identities 完整、連到原 Place、排序穩定且只有六欄；automatic／reviewed 數量保留 | Green：全部 identities／排序／六欄 shape／方法 counts 通過；原 Red 為 0 對 145 |
+| DB-C69 | Canning Town Library same_place → I7E8561E6022ED614，reviewed／2026-09-18T14:33:54Z 保留 | Green：精確六欄與原時間通過；原 Red 為 []，不解讀為今日場所有效 |
+| DB-C70 | Streatham lobby within_place → I469799177B7DF2F3；保留原時間、大廳 ID／名稱／座標 | Green：六欄、within_place 與大廳自己的 facts 通過；原 Red 為 [] |
+| DB-C71 | 無 accepted match 的藥學博物館留在 Cool Spot list，配對清單為空 | Green：完整 145 筆結果下仍沒有 museum link；空骨架原已通過，未製造 Red |
+| DB-C72 | Tate example 的同場所配對保留 checked_at=null，不用現在時間補值 | Green：精確六欄與 checked_at=null 通過；原 Red 為 [] |
+
+Red 階段，agent 只新增 PlaceMapLinkRow／Promise.resolve([]) 骨架與五個 tests，同 suite 跑真實後端連線：型別檢查通過，**18 passed／4 failed，Deno exit 1**，四項皆為預期空資料 assertions，不是連線／SQL／permission 錯誤。當時未寫 SELECT Green。既有十七項全部通過，不重跑來源 SQL／importer／Swift 或 handler。測試僅讀取／既有 WHERE false 拒絕檢查，沒有 fixtures 寫入；migration 仍十三份。
+
+2026-10-01 owner 委託 Green 後，agent 重新確認 Prototyping／2907708、working changes 與磁碟上的空骨架，再補上完整 async SELECT／JOIN／ORDER BY。型別檢查與實際 tests 結果為 **22 passed／0 failed，Deno exit 0**；先前未到達的完整 accepted identity ledger／shape／兩種關係／原配對時間／own-place facts／null assertions 全部通過。deno fmt --check／git diff --check 通過，查詢簡單清楚，無需 refactor。只讀既有資料，不重新搜尋 Apple；沒有 migration、DB reset、服務 restart、cloud SQL、commit／push、部署或 sibling checkout 改動。
+
+**本批下一步：** 照片 reader，接著 v5 assembler 與本機 HTTP；本次代寫授權限於地圖 Green。初始每 Place 0／1 map 的 fixture 尚未驗證多配對排序、全部沒有配對的 database、或 JOIN 排除 ordinary-place links；不將這些推論當測試證據。
+
+
+**來源整理 DB-C63–C67：完成。** 使用一個 agent，只操作 prototype checkout 與指定本機 DB。Owner 指定 `place_field_inference_records`；表內仍包括直接讀取／格式轉換，並非每筆都是推定。`catalogue_import_history` 保留名稱與完整首次快照，不宣稱更正歷史服務。data_sources metadata 改為指定型別欄位（含明確 is_example）；source_records 保留原始紀錄與 import_audit，刪除 mapped_data 副本；source_record_id 在相關表／reader 一致。history 指紋欄改為 import_payload_sha256，原始 canonical input／快照 keys 與 hash 保留。正式場所／降溫欄位、地圖／照片欄位與廁所語意尚未套用其餘 review 建議；不把設計推薦當成全部完成。
+
+| Case | 整理後的行為 | 實際證據 |
+|---|---|---|
+| DB-C63 | 來源標頭使用明確欄位；時間為 timestamptz／可未知；GLA false／範例 true | 結構、型別與真實 reader 精確公開欄位通過 |
+| DB-C64 | 來源紀錄保留 raw_record／import_audit；mapped_data 已有完整不可變 item 快照後才刪除 | 五個 migration rehearsal tests 與全 253 筆原始／audit／archive 比對通過 |
+| DB-C65 | 採 owner 表名、清楚區分直接 mapping／兩種推定／範例；原來源關聯／欄位鍵限制及日期保留 | 新結構與四種碼、FK／retired field 拒絕、全量比對／DB-C60–C62 通過 |
+| DB-C66 | 改名後仍保持 RLS／唯讀；原始資料、audit、本機 raw_file_path 及歷史私有 | 來源與登入權限 assertions、真實 TCP 的 42501 checks 通過 |
+| DB-C67 | 同一原始輸入整理後重試完全不變；新匯入仍原子、來源變動須停止 | 十三個 importer tests：九表完整 retry 比對、253 筆 namespaced 匯入、更正後重試、來源標頭變動、失敗 rollback 通過 |
+
+先新增 [source_structure.test.sql](supabase/tests/database/source_structure.test.sql) 與原始清單重試 test：SQL 結構 Red **9 failed／10 skipped**，psql 本身 exit 0 但 TAP 有 failures；原始 retry test 因新表不存在失敗（42P01）。依賴新結構的行為當時未執行。先核對 owner 存好的舊版取得方式 SELECT，DB-C46–C62 **17 passed／0 failed**；不把尚未跑過的 owner Green 當成歷史結果。
+
+新增第十三份 [migration](supabase/migrations/20260930220000_clarify_catalogue_sources.sql)，不修改前十二份。先在 populated 舊 schema 以 BEGIN／ROLLBACK 執行 [test_source_structure_migration.py](scripts/test_source_structure_migration.py)：**5 passed**，包括九表逐列保留、缺少 item archive／來源 header archive／hash 衝突／非範例 review 時拒絕。source_structure 在 migration 同一 rollback 演練亦通過。此 rehearsal 只適用套用前 schema；永久套用後不要重跑或 reset。
+
+以 capture/filter 輸出的 `supabase migration up --local --workdir .` 套用，exit 0；沒有 start／status 憑證輸出或服務重啟。Green：**19 structure＋134 source storage＋24 login = 177 SQL assertions，0 failed／0 skipped；13 importer tests；17 Deno TCP／reader tests，exit 0**。DB-C48 新增 raw_record／import_audit／raw_file_path 的真實登入拒絕檢查；沒有打印 URL、密碼、原始 driver errors。未重跑無關 handler／mapping／Swift suites 或 634 項歷史全套。
+
+最後唯讀計數仍為 253 places／253 cool_spots／2 sources／253 source records／links／5297 acquisition records／145 maps／3 photos／253 histories，migration 十三份。全部 253 的原始內容、配對 audit、initial item／document metadata／fields／fingerprint 與原輸入相同；正式 Place／Cool Spot 與原快照差異為 0。方法分布改為 mapped_from_source 4000、inferred_from_context 1000、inferred_from_name 250、example_data 47；原記錄時間保留。postgres 的臨時 SET reader/api 與 reader/api 的 extensions USAGE 都 false，所有測試 fixtures／暫時授權 rollback。
+
+**下一步：** 接續 maps／photos reader，再組 v5 與本機免登入 HTTP。尚無產品 API／App 接線；不在本批開始其餘 schema 重命名、新查詢／回報／登入或部署。
+
+
+接手完整讀取三份 active documents、i-have-adhd／essential-tdd，檢查 handler／Swift／v4 schema／兩份 fixtures／migrations／importer 與權限 tests。唯讀確認三個本機容器（db、pg_meta、Studio）healthy、Studio HTTP 200；沒有 Auth／PostgREST／Kong／Edge Runtime 容器。253 Places／253 Cool Spots、2 sources、253 source records／links、5,297 evidence、145 map links、3 photos、253 initial histories 與十一份 migration 均吻合。2026-09-29 再確認角色測試前兩表筆數仍 253，reader 為 NOLOGIN，cool_spots_api 尚不存在；未重啟服務或重跑 634／11 歷史結果。
+
+| Case | 第一批預期行為 | 實際狀態 |
+|---|---|---|
+| DB-C43 | 專用後端角色存在、具 LOGIN 屬性且沒有管理／bypass RLS 特權；既有 reader 保持 NOLOGIN | Green；角色／屬性 assertions 通過。真實密碼登入尚未驗證 |
+| DB-C44 | 以後端角色讀回指定測試 Place／Cool Spot 的正式值；兩表的新增、修改、刪除及清空均拒絕 | Green；SET LOCAL ROLE 後身分與讀回值正確，八種寫入均回 42501；Red 時角色缺失而跳過 |
+| DB-C45 | client／authenticator 不可取得後端角色；後端不能取得管理員、在 application schema 建物件，或讀 raw／舊 v4／私有配對證據／匯入歷史 | Green；角色／schema 權限檢查與五種受限資料 SELECT 拒絕均通過；Red 時跳過 |
+
+新增 [backend_login.test.sql](supabase/tests/database/backend_login.test.sql)，plan 23，使用獨立 fixtures 與 BEGIN／ROLLBACK；測試只給 pgTAP schema usage 和執行者的臨時 SET membership，不替受測角色補 domain-table 權限。執行 `SUPABASE_TELEMETRY_DISABLED=1 supabase test db --local --workdir . supabase/tests/database/backend_login.test.sql`：**1 passed／1 failed／21 skipped，runner exit 1／Result FAIL**。唯一失敗是 DB-C43 角色不存在，無語法或 runner 錯誤；這是結構 Red，不是實際連線拒絕或讀寫權限的行為 Red。測試後唯讀確認兩表各 253 筆、十一份 migration、測試 Place 為零、backend role 不存在、pgTAP 未保留、postgres 對 reader 的臨時 SET 權限為 false。
+
+Agent 以 CLI 建立 [20260929055551_add_backend_read_login.sql](supabase/migrations/20260929055551_add_backend_read_login.sql)，Red 當時為 0 bytes、未套用。Owner 隨後親手輸入並回覆「存了」；agent 讀取確認僅 CREATE ROLE（LOGIN、無管理／bypass RLS 屬性）及 GRANT reader（INHERIT true、SET false），沒有密碼或資料寫入。先核對本機只有這份 pending、history 十一份與兩表各 253 筆，再執行 `SUPABASE_TELEMETRY_DISABLED=1 supabase migration up --local --workdir .`，exit 0，只套用第十二份，owner SQL 未修改。
+
+第一次執行本批與既有 cool_spots_permissions.test.sql：新 suite 前 9 項通過，第 10 項中斷，錯誤為 could not determine which collation to use for string comparison；既有 **47 項全部通過**。新 suite 當時 plan 23 但只執行 9 項，整次 FAIL，沒有將未執行項算通過。唯讀定位 current_user::text 的 collation 為 C、期望字串為 default；pgTAP 整列比對遇到衝突。Agent 只將角色身分改成獨立布林 assertion，JOIN 仍比對原 Cool Spot ID、名稱、經緯度，plan 改為 24；未放寬權限或修改 production SQL。
+
+只重跑受影響的 backend_login.test.sql：**24 passed／0 failed／0 skipped，exit 0／Result PASS**。既有 47 項的程式與 SQL 未再變動，沒有重跑。沒有 production refactor；未跑 634 整套、importer、Deno 或 Swift。
+
+Green 後唯讀確認：history 十二份、最新 20260929055551；cool_spots_api LOGIN=true 且 superuser／createdb／createrole／replication／bypassrls 皆 false；reader 保持 NOLOGIN；membership 為 ADMIN=false／INHERIT=true／SET=false。九表筆數仍為 253／253／2／253／253／5297／145／3／253，兩套測試的五個 fixture Places 都不存在，pgTAP 未保留，postgres 對 api／reader 的臨時 SET 與 api 的 extensions USAGE 均 false。沒有留下測試資料或臨時授權。
+
+**2026-09-30 憑證準備：** Owner 在 Terminal 執行 psql 的隱藏密碼提示，回報已完成。其 Terminal 的 docker 不在 PATH，改用已確認存在的 /Applications/Docker.app/Contents/Resources/bin/docker；未修改 shell 設定。Agent 唯讀查詢 cool_spots_api 的 rolpassword IS NOT NULL，結果 true，未讀出密碼或 hash。Owner 隨後以隱藏輸入保存 .env.backend.local，使用 COOL_SPOTS_DATABASE_URL 並對密碼做 URL 編碼，不在指令文字中填入密碼。Agent 確認檔案存在、0600、owner 為目前 macOS 使用者、被 Git 忽略，URL 為預期的 127.0.0.1:54322／postgres／cool_spots_api 且密碼非空；未輸出檔案內容或 credentials。這只確認設定已保存，尚未證明實際登入。
+
+**DB-C46–C48 連線批次：Green。** 新增 [database_integration_test.ts](supabase/functions/cool-spots/database_integration_test.ts)、[database.ts](supabase/functions/cool-spots/database.ts) 與 [deno.lock](supabase/functions/cool-spots/deno.lock)，固定 Postgres.js 3.4.9。此批只建立連線，尚不組合 v5 JSON。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C46 | TCP 登入的 session_user／current_user 皆為 cool_spots_api，JOIN 正式兩表讀回 Canning Town Library 的舊 ID、名稱與座標 | Green：真實 TCP、登入身分與讀回值 assertions 全通過；原 Red 停在 client 骨架 |
+| DB-C47 | 改用刻意錯誤的密碼，PostgreSQL 拒絕並回 28P01 | Green：真正查詢收到 28P01；原 Red 停在 client 骨架 |
+| DB-C48 | 真正登入後，場所 UPDATE、raw_data 與匯入歷史 SELECT 均回 42501 | Green：先確認登入角色，三種禁止操作皆收到 42501；原 Red 停在 client 骨架 |
+
+測試 URL 守衛限定本機主機／port／資料庫／角色，拒絕額外 query parameters；UPDATE 使用 WHERE false，即使權限倒退也不改任何列，受限資料 SELECT 使用 LIMIT 0，不取回原始值。Helpers 只顯示安全錯誤代碼，且在 finally 關閉連線。正式資料的預期值由本次唯讀管理查詢核對；它不是後端登入成功證據，migration 仍十二份。
+
+執行前以 runner 清除繼承的 PG*／同名 URL 環境值，載入 owner 的本機設定；stdout／stderr 捕捉後先遮蔽連線字串及密碼再輸出。實際指令為：
+
+```sh
+/opt/homebrew/bin/deno test --no-prompt --lock=supabase/functions/cool-spots/deno.lock --env-file=.env.backend.local --allow-env='COOL_SPOTS_DATABASE_URL,PG*' --allow-net=127.0.0.1:54322 supabase/functions/cool-spots/database_integration_test.ts
+```
+
+初次型別檢查通過，三個 test body 均執行，**0 passed／3 failed，Deno exit 1**；共同失敗訊息為 Database connection is not implemented。這是 client 尚未實作的 Red，不是 SQL／認證失敗。Agent 當時只保留拋錯骨架，完整最小 Green 交由 owner 輸入。
+
+Owner 存好 database.ts 後，agent 確認實際內容為 postgres(databaseURL, { max: 1, connect_timeout: 5 })，以同一指令重跑：**3 passed／0 failed，Deno exit 0**。資料庫容器 running／healthy，設定檔仍是 0600、目前使用者持有且 Git 忽略；沒有改寫 owner client 或做 refactor。deno fmt --check 僅指出 owner 檔尾缺最後換行，原樣保留；它不影響型別／行為結果。未重跑既有 SQL／handler／importer／Swift tests。
+
+**DB-C49–C50 第一個 reader JOIN 批次：Green。** 新增 [database_reader.ts](supabase/functions/cool-spots/database_reader.ts)，CoolSpotRow 首步含 id／place_id／name／latitude／longitude，loadCoolSpotRows 接收已建立的 client。最初為空清單骨架，後由 owner 輸入 SELECT／JOIN。這是逐步組裝完整回應的內部資料，不是新增或縮減 API 契約；地址／降溫內容／來源與 v5 尚待後續批次。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C49 | Reader 依舊 Cool Spot ID 排序，讀回完整 253 個原 ID 與 253 個唯一 Place ID | Green：數量、完整原 ID 清單／順序與 Place 唯一性通過；原 Red 為 0 對 253。兩份既有 JSON 僅提供測試的原 ID 對照 |
+| DB-C50 | Reader 讀回圖書館的舊 ID、名稱、經緯度及不同的新 Place UUID | Green：圖書館各欄、Place UUID 格式與兩種 ID 不同皆通過；原 Red 在空清單中找不到場所 |
+
+在同一 integration suite 初次加上兩個 tests 後重跑：型別檢查通過，**3 passed／2 failed，Deno exit 1**；原 DB-C46–C48 保持 Green，兩個新 case 在預期 assertions 失敗。當時 reader 未查詢或寫入資料。Agent 未代寫 JOIN Green，完整當步程式碼交由 owner 輸入。當時唯讀計數仍為 253 places／253 cool_spots／2 sources／253 source_records／253 links／5297 evidence／145 map links／3 photos／253 histories，migration 十二份。
+
+Owner 隨後存好 database_reader.ts；agent 讀取確認 SELECT c.id／c.place_id／p.name／座標函式，JOIN places，ORDER BY c.id，最後回傳展開的 rows。以同一受限／遮蔽輸出 runner 執行：**5 passed／0 failed，Deno exit 0**；型別檢查與全部當批 assertions 通過。沒有代改 owner query 或 refactor，沒有重跑 SQL／handler／importer／Swift 歷史 suites。
+
+**DB-C51–C52 地址／場所類型批次：Green。** 本批沿用 places 已有的七個地址欄與 place_type，不新增 migration。Agent 先唯讀核對 Canning Town Library 與 Tate Modern 範例的正式值，再新增 tests，並僅補 CoolSpotRow 的必要型別宣告（七個 string | null、一個 string），原 SQL 當時完全不動。TypeScript 宣告不會自行選取 SQL 欄位；擴充 SELECT 由 owner 隨後輸入。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C51 | Library 的街道／locality／borough／country code 原樣讀回；formatted／line2／postal code 保留 null，類型為 library | Green：八欄與已核對正式值相符；原 Red 全為 undefined |
+| DB-C52 | Tate Modern 範例保留完整地址與 culture 類型；未知地址組件維持 null，不從格式化文字猜拆郵遞區號 | Green：八欄原值／null 均保留；原 Red 全為 undefined。這不驗證範例場所的目前狀況 |
+
+Red 時重跑同一 integration suite：型別檢查通過，**5 passed／2 failed，Deno exit 1**。舊五個 cases 保持 Green；新增兩個都在預期資料比較失敗，原因是 SELECT 尚未包含地址／類型，不是資料庫缺欄或連線失敗。Agent 沒有代寫擴充 SELECT，完整函式 Green 提供 owner 輸入；本批只查詢正式資料，未更新場所或重新匯入。兩個 fixtures 驗證現有部分地址／formatted 與 null，未宣稱覆蓋所有可能地址組合。
+
+Owner 回報完成後，agent 確認檔案的 SELECT 已包含七個 p.address_* 與 p.place_type，以同一受限、遮蔽 credentials 的 runner 重跑：**7 passed／0 failed，Deno exit 0**，型別與當批行為全部通過。未改寫 owner Green、未 refactor、未新增 migration 或重跑其他歷史 suites。Owner 同時詢問 JOIN 是否建立一張大表；已說明它只產生這次查詢的組合結果，原 places／cool_spots 保持分開，後端再把結果整理成 JSON；沒有另存表或 view。
+
+**DB-C53–C55 降溫／使用欄位批次：Green。** Owner 要求 next 後，agent 查核第九份 migration、PRODUCT 與本機正式 Cool Spot 欄位；沿用既有的 17 欄，不新增 domain 欄位或 migration。最初只在 CoolSpotRow 補上讓測試可編譯的欄位型別，未擴充 owner SELECT；測試 helper coolingValues 只抽取這一批公開欄位。SELECT 由 owner 隨後完成。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C53 | Canning Town Library 的室內、冷氣、使用條件與營業時間原文／時區完整讀回；unknown 與 null 保留 | Green：17 欄比對通過；原 Red 皆為 undefined |
+| DB-C54 | Community Room／Shaded Garden 範例保留 no／none／unknown／limited、單一／多個設施、未公告限制與未知限制及空 hours | Green：room 與 garden 兩筆的 17 欄均通過；原 Red 停在 room 比較，未執行 garden 內容 assertion |
+| DB-C55 | St John's Hyde Park 的空設施清單 [] 與既有降溫描述原文一起保留，不從文字推論設施碼 | Green：17 欄、空清單與原文皆通過；原 Red 皆為 undefined。歷史描述不是今日降溫證明 |
+
+唯讀檢查確認全 253 筆的 area_description／additional_information／posted_stay_limit_minutes 皆為 null；本批只能覆蓋這三欄空值，非空文字／正整數的 reader 路徑尚未驗證。不為測試改寫正式資料；既有 SQL 儲存驗證不代替 reader 非空值測試。來源年份／依據需在後續來源批次補齊，尚無 v5 HTTP 回應。
+
+Red 時用同一受限本機／遮蔽 credentials 的 runner 跑 integration suite：型別檢查通過，**7 passed／3 failed，Deno exit 1**。DB-C46–C52 保持 Green；DB-C53–C55 都因 SQL 未選取新欄位而出現預期資料比較失敗，沒有 SQL 語法或連線錯誤。Agent 只新增 tests／helper／型別宣告，完整 SELECT 補充交由 owner 輸入。
+
+Owner 回報完成後，agent 確認 SELECT 已含 17 個指定 c. 欄位，重跑同一 runner：**10 passed／0 failed，Deno exit 0**。型別與所有當批 assertions 通過，包括先前 Red 未到達的 garden assertions。未代改 owner Green、refactor、更新場所、重新匯入或重跑其他歷史 suites。
+
+**DB-C56–C57 公開來源 metadata 批次：Green。** 先查核第十份 migration、既有兩份 catalogue 的 sources、importer 與本機 data_sources；只保留既有公開 metadata 的指定欄位，不把整包 metadata 或本機 raw_file_path 帶回 source row。新增 DataSourceRow 型別與空 loadDataSourceRows 骨架，tests 加在同一 integration suite；owner 隨後完成查詢。本批尚未讀 place_source_links 或組 v5 JSON。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C56 | 兩個來源依 ID 排序，GLA 公開資料保持 2025 標籤／dataset／網址／下載網址／checksum，未知原始時間維持 null；只回指定公開欄位 | Green：完整來源順序／精確公開欄位與 null 通過；原 Red 在來源數量 0 對 2 失敗 |
+| DB-C57 | 社群來源保持 Example cooling info 與 is_example=true；缺少的網址／dataset／原始時間／公開 checksum 為 null | Green：完整範例來源欄位與 null 通過；原 Red 在空清單中找不到範例來源 |
+
+同一受限／遮蔽 credentials 的 runner 執行：型別檢查通過，**10 passed／2 failed，Deno exit 1**。舊十個 tests 保持 Green；兩個新 case 都因 loader 尚未查詢而回空清單，在預期 assertions 失敗。GLA metadata 未含 isExample，內部 row 採 null 表示未提供；wire 欄位仍待 assembler 按既有公開語意處理。原始 metadata 的未知下載／更新時間不能填成 API 回應時間；生成時間是另一項資訊。
+
+Agent 已解釋 metadata 是 JSON，SQL ->> 取指定欄位，並提供完整 loadDataSourceRows 最小 Green 由 owner 輸入。未代寫核心 Green、改權限、建立 view／migration、修改 Swift／bundled JSON 或重跑其他歷史 suites。
+
+Owner 存好來源 loader 後，agent 確認明確 SELECT 十一個公開欄位、用 ->> 取指定 metadata 值並依 id 排序；重跑同一 runner：**12 passed／0 failed，Deno exit 0**。GLA／範例的所有欄位 assertions 通過，未改 owner Green、權限或正式資料。
+
+**DB-C58–C59 場所來源關聯批次：Green。** Agent 新增 PlaceSourceLinkRow（place_id／source_id／record_id／position）、空 loadPlaceSourceLinks 骨架及兩個 tests，owner 隨後完成查詢。關聯分批讀取，後續用 Place ID 組裝，沒有把原始紀錄或歷史帶入公開 reader。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C58 | 初始 253 個 Place 的來源關聯完整、依 Place ID 排序；250 筆 GLA、3 筆範例且 position=0 | Green：數量、覆蓋／排序／來源分布與 position 通過；原 Red 為 0 對 253 |
+| DB-C59 | 圖書館連到 GLA record_id="18"；Tate 範例連到原範例 ID，只回四個關聯欄位 | Green：圖書館與 Tate 精確四欄關聯通過；原 Red 停在圖書館 [] 比較 |
+
+同一受限／遮蔽 credentials 的 runner 執行：型別檢查通過，**12 passed／2 failed，Deno exit 1**。前十二個 cases 保持 Green；新 cases 在預期 assertions 失敗，不是連線或 SQL 錯誤。Agent 未代寫核心 Green，完整四欄 SELECT／JOIN 交由 owner 輸入。這批測試只覆蓋初始每 Place 一個來源；不代表限制未來來源數量，也不宣稱已驗證多來源排序或排除沒有 Cool Spot 的 Place。
+
+Owner 回覆「好了」並詢問三個函式的責任後，agent 重新讀取 prototype 磁碟檔案：loadPlaceSourceLinks 仍為 Promise.resolve([]) 骨架，未見提供的 SELECT／JOIN。重跑同一 runner，仍為 **12 passed／2 failed，Deno exit 1**；沒有將 owner 回覆當成 Green 證據，沒有代寫查詢。已說明三個 reader 分別讀正式場所事實、來源介紹及場所與來源紀錄的關聯；完整 API 組裝仍待後續實作。
+
+Owner 理解查詢後要求下一步，agent 再讀磁碟確認 loadPlaceSourceLinks 已含四欄 SELECT、JOIN cool_spots 與 ORDER BY place_id／position。以同一 runner 執行：**14 passed／0 failed，Deno exit 0**；先前未到達的 Tate 與所有來源分布 assertions 都通過。未代改 owner Green 或 refactor。
+
+**DB-C60–C62 欄位取得方式批次：Green。** 先查核 migration 十／十一、importer 的欄位鍵映射及既有 v4 provenance 定義，再以專用後端連線唯讀核對正式 place_field_evidence。新增 FieldEvidenceRow（place_id／field_key／source_id／record_id／method／recorded_at）、空 loadFieldEvidenceRows 與同 suite 的三個 tests。內部 recorded_at 為 Date | null，後續 wire 時間序列化仍屬 assembler 工作。
+
+| Case | 預期行為 | 本次證據 |
+|---|---|---|
+| DB-C60 | 5,297 筆目前欄位依據覆蓋全部 253 個 Place，place_id／field_key 不重複，每筆連到同 Place 的來源紀錄，沒有 retired fields | Green：數量、關聯／覆蓋與欄位鍵通過；初始 Red 為 0 對 5297 |
+| DB-C61 | 圖書館的 cooling_features／hours_time_zone／place_type 改用 mapped_from_source／inferred_from_context／inferred_from_name；GLA record 18 與原時間保留，只回六欄 | Green：三種取得方式與精確六欄皆通過；初始 Red 第一筆為 undefined |
+| DB-C62 | Tate 範例 cooling_features 使用 example_data 方法碼、範例 source／record 與原 2026-09-18T22:32:22Z | Green：精確六欄／範例標記通過；初始 Red 為 undefined，不代表有真實審核服務 |
+
+唯讀核對方法分布為 imported 4000、dataset_context 1000、name_rule 250、reviewed_contribution 47，合計 5297，且全部 recorded_at 非 null。本批 fixtures 只覆蓋已知時間；null 時間的 reader 路徑仍需另驗證。GLA 現有依據記錄時間為 2026-09-19T00:16:05Z，來源仍標 GLA 2025，不解讀成今日降溫確認，也不以 API generatedAt 覆寫。
+
+同一受限本機／遮蔽 credentials 的 runner 執行：型別檢查通過，**14 passed／3 failed，Deno exit 1**。舊十四個 cases 保持 Green；三個新 case 在預期 assertions 因空 loader 失敗。Agent 只寫 tests／必要型別／空骨架，六欄 SELECT／JOIN Green 交由 owner 輸入；未建立 migration、改正式資料或重跑歷史 suites。
+
+Owner 存好的 SELECT 已在本次整理前驗證 17 passed／0 failed；整理後使用新表／欄名與方法碼的十七個測試亦全通過。**下一步：** 做地圖／照片與 v5／HTTP。Credentials 不寫入 migration／Git／App，也不要求 owner 貼到對話。API-C05 持續待整合，版本目標為 v5；未 commit／push、部署、操作雲端、重設資料庫或修改另一 checkout。
+
+**2026-09-28 資料準備批次的完成證據：** 先後提交 c69b3fd（地址／確認結論）、b47bd4f（降溫欄位）、9e8a04b（來源／權限）；本機 importer 與收尾紀錄提交於 2907708。沒有 push。十一份 migration 已套用，最新為 20260928224500。
 
 | Case | 行為 | 本次實際證據 |
 |---|---|---|
@@ -27,7 +231,7 @@ SUPABASE_TELEMETRY_DISABLED=1 supabase test db --local --workdir . supabase/test
 
 最後資料：253 places、253 cool_spots、2 sources、253 source_records／links、5,297 field_evidence、145 accepted map links、3 photo references、253 initial history。GLA 與三個範例標示、raw hash、原始／對照／mapping 快照、全部採用欄位及 metadata 均比對一致。Reader 的 LOGIN／superuser／BYPASSRLS 為 false；postgres 對 reader 的臨時 SET／USAGE 為 false；沒有 location_scope／eligibility_details domain columns。現有 Swift／JSON／handler 檔未變，沒有 API/Auth/Studio 啟動、雲端 SQL、部署或 ViewCoolSpots 編輯。
 
-**下一步但尚未授權執行：** 後端登入／唯讀連線、database reader、v4 相容 HTTP 回應與免登入 HTTP 實測。之後才討論 iOS 接 API 的檔案、影響與測試。這是 owner 指定的停止點，不能自動繼續。
+**該批當時的停止點：** 接通 API 之前；2026-09-29 已由 owner 新指示續接，當前進度與 v5 決策見本節開頭。以下保留各批當時的實際證據。
 
 **2026-09-28 來源儲存 DB-C34–C38：134 assertions Green。** 降溫內容已提交 b47bd4f。第十份 preserve_catalogue_sources 新增七表、關聯、same_place 唯一索引及 RLS／限縮欄位 SELECT，沒有後端登入或 API reader。新表缺失時 Red 為 7 failed／1 skipped。首次 Green 檢查中三個 permission tests 誤用 generated identity 的 UPDATE，先遇到 428C9；改成合法 UPDATE 後各角色實際回 42501，未放寬權限斷言。補上 INSERT 拒絕後 132 項通過。
 
@@ -135,7 +339,7 @@ prove --exec python3 scripts/test_place_migration.py
 
 **本批 Green：** owner 儲存 SQL 後明確要求「你幫我 apply」。Agent 讀取實際檔案，確認完整最小拆分、資料搬移與權限內容，不代改 SQL。先執行 `prove --verbose --exec python3 scripts/test_place_migration.py`：**11 passed／0 failed，無跳過，exit 0**。唯讀核對演練後 history 仍五份、places 不存在、cool_spots 0 筆，確認 rollback。再在 prototype 執行 `SUPABASE_TELEMETRY_DISABLED=1 supabase migration up --local --workdir .`，exit 0，僅套用 `20260928145903_split_places_from_cool_spots.sql`。
 
-套用後執行上述三份 database tests：**144 passed／0 failed，無跳過，exit 0**，分別為 places 53、cool_spots 51、permissions 40。四次 Invalid Coordinate NOTICE 對應刻意輸入 NaN 的案例，不是測試失敗。SQL／assertions 無需修正，無需 refactor；没有重跑未受影響的 API／Python／Swift tests。
+套用後執行上述三份 database tests：**144 passed／0 failed，無跳過，exit 0**，分別為 places 53、cool_spots 51、permissions 40。四次 Invalid Coordinate NOTICE 對應刻意輸入 NaN 的案例，不是測試失敗。SQL／assertions 無需修正，無需 refactor；沒有重跑未受影響的 API／Python／Swift tests。
 
 最後唯讀核對：history 六份；places 為 id uuid（default gen_random_uuid()）／name text／location geography(Point,4326)，cool_spots 為 id text／place_id uuid，皆 NOT NULL；主鍵／CHECK／UNIQUE／FK 均 validated=true，FK 為 ON DELETE RESTRICT。兩表 RLS=true，各有 reader SELECT policy；PUBLIC／anon／authenticated 無兩表 grants，reader 僅 SELECT。兩表皆 **0 筆**，pgTAP 未保留，postgres 對 reader 的測試 INHERIT／SET 與 reader 的 extensions USAGE 均 false。未改 owner SQL、重設資料庫、操作雲端、啟動 API/Auth/Studio、改 iOS／JSON、部署、commit 或 push。
 
@@ -311,7 +515,7 @@ SQL 目前由 owner 在雲端 SQL Editor 執行，尚未存為 repository migrat
 | API-C02 | 成功讀取時，保留 Cool Spot list metadata、場所 ID、items 內容及來源資訊 | Owner 確認通過；2026-09-25 新批次執行時 agent 亦驗證通過，未改 production 或製造 Red |
 | API-C03 | Reader 失敗時，回傳可辨識的服務失敗，不冒充成功空結果或洩露內部錯誤 | 2026-09-25 行為 Red：reader 錯誤直接傳出，未產生預期 500 JSON；Owner 輸入 Green 後 agent 驗證通過；全批 7 passed／0 failed |
 | API-C04 | 不支援的 HTTP method 被拒絕，且不觸發 Cool Spot list 載入 | 2026-09-25 POST／PUT／PATCH／DELETE 四個案例 Red：實際 200／預期 405；預期另含 Allow: GET、固定 JSON 錯誤與零次 load；Owner 輸入 Green 後 agent 驗證通過；全批 7 passed／0 failed |
-| API-C05 | 真實 PostgreSQL reader、API 與 Swift decoder 的讀取契約相容 | 待整合；不以單元測試代替 |
+| API-C05 | 真實 PostgreSQL reader、免登入 HTTP 與新版 Swift decoder 的 v5 讀取契約相容 | 2026-10-01 真正 reader／HTTP 已完成，見 DB-C77–C78／API-C06–C11；新版 Swift decoder／App 尚未開始，此跨層 case 仍未完成 |
 
 以下使用目前命名描述 API-C01–C04；最初 Red／Green 的 fixture 為 v3，2026-09-25 改名時升為 v4。測試介面為 `createListCoolSpotsHandler(reader)` 產生 Request → Response handler，reader 提供非同步 `load()`；API-C01 使用可控制的空 Cool Spot list 替身，不存取 Supabase、網路或使用者資料。測試檔為 [handler_test.ts](supabase/functions/cool-spots/handler_test.ts)。2026-09-24 已核對 Deno 2.9.7／TypeScript 6.0.3。第一次執行 `deno test --no-lock supabase/functions/cool-spots/handler_test.ts` 因缺少 handler.ts 而 TS2307 型別檢查失敗，未執行 test body，不算行為 Red。Owner 隨後表示理解；agent 新增 [handler.ts](supabase/functions/cool-spots/handler.ts) 最小骨架，接收 reader／Request 但僅回傳 HTTP 501。以相同指令重跑，型別檢查通過並執行一個測試，在 status assertion 失敗：`501 !== 200`，結果 **0 passed／1 failed，行為 Red 已驗證**。該次尚未到達 JSON content type／body assertions。
 
