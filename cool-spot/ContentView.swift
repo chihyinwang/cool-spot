@@ -1,9 +1,13 @@
+import MapKit
 import SwiftUI
 
 struct ContentView: View {
     @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .light
     @StateObject private var store: PrototypeStore
     @StateObject private var catalogue: CoolSpotsCatalogueViewModel
+    #if DEBUG
+    @State private var inspectionAppearance: AppAppearance = .light
+    #endif
     @State private var catalogueLoadAttempt = 0
     @State private var selectedTab: Int
     @State private var nearbyPlaceRequest: RecognisedPlace?
@@ -16,15 +20,22 @@ struct ContentView: View {
         let arguments = ProcessInfo.processInfo.arguments
         #if DEBUG
         usesReportExamples = arguments.contains("--reports-test-fixtures")
+        let usesExploreLayoutPreview = arguments.contains("--explore-layout-preview")
         #else
         usesReportExamples = false
+        let usesExploreLayoutPreview = false
         #endif
         // Preserve the previous launch argument for existing local QA shortcuts.
         let usesExamples = usesReportExamples || arguments.contains("--shape-preview")
             || arguments.contains("--example-cool-spots") || arguments.contains("--example-catalog")
-        let initialStore = usesExamples
-            ? PrototypeStore(reportDefaults: nil)
-            : PrototypeStore(reportDefaults: .standard, catalogueMode: .api)
+        let initialStore: PrototypeStore
+        if usesExploreLayoutPreview {
+            initialStore = PrototypeStore(reportDefaults: nil, catalogueMode: .api)
+        } else {
+            initialStore = usesExamples
+                ? PrototypeStore(reportDefaults: nil)
+                : PrototypeStore(reportDefaults: .standard, catalogueMode: .api)
+        }
         if usesReportExamples {
             // Isolated, memory-only examples: never overwrite saved places or real local reports.
             for (index, fixture) in initialStore.spots.enumerated() {
@@ -82,10 +93,45 @@ struct ContentView: View {
         #endif
     }
 
+    #if DEBUG
+    // Frozen rendering states for native UI checks, without requests or catalogue fallback.
+    private var fixedCatalogueInspectionState: CoolSpotsCatalogueViewModel.State? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard arguments.contains("--explore-layout-preview"),
+              let index = arguments.firstIndex(of: "--preview-catalogue-state"),
+              arguments.indices.contains(index + 1) else { return nil }
+        switch arguments[index + 1] {
+        case "idle": return .idle
+        case "loading": return .loading
+        case "failed": return .failed
+        case "empty": return .loaded([])
+        default: return nil
+        }
+    }
+    #endif
+
+    private var activeCatalogueState: CoolSpotsCatalogueViewModel.State? {
+        guard store.usesAPICatalogue else { return nil }
+        #if DEBUG
+        return fixedCatalogueInspectionState ?? catalogue.state
+        #else
+        return catalogue.state
+        #endif
+    }
+
+    private var appearanceSelection: Binding<AppAppearance> {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--explore-layout-preview") {
+            return $inspectionAppearance
+        }
+        #endif
+        return $appearance
+    }
+
     var mainApp: some View {
         TabView(selection: $selectedTab) {
             ExploreView(store: store, nearbyPlaceRequest: $nearbyPlaceRequest,
-                        catalogueState: store.usesAPICatalogue ? catalogue.state : nil,
+                        catalogueState: activeCatalogueState,
                         retryCatalogue: {
                             if catalogue.requestRetry() { catalogueLoadAttempt += 1 }
                         })
@@ -99,7 +145,7 @@ struct ContentView: View {
                 .tabItem { Label("Saved", systemImage: "bookmark") }
                 .tag(1)
 
-            YouView(store: store, appearance: $appearance)
+            YouView(store: store, appearance: appearanceSelection)
                 .tabItem { Label("You", systemImage: "person.crop.circle") }
                 .tag(2)
         }
@@ -112,9 +158,12 @@ struct ContentView: View {
         .sheet(isPresented: $showContributionPreview) {
             ContributionFlow(store: store, source: .currentLocation)
         }
-        .preferredColorScheme(appearance.colorScheme)
+        .preferredColorScheme(appearanceSelection.wrappedValue.colorScheme)
         .task(id: catalogueLoadAttempt) {
             guard store.usesAPICatalogue else { return }
+            #if DEBUG
+            guard case .none = fixedCatalogueInspectionState else { return }
+            #endif
             await catalogue.loadIfNeeded()
         }
         .task {
@@ -131,8 +180,6 @@ struct ContentView: View {
 }
 
 #if DEBUG
-// Developer inspection only: real production views, memory-only data and local
-// accessibility overrides. Does not read/write the user's stored journeys.
 private struct ShapeInspectionView: View {
     let screen: String
     @StateObject private var store = PrototypeStore()

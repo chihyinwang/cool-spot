@@ -4,6 +4,203 @@
 
 ## 本輪狀態與起點
 
+### 2026-10-03：Explore 已採用到正常 App，下一批先評估 Place detail
+
+Owner 接受 Explore 方案並委託改到正常 prototype。起點仍為 Prototyping／8cd00fd；本批是正常 App 採用，不是遠端部署。只操作 prototype、一個 agent；再次確認 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852。安裝前確認沒有未完成表單並備份 app-data；第二次安裝前另備份本輪新收藏，沒有還原／清除資料。
+
+ContentView 的正常與 DEBUG review 現在共用 ExploreView；刪除重複的 Explore inspection view。正常 `cool-spot` scheme 不需 preview flags，仍透過原 URLSession → v5 decoder/mapper → ViewModel/Store 讀本機 API，私人資料保存在裝置。`cool-spot UI Review` 只改成記憶體私人 store，畫面相同；review scheme 留在本機未追蹤，不納入本批 commit。原 owner project／已 staged test plan／shared scheme 不變。普通場所的附近結果、Saved → Explore、Nearby 模擬定位、Save a pin here／Add cooling information 與既有 detail 均保留，沒有 Report/photo/backend 改動。
+
+測試概念與實際 Red：先在舊正常 Run 檢查 accepted panel 的 grabber／Show list／count，因正常 App 尚無該面板而失敗；整合後通過。原生附近搜尋另外抓到返回問題：初始 27 筆 → British Museum 的 1／3 km 結果 → Back／Close／Cancel，地圖回原區域但清單仍是 59 筆。最小修正保存／還原 committed browse region、filter 與 expansion。確認案例改用 AC／展開狀態：完整走完相同流程後仍是 **AC／16 筆／Expanded**，與搜尋前相同；截圖地圖地標／範圍亦一致。這些是實際原生行為 Red／Green，不是 XCTest 或編譯失敗，也沒有製造 loader/model 的 Red。
+
+| 限定驗證範圍 | 實際結果 |
+|---|---|
+| 正常啟動、展開、detail Save／返回、重啟與 Saved tab | accepted Explore 可見；新 Example Community Room 收藏重啟後 Saved，實際從 Saved 找回。 |
+| 普通場所與返回 edge cases | 真實 MapKit British Museum → 1 km → 3 km → Back／Close，query 保留；Cancel 還原原區域／AC／Expanded。 |
+| 原有次要入口 | Nearby 的 Not now 不改 AC 清單；＋ → Add cooling information 開原 Choose a place；Save a pin here → 模擬 Continue → 確認 → Cancel，未新增 Pin。 |
+| 同一 Explore 的失敗／空資料 | DEBUG frozen failed 不顯示零／排序，保留 Try again；loaded empty 才顯示 0、沒有排序文字。這是 rendering 證據，不是 retry／network integration。 |
+
+共 **17 項原生斷言 passed**。Debug 與 Release 使用正常 `cool-spot` scheme、同一 QA simulator，最後修正後均 BUILD SUCCEEDED。Release 的兩個 `will never be executed` warnings 位於此次未改的 init 中 DEBUG false 分支；另有 AppIntents metadata warning。未跑 XCTest suite、未重跑歷史 42 tests、未跑 iPad／尺寸／appearance 矩陣。Coordinate dragging 仍不可用；拖曳回彈手感沿用 owner 本次接受，沒有自稱工具量測通過。Manual map pan → Search this area、You pointer entry、快速 flick／scroll arbitration／全 A–E 與完整 accessibility 仍未驗收。
+
+最後正常啟動無 preview flags，27 in this area 可見。既有 journey 全部保留，只新增一筆本輪 Example Community Room QA bookmark；原 placeDraft.values.features 按既有 Set 語意比較，只有序列化順序不同。其餘 preferences 完全一致；原有 18 個 Documents／Application Support 檔案 bytes 不變。所有 Swift／tests／project／plan／schemes fingerprints 中只有 ContentView、ExploreView 改動；提交前完整 Git index entries 不變。資料備份及完整比對在 Git 外，不輸出私人內容。
+
+實際變更：ContentView.swift 統一路由與 review-only state／appearance；ExploreView.swift 採用 browse/search／panel motion 並保留正常功能及返回上下文；AGENTS／PRODUCT／本 walkthrough 更新現行規則和 A01／A03／A04／A07 路徑。原生證據留本機：[正常 App](.impeccable/review/native-2026-10-03/explore-adoption/02-normal-green.jpg)、[附近 1 km](.impeccable/review/native-2026-10-03/explore-adoption/04-nearby-one-km.jpg)、[返回前](.impeccable/review/native-2026-10-03/explore-adoption/05-context-before.jpg)、[還原](.impeccable/review/native-2026-10-03/explore-adoption/06-context-restored.jpg)、[failure](.impeccable/review/native-2026-10-03/explore-adoption/07-shared-failure.jpg)、[empty](.impeccable/review/native-2026-10-03/explore-adoption/08-shared-empty.jpg)、[17 項結果](.impeccable/review/native-2026-10-03/explore-adoption/native-results.json)。不將未審閱的私人截圖或備份納入 commit。
+
+本批適合 local commit：只提交上述兩個 Swift 與三份文件，不納入 owner project／staged plan／原 shared scheme；不 push、不執行 hooks。下一個最小批次先原生評估 **Place detail（A01／A05／A06）**：半卡能否快速判斷去不去、展開後的來源／空狀態／次要入口層級、Save／Report 資格與返回。先提出三項最值得改善的問題和具體方案，再挑一批；沒有藉此直接重排 detail 或實作 Report backend。
+
+### 2026-10-02：Explore 改版互動預覽的歷史證據
+
+以下記錄當時尚未正常採用的狀態、比較與截圖；當時的 test／owner acceptance 範圍保留。
+
+
+本輪起點：Prototyping／8cd00fd（App 接線 commit 2949b06）。先完整讀取三份 active documents，再檢查 Swift 與原生 UI。只操作 prototype；owner 的 project／已 staged test plan／shared scheme bytes 與完整 index entries 已核對不變。依 owner 要求使用一個 agent、Impeccable 的 native iOS 指引；沒有第二位獨立 reviewer、web detector 或 web mock 驗證。
+
+既有 Cool Spot Contract QA 再確認為 iPhone 17 Pro Max／iOS 26.4／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852。原裝置停在 Home，無進行中的輸入；安裝前完整 app-data 備份至 Git 外。當前 App 編譯成功；以既有 credential-safe runner 恢復本機唯讀 listener，GET 200／v5／253 筆。初次走查未改 Swift；owner 同意繼續後新增的 DEBUG 構圖見下方。未重跑 2026-10-01 的 42 tests 或歷史 suite，未變更 DB／backend／signing。
+
+| 相關 case | 實際觀察 | 設計建議與取捨（Explore 構圖已授權，正式行為尚未實作） |
+|---|---|---|
+| A03 | 搜尋 Canning 後選 Outdoor shade：底部只餘一個範例場所，搜尋仍列 Canning Town Library。source 確認 filteredSpots 套用 filter，searchedSpots 另按場所名稱／地址／Apple identity 找結果。 | 主要問題改判為控制範圍不明，不先判定搜尋必須套 filter。推薦先區分 Browse Cool Spots 與 Find a place：瀏覽 chips 與 Cool Spots 清單成組；搜尋聚焦或有 query 時只呈現場所搜尋，退出再回原瀏覽條件。代價是目前少了搜尋中加 cooling 條件的捷徑；是否另設搜尋後篩選仍待決定。 |
+| A01／A05／A06 | Canning 中型／展開卡與 Saved 入口均有底部 Directions／Saved。四個輔助入口排在 Visitor reports 之前；零 reports 與零 presence 的兩組空狀態／停用按鈕佔大量畫面。GLA · 2025 為 caption，點擊離開 App 開來源頁。 | 後續 detail 批次推薦資訊層級：保留 cooling facts／費用座位／Facilities & accessibility／Place details 的可達性；View nearby streets／Suggest an edit 排後，空狀態收斂，來源年代易讀。取捨是次要入口靠後；不移除事實、不改 eligibility／presence 邏輯。 |
+| A03／A04 | More 無反應。Search this area 只消失，253 places 與清單順序不變，與 source 的空 action 相符。 | 未接通的 controls 暫不呈現，避免承諾沒有發生的操作；代價是展示較少功能。這項建議未獲 owner 批准，不擴張成 GPS／附近服務。 |
+
+Owner feedback，2026-10-02：保留 **Publish report** 與未來公開回報的產品方向。Owner 明確否決改叫 Save report 及在這批加入本機限定提示；已從待選事項與 UI 改動規劃移除。未接 Report API 是實作階段，不足以判定產品命名錯誤。後端尚未完成的事實仍照實記錄在文件與示範證據範圍，沒有改成聲稱已遠端發布。
+
+D01／D02／D07 的局部證據：正常模式 Canning 與 Idea Store Bow 無 nearby eligibility，Share how it felt 停用；Why can’t I share? 解釋確認造訪與後續 You → Your reports；Your reports 目前空。同一 App 的 memory-only report-required 預覽觀察三選一必填、選填區、Finish later；本次逐步截圖選 Much cooler 後 Publish report 啟用，按下後看到 Thanks for the update／Report saved on this device.，例子只存在記憶體。不以預覽當作正常模式續填／重啟／遠端發布或 backend 證據。
+
+Save 互動：原 Canning 收藏／私人 editor 僅閱讀並 Cancel；沒有修改舊 note。Tate 明確範例原本未收藏，本輪 Save 即變 Saved，再只移除本輪新加、無 note 的 QA bookmark，回到 Save。QA 結束已回正常 API 啟動；原始 saved places／notes、reports／drafts／confirmations／nearby IDs／presence deadline／popsicle preferences 均與備份相同。既有 18 個 Documents／Application Support 檔案 bytes 未變。journey JSON 僅因原提案 features 為 Set 而有序列化順序差異，按集合語意正規化後整份 journey 一致；未還原或覆寫 owner 資料。
+
+原生截圖：[Explore 的篩選矛盾](.impeccable/review/native-2026-10-02/explore-filter.png)、[Place detail 的層級](.impeccable/review/native-2026-10-02/place-detail.png)、[Report 的記憶體預覽](.impeccable/review/native-2026-10-02/report-preview.png)。這些是現況證據，不是重新設計成果或 owner UX 驗收。沒有 iPad／多尺寸／Dynamic Type／appearance 矩陣、真實 GPS、Report publication、照片傳送或效能驗證。
+
+最初的 DEBUG 固定構圖（本輪較早證據）：ContentView.swift 的 `--explore-layout-preview`／`--preview-search` 原先固定 AC／Canning，篩選、Clear、Cancel、結果導向沒有 action。使用實際 API／MapKit、memory-only personal store，只有清單捲動／鍵盤證據；當時編譯與資料／staging 保護檢查通過，沒有 tests／commit。這些舊圖不是下方可操作改版的驗收：[固定 Browse](.impeccable/review/native-2026-10-02/explore-browse-proposal.jpg)、[長名稱](.impeccable/review/native-2026-10-02/explore-browse-long-name-proposal.jpg)、[固定 Search](.impeccable/review/native-2026-10-02/explore-search-proposal.jpg)。初稿地圖過遠／底板透明問題已在當時修正；SF semantic styles、teal/mint 與 spacing tokens 保留。
+
+Owner 追問初始狀態／列表入口／排序後，重新檢查 source：正常冷啟動 query 空白、filter nil、camera 固定在 London；API loaded 非空後，底下已呈現整份目錄的橫向卡片。API 的 `loadCoolSpotRows` 按 `c.id` 排序，response／mapper／store／Explore／DEBUG 構圖維持該順序。這是固定 ID 順序，不是距離、字母、熱門或降溫推薦。最初 DEBUG Browse 構圖固定 AC 並呈現較高的直向清單，當時沒有實作或先定義初始收合／展開入口；因此不能當成定案首頁。上一稿先處理排版，漏了應先定義的結果範圍與排序，兩者需先補齊再進正式行為批次。
+
+比較證據，2026-10-02：同一 Contract QA／iOS 26.4 原生查看 Apple Maps 首次啟動；選 Don’t Allow，不啟用定位；notifications 選 Not Now。此無定位初始卡片顯示 Places／Home／Work／Add／Your Guides，未自動列出全區場所。點搜尋出現 Find Nearby 分類；點 Restaurants 後出現結果與 Open Now／Top Rated／All Cuisines 等 filters。排序選單目前為 Best Match／Ratings，未選換排序，不推測完整演算法或其他地區／定位狀態的可用選項。[初始畫面](.impeccable/review/native-2026-10-02/apple-maps-initial-no-location.jpg)、[空白搜尋](.impeccable/review/native-2026-10-02/apple-maps-empty-search.jpg)、[分類結果與 filters](.impeccable/review/native-2026-10-02/apple-maps-category-results.jpg)、[排序選單](.impeccable/review/native-2026-10-02/apple-maps-sort-no-location.jpg)。Google 只核對官方 iOS [附近探索](https://support.google.com/maps/answer/4610185?co=GENIE.Platform%3DiOS&hl=en)與[搜尋說明](https://support.google.com/maps/answer/3092445?co=GENIE.Platform%3DiOS&hl=en)：搜尋欄下分類入口可發起搜尋，結果可加 filters，local results 綜合 relevance／distance／prominence；沒有 Google 原生或首頁逐屏證據。分類搜尋入口和篩選目前結果的屬性 controls 需區分。Apple 比較後返回正常 Cool Spot Explore；Cool Spot journey／preferences 與 owner 檔案／index 均再次核對不變。本次沒有 Swift 改動、build 或新 tests。
+
+修正推薦（已轉為下方 DEBUG 互動方案供 owner 決定；正常 App 規則與正式 Swift 尚未變更）：Cool Spot 初始保持地圖為主，未選 AC 等 filter；收合的探索面板只呈現目前探索區域的 count／filters／一筆場所預覽。首次無定位可沿用 London 但標清區域，將來有效且已授權的定位可作起點，不將固定座標當成使用者位置。展開面板後呈現直向列表，AC 等條件篩選該探索區域；剛才 Browse 圖應用於此展開狀態，資料範圍與排序仍需改。地圖與列表使用同一已確認探索範圍，依離該地圖中心的直線距離近到遠，同距離用名稱／ID 穩定排序；不把直線距離當步行時間。展開面板不改探索範圍或排序；移動地圖後 Search this area 才更新結果與 count，避免列表在閱讀時跳動。這個 action 在正常 Explore 仍未接通；下方 DEBUG 已有本機區域 action，但原生拖動／刷新尚未驗證。全部 253 筆已在記憶體，區域篩選／距離計算可在 Swift 做，不需要為此變更 API、DB 或部署。取捨是初始較少場所露出，換取更多地圖空間與清楚區域關係；Cool Spot 任務較集中，因此建議保留一筆有用預覽，而非直接照抄 Maps 的個人捷徑首頁。若採此方向，需要先定義 Browse 範圍／排序／初始面板，才能開始後續 A03 TDD。
+
+Owner 要求先確認逐步截圖、再改 code：本次只走查既有正常 API App 與既有隔離 Report preview，沒有 Swift／tests 改動、build 或重新安裝。完整截圖順序：
+
+| 步驟 | 原生操作／觀察 | 截圖 |
+|---|---|---|
+| 01／A01 | 正常冷啟動；未選 filter，底部全目錄 253 places，ID 順序。 | [初始 Explore](.impeccable/review/native-2026-10-02/journey/01-explore-initial.jpg) |
+| 02／A03 | 選 AC；全目錄 136 places，尚非地圖區域範圍。 | [AC](.impeccable/review/native-2026-10-02/journey/02-ac-filter.jpg) |
+| 03／A03／A05 | 點空白搜尋；keyboard 出現，但 browse chips／清單仍在；未手動移動地圖卻出現 Search this area。 | [空白搜尋](.impeccable/review/native-2026-10-02/journey/03-search-focused-empty.jpg) |
+| 04／A05 | 輸入 Idea Store Bow；GLA 與 MapKit 有兩筆同名結果／不同地址資料，尚無足以接受配對的 identity，未合併。 | [輸入結果](.impeccable/review/native-2026-10-02/journey/04-search-typed.jpg) |
+| 05／A03／A05 | 按鍵盤 Search；keyboard 收起但 query 仍在，136 筆 browse 清單又與結果並置。 | [提交搜尋](.impeccable/review/native-2026-10-02/journey/05-search-submitted.jpg) |
+| 06／A01 | 選第一筆 GLA Idea Store Bow；中型詳情卡。 | [中型詳情](.impeccable/review/native-2026-10-02/journey/06-place-detail-medium.jpg) |
+| 07／A01 | 點 Sheet Grabber 展開；主要 facts、次要入口、空 reports／presence 區塊。 | [展開詳情](.impeccable/review/native-2026-10-02/journey/07-place-detail-expanded.jpg) |
+| 08／A06 | 原本未收藏的 Idea Store Bow 按 Save → Saved。 | [收藏回饋](.impeccable/review/native-2026-10-02/journey/08-place-saved.jpg) |
+| 09／D01 | Share how it felt 停用；按 Why can’t I share? 查看資格說明。 | [Report 資格](.impeccable/review/native-2026-10-02/journey/09-report-eligibility.jpg) |
+| 10／A06 | 關閉說明／詳情、點 Saved；新收藏可見。 | [Saved 清單](.impeccable/review/native-2026-10-02/journey/10-saved-list.jpg) |
+| 11／D02 | 另啟動既有 --shape-preview report-required；Riverside Library 是隔離 fixture，未選必填答案，Publish report 停用。 | [QA 初始表單](.impeccable/review/native-2026-10-02/journey/11-report-required-qa.jpg) |
+| 12／D02 | QA 選 Much cooler；選取狀態與 Publish report 啟用。 | [QA 選取](.impeccable/review/native-2026-10-02/journey/12-report-choice-qa.jpg) |
+| 13／D07 | 只提交記憶體 fixture；完成頁的既有本機說明保留，沒有真實回報／上傳。 | [QA 完成](.impeccable/review/native-2026-10-02/journey/13-report-complete-qa.jpg) |
+
+只移除本輪新增、沒有 note 的 Idea Store Bow 收藏，Saved 回到原 Canning；未修改原 note／report／photo／settings。完整 app-data 備份在 Git 外；既有 18 個 Documents／Application Support files bytes 相同，journey 只按既有 placeDraft features 的 Set 語意正規化後完整一致，其餘 preferences 不變。所有 Swift／tests 與 owner project／test plan／shared scheme fingerprints 不變、完整 Git index entries 不變。結束恢復正常 API Explore（253 places）。新增的 13 張是現況證據，不是推薦方案已完成或 owner 已驗收；收合首頁、範圍／排序、搜尋狀態切換仍待確認。未 commit／push。
+
+Owner 委託補齊改版 flow 後：只擴充 ContentView.swift 的 DEBUG 互動 inspection，不改 ExploreView、mainApp、核心 Store／loader／mapper／search model、tests、backend 或 project membership。公開資料沿用真實 v5 API 與原 PlaceSearchModel；`PrototypeStore(reportDefaults: nil, catalogueMode: .api)` 不讀寫私人 journey，Save 只存在此次記憶體。原有 detail／Report eligibility 保留，不把 Save 當造訪，不改 Publish report、不加入本機限定文案、不捏造照片或 reports。
+
+Browse 的 compact／expanded 共用同一 committed region 和結果，單選 filter 對該區域生效。結果依距離地圖中心的直線距離、名稱／ID 排序，明示 Closest to map centre，不聲稱離使用者最近或步行時間。初始 London view 在此次實際資料／裝置得到 27 筆、AC 16 筆，這些是觀察值，非寫死產品 count。搜尋狀態與鍵盤 focus 分開：空白／空白字元仍找場所，按 Search 只收起鍵盤；Clear 留在搜尋；Cancel 還原 filter、展開狀態及 camera。搜尋不受 browse 的 AC filter 限制；GLA 與普通 Apple Maps 結果保持來源／cooling information 差別，沿用接受過的 identity 配對，不模糊合併。
+
+| 改版步驟 | 原生操作／實際觀察 | 截圖 |
+|---|---|---|
+| 01／A01 | 未操作，All／收合面板、27 in this area、一筆帶 Example 標記的預覽。 | [改版初始](.impeccable/review/native-2026-10-02/explore-flow/01-initial-collapsed.jpg) |
+| 02／A01 | Show list；27 筆直向列表，同範圍／排序，地址與來源可讀。 | [展開列表](.impeccable/review/native-2026-10-02/explore-flow/02-list-expanded.jpg) |
+| 03／A03 | AC；16 in this area · AC，John Harvard Library 等按地圖中心距離顯示。 | [區域 AC](.impeccable/review/native-2026-10-02/explore-flow/03-ac-filter.jpg) |
+| 04／A05 | 點搜尋；空白 Find a place／原生 keyboard，沒有 browse filters 或列表。 | [空白搜尋](.impeccable/review/native-2026-10-02/explore-flow/04-search-empty.jpg) |
+| 05／A05 | Canning；真正 GLA Canning Town Library 與 Apple Maps Canning Town、來源區分。 | [輸入搜尋](.impeccable/review/native-2026-10-02/explore-flow/05-search-typed.jpg) |
+| 06／A05 | 按 keyboard Search；query／結果維持，不重現 browse。 | [收起鍵盤](.impeccable/review/native-2026-10-02/explore-flow/06-search-keyboard-dismissed.jpg) |
+| 07／A01 | 選 Canning Town Library；沿用原中型 detail，map focus 該 place。 | [Place detail](.impeccable/review/native-2026-10-02/explore-flow/07-place-detail.jpg) |
+| 08／A06 | Save → Saved；此操作只新增 memory bookmark。 | [Save 回饋](.impeccable/review/native-2026-10-02/explore-flow/08-place-saved.jpg) |
+| 09／A05 | 關閉 detail；回到相同 Canning query／兩種來源結果，keyboard 收起。 | [回搜尋](.impeccable/review/native-2026-10-02/explore-flow/09-return-to-search.jpg) |
+| 10／A05 | Clear search；query 清空／keyboard 出現，維持找場所。 | [Clear](.impeccable/review/native-2026-10-02/explore-flow/10-clear-stays-searching.jpg) |
+| 11／A03／A05 | Cancel；AC／16 筆／展開列表／原 map context 還原，沒有誤出的 Search this area。 | [Cancel 還原](.impeccable/review/native-2026-10-02/explore-flow/11-cancel-restores-browse.jpg) |
+
+原生修正證據：第一次互動發現 keyboard／tab bar 尺寸改變會移動 map camera，誤觸發 Search this area；固定 canvas 與只還原 region 仍有漂移。最終將 browse Map 與 search layout 分開生命週期，保留原 camera position。以上 03／11 的河流、地標與範圍前後比對通過；地圖 annotation collision 繪製不保證逐 pixel 相同。現有 MapKit result 配對仍可能讓未接受的同名地方並列，沒有趁此編造 identity。
+
+驗證概念／edge cases：初始區域與 filter／排序一致；keyboard 收起不等於退出搜尋；detail 往返回原 query；Clear 與 Cancel 不同；Cancel 保留 browse context。上述 11 步有原生證據；只有空白字元、快速 query replacement／晚到 callback、API failure／合法 empty 與區域無結果尚未新做 native scenario。最後 source check 分開 No Cool Spots available（整份 API 空）與 No Cool Spots match in this area（區域／filter 空）；編譯成功，最後修正已隨最新 build 安裝；2026-10-03 00:02 正常 API 啟動仍見 253 places，但未另外原生執行 empty 場景，不能列為 native pass。早前首次 compile error 為 associated-value State 不支援直接 == .loaded，改用 if case，這是 compile repair，不是 TDD behavioral Red。DEBUG 最新 build 成功；未新增 unit tests／未重跑歷史 42 tests，這個可丟棄構圖不作正式 TDD Green。
+
+工具限制：native accessibility-index actions 與 screenshots 可用，但 coordinate click／drag 回傳 noWindowsAvailable；重新綁定及重建一次連線仍失敗。Saved tab 的新 bookmark 找回、A04 manual pan → Search this area → count／排序更新未通過本輪原生驗證；不要用 source 或固定 route 替代。失敗沒有觸及其他 simulator／owner 資料。Detail／Report 仍是原有資訊設計，尚未作下一批重排。
+
+安裝前完整 app-data 備份在 Git 外；最後已恢復正常 API App，253 places 可見。完整私人 preferences/journey 只按原 placeDraft features 的 Set 語意正規化後一致；既有 18 個 Documents／Application Support files bytes 不變，沒有以備份覆寫資料。所有 Swift／tests／owner project/test-plan/shared scheme fingerprints 只有 ContentView.swift 改動；normal mainApp 內容不變、完整 index entries 不變。這批實際檔案為 ContentView.swift、AGENTS／PRODUCT／本 walkthrough 及 11 張原生 jpg，沒有新 progress 文件。未 commit／push；先讓 owner 看改版流程後才決定正式採用與下一個最小批次。
+
+正式 A03 搜尋狀態的推薦 cases 保留；DEBUG 局部原生證據如上，不等於正式實作或 owner 驗收：
+
+| 邊界 | 推薦結果與目的 |
+|---|---|
+| 聚焦但空白／只有空白字元 | 維持找場所狀態；不把 browse chips／全目錄混進結果。 |
+| 有 query，按鍵盤 Search 或收起鍵盤 | 維持同一搜尋結果，不因 focus 消失而重現無關的全目錄。 |
+| Clear 與 Cancel | Clear 清除輸入但保留搜尋；Cancel 退出搜尋、取消 pending search 並還原原 browse filter。 |
+| 選場所、關閉 detail、再 Cancel | 回到原 query／結果，再退出時仍恢復先前 filter；不因搜尋而默默修改條件。 |
+| Cancel 後舊請求晚到／loading、empty、failure | 過期搜尋不能重新打開結果；沿用既有 search cancellation 與 catalogue 狀態，不加自動 retry 或 fallback。 |
+
+行為批次依 owner grouped TDD override：一批解釋相關 cases、agent 寫有價值的 tests/helpers 並驗證 Red，再提供完整最小 Green 由 owner 輸入；未獲委託不代寫核心 Green。不要為驗證兩個 SwiftUI 可見條件硬造無用途狀態 model 或鏡像 tests。先定義初始探索範圍／排序，再決定實際最小測試介面。完成此批選定旅程與 owner feedback 後才做 detail 的資訊構圖，核對長名稱、未知 facts、零／有 reports、Save／Saved、中型／展開卡與返回；之後才擴展 Report、Saved／You，不一次重做全部 App。
+
+研究依據：[Apple typography](https://developer.apple.com/design/human-interface-guidelines/typography)、[Apple buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)、[Apple UI design tips](https://developer.apple.com/design/tips/)、[NN/G visual hierarchy](https://www.nngroup.com/articles/principles-visual-design/)、[NN/G usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)。保留 SF／teal-mint／native navigation；字級以語意 styles 與 Dynamic Type 為準，44 pt 點擊區。沿用既有 4／8／12／16／24 spacing 語彙與 20 pt page inset 作起點；不是聲稱數值是普遍最佳，也沒有完成 accessibility audit。示意照片不升格成真實環境證據。 [Google Maps 的 iOS 官方搜尋說明](https://support.google.com/maps/answer/3092445?co=GENIE.Platform%3DiOS&hl=en)有場所類型搜尋後的 filters；[Apple Maps 官方附近探索說明](https://support.apple.com/en-au/guide/iphone/iphbaf51b2c0/ios)則區分打字與附近分類。這些資料支持任務／狀態區分，未證明 Cool Spot 必須採用相同 UI。以上來源用來支持設計取捨；本批有原生構圖與 Apple Maps 無定位比較證據，沒有新的自動化 tests 或 Google App 原生走查。目標職缺是 [Ashby Design Engineer – UK](https://jobs.ashbyhq.com/Ashby/cb45928e-c7c7-4163-84d0-a962755a3593)，此案例應呈現問題、取捨、可重用元件與實際交付，而不只美化截圖；SwiftUI 案例本身不替代該職缺的 TypeScript／React／CSS 能力證據。
+
+### 2026-10-03：Explore 方向初步接受，保留系統導航
+
+Owner 看過改版 11 步後表示「還行」、其他暫無意見，並委託 agent 以專業判斷決定 UI；這是設計方向的初步接受，不是 A–E 全套驗收或核心 Green 委託。Owner 提問原膠囊 tab bar 與新版滿版底部的差異。核對附圖、既有原生截圖及 Swift：正常／DEBUG 都使用 TabView，原生證據都來自同一 Contract QA／iOS 26.4；新版結果面板的 opaque systemBackground 與下方背景接成白色區塊，使原生膠囊輪廓較不明顯，沒有另造滿版 tab bar。
+
+導航推薦（同日 owner 再貼三張截圖後修正）：保留 Explore／Saved／You 三個原生入口。Explore 支持即時找場所，Saved 支持收藏／私人 Pin 找回，You 還負責待續填／已發布回報及提案狀態，不等同帳戶設定。結果面板到下方安全區使用連續 semantic background，不在結果與 tab bar 間露出一條地圖；內容與導航的角色用標題、間距、native selection／elevation 區分。上一輪把背景融合直接當作缺陷的判斷收回：連續底色本身可改善 owner 指出的切開感，不需為彰顯膠囊額外製造地圖縫隙。保留 iOS 26 系統浮動 Liquid Glass、較舊版本的系統樣式，不自畫滿版 bar／膠囊。保留 native safe area，不能讓列尾／按鈕被導航遮住。既有 01-initial-collapsed 原生圖作結構參考，沒有本輪新 UI 改動或 native acceptance。Apple Maps／Google Maps 截圖只證明那些畫面的結構，沒有證明 Cool Spot 使用者偏好。[Apple tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars)支持 top-level destinations 與 context preservation；[Apple SwiftUI 新設計說明](https://developer.apple.com/videos/play/wwdc2025/323/)說明 iPhone tab bar 浮在內容上方，系統材料依底下內容調整。
+
+較早的導航評估只改 PRODUCT／AGENTS／本 walkthrough，記錄 owner feedback 與視覺決定；該次 Swift／tests 不變，未 build／安裝／操作 simulator、未新增原生驗證。全部 40 個 A–E IDs／順序與 Git index 不變。未 commit／push。下一個最小視覺工作以連續底部背景為基礎，只檢查收合／展開結果與 native tab bar 的間距、安全區及遮擋，不另切開背景。正式 Explore 行為仍按既有 grouped Red → owner-written Green，Place detail／Report 尚未改版。推薦驗證 A01／A03／A06 與 D03／D05：收藏一鍵找回；切回 Explore 保留 query/filter/camera/list；Finish later 後從 You 找回，未登入／API failure 仍可讀本機草稿。這些是推薦 checks，不是本輪通過紀錄。導航決定不更改 Place/Cool Spot IDs、API 契約、私人 persistence 或未完成的 Report backend。
+
+#### 把手與拖動互動預覽，2026-10-03
+
+Owner 指出新圖沒有灰色橫線，要求結果面板能滑動互動。source 確認正常 NearbyPanel 的灰線原先只是 Capsule，沒有 DragGesture；不能因舊圖有 affordance 就當作已完成行為。這批只補 ContentView.swift 的 DEBUG Explore inspection，正常 Explore／mainApp、Store／API／search model、tests、project membership 都未改。
+
+實際 code：新增 panelDragTranslation GestureState（取消手勢會回初始值）與 compactRowHeight；以實際首列 geometry 決定收合內容高度，不固定文字高度。Header 有灰色把手、44 pt tap target、Collapsed／Expanded accessibility value 與 adjustable action；Show list／Show map 保留。DragGesture 限把手／標題區，minimumDistance 12、global coordinate，忽略主要水平移動，拖動期間內容高度夾在兩個停靠值內；放手依 predictedEndTranslation 選停靠位置。Expanded content 沿用 ScrollView，手勢沒有掛到整張列表或 Map。此次只做 compact／expanded 兩段，不加全螢幕第三段、Swipe-to-dismiss、GPS 或新 backend。Loading／empty／無區域結果沒有可展開列表，因此不呈現誤導的把手／Show list。
+
+| 相關 case／驗證概念 | 實際證據與限制 |
+|---|---|
+| A01／A03：把手與兩種停靠狀態 | [灰線／收合](.impeccable/review/native-2026-10-03/panel/01-collapsed-grabber.jpg) → native accessibility button click 把手 → [展開](.impeccable/review/native-2026-10-03/panel/02-expanded-grabber.jpg)；value 由 Collapsed 變 Expanded，Show list 變 Show map。Show map 點按還原收合。這是 tap 操作，不是 drag pass。 |
+| A03：filter／文字高度／結果範圍 | [AC 收合](.impeccable/review/native-2026-10-03/panel/03-collapsed-ac.jpg)顯示 16 in this area · AC；John Harvard Library 名稱、地址、GLA · 2025 可讀，沒有誤出的 Search this area。沒有跑字級／多尺寸矩陣。 |
+| A05：搜尋往返 | native 點搜尋、keyboard 出現，再 Cancel；[返回面板](.impeccable/review/native-2026-10-03/panel/04-search-cancel-restores-panel.jpg)保留 AC／16 筆／Collapsed／Show list／原地圖 context。工具 initially 以 Description: Cancel 比對失敗；實際控制項為 button Cancel，重新讀取 AX 後正常關閉，未改產品 code。 |
+| 拖動／捲動／重要 edge cases | normal panel pointer drag 與新版 list scroll 都回 noWindowsAvailable，無法驗證跟手與 list arbitration。短拖返回、快速上下甩、水平拖不 resize、gesture interruption、VoiceOver 實際朗讀／adjust、列表末列不遮擋均待真人或恢復原生工具後確認；不能由 screenshot／code 宣稱通過。 |
+
+Debug build 成功。首次 compile failure 是 helper 加入局部 let 後少 explicit return，已修正；不是 TDD behavioral Red。未新增 unit tests／未重跑 42 tests：這是已委託的可丟棄 DEBUG 互動設計，不開始正式 Explore core Green。核心行為正式採用仍依 grouped TDD override。
+
+再次確認只用 Contract QA／iPhone 17 Pro Max／iOS 26.4／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852。安裝前 app 停在正常 Explore、沒有進行中輸入；完整 app-data／source／owner project／staging 在 Git 外備份。GET 200／v5／253 筆，未修改 listener／DB。結束恢復正常 API App，253 places 可見；18 個私人檔案 bytes 一致，完整 preferences/journey 只按既有 placeDraft features Set 語意正規化後一致，沒有覆寫／還原私人資料。Full index entries 與 owner project/test-plan/shared schemes fingerprints 不變；所有 Swift／tests fingerprint 只有 ContentView.swift 改動。實際本批檔案：ContentView.swift、AGENTS／PRODUCT／本 walkthrough、四張 jpg。未 commit／push；沒有新 progress 文件或另一 checkout 改動。
+
+需要真人拖動時，用下方明確命名的 UI Review 入口在相同 QA 裝置試把手上拉／下拉；正式 A–E persistence 走查用正常 cool-spot scheme。不要在正常 App 的裝飾灰線上要求 owner 驗證新手勢，也不要把 memory-only preview 當正常模式。
+
+#### Xcode 互動預覽入口，2026-10-03
+
+Owner 詢問一般 Xcode Run 與 Terminal 啟動的差別，要求把新版本放進 Xcode。兩者使用同一份 prototype App／Swift；先前 simctl 命令多了 --explore-layout-preview，並非另一份 checkout 或另一個 Release 版本。這批新增 shared [cool-spot UI Review.xcscheme](cool-spot.xcodeproj/xcshareddata/xcschemes/cool-spot%20UI%20Review.xcscheme)，只用 Debug Run 的 enabled --explore-layout-preview 打開已完成的互動 inspection；TestAction 的 shouldUseLaunchSchemeArgsEnv 為 NO，不讓測試繼承此 Run argument。正常 cool-spot scheme、owner project／staged test plan／原 shared scheme 內容與 staging 保留。沒有改 Swift／tests／核心 Green，沒有製造 Red 或重跑 42 tests。
+
+Xcode 開啟的是 /Users/chihyinwang/Desktop/cool-spot-prototype/cool-spot.xcodeproj；scheme 已選 cool-spot UI Review，destination 已選 Contract QA／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852。Xcode 起初未即時讀到磁碟新增的 scheme，因此最後用原生 Duplicate 建立並配置；只保留一個 UI Review scheme，未改原 scheme。原先另一台 simulator 的 debugger 用原生 process Detach 解除，沒有按 Stop。之後實際從 Xcode 按 Run，Activity 顯示 Running cool-spot on Cool Spot Contract QA。
+
+驗證概念／edge cases：XML 確認只在 Debug Run 啟用 preview、TestAction 不繼承 argument、兩個 scheme 都可辨識；xcodebuild 使用新 scheme 與指定 QA destination 編譯成功，沒有 warning／error；實際 Xcode Run 出現 Collapsed 把手、Show list、All、27 in this area／Closest to map centre、清楚標示的 Example cooling info。GET 200／v5／253 筆；27 是當時 map region 的結果，不是整份 API 數量。原生 [Xcode scheme／destination／Run 證據](.impeccable/review/native-2026-10-03/xcode/01-ui-review-scheme.jpg)與 [實際 Run 畫面](.impeccable/review/native-2026-10-03/xcode/02-xcode-run-preview.jpg)。這批沒有再次驗證拖動／scroll arbitration／Report；先前的 native tool 限制仍有效。
+
+QA Run 前沒有進行中輸入，完整 app data／fingerprints／Git index 備份在 Git 外；完成後 18 個 Documents／Application Support 私人檔案 bytes 一致，完整 preferences／journey 值直接相等（無需 features 順序正規化）。全部已備份 Swift／tests、owner project／test-plan／原 scheme fingerprints 與完整 Git index 相同；40 個 A–E IDs／順序、active local links 與 git diff --check 通過。此時依 owner 的明確 Xcode review 請求，刻意留下新預覽可供操作；收藏／筆記等預覽操作不保存至裝置，不能當作正常 persistence 驗收。要回正常 App：Xcode toolbar 選 cool-spot，destination 仍用 Contract QA，再 Run。下一步是 owner 實際確認把手上拉／下拉及列表捲動，再依原 grouped TDD 決定正式 Explore 採用；不是本批自動實作正式 Green。只更新新 scheme、既有 AGENTS／PRODUCT／本 walkthrough 及兩張 native jpg，未 commit／push。
+
+#### 載入狀態摘要修正與手勢說明，2026-10-03
+
+Owner 的實機截圖停在 Couldn’t load Cool Spots，卻有 0 in this area／Closest to map centre；owner 明確委託修正這個誤導摘要，並詢問 Explore 與 Detail 的拖動差異。實機使用 127.0.0.1 會指向手機自己，而 API 在 Mac；本批沒有更改 endpoint／listener／網路權限，不能宣稱實機 API 已接通。正常 API mode 沒有 bundled fallback。
+
+手勢 source：DEBUG Explore 用 header-only DragGesture、min/max 夾住內容高度、predictedEndTranslation 選停靠值與 0.25 s .snappy；Detail 用 native .sheet／medium + large／presentationContentInteraction(.resizes)，其內容另有 ScrollView。QA 開啟同一個 Example Community Room detail，AX 實際辨識 Sheet Grabber／Half screen；返回 Explore 是 inspectionPanelGrabber／Collapsed。這是元件證據，不是實際拖動／回彈通過。整張 sheet 的回彈與 ScrollView 內容越界回彈不同；owner 描述尚不足以排除持續 jitter，未改兩者動畫或手勢。現行把手綁 loaded + nonempty 是為了只展開列表的預覽選擇，不是 HIG 強制規則。推薦未來按面板是否有可用停靠高度決定 resize，按資料可用性決定清單／排序；需同時保留 Explore／Saved／You 導航與地圖互動，不能直接換 detail sheet 就宣稱 UX 完成。
+
+本批範圍：ContentView.swift 的 DEBUG header 顯示條件與必要渲染 helpers；Core Store／ViewModel／API／normal mainApp／Place detail／Report／photos／project／test plan／scheme 均未改。--preview-catalogue-state idle、loading、failed、empty 只在 --explore-layout-preview 有作用，使用 memory-only API-mode store、固定 ViewModel state inputs 並略過請求；沒有合成 Cool Spot 資料或新增 fallback。這是單一裝置的 UI 渲染測試 helper，固定 failure 的 Try again 不拿來驗證 retry。普通 UI Review 不帶該 flag，仍讀真實 API。
+
+相關 A01／A03 的原生顯示 checks，使用 [assert-summary.js](.impeccable/review/native-2026-10-03/catalogue-summary/assert-summary.js) 的 AX assertions；不讀 Swift source 作斷言，也不另外抽 model 重複 if 條件。先寫 helper／檢查、只建置 QA support，尚未修正 header 時，[Red 畫面](.impeccable/review/native-2026-10-03/catalogue-summary/01-red-failed.jpg)實際同時有 failure／0／排序；assertion 因 Failure incorrectly claims a known place count 失敗。此 Red 是原生 UI assertion，並非 XCTest suite 或 compile failure。執行環境禁止 eval 字串，因此 helper 在 cua_repl 直接定義後執行；未把工具拒絕算作 Red。
+
+| 渲染情境／edge case | 修正後實際結果 |
+|---|---|
+| failure | [原生畫面](.impeccable/review/native-2026-10-03/catalogue-summary/02-green-failed.jpg)保留錯誤／Try again，不宣稱數量或排序；passed。 |
+| idle／loading | loading UI 保留，兩個情境均沒有數量／排序；[loading 原生畫面](.impeccable/review/native-2026-10-03/catalogue-summary/03-green-loading.jpg)；2 passed。 |
+| 成功 empty | [原生畫面](.impeccable/review/native-2026-10-03/catalogue-summary/04-green-empty.jpg)有 No Cool Spots available 與合法的 0，不顯示空列表的排序；passed。這是固定成功空清單輸入，不是 API 真回 0。 |
+| 真實 API loaded | [原生畫面](.impeccable/review/native-2026-10-03/catalogue-summary/05-green-loaded.jpg)有 27 in this area／Closest to map centre／Collapsed 把手／Show list；passed。27 是當時 map region 範圍，不是 API 全部筆數。 |
+
+兩次 Debug build 成功；唯一 warning 是沒有 AppIntents.framework 的 metadata extraction skip。實際 UI checks 為 5 passed；沒有新增 XCTest／重跑歷史 42 tests。五個 check 的重點是區分「未知」「已知零」「有可排序結果」，不表示 gesture physics、retry integration、remote API 或整體 UX 驗收。實際 helper／Red／Green AX 與截圖存在 .impeccable/review/native-2026-10-03/catalogue-summary；沒有 browser mock。目前實作摘要：if catalogueIsLoaded 才畫 count，沿用 loaded + nonempty 的 canResize 才畫 ordering。
+
+只用已確認的 Cool Spot Contract QA／iPhone 17 Pro Max／iOS 26.4／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852；QA 安裝前停在正常 Explore，沒有私人輸入。完整 app data／原有 Swift／tests／schemes／Git index 在 Git 外備份；完成後[原生確認已恢復正常 API mode](.impeccable/review/native-2026-10-03/catalogue-summary/06-normal-restored.jpg)，畫面有 253 places。18 個 Documents／Application Support 私人檔案 bytes 一致，完整 preferences 值直接相等；除本批 ContentView 與三個既有文件外，所有已備份 Swift／tests、owner project／test plan／全部 schemes fingerprints 不變，完整 Git index 相同。40 個 A–E IDs／順序、active local links 與 git diff --check 通過。更新檔案為 ContentView.swift、assert-summary.js、原生證據、既有 AGENTS／PRODUCT／本 walkthrough。沒有另一 checkout 操作、新 progress 文件、commit／push／deploy。本批結束時尚未改 rebound；owner 後續已澄清是整張 sheet 停靠回彈，下一個 DEBUG motion batch 的實際結果記錄於下節。
+
+#### 原生 sheet 比較與頁內面板停靠，2026-10-03
+
+Owner 明確要求保留 Explore／Saved／You 直接入口，委託先做 DEBUG 比較並由 agent 判斷；允許改善自寫面板的動畫／UI。Owner 補充的 50 → 30 → 45 → 35 → 40 是整張 sheet 停靠時衰減的 rebound，並非卡內捲動。Detail 的 presentation 未改。本批是 disposable inspection，不是正式 Explore 核心 Green；没有製造動畫單元測試或假稱已驗證 spring physics。
+
+先確認 Prototyping／8cd00fd、owner dirty/staged 狀態、Contract QA／iPhone 17 Pro Max／iOS 26.4／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852。QA 原本在正常 Explore／253 places，沒有待保存輸入；完整 app data／Swift／tests／docs／project／test-plan／全部 schemes fingerprints 與 full index 在 Git 外備份。其他 booted simulator 只出現在 inventory／首次唯讀視窗辨識；所有 app 操作與安裝均在 Contract QA。
+
+原生比較只加在 ContentView.swift 的 DEBUG inspection：`--explore-layout-preview --preview-native-panel`，260／560-pt native detents、visible system grabber、background interaction enabled、interactive dismissal disabled。點 Show list 確實到另一高度；[收合](.impeccable/review/native-2026-10-03/panel-motion/01-native-sheet-compact.jpg)與[展開](.impeccable/review/native-2026-10-03/panel-motion/02-native-sheet-expanded.jpg)都覆蓋三個底部入口，故拒絕直接替換。AX 仍列 Tab Bar 不代表入口可見／可點；本決定依實際 screenshot，不宣稱所有 native container 架構都不可能。比較 flag 保留供研究，default UI Review 不啟用它。
+
+採用的預覽方向：原生 tabs ＋頁內面板。ContentView.swift 的單一 drag-height state 與 onEnded 同步設定 resting height／清理 transient state；新 drag 從量測 rendered height 起算，邊界阻力漸增且 overdrag 小於 24 pt，依 predictedEndTranslation 選 compact／expanded，SwiftUI spring response 0.34／dampingFraction 0.84／blendDuration 0.10。Reduce Motion 關閉 overdrag 並用 0.15 s ease-out；只有源碼分支檢查，沒有更改裝置設定或跑 appearance／accessibility matrix。ScrollView 不再在拖動時替換 compact row，compact／拖 header 時不捲動，收合回第一列；cancel／搜尋／tab transition 清理 transient state。拖動與中斷仍待 owner 實測；不能從這些 code 就宣稱無跳動／無 frame drop。
+
+| 相關 cases／原生檢查概念 | 本批實際結果 |
+|---|---|
+| A01：compact／expanded 與導航 | [收合](.impeccable/review/native-2026-10-03/panel-motion/03-custom-panel-compact.jpg)／[展開](.impeccable/review/native-2026-10-03/panel-motion/04-custom-panel-expanded.jpg)保留三個可見 native tabs；兩個 AX state assertions passed。透過 Tab Bar AX click 實際到[Saved](.impeccable/review/native-2026-10-03/panel-motion/05-saved-tab.jpg)，另 1 passed。You pointer click 仍被工具拒絕，不宣稱已測通。 |
+| A02／A06：detail／Save／返回 | 展開列表點 Example Community Room 到[原生 detail](.impeccable/review/native-2026-10-03/panel-motion/06-detail-from-expanded-panel.jpg)，Save 改 Saved，Close 後[保留 Expanded 與 27 in this area](.impeccable/review/native-2026-10-03/panel-motion/07-return-from-detail.jpg)；2 assertions passed。Save 僅記憶體，不證明正常 persistence 或 backend。 |
+| A03／A05：篩選／收合／搜尋返回 | Expanded 下 AC → 16 in this area · AC，收合 → 搜尋 → Cancel，回[原 AC／Collapsed](.impeccable/review/native-2026-10-03/panel-motion/08-search-cancel-ac.jpg)；3 assertions passed。Cancel 的 AX 是 button Cancel，初次檢查腳本誤找 Description 格式，按 fresh AX 修正後執行；工具腳本錯誤不是 App Red。 |
+| A01：已知／未知／零 | real API loaded 與 frozen idle／loading／failed／empty 五個摘要 assertions passed；[failure 原生畫面](.impeccable/review/native-2026-10-03/panel-motion/09-failure-summary.jpg)無 count／sort。固定 inputs 跳過 request，不測 retry，沒有 fallback。 |
+
+實際總共 13 native assertions passed，結果為 [native-checks.json](.impeccable/review/native-2026-10-03/panel-motion/native-checks.json)，新增 [assert-panel-state.js](.impeccable/review/native-2026-10-03/panel-motion/assert-panel-state.js)，重用上一批摘要 helper。13 包含五個 catalogue states／兩個 resting states／Saved／detail Save／detail return／AC／collapse AC／search Cancel；不是 13 XCTest 或 13 gesture tests。兩次 Debug build 成功，唯一 warning 是 AppIntents metadata extraction skip；沒有重跑歷史 42 tests。
+
+Native sheet drag 實際失敗 noWindowsAvailable；重新綁定已聚焦 QA 後 You 座標點擊仍同樣失敗，見 evidence JSON。真正拖曳、列表 scroll arbitration、快速 flick、反向重抓／中斷、停靠回彈與 You 點擊等待 owner 在 `cool-spot UI Review`／Contract QA 實測。動畫 screenshot 只證明停穩後的佈局。現行 resize 仍 loaded + nonempty；本批沒有擴展 failure／empty 的可拖動規則。
+
+完成後[原生確認恢复正常 API 啟動](.impeccable/review/native-2026-10-03/panel-motion/10-normal-restored.jpg)，畫面 253 places；18 個 Documents／Application Support 私人檔案 bytes 一致，完整 preferences 值直接相等。除了本批 DEBUG ContentView／三個既有 docs，所有已備份 Swift／tests／owner project／test-plan／schemes fingerprints 不變；ContentView 的 normal entry prefix bytes 相同，full Git index 相同，40 個 A–E IDs／順序保留。 修改範圍：ContentView.swift 的 DEBUG comparison／面板 motion；assert-panel-state.js／native screenshots／AX／JSON；既有 AGENTS／PRODUCT／本 walkthrough。正常 mainApp／Explore／Place detail／API／Store／tests／project／test-plan／schemes 均未改；沒有新 progress 文件、commit／push／deploy／DB 操作。下一步只請 owner 在 UI Review 上拖把手，上拉／下拉一次並中途反向重抓，回饋是否仍生硬或晃動過多；入口保留是固定條件。
+
+### 2026-10-01：已完成的本機 API 接線基準
+
 **2026-10-01：正常 App 已接本機 v5 API；止於遠端 API 之前。** 起點 Prototyping／8f7ae05。Owner 委託完成剩餘接線、tests 與適當 commit，並同意正常 API 模式停用 Publish locally；私人提案保留，明確 QA／範例模式仍可本機發布。沒有新增 API 契約、登入、上傳、部署或資料庫變更。
 
 | Case | 檢查重點 | 證據 |
@@ -24,7 +221,7 @@ Code review 再補 retry 生命周期與 fixture peer-report 邊界；各單項 
 
 QA app data 在安裝前備份至 Git 外；本輪只新增自己的 QA bookmark/note，原紀錄保留。只暫停／恢復專用 prototype API listener，未重啟容器、migration、匯入或 reset。測試、logs、results、credentials、QA backup 均不納入 commit；owner test-plan/scheme/project 格式與 staging 保留。候選 project 只含新增 Store test 的四行 membership；使用獨立 index 做精準提交，核對 secrets、文件 links 與全部 40 個 A–E IDs，不 push。
 
-下一個界線是遠端 endpoint／設定與部署設計；本輪停在此之前。Report、Cooling here、popsicle、提案仍是既有本機 prototype 生命周期，沒有假稱寫入後端。原始 bundled JSON 未改。
+API 接線批次止於遠端 endpoint／設定與部署之前；owner 現在改以原生 UI／UX 評估為焦點，尚未授權遠端工作。Report、Cooling here、popsicle、提案仍是既有本機 prototype 生命周期，沒有假稱寫入後端。原始 bundled JSON 未改。
 
 ### 上一批載入 ViewModel：歷史 Red／Green
 
@@ -929,7 +1126,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### A01｜很熱，想判斷去哪裡
 
-1. Explore → 搜尋 `John Harvard Library` → 點同名 Cool Spot；也可從底部 **Cool Spots** 或地圖標記開啟。
+1. 正常 Run → Explore：預設 **All**／收合 Cool Spots 面板，成功載入才顯示目前區域 count。**Show list** 或點 grabber 展開同一清單；依離地圖中心的直線距離排序。點搜尋入口 → 輸入 `John Harvard Library` → 點同名 Cool Spot；也可從清單或地圖標記開啟。
 2. 確認地圖移到場所、半卡上方仍看得見標記。讀名稱、GLA · 2025、降溫設施與費用／座位；上滑展開。
 3. 降溫特色下方讀有資料的費用、座位與使用資格；未知資格不應顯示 Open to everyone。不再顯示 Cooling space hours；**Facilities & accessibility** 預設收起，點開讀廁所／輪椅通行／人員值守。再次點擊可收合，座位／飲水不重複。來源在分類旁；同組的 **Place details** 開同一場所的補充資訊，關閉回原降溫卡；**View nearby streets** 緊接其後，第一區末端是較輕的 **Suggest an edit**。
 4. 場所資訊、Visitor reports、目前人數／分享操作三區之間均有淡分隔線；人數與 Here to cool down? 共用白底，沒有內層藍色卡片。新場所 **Visitor reports → No reports yet**；沒有捏造體感條狀圖。有自己的已發布回報才顯示相應分布；正常 API mode 不額外加入 fixture 訪客證據。
@@ -946,26 +1143,26 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 ### A03｜用篩選縮小範圍
 
-1. 關閉地點 → Explore → **Indoor** → 看地圖及底部結果 → 再點 Indoor 取消。
-2. 依序試 **Outdoor shade**、**AC**、**Free**、**Water**，每次看結果再取消；橫向滑動篩選列可找後方選項。
-3. 點 **Indoor**，接著點 **Water**，觀察是否符合預期。
+1. 關閉地點 → 若仍在找場所先按 **Cancel** → Explore → **Indoor** → 看地圖及目前區域結果 → **All** 清除。
+2. 依序試 **Outdoor shade**、**AC**、**Free**、**Water**，每次看結果再用 All 清除；橫向滑動可找後方選項。**Show list／Show map** 切換面板高度，不改範圍／排序。
+3. 選 **AC** 並展開 → 點搜尋 → 輸入 `British Museum` → 選普通場所 → **Find nearby Cool Spots → Search a wider area → Back to [place] → Close → Cancel**；原 AC／結果／展開及地圖上下文應還原。
 
-**目前行為：** 一次只保留一個篩選，第二個會取代第一個，不能組合條件。**More** 尚未接通，點一次確認後即可停下，不必找隱藏頁面。
+**目前行為：** 單選 filter 只篩選 browse 的 committed region；第二個取代第一個，All 清除，沒有 More。找場所狀態不顯示 browse filters／清單。收起鍵盤仍搜尋，Clear 保持找場所，Cancel 才返回瀏覽。2026-10-03 正常採用的限定原生證據包含第三步 AC／16／Expanded 還原；不代表所有 filter、快速 callback 或完整 A03 已驗收。2026-10-02 的混合篩選／搜尋觀察保留於上方歷史證據。
 
 ### A04｜定位、暫不提供定位、移動地圖
 
-1. Explore → **Nearby**。若出現 **Use your current location?**，先選 **Not now** → 搜尋框輸入 `John Harvard Library`，確認仍可搜尋。
-2. 清空搜尋框 → Nearby → 若再次出現說明，選 **Continue**。
-3. 拖動地圖 → **Search this area**。
+1. Explore → 搜尋入口下方右側 **Nearby**。若出現 **Use your current location?**，先選 **Not now** → 點搜尋入口輸入 `John Harvard Library`，確認仍可搜尋。
+2. **Cancel** 退出找場所 → Nearby → 若再次出現說明，選 **Continue**。
+3. 拖動地圖 → **Search this area**，確認 count／清單／排序以新地圖中心更新；按之前原結果保持穩定。
 
-**目前行為：** 說明是 App 內的模擬流程，不是 iOS 真正的定位授權。已按過 Continue 時不一定再問。Search this area 目前只收起按鈕，不會重新取得該區資料；地圖移動也不會改變模擬的所在地。
+**目前行為：** 說明仍是 App 內模擬流程，不是 iOS 真正授權。Continue 使用固定示範所在地；地圖移動不改該所在地。Search this area 對已載入 API 目錄更新 committed region、在記憶體篩選，沒有新的 HTTP 請求。2026-10-03 已原生確認 Not now 保留 AC 清單，以及 Save pin 的 Continue／Cancel 入口；工具不能可靠手動拖地圖，第三步仍待 owner 驗證。
 
 ### A05｜搜尋已知 Cool Space 與尚無降溫資料的場所
 
 在同一次正常啟動中比較三種狀態，不需 Run Arguments：
 
 - **A：Canning Town Library** → GLA · 2025；摘要後為預設收起的 Facilities & accessibility，以及 Place details；展開有廁所／輪椅／值守，沒有 Cooling space hours；Place details 開同一圖書館。
-- **B：Tate Modern** → Example cooling info；降溫、費用、座位與使用資格仍可見；Facilities & accessibility 顯示範例的廁所／輪椅／值守／桌子，Visitor reports 有三則標 Example 的回報，統計與列表一致。Place details 開真實 Tate Modern 卡。另搜 Example Community Room（含沒有廁所／輪椅不通行）及 Example Shaded Garden（部分未知、沒有工作人員），各有兩則回報；兩者為虛構場所，沒有捏造 Apple 場所卡連結。這是非 GLA 的示範降溫資訊，不是實際社群回報或重新查證的場所承諾。
+- **B：Tate Modern** → Example cooling info；降溫、費用、座位與使用資格仍可見；Facilities & accessibility 顯示範例的廁所／輪椅／值守／桌子；正常 API mode 初始 Visitor reports 顯示 No reports yet，不加入 fixture 訪客回報。Place details 開真實 Tate Modern 卡。另搜 Example Community Room（含沒有廁所／輪椅不通行）及 Example Shaded Garden（部分未知、沒有工作人員），初始亦無 fixture 回報；兩者為虛構場所，沒有捏造 Apple 場所卡連結。這是非 GLA 的示範降溫資訊，不是實際社群回報或重新查證的場所承諾。
 - **C：British Museum** → No cooling information yet／Find nearby Cool Spots；沒有空的 Cooling space hours 或 Facilities & accessibility 區；詳情按鈕同樣叫 Place details，名稱／地址／分類順序與 A/B 一致。
 
 本輪 A05 抽查可搜尋 Canning Town Library、Custom House Library、Beckton Library、Ham Library、Green Street Library、Library at Willesden Green、Streatham Ice and Leisure Centre、Salvation Army Centre (Harold Hill)、Horniman Museum、Museum of the Royal Pharmaceutical Society。完整名稱相符的 Cool Spot 應先顯示；Streatham 場館與大廳保持不同身份；Horniman 仍有待核對重複結果。
@@ -990,7 +1187,7 @@ A/B/C 的搜尋結果可能另有 MapKit 近似場所。B 同一場所不應同�
 
 ### A07｜從 Explore 快速存一個私人 Pin
 
-1. Explore → 右下 **＋** → **Save a pin here** → 如出現定位說明，選 Continue。
+1. Explore → 搜尋入口下方右側 **＋** → **Save a pin here** → 如出現定位說明，選 Continue。
 2. 在 **Save a pin here?** 先選 **Cancel**，確認未新增。
 3. 再開同一路徑 → **Save pin** → 提示出現時點 **View pin**。
 4. 若提示已消失：Saved → Pins → 最新的 **Dropped pin**。

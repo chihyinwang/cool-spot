@@ -48,32 +48,48 @@ struct ExploreView: View {
     @Binding var nearbyPlaceRequest: RecognisedPlace?
     let catalogueState: CoolSpotsCatalogueViewModel.State?
     let retryCatalogue: () -> Void
-    @State private var nearbyOrigin: RecognisedPlace?
-    @State private var nearbyRadius: CLLocationDistance = 1_000
-    @State private var camera: MapCameraPosition = .region(.init(
-        center: .init(latitude: 51.5052, longitude: -0.0920),
-        span: .init(latitudeDelta: 0.035, longitudeDelta: 0.035)))
-    @State private var search = ""
-    @State private var searchFocused = false
+
     @StateObject private var placeSearch = PlaceSearchModel()
-    @State private var searchRegion = MKCoordinateRegion(
-        center: .init(latitude: 51.5052, longitude: -0.0920),
-        span: .init(latitudeDelta: 0.035, longitudeDelta: 0.035))
+    @FocusState private var searchFieldFocused: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var query = ""
+    @State private var isSearching = false
+    @State private var listExpanded = false
+    @GestureState private var panelIsDragging = false
+    @State private var panelDragHeight: CGFloat?
+    @State private var panelDragStartHeight: CGFloat?
+    @State private var renderedBrowseHeight: CGFloat = 0
+    @State private var compactRowHeight: CGFloat = 96
     @State private var filter: ExploreFilter?
     @State private var selection: ExploreSelection?
-    @State private var focusedPlace: RecognisedPlace?
+    @State private var selectedPlace: RecognisedPlace?
     @State private var detailDetent: PresentationDetent = .medium
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showSearchArea = false
-    @State private var showLocationExplanation = false
-    @State private var showContribution = false
-    @State private var showSavedToast = false
-    @State private var showSaveConfirmation = false
+    @State private var camera: MapCameraPosition = .region(initialRegion)
+    @State private var visibleRegion = initialRegion
+    @State private var browseRegion = initialRegion
+    @State private var regionBeforeDetail = initialRegion
+    @State private var regionBeforeSearch = initialRegion
+    @State private var browseRegionBeforeSearch = initialRegion
+    @State private var filterBeforeSearch: ExploreFilter?
+    @State private var listExpandedBeforeSearch = false
+    @State private var mapCanvasHeight: CGFloat = 0
+    @State private var visibleCamera: MapCamera?
+    @State private var positionBeforeSearch: MapCameraPosition = .region(initialRegion)
+    @State private var positionBeforeDetail: MapCameraPosition = .region(initialRegion)
+    @State private var areaChangePending = false
+    @State private var cameraHasSettled = false
+    @State private var initialized = false
+
+    @State private var nearbyOrigin: RecognisedPlace?
+    @State private var nearbyRadius: CLLocationDistance = 1_000
     @State private var hasLocationAccess = false
+    @State private var showLocationExplanation = false
     @State private var locationRequestPurpose: LocationRequestPurpose = .nearby
+    @State private var showSaveConfirmation = false
+    @State private var showSavedToast = false
     @State private var lastSavedLocation: SavedLocation?
     @State private var savedDetail: SavedLocation?
-    @State private var acceptMapMovementAfter = Date.distantFuture
+    @State private var showContribution = false
 
     init(store: PrototypeStore, nearbyPlaceRequest: Binding<RecognisedPlace?> = .constant(nil),
          catalogueState: CoolSpotsCatalogueViewModel.State? = nil,
@@ -84,249 +100,125 @@ struct ExploreView: View {
         self.retryCatalogue = retryCatalogue
     }
 
+    private static let initialRegion = MKCoordinateRegion(
+        center: .init(latitude: 51.5052, longitude: -0.0920),
+        span: .init(latitudeDelta: 0.035, longitudeDelta: 0.035)
+    )
+
+    private var searchingOnScreen: Bool { isSearching && selection == nil }
+    private var trimmedQuery: String { query.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var catalogueIsLoaded: Bool {
+        guard let catalogueState else { return true }
+        if case .loaded = catalogueState { return true }
+        return false
+    }
+
     private var nearbyResults: [NearbyCoolSpotResult] {
         guard let origin = nearbyOrigin else { return [] }
         return NearbyCoolSpotResult.find(in: store.spots, around: origin.coordinate, radius: nearbyRadius)
     }
 
-    var filteredSpots: [CoolSpot] {
-        store.spots.filter { spot in
-            switch filter {
-            case .indoor: spot.environment == .indoors || spot.environment == .both
-            case .shade: spot.features.contains(.treeShade) || spot.features.contains(.structuralShade)
-            case .airConditioning: spot.features.contains(.airConditioning)
-            case .free: spot.access == .free
-            case .water: spot.features.contains(.drinkingWater) || spot.features.contains(.waterFeature)
-            case nil, .nearby: true
-            }
-        }
-    }
-
-    var searchedSpots: [CoolSpot] {
-        guard !query.isEmpty else { return [] }
-        return store.searchCoolSpots(query: query, including: placeSearch.places)
-    }
-
-    private var mapSpots: [CoolSpot] {
+    private var browseSpots: [CoolSpot] {
         if nearbyOrigin != nil { return nearbyResults.map(\.spot) }
-        guard case .coolSpot(let id) = selection,
-              !filteredSpots.contains(where: { $0.id == id }), let spot = store.spot(id) else { return filteredSpots }
-        return filteredSpots + [spot]
+        return store.spots.filter { contains($0.coordinate, in: browseRegion) && matchesFilter($0) }
+            .sorted { first, second in
+                let firstDistance = distance(first.coordinate, from: browseRegion.center)
+                let secondDistance = distance(second.coordinate, from: browseRegion.center)
+                if firstDistance != secondDistance { return firstDistance < secondDistance }
+                let names = first.name.localizedStandardCompare(second.name)
+                return names == .orderedSame ? first.id < second.id : names == .orderedAscending
+            }
     }
 
-    var searchedPlaces: [RecognisedPlace] {
-        PlaceSearchResults.unique(placeSearch.places + PlaceSearchResults.matching(store.recognisedPlaces, query: query))
+    private var matchingSpots: [CoolSpot] {
+        guard !trimmedQuery.isEmpty else { return [] }
+        return store.searchCoolSpots(query: trimmedQuery, including: placeSearch.places)
+    }
+
+    private var matchingPlaces: [RecognisedPlace] {
+        PlaceSearchResults.unique(placeSearch.places
+            + PlaceSearchResults.matching(store.recognisedPlaces, query: trimmedQuery))
             .filter { store.existingSpot(for: $0) == nil }
     }
 
-    var query: String { search.trimmingCharacters(in: .whitespacesAndNewlines) }
-
-    func searchPlaces(debounce: Bool = true) {
-        placeSearch.update(query: query, region: searchRegion, debounce: debounce)
+    private var areaHasMoved: Bool {
+        guard cameraHasSettled, selection == nil, nearbyOrigin == nil, areaChangePending else { return false }
+        return distance(visibleRegion.center, from: browseRegion.center) > 100
+            || abs(visibleRegion.span.latitudeDelta - browseRegion.span.latitudeDelta)
+                > browseRegion.span.latitudeDelta * 0.15
+            || abs(visibleRegion.span.longitudeDelta - browseRegion.span.longitudeDelta)
+                > browseRegion.span.longitudeDelta * 0.15
     }
 
     var body: some View {
-        NavigationStack {
-            GeometryReader { geometry in
-            ZStack(alignment: .top) {
-                Map(position: $camera) {
-                    if hasLocationAccess {
-                        Annotation("Your location", coordinate: store.currentCoordinate) {
-                            CurrentLocationMarker()
-                        }
-                    }
-                    ForEach(mapSpots) { spot in
-                        Annotation(spot.name, coordinate: spot.coordinate, anchor: .bottom) {
-                            Button { select(spot) } label: {
-                                CoolSpotPin(type: spot.type,
-                                            count: store.presence(for: spot))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    if let place = focusedPlace {
-                        Annotation(place.name, coordinate: place.coordinate, anchor: .bottom) {
-                            Button {
-                                if nearbyOrigin != nil { returnToOrigin() }
-                                else { select(place) }
-                            } label: {
-                                Image(systemName: "mappin.circle.fill")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(.white, nearbyOrigin == nil ? AppStyle.brand : .gray)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Open \(place.name)")
-                        }
-                    }
-                }
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    if selection != nil || nearbyOrigin != nil {
-                        Color.clear.frame(height: geometry.size.height * 0.5)
-                    }
-                }
-                .mapStyle(.standard(elevation: .flat, emphasis: .muted,
-                                    pointsOfInterest: .excludingAll))
-                .onMapCameraChange(frequency: .onEnd) { context in
-                    searchRegion = context.region
-                    if nearbyOrigin == nil, Date.now >= acceptMapMovementAfter { showSearchArea = true }
-                }
-                .task {
-                    try? await Task.sleep(for: .seconds(1.25))
-                    acceptMapMovementAfter = .now
-                }
-                .ignoresSafeArea(edges: .top)
-
-                if selection == nil {
-                if let origin = nearbyOrigin {
-                    VStack {
-                        Button(action: returnToOrigin) {
-                            Label("Back to \(origin.name)", systemImage: "chevron.left")
-                                .font(.subheadline.weight(.semibold))
-                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                                .padding(.horizontal, 14)
-                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.horizontal, 16)
-                        Spacer()
-                        NearbyCoolSpotsPanel(origin: origin, results: nearbyResults, radius: nearbyRadius,
-                                             expand: expandNearbyArea, choose: { select($0) })
-                            .frame(maxHeight: geometry.size.height * 0.48)
-                    }
-                    .padding(.top, 8)
-                } else {
-                VStack(spacing: 10) {
-                    SearchBar(text: $search, submit: { searchPlaces(debounce: false) },
-                              focusChanged: { searchFocused = $0 })
-                    filterBar
-                    catalogueStatus
-                    if let message = store.coolSpotsLoadError {
-                        Text(message).font(.subheadline).padding(12).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    }
-
-                    if !query.isEmpty {
-                        SearchResultsPanel(query: query, coolSpots: searchedSpots, places: searchedPlaces,
-                                           state: placeSearch.state,
-                                           retry: { searchPlaces(debounce: false) },
-                                           chooseSpot: { select($0) },
-                                           choosePlace: { select($0) },
-                                           addLocation: { showContribution = true })
-                            .padding(.horizontal, 16)
-                    } else if showSearchArea {
-                        Button { showSearchArea = false } label: {
-                            Label("Search this area", systemImage: "arrow.clockwise")
-                                .font(.subheadline.weight(.semibold))
-                                .padding(.horizontal, 16).padding(.vertical, LayoutSpacing.related)
-                                .background(.regularMaterial, in: Capsule())
-                                .shadow(color: .black.opacity(0.14), radius: 8, y: 3)
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    Spacer()
-                    if showSaveConfirmation {
-                        CurrentLocationSavePrompt {
-                            withAnimation { showSaveConfirmation = false }
-                        } save: {
-                            let saved = store.saveCurrentLocation()
-                            lastSavedLocation = saved
-                            withAnimation {
-                                showSaveConfirmation = false
-                                showSavedToast = true
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                    }
-                    HStack {
-                        Spacer()
-                        Menu {
-                            Button {
-                                requestLocation(for: .saveCurrentLocation)
-                            } label: { Label("Save a pin here", systemImage: "mappin.and.ellipse") }
-                            Button { showContribution = true } label: {
-                                Label("Add cooling information", systemImage: "plus.bubble.fill")
-                            }
-                        } label: {
-                            Image(systemName: "plus").font(.title2.bold()).foregroundStyle(.white)
-                                .frame(width: 54, height: 54).background(AppStyle.ink, in: Circle())
-                                .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
-                        }
-                        .accessibilityLabel("Save or contribute")
-                    }
-                    .padding(.horizontal, 16)
-                    if !searchFocused || query.isEmpty {
-                        if showsCataloguePanel {
-                            NearbyPanel(spots: filteredSpots) { select($0) }
-                        }
-                    }
-                }
-                .padding(.top, 8)
-                }
-                }
-
-                if showSavedToast {
-                    SavedToast {
-                        if let lastSavedLocation { savedDetail = lastSavedLocation }
-                        withAnimation { showSavedToast = false }
-                    }
-                        .padding(.horizontal, 16).padding(.top, 132)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .task {
-                            try? await Task.sleep(for: .seconds(3))
-                            withAnimation { showSavedToast = false }
-                        }
-                }
-            }
-            .toolbar(.hidden, for: .navigationBar)
-            }
-        }
-        .onAppear {
-            searchPlaces()
-            receiveNearbyRequest()
-        }
-        .onChange(of: nearbyPlaceRequest?.id) { _, _ in receiveNearbyRequest() }
-        .onChange(of: search) { _, _ in
-            if nearbyOrigin == nil { searchPlaces() }
-        }
-        .onDisappear { placeSearch.cancel() }
-        .alert("Use your current location?", isPresented: $showLocationExplanation) {
-            Button("Not now", role: .cancel) {}
-            Button("Continue") {
-                hasLocationAccess = true
-                filter = .nearby
-                showSearchArea = false
-                acceptMapMovementAfter = .now.addingTimeInterval(1)
-                camera = .region(.init(center: store.currentCoordinate,
-                                       span: .init(latitudeDelta: 0.018, longitudeDelta: 0.018)))
-                if locationRequestPurpose == .saveCurrentLocation {
-                    filter = nil
-                    withAnimation { showSaveConfirmation = true }
-                }
-            }
-        } message: {
-            Text(locationRequestPurpose == .saveCurrentLocation
-                 ? "Cool Spot uses your location to show the point before you save it. The estimated accuracy is also shown."
-                 : "Cool Spot uses your location only when you ask for nearby places or check in. You can still search without it.")
-        }
+        explore
+        .toolbar(searchingOnScreen ? .hidden : .visible, for: .tabBar)
         .sheet(item: $selection, onDismiss: {
-            if nearbyOrigin != nil { focusNearbyArea() }
-        }) { item in
-            Group {
-            switch item {
-            case .coolSpot(let id):
-                if let spot = store.spot(id) {
-                    CoolSpotDetailView(store: store, spot: spot, distanceContext: nearbyDistanceContext(for: id))
-                }
-            case .recognisedPlace(let id):
-                if let place = store.place(id) {
-                    RecognisedPlaceDetailView(store: store, place: place, findNearby: { startNearby(place) })
-                }
+            if nearbyOrigin != nil {
+                focusNearbyArea()
+            } else {
+                camera = positionBeforeDetail
+                visibleRegion = regionBeforeDetail
             }
+        }) { destination in
+            Group {
+                switch destination {
+                case .coolSpot(let id):
+                    if let spot = store.spot(id) {
+                        CoolSpotDetailView(store: store, spot: spot,
+                                           distanceContext: nearbyDistanceContext(for: id))
+                    }
+                case .recognisedPlace:
+                    if let place = selectedPlace {
+                        RecognisedPlaceDetailView(store: store, place: place, findNearby: {
+                            startNearby(place)
+                        })
+                    }
+                }
             }
             .presentationDetents([.medium, .large], selection: $detailDetent)
             .presentationDragIndicator(.visible)
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             .presentationContentInteraction(.resizes)
+        }
+        .onAppear {
+            receiveNearbyRequest()
+            guard !initialized else { return }
+            initialized = true
+            #if DEBUG
+            let arguments = ProcessInfo.processInfo.arguments
+            if arguments.contains("--explore-layout-preview"), arguments.contains("--preview-search") {
+                beginSearch()
+                query = "Canning"
+            }
+            #endif
+        }
+        .onChange(of: nearbyPlaceRequest?.id) { _, _ in receiveNearbyRequest() }
+        .onChange(of: query) { _, value in
+            guard isSearching else { return }
+            placeSearch.update(query: value, region: browseRegion)
+        }
+        .onChange(of: panelIsDragging) { _, dragging in
+            // Gesture cancellation also needs a stable resting height.
+            if !dragging, panelDragHeight != nil { setListExpanded(listExpanded) }
+        }
+        .onChange(of: isSearching) { _, searching in
+            if searching { clearPanelDrag() }
+        }
+        .onDisappear {
+            placeSearch.cancel()
+            clearPanelDrag()
+        }
+        .alert("Use your current location?", isPresented: $showLocationExplanation) {
+            Button("Not now", role: .cancel) {}
+            Button("Continue") {
+                hasLocationAccess = true
+                focusCurrentLocation()
+            }
+        } message: {
+            Text(locationRequestPurpose == .saveCurrentLocation
+                 ? "Cool Spot uses your location to show the point before you save it. The estimated accuracy is also shown."
+                 : "Cool Spot uses your location only when you ask for nearby places or check in. You can still search without it.")
         }
         .sheet(isPresented: $showContribution) {
             ContributionFlow(store: store, source: .currentLocation)
@@ -336,59 +228,581 @@ struct ExploreView: View {
         }
     }
 
-    private var showsCataloguePanel: Bool {
-        guard let catalogueState else { return true }
-        if case let .loaded(spots) = catalogueState { return !spots.isEmpty }
-        return false
+    private var explore: some View {
+        GeometryReader { geometry in
+            ZStack {
+                if !searchingOnScreen {
+                Map(position: $camera) {
+                    if hasLocationAccess {
+                        Annotation("Your location", coordinate: store.currentCoordinate) {
+                            CurrentLocationMarker()
+                        }
+                    }
+                    ForEach(browseSpots) { spot in
+                        Annotation(spot.name, coordinate: spot.coordinate, anchor: .bottom) {
+                            Button { open(spot) } label: {
+                                CoolSpotPin(type: spot.type, count: store.presence(for: spot))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(spot.name)
+                        }
+                    }
+                    if let selectedPlace, selection != nil || nearbyOrigin != nil {
+                        Marker(selectedPlace.name, coordinate: selectedPlace.coordinate)
+                            .tint(AppStyle.brand)
+                    }
+                    if case .coolSpot(let id) = selection, let spot = store.spot(id),
+                       !browseSpots.contains(where: { $0.id == id }) {
+                        Marker(spot.name, coordinate: spot.coordinate).tint(AppStyle.brand)
+                    }
+                }
+                // Keyboard and tab-bar changes must not resize the hidden map
+                // or masquerade as a new area chosen by the person.
+                .frame(width: geometry.size.width,
+                       height: mapCanvasHeight == 0 ? geometry.size.height : mapCanvasHeight)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .mapStyle(.standard(elevation: .flat, emphasis: .muted,
+                                    pointsOfInterest: .excludingAll))
+                .ignoresSafeArea()
+                .onMapCameraChange(frequency: .onEnd) { context in
+                    visibleRegion = context.region
+                    visibleCamera = context.camera
+                    if !cameraHasSettled {
+                        browseRegion = context.region
+                        cameraHasSettled = true
+                    }
+                    if camera.positionedByUser && !isSearching && selection == nil && nearbyOrigin == nil {
+                        areaChangePending = true
+                    }
+                }
+                .overlay(alignment: .top) {
+                    if !searchingOnScreen && selection == nil {
+                        VStack(spacing: LayoutSpacing.text) {
+                            if let origin = nearbyOrigin {
+                                Button(action: returnToOrigin) {
+                                    Label("Back to \(origin.name)", systemImage: "chevron.left")
+                                        .font(.subheadline.weight(.semibold))
+                                        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                                        .padding(.horizontal, LayoutSpacing.group)
+                                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+                                }.buttonStyle(.plain)
+                            } else {
+                            Button(action: beginSearch) {
+                                Label("Search a place or postcode", systemImage: "magnifyingglass")
+                                    .font(.body)
+                                    .foregroundStyle(AppStyle.supportingText)
+                                    .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                                    .padding(.horizontal, LayoutSpacing.group)
+                                    .background(.regularMaterial,
+                                                in: RoundedRectangle(cornerRadius: 14))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("inspectionSearch")
+                            HStack {
+                                Spacer()
+                                Button { requestLocation(for: .nearby) } label: {
+                                    Label("Nearby", systemImage: "location.fill")
+                                        .font(.subheadline.weight(.semibold))
+                                        .padding(.horizontal, LayoutSpacing.related)
+                                        .frame(minHeight: 44)
+                                        .background(.regularMaterial, in: Capsule())
+                                }.buttonStyle(.plain)
+                                contributionMenu
+                            }
+                            }
+                            if areaHasMoved {
+                                Button {
+                                    browseRegion = visibleRegion
+                                    areaChangePending = false
+                                } label: {
+                                    Label("Search this area", systemImage: "arrow.clockwise")
+                                        .font(.subheadline.weight(.semibold))
+                                        .padding(.horizontal, LayoutSpacing.group)
+                                        .frame(minHeight: 44)
+                                        .background(.regularMaterial, in: Capsule())
+                                }.buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, LayoutSpacing.page)
+                        .padding(.top, LayoutSpacing.text)
+                    }
+                }
+                .overlay(alignment: .bottom) {
+                    if !searchingOnScreen && selection == nil {
+                        VStack(spacing: LayoutSpacing.related) {
+                            if showSaveConfirmation {
+                                CurrentLocationSavePrompt {
+                                    showSaveConfirmation = false
+                                } save: {
+                                    lastSavedLocation = store.saveCurrentLocation()
+                                    showSaveConfirmation = false
+                                    showSavedToast = true
+                                }.padding(.horizontal, LayoutSpacing.page)
+                            }
+                            if let origin = nearbyOrigin {
+                                if catalogueIsLoaded {
+                                    NearbyCoolSpotsPanel(origin: origin, results: nearbyResults,
+                                                        radius: nearbyRadius, expand: expandNearbyArea,
+                                                        choose: open)
+                                        .frame(maxHeight: geometry.size.height * 0.48)
+                                } else {
+                                    catalogueStatus.background(Color(.systemBackground))
+                                }
+                            } else {
+                                browsePanel(availableHeight: geometry.size.height)
+                            }
+                        }
+                    }
+                }
+                }
+
+                if searchingOnScreen { searchLayout }
+                if showSavedToast {
+                    VStack {
+                        SavedToast {
+                            savedDetail = lastSavedLocation
+                            showSavedToast = false
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal, LayoutSpacing.page)
+                    .padding(.top, 132)
+                    .task {
+                        try? await Task.sleep(for: .seconds(3))
+                        showSavedToast = false
+                    }
+                }
+            }
+            .onAppear { mapCanvasHeight = geometry.size.height }
+        }
+    }
+
+    private func browsePanel(availableHeight: CGFloat) -> some View {
+        let canResize = catalogueIsLoaded && !browseSpots.isEmpty
+        let contentHeight = browseContentHeight(availableHeight: availableHeight)
+        return VStack(alignment: .leading, spacing: 0) {
+            VStack(spacing: 0) {
+                if canResize {
+                    Button { setListExpanded(!listExpanded) } label: {
+                        Capsule().fill(Color(.tertiaryLabel))
+                            .frame(width: 38, height: 5)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Cool Spots panel")
+                    .accessibilityValue(listExpanded ? "Expanded" : "Collapsed")
+                    .accessibilityHint("Double-tap to expand or collapse the list.")
+                    .accessibilityIdentifier("inspectionPanelGrabber")
+                    .accessibilityAdjustableAction { direction in
+                        switch direction {
+                        case .increment: setListExpanded(true)
+                        case .decrement: setListExpanded(false)
+                        @unknown default: break
+                        }
+                    }
+                }
+                HStack(alignment: .top, spacing: LayoutSpacing.related) {
+                    VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                        Text("Cool Spots").font(.title3.weight(.semibold))
+                        if catalogueIsLoaded {
+                            Text("\(browseSpots.count) in this area\(filter.map { " · \($0.title)" } ?? "")")
+                                .font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                        }
+                        if canResize {
+                            Text("Closest to map centre")
+                                .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                    if canResize {
+                        Button { setListExpanded(!listExpanded) } label: {
+                            Label(listExpanded ? "Show map" : "Show list",
+                                  systemImage: listExpanded ? "chevron.down" : "chevron.up")
+                                .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
+                        }
+                        .accessibilityIdentifier("inspectionExpandList")
+                    }
+                }
+                .padding(.horizontal, LayoutSpacing.page)
+                .padding(.top, canResize ? 0 : LayoutSpacing.group)
+                .padding(.bottom, LayoutSpacing.related)
+            }
+            .contentShape(Rectangle())
+            .gesture(browseResizeGesture(availableHeight: availableHeight))
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: LayoutSpacing.text) {
+                    filterButton(title: "All", symbol: nil, value: nil)
+                    ForEach(ExploreFilter.visible) { option in
+                        filterButton(title: option.title, symbol: option.symbol, value: option)
+                    }
+                }.padding(.horizontal, LayoutSpacing.page)
+            }
+            .padding(.bottom, LayoutSpacing.text)
+
+            if catalogueIsLoaded && store.spots.isEmpty {
+                catalogueStatus
+            } else if catalogueIsLoaded {
+                if browseSpots.isEmpty {
+                    VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                        Text("No Cool Spots match in this area").font(.headline)
+                        Text("Try another filter or move the map to explore a different area.")
+                            .font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                        if filter != nil {
+                            Button("Clear filter") { filter = nil }.frame(minHeight: 44)
+                        }
+                    }
+                    .padding(.horizontal, LayoutSpacing.page)
+                    .padding(.vertical, LayoutSpacing.group)
+                } else {
+                    // Keep the same list while dragging and settling; replacing it mid-gesture jumps.
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(browseSpots) { spot in
+                                    measuredBrowseRow(spot).id(spot.id)
+                                    Divider().padding(.leading, 74)
+                                }
+                            }
+                        }
+                        .scrollDisabled(!listExpanded || panelIsDragging)
+                        .scrollBounceBehavior(.basedOnSize)
+                        .onChange(of: listExpanded) { _, expanded in
+                            if !expanded, let first = browseSpots.first {
+                                var transaction = Transaction()
+                                transaction.disablesAnimations = true
+                                withTransaction(transaction) { proxy.scrollTo(first.id, anchor: .top) }
+                            }
+                        }
+                    }
+                    .frame(height: contentHeight, alignment: .top)
+                    .clipped()
+                    .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { height in
+                        renderedBrowseHeight = height
+                    }
+                }
+            } else {
+                catalogueStatus
+            }
+        }
+        .padding(.bottom, LayoutSpacing.related)
+        .background(Color(.systemBackground),
+                    in: UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24))
+    }
+
+    private func measuredBrowseRow(_ spot: CoolSpot) -> some View {
+        spotRow(spot, inBrowse: true)
+            .fixedSize(horizontal: false, vertical: true)
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { height in
+                if spot.id == browseSpots.first?.id, height > 0 {
+                    compactRowHeight = max(44, height)
+                }
+            }
+    }
+
+    private func expandedBrowseHeight(availableHeight: CGFloat) -> CGFloat {
+        max(compactRowHeight, min(360, availableHeight * 0.40))
+    }
+
+    private func browseContentHeight(availableHeight: CGFloat) -> CGFloat {
+        panelDragHeight ?? (listExpanded ? expandedBrowseHeight(availableHeight: availableHeight)
+                                       : compactRowHeight)
+    }
+
+    private func resistedBrowseHeight(_ height: CGFloat, upperBound: CGFloat) -> CGFloat {
+        let bounded = min(upperBound, max(compactRowHeight, height))
+        guard !reduceMotion else { return bounded }
+        let excess = height - bounded
+        // Resistance increases near each boundary; overdrag stays below 24 pt.
+        return bounded + 24 * excess / (abs(excess) + 120)
+    }
+
+    private func browseResizeGesture(availableHeight: CGFloat) -> some Gesture {
+        DragGesture(minimumDistance: 12, coordinateSpace: .global)
+            .updating($panelIsDragging) { value, dragging, transaction in
+                guard catalogueIsLoaded, !browseSpots.isEmpty,
+                      abs(value.translation.height) > abs(value.translation.width) else { return }
+                dragging = true
+                transaction.animation = nil
+            }
+            .onChanged { value in
+                guard catalogueIsLoaded, !browseSpots.isEmpty,
+                      abs(value.translation.height) > abs(value.translation.width) else { return }
+                let upperBound = expandedBrowseHeight(availableHeight: availableHeight)
+                if panelDragStartHeight == nil {
+                    let currentHeight = renderedBrowseHeight > 0
+                        ? renderedBrowseHeight : browseContentHeight(availableHeight: availableHeight)
+                    panelDragStartHeight = min(upperBound, max(compactRowHeight, currentHeight))
+                }
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    panelDragHeight = resistedBrowseHeight(
+                        (panelDragStartHeight ?? compactRowHeight) - value.translation.height,
+                        upperBound: upperBound
+                    )
+                }
+            }
+            .onEnded { value in
+                guard let startHeight = panelDragStartHeight else { return }
+                let upperBound = expandedBrowseHeight(availableHeight: availableHeight)
+                let destinationHeight = startHeight - value.predictedEndTranslation.height
+                setListExpanded(destinationHeight > (compactRowHeight + upperBound) / 2)
+            }
+    }
+
+    private func setListExpanded(_ expanded: Bool) {
+        let settling: Animation = reduceMotion ? .easeOut(duration: 0.15)
+            : .spring(response: 0.34, dampingFraction: 0.84, blendDuration: 0.10)
+        withAnimation(settling) {
+            listExpanded = expanded
+            clearPanelDrag()
+        }
+    }
+
+    private func clearPanelDrag() {
+        panelDragHeight = nil
+        panelDragStartHeight = nil
+    }
+
+    private func filterButton(title: String, symbol: String?, value: ExploreFilter?) -> some View {
+        Button { filter = value } label: {
+            HStack(spacing: 6) {
+                if let symbol { Image(systemName: symbol) }
+                Text(title)
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(filter == value ? .white : AppStyle.brand)
+            .padding(.horizontal, LayoutSpacing.related)
+            .frame(minHeight: 44)
+            .background(filter == value ? AppStyle.ink : AppStyle.controlSurface, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(filter == value ? .isSelected : [])
+    }
+
+    private var searchLayout: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: LayoutSpacing.text) {
+                HStack(spacing: 0) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(AppStyle.supportingText)
+                        .padding(.leading, LayoutSpacing.related)
+                        .padding(.trailing, LayoutSpacing.text)
+                    TextField("Search a place or postcode", text: $query,
+                              prompt: Text("Search a place or postcode")
+                                .foregroundStyle(AppStyle.supportingText))
+                        .font(.body).focused($searchFieldFocused)
+                        .submitLabel(.search).autocorrectionDisabled()
+                        .onSubmit {
+                            searchFieldFocused = false
+                            placeSearch.update(query: query, region: browseRegion, debounce: false)
+                        }
+                    if !query.isEmpty {
+                        Button {
+                            query = ""
+                            placeSearch.cancel()
+                            searchFieldFocused = true
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(AppStyle.supportingText)
+                                .frame(width: 44, height: 44)
+                        }.accessibilityLabel("Clear search")
+                    }
+                }
+                .frame(minHeight: 48)
+                .background(AppStyle.controlSurface, in: RoundedRectangle(cornerRadius: 12))
+
+                Button("Cancel", action: cancelSearch)
+                    .font(.body).frame(minHeight: 44)
+            }
+            .padding(.horizontal, LayoutSpacing.page)
+            .padding(.vertical, LayoutSpacing.related)
+
+            if trimmedQuery.isEmpty {
+                VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                    Text("Find a place").font(.title2.weight(.semibold))
+                    Text("Search by name, address or postcode.")
+                        .font(.body).foregroundStyle(AppStyle.supportingText)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(LayoutSpacing.page)
+                Spacer()
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        if !catalogueIsLoaded { catalogueStatus }
+                        ForEach(matchingSpots) { spot in
+                            spotRow(spot, inBrowse: false)
+                            Divider().padding(.leading, 74)
+                        }
+                        ForEach(matchingPlaces) { place in
+                            Button { open(place) } label: {
+                                resultRow(symbol: place.type.symbol, name: place.name,
+                                          address: place.address,
+                                          metadata: "Apple Maps · No cooling information yet",
+                                          isCoolSpot: false)
+                            }.buttonStyle(.plain)
+                            Divider().padding(.leading, 74)
+                        }
+                        PlaceSearchStatus(state: placeSearch.state, retry: {
+                            placeSearch.update(query: query, region: browseRegion, debounce: false)
+                        })
+                        .padding(.horizontal, LayoutSpacing.page)
+                        .padding(.vertical, LayoutSpacing.related)
+                        if placeSearch.state == .loaded && matchingSpots.isEmpty && matchingPlaces.isEmpty {
+                            VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                                Text("No places found").font(.headline)
+                                Text("Try a different name, address or postcode.")
+                                    .font(.body).foregroundStyle(AppStyle.supportingText)
+                                Button("Add cooling information") { showContribution = true }
+                                    .frame(minHeight: 44)
+                            }.padding(LayoutSpacing.page)
+                        }
+                    }
+                }.scrollDismissesKeyboard(.interactively)
+            }
+        }
+        .background(Color(.systemBackground))
     }
 
     @ViewBuilder private var catalogueStatus: some View {
         switch catalogueState {
         case .idle?, .loading?:
-            HStack(spacing: 10) {
-                ProgressView()
-                Text("Loading Cool Spots…")
-            }
-            .font(.subheadline)
-            .padding(12)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            ProgressView("Loading Cool Spots…").padding(LayoutSpacing.page)
         case .failed?:
-            VStack(spacing: 8) {
-                Text("Couldn’t load Cool Spots")
-                Button("Try again", action: retryCatalogue)
-                    .fontWeight(.semibold)
+            VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                Text("Couldn’t load Cool Spots").font(.headline)
+                Text("Try again to load the cooling catalogue.")
+                    .font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                Button("Try again", action: retryCatalogue).frame(minHeight: 44)
+            }.padding(LayoutSpacing.page)
+        case .loaded?, nil:
+            if store.spots.isEmpty {
+                Text("No Cool Spots available")
+                    .font(.headline).padding(LayoutSpacing.page)
             }
-            .font(.subheadline)
-            .padding(12)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-        case let .loaded(spots)? where spots.isEmpty:
-            Text("No Cool Spots available")
-                .font(.subheadline)
-                .padding(12)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-        default:
-            EmptyView()
         }
     }
 
-    private func select(_ spot: CoolSpot) {
-        focusedPlace = nearbyOrigin
-        focusMap(on: spot.coordinate)
+    private func spotRow(_ spot: CoolSpot, inBrowse: Bool) -> some View {
+        Button { open(spot) } label: {
+            resultRow(symbol: spot.type.symbol, name: spot.name, address: spot.address,
+                      metadata: inBrowse
+                        ? "\(spot.features.first?.rawValue ?? "Cooling information") · \(spot.sourceLabel)"
+                        : "Cool Spot · \(spot.sourceLabel)",
+                      isCoolSpot: true,
+                      distanceLabel: inBrowse ? formattedDistance(spot.coordinate) : nil)
+        }.buttonStyle(.plain)
+    }
+
+    private func resultRow(symbol: String, name: String, address: String,
+                           metadata: String, isCoolSpot: Bool, distanceLabel: String? = nil) -> some View {
+        HStack(alignment: .top, spacing: LayoutSpacing.related) {
+            Image(systemName: symbol).font(.body.weight(.medium))
+                .foregroundStyle(isCoolSpot ? .white : AppStyle.brand)
+                .frame(width: 42, height: 42)
+                .background(isCoolSpot ? AppStyle.ink : AppStyle.controlSurface, in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
+                Text(name).font(.body.weight(.semibold))
+                    .foregroundStyle(.primary).fixedSize(horizontal: false, vertical: true)
+                Text(address).font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(metadata).font(.footnote)
+                    .foregroundStyle(isCoolSpot ? AppStyle.brand : AppStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            VStack(alignment: .trailing, spacing: LayoutSpacing.text) {
+                if let distanceLabel {
+                    Text(distanceLabel).font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                        .fixedSize()
+                }
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold))
+                    .foregroundStyle(AppStyle.supportingText).accessibilityHidden(true)
+            }.padding(.top, LayoutSpacing.metadata)
+        }
+        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .padding(.horizontal, LayoutSpacing.page)
+        .padding(.vertical, LayoutSpacing.group)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+    }
+
+    private func beginSearch() {
+        captureBrowseContext()
+        isSearching = true
+        Task { @MainActor in
+            await Task.yield()
+            searchFieldFocused = true
+        }
+    }
+
+    private func captureBrowseContext() {
+        regionBeforeSearch = visibleRegion
+        positionBeforeSearch = camera.positionedByUser
+            ? visibleCamera.map(MapCameraPosition.camera) ?? camera : camera
+        browseRegionBeforeSearch = browseRegion
+        filterBeforeSearch = filter
+        listExpandedBeforeSearch = listExpanded
+    }
+
+    private func cancelSearch() {
+        searchFieldFocused = false
+        placeSearch.cancel()
+        query = ""
+        isSearching = false
+        clearPanelDrag()
+        browseRegion = browseRegionBeforeSearch
+        filter = filterBeforeSearch
+        listExpanded = listExpandedBeforeSearch
+        camera = positionBeforeSearch
+        visibleRegion = regionBeforeSearch
+    }
+
+    private func open(_ spot: CoolSpot) {
+        searchFieldFocused = false
+        regionBeforeDetail = isSearching ? regionBeforeSearch : visibleRegion
+        positionBeforeDetail = isSearching ? positionBeforeSearch : camera.positionedByUser
+            ? visibleCamera.map(MapCameraPosition.camera) ?? camera : camera
+        selectedPlace = nil
+        detailDetent = .medium
+        camera = .region(.init(center: spot.coordinate, span: .init(latitudeDelta: 0.008, longitudeDelta: 0.008)))
         selection = .coolSpot(spot.id)
     }
 
-    private func select(_ place: RecognisedPlace) {
-        if let spot = store.existingSpot(for: place) { select(spot); return }
+    private func open(_ place: RecognisedPlace) {
+        searchFieldFocused = false
+        regionBeforeDetail = isSearching ? regionBeforeSearch : visibleRegion
+        positionBeforeDetail = isSearching ? positionBeforeSearch : camera.positionedByUser
+            ? visibleCamera.map(MapCameraPosition.camera) ?? camera : camera
         store.remember(place)
-        focusedPlace = place
-        focusMap(on: place.coordinate)
+        selectedPlace = place
+        detailDetent = .medium
+        camera = .region(.init(center: place.coordinate, span: .init(latitudeDelta: 0.008, longitudeDelta: 0.008)))
         selection = .recognisedPlace(place.id)
+    }
+
+    private var contributionMenu: some View {
+        Menu {
+            Button { requestLocation(for: .saveCurrentLocation) } label: {
+                Label("Save a pin here", systemImage: "mappin.and.ellipse")
+            }
+            Button { showContribution = true } label: {
+                Label("Add cooling information", systemImage: "plus.bubble.fill")
+            }
+        } label: {
+            Image(systemName: "plus").font(.body.weight(.semibold))
+                .frame(width: 44, height: 44)
+                .background(.regularMaterial, in: Circle())
+        }.accessibilityLabel("Save or contribute")
     }
 
     private func receiveNearbyRequest() {
         guard let place = nearbyPlaceRequest else { return }
         nearbyPlaceRequest = nil
-        search = place.name
+        if !isSearching { captureBrowseContext() }
+        query = place.name
         startNearby(place)
     }
 
@@ -396,18 +810,22 @@ struct ExploreView: View {
         store.remember(place)
         nearbyOrigin = place
         nearbyRadius = 1_000
-        focusedPlace = place
+        selectedPlace = place
         selection = nil
-        searchFocused = false
+        searchFieldFocused = false
+        isSearching = false
         placeSearch.cancel()
+        filter = nil
+        clearPanelDrag()
         focusNearbyArea()
     }
 
     private func returnToOrigin() {
-        guard let place = nearbyOrigin else { return }
+        guard let origin = nearbyOrigin else { return }
         nearbyOrigin = nil
-        select(place)
-        searchPlaces(debounce: false)
+        isSearching = !trimmedQuery.isEmpty
+        placeSearch.update(query: query, region: browseRegion, debounce: false)
+        open(origin)
     }
 
     private func expandNearbyArea() {
@@ -417,41 +835,13 @@ struct ExploreView: View {
 
     private func focusNearbyArea() {
         guard let origin = nearbyOrigin else { return }
-        showSearchArea = false
-        acceptMapMovementAfter = .now.addingTimeInterval(1)
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) {
-            camera = .region(MKCoordinateRegion(center: origin.coordinate,
-                                                latitudinalMeters: nearbyRadius * 2.4,
-                                                longitudinalMeters: nearbyRadius * 2.4))
-        }
-    }
-
-    private func focusMap(on coordinate: CLLocationCoordinate2D) {
-        detailDetent = .medium
-        searchFocused = false
-        showSearchArea = false
-        acceptMapMovementAfter = .now.addingTimeInterval(1)
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) {
-            camera = .region(.init(center: coordinate,
-                                   span: .init(latitudeDelta: 0.008, longitudeDelta: 0.008)))
-        }
-    }
-
-    var filterBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                FilterChip(title: "Nearby", symbol: "location.fill", selected: filter == .nearby) {
-                    requestLocation(for: .nearby)
-                }
-                ForEach(ExploreFilter.visible) { item in
-                    FilterChip(title: item.title, symbol: item.symbol, selected: filter == item) {
-                        filter = filter == item ? nil : item
-                    }
-                }
-                FilterChip(title: "More", symbol: "slider.horizontal.3", selected: false) {}
-            }
-            .padding(.horizontal, 16)
-        }
+        let region = MKCoordinateRegion(center: origin.coordinate,
+                                        latitudinalMeters: nearbyRadius * 2.4,
+                                        longitudinalMeters: nearbyRadius * 2.4)
+        browseRegion = region
+        visibleRegion = region
+        areaChangePending = false
+        camera = .region(region)
     }
 
     private func nearbyDistanceContext(for id: String) -> String? {
@@ -460,23 +850,53 @@ struct ExploreView: View {
         return "\(result.distanceLabel) from \(origin.name) (straight-line)"
     }
 
-    func requestLocation(for purpose: LocationRequestPurpose) {
+    private func requestLocation(for purpose: LocationRequestPurpose) {
         locationRequestPurpose = purpose
-        if hasLocationAccess {
-            showSearchArea = false
-            acceptMapMovementAfter = .now.addingTimeInterval(1)
-            camera = .region(.init(center: store.currentCoordinate,
-                                   span: .init(latitudeDelta: 0.018, longitudeDelta: 0.018)))
-            if purpose == .nearby {
-                filter = .nearby
-            } else {
-                withAnimation { showSaveConfirmation = true }
-            }
-        } else {
-            showLocationExplanation = true
+        if hasLocationAccess { focusCurrentLocation() }
+        else { showLocationExplanation = true }
+    }
+
+    private func focusCurrentLocation() {
+        let region = MKCoordinateRegion(center: store.currentCoordinate,
+                                       span: .init(latitudeDelta: 0.018, longitudeDelta: 0.018))
+        browseRegion = region
+        visibleRegion = region
+        camera = .region(region)
+        filter = nil
+        areaChangePending = false
+        if locationRequestPurpose == .saveCurrentLocation { showSaveConfirmation = true }
+    }
+
+    private func matchesFilter(_ spot: CoolSpot) -> Bool {
+        switch filter {
+        case .indoor: spot.environment == .indoors || spot.environment == .both
+        case .shade: spot.features.contains(.treeShade) || spot.features.contains(.structuralShade)
+        case .airConditioning: spot.features.contains(.airConditioning)
+        case .free: spot.access == .free
+        case .water: spot.features.contains(.drinkingWater) || spot.features.contains(.waterFeature)
+        case nil, .nearby: true
         }
     }
+
+    private func contains(_ coordinate: CLLocationCoordinate2D, in region: MKCoordinateRegion) -> Bool {
+        abs(coordinate.latitude - region.center.latitude) <= region.span.latitudeDelta / 2
+            && abs(coordinate.longitude - region.center.longitude) <= region.span.longitudeDelta / 2
+    }
+
+    private func distance(_ coordinate: CLLocationCoordinate2D, from centre: CLLocationCoordinate2D) -> CLLocationDistance {
+        CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            .distance(from: CLLocation(latitude: centre.latitude, longitude: centre.longitude))
+    }
+
+    private func formattedDistance(_ coordinate: CLLocationCoordinate2D) -> String {
+        let metres = distance(coordinate, from: browseRegion.center)
+        if metres < 1_000 { return "\(Int((metres / 10).rounded()) * 10) m" }
+        return String(format: "%.1f km", metres / 1_000)
+    }
 }
+
+// Developer inspection only: real production views, memory-only data and local
+// accessibility overrides. Does not read/write the user's stored journeys.
 
 struct NearbyCoolSpotResult: Identifiable {
     let spot: CoolSpot
