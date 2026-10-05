@@ -1,0 +1,29 @@
+{
+  "configurations" : [
+    {
+      "id" : "F7F914A9-41F5-488C-9465-AB7CBDE13FE6",
+      "name" : "Test Scheme Action",
+      "options" : {
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:cool-spot.xcodeproj",
+      "identifier" : "6D011D282C000001001D0001",
+      "name" : "cool-spot"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:cool-spot.xcodeproj",
+        "identifier" : "6D011D372C000001001D0001",
+        "name" : "cool_spotTests"
+      }
+    }
+  ],
+  "version" : 1
+}
