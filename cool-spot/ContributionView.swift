@@ -261,6 +261,7 @@ struct ContributionFlow: View {
     let source: ContributionSource
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.usesRefinedContributionLayout) private var usesRefinedLayout
     @State private var draft: PlaceContributionDraft
     @State private var rootPage: PlaceContributionPage
     @State private var path: [PlaceContributionPage] = []
@@ -535,7 +536,12 @@ struct ContributionFlow: View {
                         }
                         fieldError(.location)
                     }.id(ContributionField.location)
-                } header: { sectionHeading("Location") }
+                } header: { sectionHeading("Location") } footer: {
+                    if usesRefinedLayout && draft.isUpdate {
+                        Text("Change only what needs updating. Unchanged details won’t be submitted.")
+                            .font(.subheadline).foregroundStyle(AppStyle.supportingText)
+                    }
+                }
 
                 Section {
                     if draft.sourceSetting {
@@ -552,18 +558,31 @@ struct ContributionFlow: View {
                             TextField("e.g. Shade beside the playground", text: $draft.values.name,
                                       prompt: Text("e.g. Shade beside the playground").foregroundStyle(AppStyle.supportingText), axis: .vertical)
                                 .lineLimit(1...3).focused($focusedField, equals: .name)
+                                .contributionTextInput(isFocused: focusedField == .name)
                                 .accessibilityLabel("Place name, required")
                             fieldError(.name)
                         }.id(ContributionField.name)
                     }
-                    DisclosureGroup("Specific area · Optional", isExpanded: $areaExpanded) {
-                        TextField("e.g. Reading room on the fourth floor", text: $draft.values.locationDetails,
-                                  prompt: Text("e.g. Reading room on the fourth floor").foregroundStyle(AppStyle.supportingText), axis: .vertical)
-                            .focused($focusedField, equals: .locationDetails)
-                            .lineLimit(1...4).accessibilityLabel("Specific cooling area, optional")
-                    }
+                    DisclosureGroup(isExpanded: $areaExpanded) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            if usesRefinedLayout {
+                                contributionHelper("Help people find the cool area within this place.")
+                            }
+                            TextField("e.g. Reading room on the fourth floor", text: $draft.values.locationDetails,
+                                      prompt: Text("e.g. Reading room on the fourth floor").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                                .focused($focusedField, equals: .locationDetails)
+                                .contributionTextInput(isFocused: focusedField == .locationDetails)
+                                .lineLimit(1...4).accessibilityLabel("Specific cooling area, optional")
+                        }
+                    } label: {
+                        if usesRefinedLayout { ContributionFieldLabel("Specific area") }
+                        else { Text("Specific area · Optional") }
+                    }.contributionDisclosureStyle()
                     if draft.sourceType {
-                        LabeledContent("Place type") { Text(draft.values.type?.rawValue ?? "Not known").foregroundStyle(AppStyle.supportingText) }
+                        LabeledContent(usesRefinedLayout ? "Current place type" : "Place type") {
+                            Text((usesRefinedLayout ? draft.original.type : draft.values.type)?.rawValue ?? "Not known")
+                                .foregroundStyle(AppStyle.supportingText)
+                        }
                     } else {
                         ContributionPickerRow("Place type", selection: $draft.values.type, valueText: draft.values.type?.rawValue ?? "Not sure") {
                             Text("Not sure").tag(nil as PlaceType?)
@@ -573,47 +592,47 @@ struct ContributionFlow: View {
                     fieldError(.type).id(ContributionField.type)
                     if draft.sourceName {
                         DisclosureGroup("Name or place type is incorrect", isExpanded: $correctionExpanded) {
-                            Text("Suggest a correction for Cool Spot.")
-                                .font(.footnote).foregroundStyle(AppStyle.supportingText)
-                            VStack(alignment: .leading, spacing: 8) {
-                                ContributionFieldLabel("Suggested name", requirement: nil)
-                                TextField("Suggested name", text: $draft.values.name, axis: .vertical)
-                                    .lineLimit(1...3).focused($focusedField, equals: .name)
-                                fieldError(.name)
-                            }.id(ContributionField.name)
-                            if draft.sourceType {
-                                ContributionPickerRow("Suggested place type", selection: $draft.values.type,
-                                                      valueText: draft.values.type?.rawValue ?? "Choose a type") {
-                                    ForEach(PlaceType.allCases.filter { $0 != .unknown }) { Text($0.rawValue).tag(Optional($0)) }
+                            if usesRefinedLayout {
+                                VStack(alignment: .leading, spacing: 20) {
+                                    contributionHelper("Suggest a corrected name or place type.")
+                                    correctionNameField
+                                    if draft.sourceType { correctionTypePicker }
+                                    correctionExplanationField
                                 }
+                            } else {
+                                Text("Suggest a correction for Cool Spot.")
+                                    .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                                correctionNameField
+                                if draft.sourceType { correctionTypePicker }
+                                correctionExplanationField
                             }
-                            VStack(alignment: .leading, spacing: 8) {
-                                ContributionFieldLabel("Additional details", requirement: "Optional")
-                                TextField("e.g. The sign outside uses this name", text: $draft.values.sourceCorrection,
-                                          prompt: Text("e.g. The sign outside uses this name").foregroundStyle(AppStyle.supportingText), axis: .vertical)
-                                    .lineLimit(2...6).focused($focusedField, equals: .correction)
-                            }
-                        }.font(.subheadline)
+                        }.font(usesRefinedLayout ? .body : .subheadline)
+                            .contributionDisclosureStyle()
                     }
                 } header: { sectionHeading("About the place") }
 
                 Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        ContributionFieldLabel("What helps people cool down?", requirement: draft.isUpdate ? nil : "Required")
-                        if validationAttempt == 0 || !draft.validationIssues.contains(where: { $0.field == .features }) {
-                            Text(draft.isUpdate ? "Change only the features you can confirm." : "Choose at least one.")
-                                .font(.footnote).foregroundStyle(AppStyle.supportingText)
-                        }
-                        fieldError(.features)
-                    }.id(ContributionField.features)
-                    CoolingFeatureChoices(selection: $draft.values.features)
-                        .labelStyle(ContributionLeadingLabelStyle())
+                    if usesRefinedLayout {
+                        VStack(alignment: .leading, spacing: 8) {
+                            coolingQuestion.padding(.top, 16)
+                            CoolingFeatureChoices(selection: $draft.values.features, compactRows: true)
+                        }.id(ContributionField.features)
+                            .contributionInspectionGeometry("Cooling card content", enabled: true)
+                    } else {
+                        coolingQuestion.id(ContributionField.features)
+                        CoolingFeatureChoices(selection: $draft.values.features)
+                            .labelStyle(ContributionLeadingLabelStyle())
+                    }
                     if draft.needsRemovalReason {
                         VStack(alignment: .leading, spacing: 8) {
                             ContributionFieldLabel("What changed?", requirement: "Required")
+                            if usesRefinedLayout {
+                                contributionHelper("Explain why these features no longer apply. Only reviewers see this explanation.")
+                            }
                             TextField("Why should these cooling features be removed?", text: $draft.values.removalReason,
                                       prompt: Text("Why should these cooling features be removed?").foregroundStyle(AppStyle.supportingText), axis: .vertical)
                                 .lineLimit(2...6).focused($focusedField, equals: .removalReason)
+                                .contributionTextInput(isFocused: focusedField == .removalReason)
                                 .accessibilityLabel("What changed? Required")
                             fieldError(.removalReason)
                         }.id(ContributionField.removalReason)
@@ -624,51 +643,38 @@ struct ContributionFlow: View {
                     VStack(alignment: .leading, spacing: 8) {
                         ContributionFieldLabel("Photo", requirement: draft.isUnlisted ? "Required" : "Optional")
                         Text("Show a landmark or entrance so people can find the spot.")
-                            .font(.footnote).foregroundStyle(AppStyle.supportingText)
+                            .font(usesRefinedLayout ? .subheadline : .footnote).foregroundStyle(AppStyle.supportingText)
                         fieldError(.photo)
                         ContributionPhotoField(values: $draft.values, loading: $photoLoading)
                     }.id(ContributionField.photo)
                 }
 
                 Section {
-                    DisclosureGroup("Entry and seating", isExpanded: $visitingExpanded) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ContributionPickerRow("Who can use this spot?", selection: $draft.values.entryEligibility, valueText: draft.values.entryEligibility.rawValue) {
-                                ForEach(PlaceEntryEligibility.allCases) { Text($0.rawValue).tag($0) }
-                            }
-                            if draft.values.entryEligibility == .limited {
-                                Text(PlaceEntryEligibility.limitedExamples)
-                                    .font(.footnote).foregroundStyle(AppStyle.supportingText)
-                            }
+                    if usesRefinedLayout {
+                        VStack(alignment: .leading, spacing: 24) {
+                            entryDisclosure
+                            facilitiesDisclosure
+                            additionalInformationField
                         }
-                        ContributionPickerRow("Cost to use", selection: $draft.values.access, valueText: draft.values.access.rawValue) {
-                            ForEach(AccessType.allCases) { Text($0.rawValue).tag($0) }
-                        }
-                        ContributionPickerRow("Seating", selection: $draft.values.seating, valueText: draft.values.seating == .unsure ? "Not added" : draft.values.seating.displayName) {
-                            ForEach(SeatingType.allCases) { Text($0 == .unsure ? "Not added" : $0.displayName).tag($0) }
-                        }
-                        factPicker("Wheelchair accessible", value: $draft.values.wheelchairAccess)
-                        PostedStayLimitPicker(value: $draft.values.stayLimit)
-                    }
-                    DisclosureGroup("Facilities", isExpanded: $facilitiesExpanded) {
-                        ContributionPickerRow("Toilets", selection: $draft.values.toilets, valueText: draft.values.toilets.choiceLabel) {
-                            ForEach(PlaceInformation.Toilets.allCases) { Text($0.choiceLabel).tag($0) }
-                        }
-                        factPicker("Staff on site when open", value: $draft.values.staffedWhenOpen)
-                        factPicker("Tables", value: $draft.values.tables)
-                    }
-                    VStack(alignment: .leading, spacing: 8) {
-                        ContributionFieldLabel("Anything else people should know?", requirement: "Optional")
-                        TextField("Add a useful detail", text: $draft.values.note,
-                                  prompt: Text("Add a useful detail").foregroundStyle(AppStyle.supportingText), axis: .vertical)
-                            .lineLimit(2...6).focused($focusedField, equals: .note)
-                            .accessibilityLabel("Anything else people should know? Optional")
+                    } else {
+                        entryDisclosure
+                        facilitiesDisclosure
+                        additionalInformationField
                     }
                 } header: { sectionHeading("More details") }
 
                 if draft.isUpdate {
                     if !draft.changes.isEmpty {
-                        Section("Your changes") { ForEach(draft.changes, id: \.self) { Text($0).font(.subheadline) } }
+                        Section {
+                            ForEach(draft.changes, id: \.self) { change in
+                                if usesRefinedLayout && change == coolingFeatureChangeDescription {
+                                    CoolingFeatureChangeSummary(original: draft.original.features,
+                                                                proposed: draft.values.features)
+                                } else {
+                                    Text(change).font(usesRefinedLayout ? .body : .subheadline)
+                                }
+                            }
+                        } header: { sectionHeading("Your changes") }
                     } else if validationAttempt > 0 {
                         Section { fieldError(.changes) }.id(ContributionField.changes)
                     }
@@ -677,7 +683,7 @@ struct ContributionFlow: View {
             }
             .listSectionSpacing(LayoutSpacing.section)
             .environment(\.defaultMinListRowHeight, 44)
-            // Use one row inset for custom questions and native picker wrappers.
+            // Refined controls own their sizing inside grouped Form rows.
             .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             .scrollDismissesKeyboard(.immediately)
             .onScrollPhaseChange { _, phase in
@@ -700,8 +706,118 @@ struct ContributionFlow: View {
             }
         }
     }
+    // Isolate this display row using the existing formatter, without parsing its copy
+    // or changing the real draft, change detection, validation or submission.
+    private var coolingFeatureChangeDescription: String? {
+        var featureOnlyDraft = draft
+        featureOnlyDraft.values = draft.original
+        featureOnlyDraft.values.features = draft.values.features
+        return featureOnlyDraft.changes.first
+    }
+    private var coolingQuestion: some View {
+        VStack(alignment: .leading, spacing: usesRefinedLayout ? 4 : 8) {
+            ContributionFieldLabel("What helps people cool down?", requirement: draft.isUpdate ? nil : "Required", emphasized: true)
+            if validationAttempt == 0 || !draft.validationIssues.contains(where: { $0.field == .features }) {
+                Text(draft.isUpdate ? "Change only the features you can confirm." : "Choose at least one.")
+                    .font(usesRefinedLayout ? .subheadline : .footnote).foregroundStyle(AppStyle.supportingText)
+            }
+            fieldError(.features)
+        }
+    }
+    private var entryDisclosure: some View {
+        DisclosureGroup("Entry and seating", isExpanded: $visitingExpanded) {
+            if usesRefinedLayout { VStack(spacing: 0) { entryAndSeatingFields } }
+            else { entryAndSeatingFields }
+        }.contributionDisclosureStyle()
+    }
+    private var facilitiesDisclosure: some View {
+        DisclosureGroup("Facilities", isExpanded: $facilitiesExpanded) {
+            if usesRefinedLayout { VStack(spacing: 0) { facilityFields } }
+            else { facilityFields }
+        }.contributionDisclosureStyle()
+    }
+    private var additionalInformationField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ContributionFieldLabel("Anything else people should know?", requirement: "Optional")
+            if usesRefinedLayout {
+                contributionHelper("This will appear in the place information if approved.")
+            }
+            TextField(usesRefinedLayout ? "e.g. Use the entrance on the south side" : "Add a useful detail", text: $draft.values.note,
+                      prompt: Text(usesRefinedLayout ? "e.g. Use the entrance on the south side" : "Add a useful detail").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                .lineLimit(2...6).focused($focusedField, equals: .note)
+                .contributionTextInput(isFocused: focusedField == .note)
+                .accessibilityLabel("Anything else people should know? Optional")
+        }
+    }
+    @ViewBuilder private var entryAndSeatingFields: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ContributionPickerRow(usesRefinedLayout ? "Who can use it?" : "Who can use this spot?", selection: $draft.values.entryEligibility, valueText: draft.values.entryEligibility.rawValue) {
+                ForEach(PlaceEntryEligibility.allCases) { Text($0.rawValue).tag($0) }
+            }
+            if draft.values.entryEligibility == .limited {
+                Text(PlaceEntryEligibility.limitedExamples)
+                    .font(.footnote).foregroundStyle(AppStyle.supportingText)
+            }
+        }
+        if usesRefinedLayout { ContributionFormSeparator("Entry first separator") }
+        ContributionPickerRow("Cost to use", selection: $draft.values.access, valueText: draft.values.access.rawValue) {
+            ForEach(AccessType.allCases) { Text($0.rawValue).tag($0) }
+        }
+        if usesRefinedLayout { ContributionFormSeparator() }
+        ContributionPickerRow("Seating", selection: $draft.values.seating, valueText: draft.values.seating == .unsure ? "Not added" : draft.values.seating.displayName) {
+            ForEach(SeatingType.allCases) { Text($0 == .unsure ? "Not added" : $0.displayName).tag($0) }
+        }
+        if usesRefinedLayout { ContributionFormSeparator() }
+        factPicker("Wheelchair accessible", value: $draft.values.wheelchairAccess)
+        if usesRefinedLayout { ContributionFormSeparator() }
+        PostedStayLimitPicker(value: $draft.values.stayLimit)
+    }
+    @ViewBuilder private var facilityFields: some View {
+        ContributionPickerRow("Toilets", selection: $draft.values.toilets, valueText: draft.values.toilets.choiceLabel) {
+            ForEach(PlaceInformation.Toilets.allCases) { Text($0.choiceLabel).tag($0) }
+        }
+        if usesRefinedLayout { ContributionFormSeparator("Facilities first separator") }
+        factPicker("Staff on site when open", value: $draft.values.staffedWhenOpen)
+        if usesRefinedLayout { ContributionFormSeparator() }
+        factPicker("Tables", value: $draft.values.tables)
+    }
     private func sectionHeading(_ title: String) -> some View {
-        Text(title).foregroundStyle(AppStyle.supportingText).textCase(nil)
+        Text(title)
+            .font(usesRefinedLayout ? .body.weight(.semibold) : nil)
+            .foregroundStyle(usesRefinedLayout ? Color.primary : AppStyle.supportingText)
+            .textCase(nil)
+    }
+    private func contributionHelper(_ text: String) -> some View {
+        Text(text).font(.subheadline).foregroundStyle(AppStyle.supportingText)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+    private var correctionNameField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ContributionFieldLabel("Suggested name", requirement: usesRefinedLayout ? "Required" : nil)
+            TextField("Suggested name", text: $draft.values.name, axis: .vertical)
+                .lineLimit(1...3).focused($focusedField, equals: .name)
+                .contributionTextInput(isFocused: focusedField == .name)
+                .accessibilityLabel("Suggested name, required", isEnabled: usesRefinedLayout)
+            fieldError(.name)
+        }.id(ContributionField.name)
+            .contributionInspectionGeometry("Suggested name field", enabled: usesRefinedLayout)
+    }
+    private var correctionTypePicker: some View {
+        ContributionPickerRow("Suggested place type", selection: $draft.values.type,
+                              valueText: draft.values.type?.rawValue ?? "Choose a type", stackedValue: true) {
+            ForEach(PlaceType.allCases.filter { $0 != .unknown }) { Text($0.rawValue).tag(Optional($0)) }
+        }
+    }
+    private var correctionExplanationField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ContributionFieldLabel(usesRefinedLayout ? "Reason for correction" : "Additional details", requirement: "Optional")
+            if usesRefinedLayout { contributionHelper("Only reviewers see this explanation.") }
+            TextField("e.g. The sign outside uses this name", text: $draft.values.sourceCorrection,
+                      prompt: Text("e.g. The sign outside uses this name").foregroundStyle(AppStyle.supportingText), axis: .vertical)
+                .lineLimit(2...6).focused($focusedField, equals: .correction)
+                .contributionTextInput(isFocused: focusedField == .correction)
+                .accessibilityLabel("Reason for correction, optional", isEnabled: usesRefinedLayout)
+        }
     }
     @ViewBuilder private func fieldError(_ field: ContributionField) -> some View {
         if validationAttempt > 0, let issue = draft.validationIssues.first(where: { $0.field == field }) {
@@ -710,7 +826,7 @@ struct ContributionFlow: View {
             } icon: {
                 Image(systemName: "exclamationmark.circle").foregroundStyle(.red)
             }
-                .font(.footnote)
+                .font(usesRefinedLayout ? .subheadline : .footnote)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityLabel("Error: \(issue.message)")
                 .accessibilityFocused($focusedError, equals: field)
@@ -744,7 +860,10 @@ struct ContributionFlow: View {
                 // Buttons allow an unanswered question without adding a fourth
                 // placeholder option or assigning a default on the user's behalf.
                 Group {
-                    if selected {
+                    if usesRefinedLayout {
+                        environmentButton(environment, vertical: vertical)
+                            .buttonStyle(.plain)
+                    } else if selected {
                         environmentButton(environment, vertical: vertical)
                             .buttonStyle(.borderedProminent)
                     } else {
@@ -766,6 +885,12 @@ struct ContributionFlow: View {
                     ? Color(uiColor: .systemBackground) : AppStyle.brand)
                 .fixedSize(horizontal: !vertical, vertical: true)
                 .frame(maxWidth: .infinity, minHeight: 44)
+                .background {
+                    if usesRefinedLayout {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(draft.values.setting == environment ? AppStyle.brand : Color(uiColor: .quaternarySystemFill))
+                    }
+                }
         }
         .accessibilityLabel("\(environment.rawValue), indoors or outdoors")
     }
@@ -804,17 +929,133 @@ private struct ContributionLeadingLabelStyle: LabelStyle {
     }
 }
 
+private extension View {
+    func contributionTextInput(isFocused: Bool) -> some View {
+        modifier(ContributionTextInputStyle(isFocused: isFocused))
+    }
+    @ViewBuilder func contributionDisclosureStyle() -> some View {
+        modifier(ContributionDisclosureModifier())
+    }
+    @ViewBuilder func contributionInspectionGeometry(_ label: String, enabled: Bool) -> some View {
+        #if DEBUG
+        let isLayoutInspection = ProcessInfo.processInfo.arguments.contains("--contribution-layout-preview")
+            || Bundle.main.bundleIdentifier?.hasPrefix("com.chihyinwang.cool-spot.contribution-preview") == true
+        if enabled && isLayoutInspection {
+            self.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                print("Contribution layout · \(label) · \(frame)")
+            }
+        } else { self }
+        #else
+        self
+        #endif
+    }
+}
+
+private struct ContributionTextInputStyle: ViewModifier {
+    @Environment(\.usesRefinedContributionLayout) private var usesRefinedLayout
+    let isFocused: Bool
+    @ViewBuilder func body(content: Content) -> some View {
+        if usesRefinedLayout {
+            content
+                .font(.body).foregroundStyle(.primary)
+                .padding(12)
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+                .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(isFocused ? AppStyle.brand : AppStyle.supportingText.opacity(0.45),
+                                      lineWidth: isFocused ? 1.5 : 1)
+                        .allowsHitTesting(false)
+                }
+        } else { content }
+    }
+}
+
+private struct ContributionDisclosureModifier: ViewModifier {
+    @Environment(\.usesRefinedContributionLayout) private var usesRefinedLayout
+    @ViewBuilder func body(content: Content) -> some View {
+        if usesRefinedLayout { content.disclosureGroupStyle(ContributionRefinedDisclosureStyle()) }
+        else { content }
+    }
+}
+
+// Keep native disclosure state/semantics while owning the refined layout's inner spacing.
+private struct ContributionRefinedDisclosureStyle: DisclosureGroupStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+                    configuration.isExpanded.toggle()
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    configuration.label.frame(maxWidth: .infinity, alignment: .leading)
+                    Image(systemName: configuration.isExpanded ? "chevron.down" : "chevron.right")
+                        .font(.subheadline.weight(.semibold)).accessibilityHidden(true)
+                }
+                .font(.body).foregroundStyle(.primary)
+                .frame(minHeight: 44).contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(configuration.isExpanded ? "Expanded" : "Collapsed")
+            if configuration.isExpanded {
+                ContributionFormSeparator()
+                configuration.content.padding(.top, 8)
+            }
+        }
+    }
+}
+
+// A drawn separator stays inside our stack; Form cannot reinterpret it as a row separator.
+private struct ContributionFormSeparator: View {
+    @Environment(\.displayScale) private var displayScale
+    private let inspectionLabel: String?
+    init(_ inspectionLabel: String? = nil) { self.inspectionLabel = inspectionLabel }
+    var body: some View {
+        Rectangle().fill(Color(.separator))
+            .frame(height: 1 / displayScale)
+            .accessibilityHidden(true)
+            .contributionInspectionGeometry(inspectionLabel ?? "Separator", enabled: inspectionLabel != nil)
+    }
+}
+
+private struct ContributionRefinedLayoutKey: EnvironmentKey {
+    // The accepted layout is shared by normal Register and Suggest an edit flows.
+    // DEBUG comparison can still explicitly select the historical layout.
+    static let defaultValue = true
+}
+extension EnvironmentValues {
+    var usesRefinedContributionLayout: Bool {
+        get { self[ContributionRefinedLayoutKey.self] }
+        set { self[ContributionRefinedLayoutKey.self] = newValue }
+    }
+}
+
 // Requirement text always belongs to a question, never a section heading.
 private struct ContributionFieldLabel: View {
+    @Environment(\.usesRefinedContributionLayout) private var usesRefinedLayout
     let title: String
     let requirement: String?
-    init(_ title: String, requirement: String? = "Optional") {
-        self.title = title; self.requirement = requirement
+    let emphasized: Bool
+    init(_ title: String, requirement: String? = "Optional", emphasized: Bool = false) {
+        self.title = title; self.requirement = requirement; self.emphasized = emphasized
     }
+    @ViewBuilder
     var body: some View {
-        (Text(title).font(.subheadline.weight(.semibold)) +
-         Text(requirement.map { " · \($0)" } ?? "").font(.subheadline).foregroundColor(AppStyle.supportingText))
-            .fixedSize(horizontal: false, vertical: true)
+        if usesRefinedLayout {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.body.weight(emphasized ? .semibold : .regular))
+                    .foregroundStyle(.primary).fixedSize(horizontal: false, vertical: true)
+                if let requirement {
+                    Text(requirement).font(.footnote).foregroundStyle(AppStyle.supportingText)
+                }
+            }
+        } else {
+            (Text(title).font(.subheadline.weight(.semibold)) +
+             Text(requirement.map { " · \($0)" } ?? "").font(.subheadline).foregroundColor(AppStyle.supportingText))
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 
@@ -823,13 +1064,19 @@ private struct ContributionPickerRow<Selection: Hashable, Options: View>: View {
     @Binding var selection: Selection
     let options: Options
     let valueText: String
+    let stackedValue: Bool
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    init(_ title: String, selection: Binding<Selection>, valueText: String, @ViewBuilder options: () -> Options) {
-        self.title = title; _selection = selection; self.valueText = valueText; self.options = options()
+    @Environment(\.usesRefinedContributionLayout) private var usesRefinedLayout
+    init(_ title: String, selection: Binding<Selection>, valueText: String, stackedValue: Bool = false,
+         @ViewBuilder options: () -> Options) {
+        self.title = title; _selection = selection; self.valueText = valueText
+        self.stackedValue = stackedValue; self.options = options()
     }
     var body: some View {
         Group {
-            if dynamicTypeSize.isAccessibilitySize {
+            if usesRefinedLayout {
+                refinedMenu
+            } else if dynamicTypeSize.isAccessibilitySize {
                 stacked
             } else {
                 ViewThatFits(in: .horizontal) {
@@ -841,7 +1088,55 @@ private struct ContributionPickerRow<Selection: Hashable, Options: View>: View {
                     stacked
                 }
             }
-        }.frame(minHeight: 44)
+        }
+        .frame(minHeight: usesRefinedLayout ? 56 : 44)
+        .contributionInspectionGeometry(title, enabled: usesRefinedLayout)
+    }
+    private var refinedMenu: some View {
+        Menu {
+            Picker(title, selection: $selection) { options }.pickerStyle(.inline)
+        } label: {
+            Group {
+                if stackedValue {
+                    stackedValueContent
+                } else {
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 16) {
+                            refinedLabel.fixedSize(horizontal: true, vertical: true)
+                            Spacer(minLength: 0)
+                            refinedValue.fixedSize(horizontal: true, vertical: true)
+                        }
+                        stackedValueContent
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 56)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title).accessibilityValue(valueText).accessibilityHint("Optional")
+    }
+    private var stackedValueContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            refinedLabel
+            if stackedValue {
+                refinedValue.contributionTextInput(isFocused: false)
+                    .contributionInspectionGeometry("Correction type control", enabled: usesRefinedLayout)
+            } else {
+                refinedValue.frame(minHeight: 44, alignment: .leading)
+            }
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+    private var refinedLabel: some View {
+        ContributionFieldLabel(title)
+    }
+    private var refinedValue: some View {
+        HStack(spacing: 6) {
+            Text(valueText).font(.body).multilineTextAlignment(.leading)
+            if stackedValue { Spacer(minLength: 8) }
+            Image(systemName: "chevron.up.chevron.down").font(.caption)
+                .accessibilityHidden(true)
+        }.foregroundStyle(AppStyle.brand)
     }
     private var stacked: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -854,6 +1149,40 @@ private struct ContributionPickerRow<Selection: Hashable, Options: View>: View {
             .pickerStyle(.menu).labelsHidden()
             .accessibilityValue(valueText)
             .accessibilityHint("Optional")
+    }
+}
+
+private struct CoolingFeatureChangeSummary: View {
+    let original: Set<CoolingFeature>
+    let proposed: Set<CoolingFeature>
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Cooling features").font(.body.weight(.semibold))
+            changeGroup("Add", symbol: "plus", features: proposed.subtracting(original))
+            changeGroup("Remove", symbol: "minus", features: original.subtracting(proposed))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func changeGroup(_ title: String, symbol: String, features: Set<CoolingFeature>) -> some View {
+        if !features.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.supportingText)
+                ForEach(CoolingFeature.allCases.filter { features.contains($0) }) { feature in
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Image(systemName: symbol).font(.caption.weight(.semibold))
+                            .foregroundStyle(AppStyle.supportingText).frame(width: 16)
+                            .accessibilityHidden(true)
+                        Text(feature.rawValue).font(.body).foregroundStyle(.primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
     }
 }
 
@@ -904,30 +1233,44 @@ struct PostedStayLimitPicker: View {
 // Shared, inline multi-selection: short answers never require a separate page.
 struct CoolingFeatureChoices: View {
     @Binding var selection: Set<CoolingFeature>
+    var compactRows = false
     @ScaledMetric(relativeTo: .body) private var iconWidth = 24
     var body: some View {
-        ForEach(CoolingFeature.allCases) { feature in
-            Button {
-                if selection.contains(feature) { selection.remove(feature) }
-                else { selection.insert(feature) }
-            } label: {
-                HStack(spacing: 12) {
-                    HStack(alignment: .firstTextBaseline, spacing: LayoutSpacing.text) {
-                        Image(systemName: feature.symbol)
-                            .frame(width: iconWidth).accessibilityHidden(true)
-                        Text(feature.rawValue)
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }.foregroundStyle(.primary)
-                    Spacer(minLength: 8)
-                    Image(systemName: selection.contains(feature) ? "checkmark.circle.fill" : "circle")
-                        .frame(width: iconWidth).accessibilityHidden(true)
-                        .foregroundStyle(selection.contains(feature) ? AppStyle.brand : .secondary)
-                }.frame(minHeight: 44)
+        if compactRows {
+            VStack(spacing: 0) {
+                ForEach(CoolingFeature.allCases) { feature in
+                    featureButton(feature)
+                    if feature != CoolingFeature.allCases.last {
+                        ContributionFormSeparator().padding(.leading, iconWidth + LayoutSpacing.text)
+                    }
+                }
             }
-            .buttonStyle(.borderless)
-            .accessibilityAddTraits(selection.contains(feature) ? .isSelected : [])
+        } else {
+            ForEach(CoolingFeature.allCases) { featureButton($0) }
         }
+    }
+    private func featureButton(_ feature: CoolingFeature) -> some View {
+        Button {
+            if selection.contains(feature) { selection.remove(feature) }
+            else { selection.insert(feature) }
+        } label: {
+            HStack(spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: LayoutSpacing.text) {
+                    Image(systemName: feature.symbol)
+                        .frame(width: iconWidth).accessibilityHidden(true)
+                    Text(feature.rawValue)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }.foregroundStyle(.primary)
+                Spacer(minLength: 8)
+                Image(systemName: selection.contains(feature) ? "checkmark.circle.fill" : "circle")
+                    .frame(width: iconWidth).accessibilityHidden(true)
+                    .foregroundStyle(selection.contains(feature) ? AppStyle.brand : .secondary)
+            }.frame(minHeight: compactRows ? 56 : 44)
+        }
+        .buttonStyle(.borderless)
+        .contributionInspectionGeometry(feature.rawValue, enabled: compactRows)
+        .accessibilityAddTraits(selection.contains(feature) ? .isSelected : [])
     }
 }
 

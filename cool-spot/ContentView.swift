@@ -21,12 +21,15 @@ struct ContentView: View {
         #if DEBUG
         usesReportExamples = arguments.contains("--reports-test-fixtures")
         let usesExploreLayoutPreview = arguments.contains("--explore-layout-preview")
+        let usesContributionLayoutPreview = arguments.contains("--contribution-layout-preview")
+            || Bundle.main.bundleIdentifier?.hasPrefix("com.chihyinwang.cool-spot.contribution-preview") == true
         #else
         usesReportExamples = false
         let usesExploreLayoutPreview = false
+        let usesContributionLayoutPreview = false
         #endif
         // Preserve the previous launch argument for existing local QA shortcuts.
-        let usesExamples = usesReportExamples || arguments.contains("--shape-preview")
+        let usesExamples = usesReportExamples || usesContributionLayoutPreview || arguments.contains("--shape-preview")
             || arguments.contains("--example-cool-spots") || arguments.contains("--example-catalog")
         let initialStore: PrototypeStore
         if usesExploreLayoutPreview {
@@ -84,7 +87,10 @@ struct ContentView: View {
 
     var body: some View {
         #if DEBUG
-        if let index = ProcessInfo.processInfo.arguments.firstIndex(of: "--shape-preview"),
+        if ProcessInfo.processInfo.arguments.contains("--contribution-layout-preview")
+            || Bundle.main.bundleIdentifier?.hasPrefix("com.chihyinwang.cool-spot.contribution-preview") == true {
+            ContributionLayoutInspectionView()
+        } else if let index = ProcessInfo.processInfo.arguments.firstIndex(of: "--shape-preview"),
            ProcessInfo.processInfo.arguments.indices.contains(index + 1) {
             ShapeInspectionView(screen: ProcessInfo.processInfo.arguments[index + 1])
         } else { mainApp }
@@ -296,6 +302,44 @@ private struct ShapeInspectionView: View {
             }
         default: PresenceExplanationSheet()
         }
+    }
+}
+#endif
+
+#if DEBUG
+// One real flow, one memory store, and a rendering switch: answers survive comparison.
+private struct ContributionLayoutInspectionView: View {
+    @StateObject private var store = PrototypeStore(reportDefaults: nil)
+    @State private var presented = true
+    @State private var proposal = true
+    @State private var sessionID = UUID()
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Update layout preview").font(.title2.bold())
+            Text("Compare the same form in Current and Proposal.\nUses example data on this preview device.")
+                .font(.body).multilineTextAlignment(.center).foregroundStyle(AppStyle.supportingText)
+            Button("Open update form") {
+                sessionID = UUID(); presented = true
+            }.buttonStyle(PrimaryButtonStyle())
+        }
+        .padding(24)
+        .sheet(isPresented: $presented) {
+            VStack(spacing: 0) {
+                Picker("Layout", selection: $proposal) {
+                    Text("Current").tag(false)
+                    Text("Proposal").tag(true)
+                }
+                .pickerStyle(.segmented).padding(.horizontal, 20).padding(.vertical, 12)
+                .accessibilityHint("Switch layouts without clearing your answers")
+                ContributionFlow(store: store, source: .existingCoolSpot(store.spots[0]))
+                    .id(sessionID)
+                    .environment(\.usesRefinedContributionLayout, proposal)
+            }
+            .presentationDetents([.large])
+        }
+        .tint(AppStyle.brand)
+        .preferredColorScheme(.light)
+        .environment(\.dynamicTypeSize, .large)
     }
 }
 #endif
