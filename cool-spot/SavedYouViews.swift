@@ -543,16 +543,13 @@ struct PublishedVisitReportView: View {
     var body: some View {
         List {
             Section {
+                if let spot = store.spot(report.spotID) { ReportPlaceContext(spot: spot) }
                 VisitorReportContent(item: .init(id: report.id.uuidString, comment: report.comment,
-                                                 report: report, provenance: .own))
+                                                 report: report, provenance: .own), showsProvenance: false)
                 if store.hasReceivedExamplePopsicle(for: report.id) { ReceivedPopsicleExample() }
-            } header: {
-                Text(store.spot(report.spotID)?.name ?? "Cool Spot")
-                    .font(.subheadline.weight(.semibold)).textCase(nil)
-                    .foregroundStyle(AppStyle.supportingText)
             } footer: {
                 Text("Published \(report.submittedAt.formatted(date: .abbreviated, time: .shortened))")
-                    .foregroundStyle(AppStyle.supportingText)
+                    .font(.caption).foregroundStyle(AppStyle.supportingText)
             }
         }.listStyle(.plain)
         .navigationTitle("Your report").navigationBarTitleDisplayMode(.inline)

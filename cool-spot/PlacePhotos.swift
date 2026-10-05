@@ -46,12 +46,15 @@ struct PlacePhotoStrip: View {
     let photos: [PlacePhotoAsset]
     let placeName: String
     @State private var selection: PhotoSelection?
+    private var columns: CGFloat { CGFloat(min(photos.count, 3)) }
+    private var thumbnailHeight: CGFloat { photos.count == 1 ? 160 : 108 }
 
     var body: some View {
         if !photos.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Photos · \(photos.count)").font(.subheadline).foregroundStyle(.secondary)
+                    Text("Photos · \(photos.count)").font(.title3.weight(.semibold))
+                        .accessibilityAddTraits(.isHeader)
                     Spacer()
                     if photos.count > 1 {
                         NavigationLink("See all") { PlacePhotoGallery(photos: photos, placeName: placeName) }
@@ -65,14 +68,15 @@ struct PlacePhotoStrip: View {
                     ForEach(Array(photos.prefix(3))) { photo in
                         Button { selection = .init(id: photo.id) } label: {
                             PlacePhotoImage(url: photo.thumbnailURL, fill: true)
-                                .frame(width: (geometry.size.width - 16) / 3, height: 108).clipped()
+                                .frame(width: (geometry.size.width - 8 * (columns - 1)) / columns,
+                                       height: thumbnailHeight).clipped()
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(photo.caption ?? "View place photo")
                     }
                 }
-                }.frame(height: 108)
+                }.frame(height: thumbnailHeight)
             }
             .fullScreenCover(item: $selection) { selection in
                 PlacePhotoViewer(photos: photos, selectedID: selection.id, placeName: placeName)

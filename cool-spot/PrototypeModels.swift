@@ -47,6 +47,11 @@ enum AppStyle {
             ? UIColor(red: 0.74, green: 0.77, blue: 0.79, alpha: 1)
             : UIColor(red: 0.30, green: 0.33, blue: 0.35, alpha: 1)
     })
+    static let errorText = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 1, green: 0.72, blue: 0.72, alpha: 1)
+            : UIColor(red: 0.64, green: 0.16, blue: 0.16, alpha: 1)
+    })
     static let mint = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(red: 0.08, green: 0.23, blue: 0.20, alpha: 1)
@@ -779,6 +784,13 @@ final class PrototypeStore: ObservableObject {
         return visitReports.first { $0.spotID == spotID && $0.confirmationAt == confirmation }
     }
 
+    func ownReports(for spotID: String) -> [VisitReport] {
+        VisitorReportItem.newestFirst(visitReports.filter { $0.spotID == spotID }
+            .map { VisitorReportItem(id: $0.id.uuidString, comment: $0.comment,
+                                     report: $0, provenance: .own) })
+            .compactMap(\.report)
+    }
+
     var visitsToShare: [CoolSpot] {
         spots.filter { visitConfirmedAt[$0.id] != nil && publishedReport(for: $0.id) == nil }
             .sorted { visitConfirmedAt[$0.id, default: .distantPast] > visitConfirmedAt[$1.id, default: .distantPast] }
@@ -794,11 +806,13 @@ final class PrototypeStore: ObservableObject {
     }
 
     @discardableResult
-    func beginVisitReport(for spot: CoolSpot, at now: Date = .now) -> Bool {
+    func beginVisitReport(for spot: CoolSpot, initialExperience: CoolingExperience? = nil,
+                          at now: Date = .now) -> Bool {
         guard canReportVisit(for: spot, at: now) else { return false }
         if spot.isNearby { confirmVisitIfNeeded(for: spot, at: now) }
         if reportDrafts[spot.id] == nil {
-            reportDrafts[spot.id] = VisitReportDraft(visitedAt: visitConfirmedAt[spot.id] ?? now)
+            reportDrafts[spot.id] = VisitReportDraft(experience: initialExperience,
+                                                    visitedAt: visitConfirmedAt[spot.id] ?? now)
         }
         persistJourneys()
         return true

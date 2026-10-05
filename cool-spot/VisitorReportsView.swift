@@ -1,6 +1,35 @@
 import MapKit
 import SwiftUI
 
+struct PlaceOwnReportsView: View {
+    @ObservedObject var store: PrototypeStore
+    let spot: CoolSpot
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(store.ownReports(for: spot.id)) { report in
+                    NavigationLink {
+                        PublishedVisitReportView(store: store, report: report)
+                    } label: {
+                        VStack(alignment: .leading, spacing: LayoutSpacing.text) {
+                            Label(report.experience.rawValue, systemImage: report.experience.symbol)
+                                .font(.headline)
+                            Text("Visited \(report.visitedAt.formatted(date: .abbreviated, time: .shortened))")
+                                .font(.caption).foregroundStyle(AppStyle.supportingText)
+                        }.padding(.vertical, LayoutSpacing.text)
+                    }
+                }
+            } header: {
+                Text(spot.name).textCase(nil).font(.subheadline.weight(.semibold))
+            }
+        }
+        .listStyle(.plain)
+        .navigationTitle("Your report history").navigationBarTitleDisplayMode(.inline)
+        .tint(AppStyle.brand)
+    }
+}
+
 // Extend the existing native teal/mint system. Read first, thank second.
 // Individual reports never inherit facts or dates from aggregate totals.
 // Recognition is a local demo, not cooling evidence or a ranking signal.
@@ -40,6 +69,7 @@ struct VisitorReportsView: View {
 // remain absent; presentation never supplies an answer or date on their behalf.
 struct VisitorReportContent: View {
     let item: VisitorReportItem
+    var showsProvenance = true
     var body: some View {
         VStack(alignment: .leading, spacing: LayoutSpacing.related) {
             if let report = item.report {
@@ -69,8 +99,7 @@ struct VisitorReportContent: View {
                 }
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.sourceLabel)
-                    .font(.caption.weight(.semibold))
+                if showsProvenance { Text(item.sourceLabel).font(.caption.weight(.semibold)) }
                 if let report = item.report {
                     Text("Visited \(report.visitedAt.formatted(date: .abbreviated, time: .shortened))")
                         .font(.caption)

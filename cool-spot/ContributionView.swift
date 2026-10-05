@@ -904,6 +904,7 @@ struct PostedStayLimitPicker: View {
 // Shared, inline multi-selection: short answers never require a separate page.
 struct CoolingFeatureChoices: View {
     @Binding var selection: Set<CoolingFeature>
+    @ScaledMetric(relativeTo: .body) private var iconWidth = 24
     var body: some View {
         ForEach(CoolingFeature.allCases) { feature in
             Button {
@@ -911,10 +912,16 @@ struct CoolingFeatureChoices: View {
                 else { selection.insert(feature) }
             } label: {
                 HStack(spacing: 12) {
-                    Label(feature.rawValue, systemImage: feature.symbol).foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(alignment: .firstTextBaseline, spacing: LayoutSpacing.text) {
+                        Image(systemName: feature.symbol)
+                            .frame(width: iconWidth).accessibilityHidden(true)
+                        Text(feature.rawValue)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }.foregroundStyle(.primary)
                     Spacer(minLength: 8)
                     Image(systemName: selection.contains(feature) ? "checkmark.circle.fill" : "circle")
+                        .frame(width: iconWidth).accessibilityHidden(true)
                         .foregroundStyle(selection.contains(feature) ? AppStyle.brand : .secondary)
                 }.frame(minHeight: 44)
             }

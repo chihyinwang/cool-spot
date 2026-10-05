@@ -6,6 +6,111 @@ import MapKit
 @MainActor
 final class CoolSpotTests: XCTestCase {
 
+    func testMapMarkersIncludeSelectedSpotOutsideBrowseAndReadCurrentPresence() throws {
+        let store = PrototypeStore(reportDefaults: nil)
+        let selected = try XCTUnwrap(store.spot("library"))
+        let shaded = try XCTUnwrap(store.spot("shade"))
+        func markers() -> [ExploreMapSpot] {
+            ExploreMapSpot.make(browsing: [shaded], selected: selected,
+                                presence: { store.presence(for: $0) })
+        }
+
+        XCTAssertEqual(markers().map(\.id), [shaded.id, selected.id])
+        XCTAssertEqual(markers().last?.count, selected.presenceCount)
+        store.checkIn(selected)
+        XCTAssertEqual(markers().last?.count, selected.presenceCount + 1)
+        XCTAssertTrue(store.visitReports.isEmpty)
+
+        store.activePresenceSpotID = nil
+        XCTAssertEqual(markers().last?.count, selected.presenceCount)
+    }
+
+    func testMapMarkersNeverDuplicateSelectionOrRetainItAfterClosing() throws {
+        let store = PrototypeStore(reportDefaults: nil)
+        let selected = try XCTUnwrap(store.spot("library"))
+        let shaded = try XCTUnwrap(store.spot("shade"))
+        store.checkIn(selected)
+
+        let included = ExploreMapSpot.make(browsing: [selected, shaded], selected: selected,
+                                           presence: { store.presence(for: $0) })
+        XCTAssertEqual(included.map(\.id), [selected.id, shaded.id])
+        XCTAssertEqual(included.first?.count, selected.presenceCount + 1)
+
+        let closed = ExploreMapSpot.make(browsing: [shaded], selected: nil,
+                                         presence: { store.presence(for: $0) })
+        XCTAssertEqual(closed.map(\.id), [shaded.id])
+        XCTAssertEqual(closed.first?.count, shaded.presenceCount)
+    }
+
+    func testQuickExperienceStartsOnlyItsConfirmedDraftAndCanBeFinishedAway() throws {
+        let store = PrototypeStore(reportDefaults: nil)
+        var spot = try XCTUnwrap(store.spot("library"))
+        let now = Date(timeIntervalSince1970: 2_000_000)
+        let originalPresence = store.presence(for: spot, at: now)
+
+        XCTAssertTrue(store.beginVisitReport(for: spot, initialExperience: .notCooler, at: now))
+
+        XCTAssertEqual(store.reportDrafts[spot.id]?.experience, .notCooler)
+        XCTAssertEqual(store.reportDrafts[spot.id]?.visitedAt, now)
+        XCTAssertEqual(store.visitConfirmedAt[spot.id], now)
+        XCTAssertTrue(store.visitReports.isEmpty)
+        XCTAssertNil(store.activePresenceSpotID)
+        XCTAssertEqual(store.presence(for: spot, at: now), originalPresence)
+        spot.isNearby = false
+        XCTAssertTrue(store.canReportVisit(for: spot, at: now.addingTimeInterval(86_400)))
+        XCTAssertTrue(store.beginVisitReport(for: spot, at: now.addingTimeInterval(86_400)))
+        XCTAssertEqual(store.reportDrafts[spot.id]?.visitedAt, now)
+    }
+
+    func testQuickExperienceNeverOverwritesAnExistingDraftOrConfirmsAnAwayVisit() throws {
+        let store = PrototypeStore(reportDefaults: nil)
+        var spot = try XCTUnwrap(store.spot("library"))
+        let now = Date(timeIntervalSince1970: 2_000_000)
+        spot.isNearby = false
+        XCTAssertFalse(store.beginVisitReport(for: spot, initialExperience: .muchCooler, at: now))
+        XCTAssertNil(store.reportDrafts[spot.id])
+        XCTAssertNil(store.visitConfirmedAt[spot.id])
+
+        spot.isNearby = true
+        XCTAssertTrue(store.beginVisitReport(for: spot, at: now))
+        let saved = VisitReportDraft(experience: .aLittleCooler, helpedFeatures: [.fans],
+                                    stay: .under30, comment: "Keep my original answers", visitedAt: now)
+        store.saveReportDraft(saved, for: spot.id)
+        spot.isNearby = false
+        XCTAssertTrue(store.beginVisitReport(for: spot, initialExperience: .muchCooler,
+                                            at: now.addingTimeInterval(86_400)))
+        XCTAssertEqual(store.reportDrafts[spot.id], saved)
+        XCTAssertTrue(store.visitReports.isEmpty)
+        XCTAssertNil(store.activePresenceSpotID)
+    }
+
+    func testOwnPlaceReportHistoryUsesVisitTimeAndKeepsAllOriginalRecords() throws {
+        let store = PrototypeStore(reportDefaults: nil)
+        let spot = try XCTUnwrap(store.spot("library"))
+        let now = Date(timeIntervalSince1970: 2_000_000)
+        func report(_ number: Int, place: String, visit: TimeInterval, sent: TimeInterval) -> VisitReport {
+            VisitReport(id: UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", number))!,
+                        spotID: place, experience: .aLittleCooler, helpedFeatures: [.fans],
+                        stayLength: .under30, comment: "Original \(number)",
+                        visitedAt: now.addingTimeInterval(visit), confirmationAt: now,
+                        submittedAt: now.addingTimeInterval(sent))
+        }
+        let old = report(1, place: spot.id, visit: -172_800, sent: 30)
+        let recent = report(2, place: spot.id, visit: -10, sent: 10)
+        let tied = report(3, place: spot.id, visit: -10, sent: 20)
+        let other = report(4, place: "park", visit: 0, sent: 40)
+        store.visitReports = [old, other, recent, tied]
+
+        let history = store.ownReports(for: spot.id)
+
+        XCTAssertEqual(history.map(\.id), [tied.id, recent.id, old.id])
+        XCTAssertEqual(history.map(\.comment), ["Original 3", "Original 2", "Original 1"])
+        XCTAssertEqual(store.visitReports.map(\.id), [old.id, other.id, recent.id, tied.id])
+        XCTAssertTrue(store.ownReports(for: "unknown").isEmpty)
+        XCTAssertTrue(store.reportDrafts.isEmpty)
+        XCTAssertNil(store.activePresenceSpotID)
+    }
+
     func testCoolSpotsResponseUsesV4DatasetIDAndReadsLegacyResponseIDs() throws {
         let current = try CoolSpotsResponse.bundled()
         let encoded = try JSONEncoder().encode(current)

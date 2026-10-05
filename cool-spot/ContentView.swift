@@ -185,9 +185,57 @@ private struct ShapeInspectionView: View {
     @StateObject private var store = PrototypeStore()
     private let args = ProcessInfo.processInfo.arguments
     @State private var presented = true
+    @State private var detailDetent: PresentationDetent = .large
     init(screen: String) {
         self.screen = screen
         let memoryStore = PrototypeStore()
+        if screen == "detail-report",
+           var spot = PrototypeComparisonPlaces.communitySpots.first(where: { $0.name == "Example Community Room" }) {
+            let arguments = ProcessInfo.processInfo.arguments
+            func option(_ name: String, fallback: String) -> String {
+                guard let index = arguments.firstIndex(of: name), arguments.indices.contains(index + 1) else { return fallback }
+                return arguments[index + 1]
+            }
+            // Explicit, disposable examples exercise the normal views and store.
+            // They never read or overwrite the owner's persisted journeys.
+            let scenario = option("--preview-report-state", fallback: "first")
+            let photoCount = Int(option("--preview-detail-photos", fallback: "0")) ?? 0
+            spot.photos = Array(spot.photos.prefix(photoCount))
+            spot.information.areaDescription = "Fourth-floor reading room"
+            spot.information.wheelchairAccessible = false
+            spot.experienceReports = [:]
+            spot.stayReports = [:]
+            spot.comments = []
+            spot.presenceCount = 0
+            let detailStore = PrototypeStore(reportDefaults: nil, catalogueMode: .api)
+            detailStore.replaceAPICatalogue([spot])
+            detailStore.simulateNearbySpot(spot.id)
+            let now = Date.now
+            if scenario == "history" {
+                for offset in [4, 2, 0] {
+                    let date = now.addingTimeInterval(-Double(offset) * 86_400 - 600)
+                    let nearby = detailStore.spot(spot.id)!
+                    if detailStore.publishedReport(for: spot.id) != nil {
+                        _ = detailStore.beginNewVisitReport(for: nearby, at: date)
+                    } else {
+                        _ = detailStore.beginVisitReport(for: nearby, at: date)
+                    }
+                    _ = detailStore.submitReport(spot: nearby, experience: offset == 2 ? .notCooler : .aLittleCooler,
+                        helpedFeatures: [.fans], stay: .under30, comment: "Example visit for layout review.",
+                        visitedAt: date, at: date)
+                }
+            } else if scenario == "draft" {
+                let date = now.addingTimeInterval(-2 * 86_400)
+                _ = detailStore.beginVisitReport(for: detailStore.spot(spot.id)!, at: date)
+                detailStore.saveReportDraft(.init(experience: .aLittleCooler, helpedFeatures: [.fans],
+                    stay: .under30, comment: "Example saved draft for layout review.", visitedAt: date), for: spot.id)
+                detailStore.simulateNearbySpot(nil)
+            } else if scenario == "away" {
+                detailStore.simulateNearbySpot(nil)
+            }
+            _store = StateObject(wrappedValue: detailStore)
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--preview-entry-requirements") {
             memoryStore.spots[0].entryEligibility = .limited
             memoryStore.spots[0].entryRequirement = "Example: university students and staff only"
@@ -210,6 +258,9 @@ private struct ShapeInspectionView: View {
         Color(.systemBackground)
             .sheet(isPresented: $presented) {
                 content
+                    .presentationDetents(screen == "detail-report" ? [.medium, .large] : [.large],
+                                         selection: $detailDetent)
+                    .presentationDragIndicator(screen == "detail-report" ? .visible : .automatic)
                     .environment(\.dynamicTypeSize, args.contains("--preview-large") ? .accessibility5 : .large)
                     .tint(AppStyle.brand)
             }
@@ -219,6 +270,8 @@ private struct ShapeInspectionView: View {
     }
     @ViewBuilder var content: some View {
         switch screen {
+        case "detail-report":
+            if let spot = store.spots.first { CoolSpotDetailView(store: store, spot: spot) }
         case "report", "report-required":
             if let spot = store.spot("library") {
                 VisitReportFlow(store: store, spot: spot, initialExperience: screen == "report" ? .muchCooler : nil)

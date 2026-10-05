@@ -43,6 +43,21 @@ enum LocationRequestPurpose: Equatable {
     case saveCurrentLocation
 }
 
+struct ExploreMapSpot: Identifiable {
+    let spot: CoolSpot
+    let count: Int
+    var id: String { spot.id }
+
+    static func make(browsing: [CoolSpot], selected: CoolSpot?,
+                     presence: (CoolSpot) -> Int) -> [Self] {
+        var spots = browsing
+        if let selected, !spots.contains(where: { $0.id == selected.id }) {
+            spots.append(selected)
+        }
+        return spots.map { .init(spot: $0, count: presence($0)) }
+    }
+}
+
 struct ExploreView: View {
     @ObservedObject var store: PrototypeStore
     @Binding var nearbyPlaceRequest: RecognisedPlace?
@@ -133,6 +148,14 @@ struct ExploreView: View {
     private var matchingSpots: [CoolSpot] {
         guard !trimmedQuery.isEmpty else { return [] }
         return store.searchCoolSpots(query: trimmedQuery, including: placeSearch.places)
+    }
+
+    private var mapSpots: [ExploreMapSpot] {
+        let selected: CoolSpot?
+        if case .coolSpot(let id) = selection { selected = store.spot(id) }
+        else { selected = nil }
+        return ExploreMapSpot.make(browsing: browseSpots, selected: selected,
+                                   presence: { store.presence(for: $0) })
     }
 
     private var matchingPlaces: [RecognisedPlace] {
@@ -238,22 +261,20 @@ struct ExploreView: View {
                             CurrentLocationMarker()
                         }
                     }
-                    ForEach(browseSpots) { spot in
-                        Annotation(spot.name, coordinate: spot.coordinate, anchor: .bottom) {
-                            Button { open(spot) } label: {
-                                CoolSpotPin(type: spot.type, count: store.presence(for: spot))
+                    ForEach(mapSpots) { marker in
+                        Annotation(marker.spot.name, coordinate: marker.spot.coordinate, anchor: .bottom) {
+                            Button { open(marker.spot) } label: {
+                                CoolSpotPin(type: marker.spot.type, count: marker.count)
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel(spot.name)
+                            .accessibilityLabel(marker.count > 0
+                                ? "\(marker.spot.name). \(marker.count) \(marker.count == 1 ? "person" : "people") shared they’re cooling off here in the last 10 minutes"
+                                : marker.spot.name)
                         }
                     }
                     if let selectedPlace, selection != nil || nearbyOrigin != nil {
                         Marker(selectedPlace.name, coordinate: selectedPlace.coordinate)
                             .tint(AppStyle.brand)
-                    }
-                    if case .coolSpot(let id) = selection, let spot = store.spot(id),
-                       !browseSpots.contains(where: { $0.id == id }) {
-                        Marker(spot.name, coordinate: spot.coordinate).tint(AppStyle.brand)
                     }
                 }
                 // Keyboard and tab-bar changes must not resize the hidden map
