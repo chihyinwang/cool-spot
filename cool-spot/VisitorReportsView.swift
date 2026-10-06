@@ -195,8 +195,6 @@ struct PresenceMapExample: View {
             if !reduceMotion {
                 Button(paused ? "Resume example" : "Pause example") { paused.toggle() }
                     .frame(minHeight: 44)
-                Text(elapsed < 6 ? "Example restarts at 2" : "One more person: 3")
-                    .font(.caption).foregroundStyle(.secondary).accessibilityHidden(true)
             }
         }
         .task(id: runs) {

@@ -1,19 +1,40 @@
+[![Cool Spot app icon: a person sitting in shade beside sunlight.](docs/images/app-icon-preview.png)](docs/images/app-icon-ios.png)
+
 # Cool Spot
 
-**Find a place to cool down.**
+**Find a place to cool down in London.**
 
-![An illustrated London street with a shaded bench beneath a leafy tree and a welcoming library.](docs/images/cool-spot-cover.jpg)
+Cool Spot is a native iOS prototype for finding places to cool down in London. It integrates the Greater London Authority's (GLA) [2025 Cool Spaces data](https://data.london.gov.uk/dataset/cool-space-data-2025-2z19p) with Apple Maps search, so people can check cooling and access information before they go.
 
-## Why Cool Spot?
+| Explore | Place detail · Illustrative photos | Report · Choose how it felt |
+| :---: | :---: | :---: |
+| [![Explore a London map with cooling filters and a place preview.](docs/images/explore-preview-current.png)](docs/images/explore-current.png) | [![Example Community Room detail showing illustrative photos, facilities and additional place information.](docs/images/place-photos-preview-current.png)](docs/images/place-photos-current.png) | [![Example visit: start a report by choosing Not cooler, A little cooler or Much cooler.](docs/images/report-entry-preview-current.png)](docs/images/report-entry-current.png) |
 
-Londoners need somewhere to cool down on hot days, but scattered information about how places feel, who can use them and what they cost leaves people guessing.
+## Features
 
-## See the app
+- **Find a cooling place.** Browse the map or place list; filter for indoor spaces, outdoor shade, air conditioning, free entry or water. Search places with Apple Maps.
+- **See where people are cooling off.** View recent anonymous shares on the map and use **I’m cooling off here** to share for 10 minutes. Presence and proximity are simulated in this prototype.
+- **Check the details.** See cooling features, cost, access restrictions and available photos, then open directions.
+- **Save places for later.** Keep places and private notes in **Saved**.
+- **Report a visit.** For an eligible visit, choose **Not cooler**, **A little cooler** or **Much cooler**. Add optional details or use **Finish later** to keep a private draft.
+- **Add or update a place.** Register cooling information or use **Suggest an edit**. **Your changes** shows added and removed cooling features.
+- **Find your activity.** Return to drafts, completed visit reports and place proposal records in **You**.
 
-[![Explore nearby cooling spots on a map of London.](docs/images/explore-preview.png)](docs/images/explore.png) [![Check a spot's facilities, entry conditions and visitor experiences.](docs/images/place-preview.png)](docs/images/place.png) [![Share how much cooler a visit felt compared with outside.](docs/images/report-preview.png)](docs/images/report.png)
+Reports and place proposals are saved on the device in this prototype.
 
-*Screens show example places and reports.*
+| Suggest an edit | How this works · Simulated example |
+| :---: | :---: |
+| [![Suggest an edit showing a note field and an Add Fans / Remove Air conditioning change summary.](docs/images/edit-changes-preview-current.png)](docs/images/edit-changes-current.png) | [![The app’s How this works screen: anonymous ten-minute sharing and an example map count increasing from two to three.](docs/images/how-this-works-preview-current.png)](docs/images/how-this-works-current.png) |
 
-- **Find your next cooling spot.** Explore indoor spaces and outdoor shade; filter for AC, water or free use.
-- **Decide before you go.** Check facilities, entry conditions and visitor experiences. Save a place or open walking directions in Apple Maps.
-- **Help the next visitor.** Share how a visit felt, or propose a missing spot—even a patch of shade beside a playground.
+## Engineering
+
+```mermaid
+flowchart LR
+    DB["PostgreSQL"] --> API["TypeScript API"] --> App["Swift / SwiftUI · iOS"]
+```
+
+[Shared SwiftUI components](cool-spot/PrototypeSharedViews.swift) define spacing, fact rows and button styles. The same cooling-feature selector serves Report, Register and Suggest an edit.
+
+## Run
+
+Open `cool-spot.xcodeproj` in Xcode and select the **cool-spot** scheme. Requires iOS 18 or later.
