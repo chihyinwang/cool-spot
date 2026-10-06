@@ -320,7 +320,7 @@ struct ContributionFlow: View {
             screen(rootPage)
                 .navigationDestination(for: PlaceContributionPage.self) { screen($0) }
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
         .onChange(of: path) { _, _ in focusedField = nil }
         .interactiveDismissDisabled(draft.isDirty && !sent)
         .background(ContributionDismissObserver(hasChanges: draft.isDirty && !sent) { showClose = true })
@@ -376,7 +376,7 @@ struct ContributionFlow: View {
         case .complete:
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Image(systemName: "paperplane.circle.fill").font(.largeTitle).foregroundStyle(AppStyle.brand)
+                    Image(systemName: "paperplane.circle.fill").font(.largeTitle).foregroundStyle(AppStyle.actionForeground)
                     Text("Thanks for helping others find a cool spot").font(.title2.bold())
                     Text("Your information is waiting for review. It isn’t public yet.")
                     Text("Follow it in You → Places you’ve added or updated.")
@@ -517,7 +517,7 @@ struct ContributionFlow: View {
                         if draft.isUnlisted {
                             Map(position: .constant(.region(.init(center: draft.values.coordinate,
                                 span: .init(latitudeDelta: 0.003, longitudeDelta: 0.004)))), interactionModes: []) {
-                                Marker("Selected spot", coordinate: draft.values.coordinate).tint(AppStyle.brand)
+                                Marker("Selected spot", coordinate: draft.values.coordinate).tint(AppStyle.actionForeground)
                             }
                             .mapStyle(.standard(elevation: .flat, emphasis: .muted, pointsOfInterest: .excludingAll))
                             .frame(height: 150).clipShape(RoundedRectangle(cornerRadius: 12))
@@ -882,13 +882,13 @@ struct ContributionFlow: View {
         } label: {
             Text(environment.rawValue)
                 .foregroundStyle(draft.values.setting == environment
-                    ? Color(uiColor: .systemBackground) : AppStyle.brand)
+                    ? Color.white : AppStyle.actionForeground)
                 .fixedSize(horizontal: !vertical, vertical: true)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .background {
                     if usesRefinedLayout {
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(draft.values.setting == environment ? AppStyle.brand : Color(uiColor: .quaternarySystemFill))
+                            .fill(draft.values.setting == environment ? AppStyle.actionFill : Color(uiColor: .quaternarySystemFill))
                     }
                 }
         }
@@ -963,7 +963,7 @@ private struct ContributionTextInputStyle: ViewModifier {
                 .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
                 .overlay {
                     RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(isFocused ? AppStyle.brand : AppStyle.supportingText.opacity(0.45),
+                        .strokeBorder(isFocused ? AppStyle.actionForeground : AppStyle.supportingText.opacity(0.45),
                                       lineWidth: isFocused ? 1.5 : 1)
                         .allowsHitTesting(false)
                 }
@@ -1136,7 +1136,7 @@ private struct ContributionPickerRow<Selection: Hashable, Options: View>: View {
             if stackedValue { Spacer(minLength: 8) }
             Image(systemName: "chevron.up.chevron.down").font(.caption)
                 .accessibilityHidden(true)
-        }.foregroundStyle(AppStyle.brand)
+        }.foregroundStyle(AppStyle.actionForeground)
     }
     private var stacked: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -1265,7 +1265,7 @@ struct CoolingFeatureChoices: View {
                 Spacer(minLength: 8)
                 Image(systemName: selection.contains(feature) ? "checkmark.circle.fill" : "circle")
                     .frame(width: iconWidth).accessibilityHidden(true)
-                    .foregroundStyle(selection.contains(feature) ? AppStyle.brand : .secondary)
+                    .foregroundStyle(selection.contains(feature) ? AppStyle.actionForeground : .secondary)
             }.frame(minHeight: compactRows ? 56 : 44)
         }
         .buttonStyle(.borderless)
@@ -1290,7 +1290,7 @@ struct ContributionLocationEditor: View {
                     .font(.subheadline).foregroundStyle(AppStyle.supportingText)
                 MapReader { proxy in
                     Map(initialPosition: .region(.init(center: values.coordinate, span: .init(latitudeDelta: 0.004, longitudeDelta: 0.004)))) {
-                        Marker("Selected spot", coordinate: values.coordinate).tint(AppStyle.brand)
+                        Marker("Selected spot", coordinate: values.coordinate).tint(AppStyle.actionForeground)
                     }
                     .onTapGesture { point in
                         if let coordinate = proxy.convert(point, from: .local) {

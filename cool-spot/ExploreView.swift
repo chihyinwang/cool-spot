@@ -158,6 +158,11 @@ struct ExploreView: View {
                                    presence: { store.presence(for: $0) })
     }
 
+    private var selectedCoolSpotID: String? {
+        if case .coolSpot(let id) = selection { return id }
+        return nil
+    }
+
     private var matchingPlaces: [RecognisedPlace] {
         PlaceSearchResults.unique(placeSearch.places
             + PlaceSearchResults.matching(store.recognisedPlaces, query: trimmedQuery))
@@ -264,9 +269,13 @@ struct ExploreView: View {
                     ForEach(mapSpots) { marker in
                         Annotation(marker.spot.name, coordinate: marker.spot.coordinate, anchor: .bottom) {
                             Button { open(marker.spot) } label: {
-                                CoolSpotPin(type: marker.spot.type, count: marker.count)
+                                CoolSpotPin(type: marker.spot.type, count: marker.count,
+                                            isSelected: selectedCoolSpotID == marker.spot.id)
+                                    .frame(minWidth: 44, minHeight: 44)
+                                    .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
+                            .accessibilityAddTraits(selectedCoolSpotID == marker.spot.id ? .isSelected : [])
                             .accessibilityLabel(marker.count > 0
                                 ? "\(marker.spot.name). \(marker.count) \(marker.count == 1 ? "person" : "people") shared they’re cooling off here in the last 10 minutes"
                                 : marker.spot.name)
@@ -274,7 +283,7 @@ struct ExploreView: View {
                     }
                     if let selectedPlace, selection != nil || nearbyOrigin != nil {
                         Marker(selectedPlace.name, coordinate: selectedPlace.coordinate)
-                            .tint(AppStyle.brand)
+                            .tint(AppStyle.actionForeground)
                     }
                 }
                 // Keyboard and tab-bar changes must not resize the hidden map
@@ -593,10 +602,10 @@ struct ExploreView: View {
                 Text(title)
             }
             .font(.subheadline.weight(.medium))
-            .foregroundStyle(filter == value ? .white : AppStyle.brand)
+            .foregroundStyle(filter == value ? .white : AppStyle.actionForeground)
             .padding(.horizontal, LayoutSpacing.related)
             .frame(minHeight: 44)
-            .background(filter == value ? AppStyle.ink : AppStyle.controlSurface, in: Capsule())
+            .background(filter == value ? AppStyle.actionFill : AppStyle.controlSurface, in: Capsule())
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(filter == value ? .isSelected : [])
@@ -720,9 +729,9 @@ struct ExploreView: View {
                            metadata: String, isCoolSpot: Bool, distanceLabel: String? = nil) -> some View {
         HStack(alignment: .top, spacing: LayoutSpacing.related) {
             Image(systemName: symbol).font(.body.weight(.medium))
-                .foregroundStyle(isCoolSpot ? .white : AppStyle.brand)
+                .foregroundStyle(isCoolSpot ? .white : AppStyle.actionForeground)
                 .frame(width: 42, height: 42)
-                .background(isCoolSpot ? AppStyle.ink : AppStyle.controlSurface, in: Circle())
+                .background(isCoolSpot ? AppStyle.mapMarkerFill : AppStyle.controlSurface, in: Circle())
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                 Text(name).font(.body.weight(.semibold))
@@ -730,7 +739,7 @@ struct ExploreView: View {
                 Text(address).font(.subheadline).foregroundStyle(AppStyle.supportingText)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(metadata).font(.footnote)
-                    .foregroundStyle(isCoolSpot ? AppStyle.brand : AppStyle.supportingText)
+                    .foregroundStyle(AppStyle.supportingText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
@@ -1029,7 +1038,7 @@ struct CurrentLocationSavePrompt: View {
                 Button("Cancel", action: cancel).buttonStyle(.bordered)
                 Spacer()
                 Button("Save pin", action: save)
-                    .buttonStyle(.borderedProminent).tint(AppStyle.ink)
+                    .buttonStyle(.borderedProminent).tint(AppStyle.actionFill)
             }
         }
         .padding(14)
@@ -1076,9 +1085,9 @@ struct FilterChip: View {
     var body: some View {
         Button(action: action) {
             Label(title, systemImage: symbol).font(.caption.weight(.semibold))
-                .foregroundStyle(selected ? .white : AppStyle.brand)
+                .foregroundStyle(selected ? .white : AppStyle.actionForeground)
                 .padding(.horizontal, 12).padding(.vertical, 9)
-                .background(selected ? AppStyle.ink : AppStyle.controlSurface, in: Capsule())
+                .background(selected ? AppStyle.actionFill : AppStyle.controlSurface, in: Capsule())
                 .overlay(Capsule().stroke(AppStyle.subtleBorder))
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
@@ -1089,9 +1098,11 @@ struct FilterChip: View {
 struct CoolSpotPin: View {
     let type: PlaceType
     let count: Int
+    var isSelected = false
     var arrivalPhase: Int = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @ScaledMetric(relativeTo: .body) private var diameter = 42.0
+    @ScaledMetric(relativeTo: .body) private var diameter = 38.0
+    @ScaledMetric(relativeTo: .body) private var selectedDiameter = 44.0
     @ScaledMetric(relativeTo: .caption) private var badgeSpace = 32.0
     var body: some View {
         VStack(spacing: 4) {
@@ -1111,11 +1122,13 @@ struct CoolSpotPin: View {
             }
             Image(systemName: type.symbol)
                 .font(.body.weight(.bold)).foregroundStyle(.white)
-                .frame(width: diameter, height: diameter).background(AppStyle.ink, in: Circle())
-                .overlay(Circle().stroke(.white, lineWidth: 2))
+                .frame(width: isSelected ? selectedDiameter : diameter,
+                       height: isSelected ? selectedDiameter : diameter)
+                .background(isSelected ? AppStyle.selectedMapMarkerFill : AppStyle.mapMarkerFill, in: Circle())
+                .overlay(Circle().stroke(.white, lineWidth: isSelected ? 3 : 2))
         }
         // Stable bottom anchor in the map, including when the badge disappears.
-        .frame(minHeight: diameter + badgeSpace, alignment: .bottom)
+        .frame(minHeight: selectedDiameter + badgeSpace, alignment: .bottom)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(type.rawValue). \(count > 0 ? "\(count) people shared they’re cooling off here in the last 10 minutes" : "No active shared presence")")
     }
@@ -1172,8 +1185,8 @@ struct SearchResultRow: View {
     let isCoolSpot: Bool
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol).foregroundStyle(isCoolSpot ? .white : AppStyle.brand)
-                .frame(width: 38, height: 38).background(isCoolSpot ? AppStyle.ink : AppStyle.blue, in: Circle())
+            Image(systemName: symbol).foregroundStyle(isCoolSpot ? .white : AppStyle.actionForeground)
+                .frame(width: 38, height: 38).background(isCoolSpot ? AppStyle.mapMarkerFill : AppStyle.blue, in: Circle())
             VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                 Text(title).font(.subheadline.weight(.semibold))
                 Text(subtitle).font(.caption).foregroundStyle(AppStyle.supportingText)
@@ -1199,7 +1212,7 @@ struct NearbyPanel: View {
                     Text("Cool Spots").font(.headline)
                 }
                 Spacer()
-                Text("\(spots.count) places").font(.caption.weight(.semibold)).foregroundStyle(AppStyle.brand)
+                Text("\(spots.count) places").font(.caption.weight(.semibold)).foregroundStyle(AppStyle.supportingText)
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: LayoutSpacing.related) {
@@ -1207,7 +1220,7 @@ struct NearbyPanel: View {
                         Button { choose(spot) } label: {
                             HStack(spacing: LayoutSpacing.related) {
                                 Image(systemName: spot.type.symbol).foregroundStyle(.white)
-                                    .frame(width: 34, height: 34).background(AppStyle.ink, in: Circle())
+                                    .frame(width: 34, height: 34).background(AppStyle.mapMarkerFill, in: Circle())
                                 VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                                     Text(spot.name).font(.subheadline.weight(.semibold)).lineLimit(1)
                                     Text([spot.isExample ? spot.sourceLabel : spot.distance, spot.features.first?.rawValue ?? spot.type.shortName].filter { !$0.isEmpty }.joined(separator: " · "))
@@ -1231,7 +1244,7 @@ struct SavedToast: View {
     let view: () -> Void
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "bookmark.fill").foregroundStyle(AppStyle.brand)
+            Image(systemName: "bookmark.fill").foregroundStyle(AppStyle.actionForeground)
             VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                 Text("Private pin saved").font(.subheadline.weight(.semibold))
                 Text("Added to Saved → Pins").font(.caption).foregroundStyle(.secondary)

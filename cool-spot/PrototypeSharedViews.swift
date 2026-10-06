@@ -40,7 +40,7 @@ struct FactRow: View {
     let title: String
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Image(systemName: symbol).foregroundStyle(AppStyle.brand).frame(width: 24)
+            Image(systemName: symbol).foregroundStyle(AppStyle.informationAccent).frame(width: 24)
                 .accessibilityHidden(true)
             Text(title).font(.subheadline).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
@@ -59,7 +59,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical, 14)
             .padding(.horizontal, 18)
-            .background(isEnabled ? AppStyle.ink.opacity(configuration.isPressed ? 0.76 : 1)
+            .background(isEnabled ? (configuration.isPressed ? AppStyle.actionPressedFill : AppStyle.actionFill)
                                   : AppStyle.controlSurface,
                         in: RoundedRectangle(cornerRadius: 14))
     }
@@ -71,18 +71,17 @@ struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(isEnabled ? AppStyle.brand : Color.secondary)
+            .foregroundStyle(isEnabled ? (configuration.isPressed ? AppStyle.actionPressedForeground : AppStyle.actionForeground) : Color.secondary)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical, 14)
             .padding(.horizontal, 18)
-            .background(Color(uiColor: .systemBackground),
+            .background(configuration.isPressed && isEnabled ? AppStyle.pressedControlSurface : Color(uiColor: .systemBackground),
                         in: RoundedRectangle(cornerRadius: 14))
             .overlay {
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(isEnabled ? AppStyle.brand.opacity(configuration.isPressed ? 0.48 : 0.68)
+                    .stroke(isEnabled ? (configuration.isPressed ? AppStyle.actionPressedForeground : AppStyle.actionBorder)
                                       : AppStyle.subtleBorder, lineWidth: 1)
             }
-            .opacity(configuration.isPressed ? 0.72 : 1)
     }
 }
 
@@ -98,9 +97,9 @@ struct SelectionCard: View {
             HStack(spacing: LayoutSpacing.related) {
                 Image(systemName: symbol)
                     .font(.title3)
-                    .foregroundStyle(selected ? .white : AppStyle.brand)
+                    .foregroundStyle(selected ? .white : AppStyle.actionForeground)
                     .frame(width: 44, height: 44)
-                    .background(selected ? AppStyle.ink : AppStyle.blue, in: Circle())
+                    .background(selected ? AppStyle.actionFill : AppStyle.blue, in: Circle())
                 VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                     Text(title).font(.headline)
                     if let subtitle {
@@ -109,13 +108,13 @@ struct SelectionCard: View {
                 }
                 Spacer()
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(selected ? AppStyle.brand : Color.secondary)
+                    .foregroundStyle(selected ? AppStyle.actionForeground : Color.secondary)
             }
             .padding(LayoutSpacing.group)
             .background(Color.secondary.opacity(selected ? 0.12 : 0.06),
                         in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16)
-                .stroke(selected ? AppStyle.brand : .clear, lineWidth: 2))
+                .stroke(selected ? AppStyle.actionForeground : .clear, lineWidth: 2))
         }
         .buttonStyle(.plain)
     }
@@ -135,7 +134,7 @@ struct PlaceCover: View {
             Circle().fill(.white.opacity(0.34)).frame(width: 180).offset(x: 110, y: -30)
             Image(systemName: type.symbol)
                 .font(.system(size: 76, weight: .light))
-                .foregroundStyle(AppStyle.brand.opacity(0.88))
+                .foregroundStyle(AppStyle.actionForeground.opacity(0.88))
             VStack {
                 Spacer()
                 HStack {
@@ -165,7 +164,7 @@ struct DetailAction: View {
                     .background(AppStyle.blue, in: Circle())
                 Text(title).font(.caption.weight(.medium)).lineLimit(1)
             }
-            .foregroundStyle(AppStyle.brand)
+            .foregroundStyle(AppStyle.actionForeground)
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)

@@ -62,7 +62,7 @@ struct CoolSpotDetailView: View {
                 }
             }
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
         .alert("Start your report while you’re here", isPresented: $showReportUnavailable) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -80,7 +80,7 @@ struct CoolSpotDetailView: View {
             PresenceExplanationSheet()
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
-                .tint(AppStyle.brand)
+                .tint(AppStyle.actionForeground)
         }
         .sheet(isPresented: $showReportingHelp) { ReportingHelpSheet() }
     }
@@ -152,7 +152,7 @@ struct CoolSpotDetailView: View {
                             .font(.subheadline)
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                             .contentShape(Rectangle())
-                    }.buttonStyle(.plain).foregroundStyle(AppStyle.brand)
+                    }.buttonStyle(.plain).foregroundStyle(AppStyle.actionForeground)
                 }
             } label: {
                 Text("More place information").font(.title3.weight(.semibold))
@@ -301,7 +301,7 @@ struct CoolSpotDetailView: View {
                                          : "Show all \(spot.features.count) cooling features",
                           systemImage: expandFeatures ? "chevron.up" : "chevron.down")
                         .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
-                }.buttonStyle(.plain).foregroundStyle(AppStyle.brand)
+                }.buttonStyle(.plain).foregroundStyle(AppStyle.actionForeground)
             }
         }
     }
@@ -347,7 +347,7 @@ struct CoolSpotDetailView: View {
                 }.buttonStyle(SecondaryButtonStyle()).accessibilityIdentifier("independentVisitReport")
             } else if let latest = history.first {
                 Label("Published · \(latest.experience.rawValue)", systemImage: "checkmark.circle")
-                    .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                 visitTime(latest.visitedAt)
                 NavigationLink { PublishedVisitReportView(store: store, report: latest) } label: {
                     Text("View your report").frame(maxWidth: .infinity)
@@ -436,7 +436,7 @@ struct LivePresenceActions: View {
         VStack(alignment: .leading, spacing: LayoutSpacing.text) {
             if isCheckedIn {
                 Label("You’re sharing that you’re here", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                 Text("Your name isn’t shown · Ends at \(presenceDeadline?.formatted(date: .omitted, time: .shortened) ?? "—")")
                     .font(.caption).foregroundStyle(AppStyle.supportingText)
                 Button("Stop sharing", action: action)
@@ -469,7 +469,7 @@ struct ReportingHelpSheet: View {
             .navigationTitle("Sharing a visit").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
     }
 }
 
@@ -502,7 +502,7 @@ struct PresenceExplanationSheet: View {
                                            text: "Your share ends automatically after 10 minutes, or you can stop it sooner.")
                     Text("This shows that someone is using the place to cool down. It doesn’t say whether the place feels cool or has space available.")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppStyle.supportingText)
                         .padding(.top, 2)
                     PresenceMapExample().padding(.top, 8)
                 }
@@ -526,7 +526,7 @@ struct PresenceExplanationRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol)
-                .foregroundStyle(AppStyle.brand)
+                .foregroundStyle(AppStyle.informationAccent)
                 .frame(width: 30, height: 30)
                 .background(AppStyle.mint, in: Circle())
             Text(text)
@@ -578,7 +578,7 @@ struct ExperienceDistribution: View {
         GeometryReader { proxy in
             Capsule().fill(AppStyle.controlSurface)
                 .overlay(alignment: .leading) {
-                    Capsule().fill(AppStyle.brand)
+                    Capsule().fill(AppStyle.dataFill)
                         .frame(width: proxy.size.width * CGFloat(reports[experience, default: 0]) / CGFloat(maxCount))
                 }
         }
@@ -604,7 +604,7 @@ struct StayDistribution: View {
                     }
                     .font(.caption)
                     GeometryReader { proxy in
-                        Capsule().fill(AppStyle.brand)
+                        Capsule().fill(AppStyle.dataFill)
                             .frame(width: proxy.size.width * CGFloat(reports[length, default: 0]) / CGFloat(maxCount))
                     }
                     .frame(height: 9)
@@ -677,7 +677,7 @@ struct RecognisedPlaceDetailView: View {
                 }.accessibilityLabel("Close")
             } }
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
         .sheet(isPresented: $showContribution) {
             ContributionFlow(store: store, source: .recognisedPlace(place))
         }
@@ -748,7 +748,7 @@ private struct ApplePlaceInformationView: View {
                     .frame(minHeight: 44)
                     .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain).foregroundStyle(AppStyle.brand)
+                .buttonStyle(.plain).foregroundStyle(AppStyle.actionForeground)
                 .disabled(loadingDetails)
             }
             if showsNearbyStreets {
@@ -786,7 +786,7 @@ private struct ApplePlaceInformationView: View {
                 } label: {
                     Label("View nearby streets", systemImage: "binoculars")
                         .labelStyle(PlaceActionLabelStyle())
-                        .foregroundStyle(AppStyle.brand)
+                        .foregroundStyle(AppStyle.actionForeground)
                         .frame(minHeight: 44)
                 }
                 .font(.subheadline.weight(.semibold))
@@ -938,7 +938,7 @@ struct VisitReportFlow: View {
                 }
             }
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
         .onAppear { store.saveReportDraft(draft, for: spot.id) }
         .onChange(of: draft) { _, value in
             store.saveReportDraft(value, for: spot.id)
@@ -1020,7 +1020,7 @@ struct VisitReportFlow: View {
 
     private var confirmation: some View {
         VStack(alignment: .leading, spacing: LayoutSpacing.section) {
-            Image(systemName: "checkmark.circle.fill").font(.largeTitle).foregroundStyle(AppStyle.brand)
+            Image(systemName: "checkmark.circle.fill").font(.largeTitle).foregroundStyle(AppStyle.actionForeground)
                 .accessibilityHidden(true)
             Text("Thanks for sharing your visit").font(.title2.bold()).accessibilityAddTraits(.isHeader)
             ReportPlaceContext(spot: spot)
@@ -1102,14 +1102,14 @@ struct ReportChoice: View {
                 }
             }
             .font(.body.weight(selected ? .semibold : .regular))
-            .foregroundStyle(selected ? AppStyle.brand : Color.primary)
+            .foregroundStyle(selected ? AppStyle.actionForeground : Color.primary)
             .padding(.horizontal, LayoutSpacing.related)
             .padding(.vertical, LayoutSpacing.text)
             .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
             .background(selected ? AppStyle.mint : Color(uiColor: .systemBackground),
                         in: RoundedRectangle(cornerRadius: 12))
             .overlay {
-                RoundedRectangle(cornerRadius: 12).stroke(selected ? AppStyle.brand : AppStyle.subtleBorder, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12).stroke(selected ? AppStyle.actionForeground : AppStyle.subtleBorder, lineWidth: 1)
             }
             .contentShape(Rectangle())
         }

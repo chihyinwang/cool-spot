@@ -153,7 +153,7 @@ private struct PlacePhotoViewer: View {
             .navigationTitle("\(index + 1) of \(photos.count)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
-        }.tint(AppStyle.brand)
+        }.tint(AppStyle.actionForeground)
     }
 }
 

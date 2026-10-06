@@ -26,7 +26,7 @@ struct PlaceOwnReportsView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Your report history").navigationBarTitleDisplayMode(.inline)
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
     }
 }
 
@@ -61,7 +61,7 @@ struct VisitorReportsView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Visitor reports").navigationBarTitleDisplayMode(.inline)
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
     }
 }
 
@@ -74,7 +74,7 @@ struct VisitorReportContent: View {
         VStack(alignment: .leading, spacing: LayoutSpacing.related) {
             if let report = item.report {
                 Label(report.experience.summary, systemImage: report.experience.symbol)
-                    .font(.headline).foregroundStyle(AppStyle.brand)
+                    .font(.headline).foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if !item.comment.isEmpty {
@@ -116,7 +116,7 @@ struct VisitorReportContent: View {
 struct PopsicleMark: View {
     var body: some View {
         VStack(spacing: 0) {
-            RoundedRectangle(cornerRadius: 5).fill(AppStyle.brand).frame(width: 16, height: 23)
+            RoundedRectangle(cornerRadius: 5).fill(AppStyle.informationAccent).frame(width: 16, height: 23)
                 .overlay { Capsule().fill(AppStyle.mint).frame(width: 3, height: 12) }
             Capsule().fill(.secondary).frame(width: 4, height: 7)
         }.frame(width: 24, height: 32).accessibilityHidden(true)
@@ -132,7 +132,7 @@ struct PopsicleThanksButton: View {
         VStack(alignment: .leading, spacing: 2) {
             if store.hasSentPopsicle(to: reportID) {
                 Label { Text("Popsicle sent · Demo") } icon: { PopsicleMark() }
-                    .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                 Button("Undo") { store.undoPopsicle(to: reportID) }.frame(minHeight: 44)
             } else {
                 Button {
@@ -158,7 +158,7 @@ struct ReceivedPopsicleExample: View {
     var body: some View {
         VStack(alignment: .leading, spacing: LayoutSpacing.text) {
             Label { Text("Popsicle received · Example") } icon: { PopsicleMark() }
-                .font(.headline).foregroundStyle(AppStyle.brand)
+                .font(.headline).foregroundStyle(.primary)
             Text("A little thank-you for sharing this report.").font(.subheadline)
         }.padding(.vertical, 4)
     }

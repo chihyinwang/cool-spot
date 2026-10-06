@@ -102,7 +102,7 @@ struct SavedCard: View {
         HStack(spacing: LayoutSpacing.related) {
             Image(systemName: coolSpot?.type.symbol ?? (isCoordinate ? "mappin.and.ellipse" : "building.2.fill"))
                 .font(.title3).foregroundStyle(.white).frame(width: 48, height: 48)
-                .background(coolSpot == nil ? Color.secondary : AppStyle.ink,
+                .background(coolSpot == nil ? Color.secondary : AppStyle.actionFill,
                             in: RoundedRectangle(cornerRadius: 13))
             VStack(alignment: .leading, spacing: LayoutSpacing.metadata) {
                 Text(saved.title).font(.headline)
@@ -154,7 +154,7 @@ struct SavedDetail: View {
                         }
                         if let spot = coolSpot {
                             Label("Published on the Cool Spot map", systemImage: "checkmark.seal.fill")
-                                .font(.subheadline.weight(.semibold)).foregroundStyle(AppStyle.brand)
+                                .font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                             SourceBadge(source: spot.source)
                             FlowLayout(spacing: 8) { ForEach(spot.features) { InfoPill(feature: $0) } }
                             FactRow(symbol: "creditcard", title: spot.access.summary)
@@ -381,7 +381,7 @@ struct SavedPlaceEditor: View {
                 }
             }
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
         .interactiveDismissDisabled(changed)
         .confirmationDialog("Discard changes?", isPresented: $confirmDiscard, titleVisibility: .visible) {
             Button("Discard changes", role: .destructive) { dismiss() }
@@ -512,7 +512,7 @@ struct YourReportsView: View {
                                     Text(report.experience.rawValue).font(.subheadline)
                                     if store.hasReceivedExamplePopsicle(for: report.id) {
                                         Label { Text("Popsicle received · Example") } icon: { PopsicleMark() }
-                                            .font(.caption).foregroundStyle(AppStyle.brand)
+                                            .font(.caption).foregroundStyle(.primary)
                                     }
                                 }.padding(.vertical, 4)
                             }
@@ -642,7 +642,7 @@ struct CoolHuntView: View {
                     Spacer()
                     Text("1 of 2").font(.subheadline.weight(.semibold))
                 }
-                ProgressView(value: 0.5).tint(AppStyle.brand)
+                ProgressView(value: 0.5).tint(AppStyle.actionForeground)
                 Text("Next: cool off beneath structural shade")
                     .font(.subheadline).foregroundStyle(Color.primary.opacity(0.78))
             }
@@ -756,7 +756,7 @@ struct SignInCard: View {
             Label("Your account", systemImage: "person.crop.circle.badge.plus")
                 .font(.headline)
             Text(detail).font(.subheadline).foregroundStyle(Color.primary.opacity(0.78))
-            Button("Preview account", action: action).buttonStyle(.borderedProminent).tint(AppStyle.ink)
+            Button("Preview account", action: action).buttonStyle(.borderedProminent).tint(AppStyle.actionFill)
         }
         .padding(16).frame(maxWidth: .infinity, alignment: .leading)
         .background(AppStyle.blue, in: RoundedRectangle(cornerRadius: 18))
@@ -797,7 +797,7 @@ struct HuntTile: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: unlocked ? type.symbol : "questionmark").font(.title2)
-                .foregroundStyle(unlocked ? AppStyle.brand : .secondary).frame(width: 46, height: 46)
+                .foregroundStyle(unlocked ? AppStyle.informationAccent : .secondary).frame(width: 46, height: 46)
                 .background(unlocked ? AppStyle.mint : Color.secondary.opacity(0.10), in: Circle())
             Text(unlocked ? type.shortName : "Undiscovered").font(.caption.weight(.semibold))
                 .multilineTextAlignment(.center).lineLimit(2)
@@ -825,7 +825,7 @@ struct ContributionRow: View {
     var color: Color {
         switch item.status {
         case .actionNeeded, .notPublished: .primary
-        case .published, .merged: AppStyle.brand
+        case .published, .merged: AppStyle.informationAccent
         case .draft, .inReview: .blue
         }
     }

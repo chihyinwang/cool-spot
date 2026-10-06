@@ -32,14 +32,24 @@ enum AppAppearance: String, CaseIterable, Identifiable {
 }
 
 enum AppStyle {
-    // A fixed dark fill used only when the foreground is explicitly white.
-    static let ink = Color(red: 0.05, green: 0.25, blue: 0.28)
-    // Brand-coloured foreground that remains legible on system backgrounds.
-    static let brand = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.56, green: 0.88, blue: 0.82, alpha: 1)
-            : UIColor(red: 0.05, green: 0.25, blue: 0.28, alpha: 1)
-    })
+    // Interactive foreground and opaque white-label fills are separate roles.
+    static let actionForeground = adaptive(light: 0x0D6670, dark: 0x8FE0D1,
+                                          contrastLight: 0x07515C, contrastDark: 0xBDF6DF)
+    static let actionFill = adaptive(light: 0x0D6670, dark: 0x0D6670,
+                                    contrastLight: 0x07515C, contrastDark: 0x07515C)
+    static let actionPressedFill = adaptive(light: 0x07515C, dark: 0x07515C)
+    static let actionPressedForeground = adaptive(light: 0x07515C, dark: 0xBDF6DF)
+    static let actionBorder = adaptive(light: 0x5D9197, dark: 0x4E9C90,
+                                      contrastLight: 0x07515C, contrastDark: 0xBDF6DF)
+    static let pressedControlSurface = adaptive(light: 0xE2F2ED, dark: 0x17352F)
+
+    // Map, information and data can evolve without changing control colours.
+    static let mapMarkerFill = adaptive(light: 0x147E83, dark: 0x147E83,
+                                       contrastLight: 0x0D6670, contrastDark: 0x0D6670)
+    static let selectedMapMarkerFill = adaptive(light: 0x07515C, dark: 0x07515C)
+    static let informationAccent = adaptive(light: 0x0D6670, dark: 0x8FE0D1,
+                                           contrastLight: 0x07515C, contrastDark: 0xBDF6DF)
+    static let dataFill = informationAccent
     // Opaque supporting copy for forms and report evidence, including in glare.
     // Avoid hierarchical opacity on tinted buttons and pale field placeholders.
     static let supportingText = Color(uiColor: UIColor { traits in
@@ -52,11 +62,8 @@ enum AppStyle {
             ? UIColor(red: 1, green: 0.72, blue: 0.72, alpha: 1)
             : UIColor(red: 0.64, green: 0.16, blue: 0.16, alpha: 1)
     })
-    static let mint = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.08, green: 0.23, blue: 0.20, alpha: 1)
-            : UIColor(red: 0.78, green: 0.93, blue: 0.86, alpha: 1)
-    })
+    static let mint = adaptive(light: 0xCDF2E3, dark: 0x143B34,
+                               contrastLight: 0xBDF6DF, contrastDark: 0x092B25)
     static let blue = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(red: 0.08, green: 0.21, blue: 0.25, alpha: 1)
@@ -71,6 +78,19 @@ enum AppStyle {
     static let paper = Color(uiColor: .systemGroupedBackground)
     static let controlSurface = Color(uiColor: .secondarySystemBackground)
     static let subtleBorder = Color(uiColor: .separator)
+
+    private static func adaptive(light: UInt32, dark: UInt32,
+                                 contrastLight: UInt32? = nil, contrastDark: UInt32? = nil) -> Color {
+        Color(uiColor: UIColor { traits in
+            let isDark = traits.userInterfaceStyle == .dark
+            let normal = isDark ? dark : light
+            let increased = isDark ? contrastDark : contrastLight
+            let value = traits.accessibilityContrast == .high ? increased ?? normal : normal
+            return UIColor(red: CGFloat((value >> 16) & 0xFF) / 255,
+                           green: CGFloat((value >> 8) & 0xFF) / 255,
+                           blue: CGFloat(value & 0xFF) / 255, alpha: 1)
+        })
+    }
 }
 
 enum SpotSource: String {

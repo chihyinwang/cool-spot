@@ -19,17 +19,20 @@ struct ContentView: View {
     init() {
         let arguments = ProcessInfo.processInfo.arguments
         #if DEBUG
+        _inspectionAppearance = State(initialValue: arguments.contains("--preview-dark") ? .dark : .light)
+        let usesColourReview = arguments.contains("--colour-review")
         usesReportExamples = arguments.contains("--reports-test-fixtures")
         let usesExploreLayoutPreview = arguments.contains("--explore-layout-preview")
         let usesContributionLayoutPreview = arguments.contains("--contribution-layout-preview")
             || Bundle.main.bundleIdentifier?.hasPrefix("com.chihyinwang.cool-spot.contribution-preview") == true
         #else
+        let usesColourReview = false
         usesReportExamples = false
         let usesExploreLayoutPreview = false
         let usesContributionLayoutPreview = false
         #endif
         // Preserve the previous launch argument for existing local QA shortcuts.
-        let usesExamples = usesReportExamples || usesContributionLayoutPreview || arguments.contains("--shape-preview")
+        let usesExamples = usesReportExamples || usesContributionLayoutPreview || usesColourReview || arguments.contains("--shape-preview")
             || arguments.contains("--example-cool-spots") || arguments.contains("--example-catalog")
         let initialStore: PrototypeStore
         if usesExploreLayoutPreview {
@@ -127,7 +130,8 @@ struct ContentView: View {
 
     private var appearanceSelection: Binding<AppAppearance> {
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--explore-layout-preview") {
+        if ProcessInfo.processInfo.arguments.contains("--explore-layout-preview")
+            || ProcessInfo.processInfo.arguments.contains("--colour-review") {
             return $inspectionAppearance
         }
         #endif
@@ -155,7 +159,7 @@ struct ContentView: View {
                 .tabItem { Label("You", systemImage: "person.crop.circle") }
                 .tag(2)
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
         .sheet(isPresented: $showDetailPreview) {
             if let spot = store.spot(detailPreviewSpotID) {
                 CoolSpotDetailView(store: store, spot: spot)
@@ -247,7 +251,8 @@ private struct ShapeInspectionView: View {
             memoryStore.spots[0].entryRequirement = "Example: university students and staff only"
             memoryStore.spots[0].entryInformation = "Example: book a free ticket before visiting"
         }
-        if screen == "visitor-reports" || screen == "place" {
+        if (screen == "visitor-reports" || screen == "place")
+            && !args.contains("--colour-review") {
             // Read existing local reports for layout inspection, but never write
             // preview actions to the user's persisted store.
             memoryStore.visitReports = PrototypeStore(reportDefaults: .standard).visitReports
@@ -257,6 +262,19 @@ private struct ShapeInspectionView: View {
             memoryStore.visitReports = [.init(id: UUID(), spotID: "library", experience: .aLittleCooler,
                 helpedFeatures: [], stayLength: nil, comment: "Layout test: an older personal report.",
                 visitedAt: date, confirmationAt: date, submittedAt: date)]
+        }
+        if screen == "saved", let spot = memoryStore.spots.first {
+            _ = memoryStore.toggleSaved(spot)
+        }
+        if screen == "own-reports", let spot = memoryStore.spots.first {
+            let visit = Date.now.addingTimeInterval(-600)
+            _ = memoryStore.beginVisitReport(for: spot, at: visit)
+            _ = memoryStore.submitReport(spot: spot, experience: .aLittleCooler,
+                helpedFeatures: [.airConditioning], stay: .under30,
+                comment: "Example visit for colour review.", visitedAt: visit, at: visit)
+            if let report = memoryStore.visitReports.first {
+                memoryStore.simulateReceivedPopsicle(for: report.id)
+            }
         }
         _store = StateObject(wrappedValue: memoryStore)
     }
@@ -268,11 +286,11 @@ private struct ShapeInspectionView: View {
                                          selection: $detailDetent)
                     .presentationDragIndicator(screen == "detail-report" ? .visible : .automatic)
                     .environment(\.dynamicTypeSize, args.contains("--preview-large") ? .accessibility5 : .large)
-                    .tint(AppStyle.brand)
+                    .tint(AppStyle.actionForeground)
             }
             .preferredColorScheme(args.contains("--preview-dark") ? .dark : .light)
             .environment(\.dynamicTypeSize, args.contains("--preview-large") ? .accessibility5 : .large)
-            .tint(AppStyle.brand)
+            .tint(AppStyle.actionForeground)
     }
     @ViewBuilder var content: some View {
         switch screen {
@@ -287,6 +305,11 @@ private struct ShapeInspectionView: View {
             NavigationStack { VisitorReportsView(store: store, spot: store.spots[0]) }
         case "new-place": ContributionFlow(store: store, source: .recognisedPlace(store.recognisedPlaces[0]))
         case "update": ContributionFlow(store: store, source: .existingCoolSpot(store.spots[0]))
+        case "saved": SavedView(store: store, findNearby: { _ in })
+        case "own-reports": NavigationStack { YourReportsView(store: store) }
+        case "you": YouView(store: store, appearance: .constant(args.contains("--preview-dark") ? .dark : .light))
+        case "photos":
+            NavigationStack { PlacePhotoGallery(photos: PlacePhotoAsset.examples, placeName: "Example Community Room") }
         case "contribution": ContributionFlow(store: store, source: .currentLocation)
         case "contribution-pin": ContributionFlow(store: store, source: .savedCoordinate(store.savedLocations[0]))
         case "pin":
@@ -296,7 +319,11 @@ private struct ShapeInspectionView: View {
             NavigationStack {
                 ScrollView { VStack(spacing: 60) {
                     ForEach(args.contains("--preview-bottom") ? [100, 10, 3, 2, 0] : [0, 2, 3, 10, 100], id: \.self) { count in
-                        HStack(spacing: 24) { CoolSpotPin(type: .library, count: count); Text("\(count) shared presences") }.padding(.top, 32)
+                        HStack(spacing: 24) {
+                            CoolSpotPin(type: .library, count: count)
+                            CoolSpotPin(type: .library, count: count, isSelected: true)
+                            Text("\(count) shared presences")
+                        }.padding(.top, 32)
                     }
                 }.padding(24) }.navigationTitle("Marker inspection")
             }
@@ -337,7 +364,7 @@ private struct ContributionLayoutInspectionView: View {
             }
             .presentationDetents([.large])
         }
-        .tint(AppStyle.brand)
+        .tint(AppStyle.actionForeground)
         .preferredColorScheme(.light)
         .environment(\.dynamicTypeSize, .large)
     }
