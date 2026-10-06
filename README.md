@@ -6,9 +6,9 @@
 
 Cool Spot is a native iOS prototype for finding places to cool down in London. It integrates the Greater London Authority's (GLA) [2025 Cool Spaces data](https://data.london.gov.uk/dataset/cool-space-data-2025-2z19p) with Apple Maps search, so people can check cooling and access information before they go.
 
-| Explore | Place detail · Example photos | Report · Visit experience |
+| Explore | Place detail · Example photos | Report · Quick entry |
 | :---: | :---: | :---: |
-| [![Explore a London map with cooling filters and a place preview.](docs/images/explore-preview-current.png)](docs/images/explore-current.png) | [![Example Community Room detail showing illustrative photos, facilities and additional place information.](docs/images/place-photos-preview-current.png)](docs/images/place-photos-current.png) | [![Example visit report with Much cooler selected and optional visit details.](docs/images/report-entry-preview-current.png)](docs/images/report-entry-current.png) |
+| [![Explore a London map with cooling filters and a place preview.](docs/images/explore-preview-current.png)](docs/images/explore-current.png) | [![Example Community Room detail showing illustrative photos, facilities and additional place information.](docs/images/place-photos-preview-current.png)](docs/images/place-photos-current.png) | [![Example Community Room detail with seating information and three direct visit-experience choices.](docs/images/report-entry-preview-current.png)](docs/images/report-entry-current.png) |
 
 ## Features
 

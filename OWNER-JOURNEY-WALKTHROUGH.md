@@ -4,6 +4,16 @@
 
 ## 本輪狀態與起點
 
+### 2026-10-06：README 截圖刷新與 Git checkpoint
+
+Owner 要求重截 README 圖片，**commit 前先檢查**。來源 Prototyping／`5e981d9`（Refine place detail facts and Dynamic Type layout），開始 working tree clean／index empty。現有 Contract QA Debug executable、debug dylib 和 Assets.car 與最新 build 完全相同，本輪沒有 rebuild／install／XCTest 或 Swift／產品規則變更。
+
+- 重新擷取五張 1320 × 2868 原生 light 圖：Explore、Example Community Room 的 Photos／expanded Facilities、同一 example 的首次三選回報入口、Suggest an edit 的 Add Fans／Remove Air conditioning，以及 How this works 的 paused simulated example。Explore 讀 live local v5 API（HTTP 200／253 items）；個人資料 memory-only。其餘用 --colour-review 明確隔離的 example／demo，不讀寫 owner reports／草稿；未按 Publish／Send 或新增 presence。
+- 覆寫既有 docs/images 的五張 *-current.png 與五張 *-preview-current.png，保留檔名與縮圖尺寸。Full-size 是未重畫的 simctl PNG；縮圖與 [整組 preview](.impeccable/review/native-2026-10-06-detail-refinement/readme-refresh-5e981d9/overview.png) 只等比例縮放排版為 sRGB。README 第三欄改成 Report · Quick entry，alt 正確描述座位資訊與三個直接選項；Example photos／simulated example 標示保留。Icon、Features／Engineering／Run、Swift、PRODUCT 不變。所有 README image references resolve。
+- [captures manifest](.impeccable/review/native-2026-10-06-detail-refinement/readme-refresh-5e981d9/captures.json) 與 [verification](.impeccable/review/native-2026-10-06-detail-refinement/readme-refresh-5e981d9/verification.json) 位於既有 ignored archive 子目錄；QA 和舊 README 圖片的 before backup 保存在同處。前後 53 preference dictionaries 語意相同；QA 原 79 non-SplashBoard 檔中 75 個 byte-identical，四個 Metal render cache 正常更新、無新增；owner simulator 原 33 檔全相同／無新增，42 個 App／project／plan／schemes／tests／icon protected files 和 staging 不變。最後無 launch arguments 回正常 API Explore，All／27／collapsed。
+
+提供整組預覽後，Owner 隨後要求 commit／push，訊息為 **Update README screenshots**，parent `5e981d9`，實際 revision／remote state 以 Git 核對。只收錄 README、十張 assets、本節及 AGENTS；普通 Prototyping push 也會包含先前未推送的 colour／detail checkpoints，不使用 force。此 Git 操作不新增 build／test／原生操作或 UX acceptance。這輪 screenshot QA 不代表真人使用者比較或完整 UX acceptance；待辦研究保留在下一節，A–E IDs 不變。沒有 hooks、backend／DB、telemetry、招募、sibling 或額外 agent。
+
 ### 2026-10-06：首次回報入口暫復原與待辦使用者比較
 
 Owner 質疑單一 Share how it felt 入口是否會降低回報意願，並明確要求先暫復原三個直接答案、記下使用者測試。來源 Prototyping／`f622c18` 加上上一輪未 commit 的 UI 修正。現在首次符合資格的 Your reports 再次直接顯示 Not cooler／A little cooler／Much cooler；點答案進既有表單並預填，仍須 Publish report 才完成回報。保留首段已知座位／wheelchair facts 和 ReportChoice／FactRow 的 ScaledMetric 修正。草稿、歷史、資格、Visit time 與 presence 規則不變；C05／D01 恢復直接答案 click paths，40 個 IDs 不變。下方單一入口截圖與原生證據保留為前一輪對照，已不是目前首次入口。
