@@ -1,4 +1,4 @@
-[![Cool Spot app icon: a person sitting in shade beside sunlight.](docs/images/app-icon-preview.png)](docs/images/app-icon-ios.png)
+[![Cool Spot app icon: a person sitting in shade beside sunlight.](docs/images/app-icon-refined-readme.png)](docs/images/app-icon-refined-ios.png)
 
 # Cool Spot
 

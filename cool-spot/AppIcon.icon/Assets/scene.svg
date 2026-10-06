@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="shade-tone" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="1024"><stop offset="0" stop-color="#147E83" /><stop offset="0.48" stop-color="#0D6670" /><stop offset="1" stop-color="#07515C" /></linearGradient></defs><rect id="background" width="1024" height="1024" fill="#BDF6DF" />
+  <path id="shade" d="M0 0H481C501 151 561 303 661 488C754 659 823 822 872 1024H0Z" fill="url(#shade-tone)" />
+  <circle id="sun" cx="826" cy="225" r="58" fill="#FFAE32" />
+</svg>

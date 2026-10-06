@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="figure-tone" gradientUnits="userSpaceOnUse" x1="0" y1="302" x2="0" y2="888"><stop offset="0" stop-color="#EDFFF5" /><stop offset="0.48" stop-color="#DCF7EA" /><stop offset="1" stop-color="#CCECDD" /></linearGradient></defs><g transform="translate(0 -32)"><path d="M301 704H428C439 704 448 713 448 724V868C448 879 439 888 428 888H301C290 888 281 879 281 868V724C281 713 290 704 301 704Z" fill="url(#figure-tone)" />
+  <ellipse id="head" cx="369" cy="355" rx="49" ry="50" fill="url(#figure-tone)" />
+    <path id="resting-body" d="M350 398H388L391 416C391 429 398 440 410 447C422 455 430 468 436 489L463 573C472 606 490 628 514 641L566 651C588 655 602 669 606 691L624 825C626 838 633 844 647 848L666 857C678 862 680 873 670 881C666 885 660 888 652 888H623C603 888 590 877 586 858L556 706H426C382 706 351 681 343 641L320 513C313 477 322 452 338 443C350 436 350 425 350 410Z" fill="url(#figure-tone)" />
+  </g></svg>

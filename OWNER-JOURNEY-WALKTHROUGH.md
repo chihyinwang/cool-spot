@@ -4,6 +4,54 @@
 
 ## 本輪狀態與起點
 
+### 2026-10-06：採用 C 精修 App Icon
+
+Owner 閱讀 WWDC25 對照判斷並實看 A／B／C 原生比較後，接受 agent 推薦的 C，明確要求換入 prototype。來源為 Prototyping／4727d35 加既有 working changes；只替換 [AppIcon.icon](cool-spot/AppIcon.icon) 內 `Assets/figure.svg`、`Assets/scene.svg` 和 `icon.json`，三個檔案 bytes 與 [C 提案](design/app-icon/review-2026-10-06/c-refined.icon) 一致。既有 Xcode file reference／Resources／App Icon 名稱沿用，沒有修改 project、Swift 或 UI 配色。圖示底層仍為 SVG 向量，Icon Composer 負責材質與平台／appearance 編譯。
+
+- **實際設計變更：** teal／mint 更清新、sun 改暖 amber；人物頸部收窄、頭肩腿轉折微調、座位從左側收窄 14 px，人物與座位整體上移 32 px／1024 px canvas。實際 SVG 是 `<g transform="translate(0 -32)">`；neutral shadow 從 20% 改 14%，specular／translucency 保持 off。人物 Mono fill specialization 使用白色。AppStyle 的文字／按鈕／背景色保留。提案 renderer 與 60／40／24 px、六種靜態 appearance 的 [比較圖](design/app-icon/review-2026-10-06/comparison.png)／[appearance samples](design/app-icon/review-2026-10-06/appearances.png) 另存於 prototype；最初預設 TintedDark 匯出偏暗，明確指定 renderer tint colour 0.25／strength 0.75 後能辨識，不能將原先匯出參數問題當成已確認的真機 App defect。
+- **建置：** [Debug](../cool-spot-prototype-local-evidence-2026-10-06/icon-c-b1yxscjh/debug-build.log)／[Release](../cool-spot-prototype-local-evidence-2026-10-06/icon-c-b1yxscjh/release-build.log) simulator builds 均 exit0／BUILD SUCCEEDED，actool 編譯新的 AppIcon.icon，Debug 產物 primary icon name 為 AppIcon。AppIntents metadata skipped warning 保留；Release 有既有 ContentView 的兩個 DEBUG 分支不可達 warning，另有生成 ModuleCache／SwiftShims 路徑缺檔 warning。没有 icon 編譯錯誤；沒有 XCTest、iPad runtime 或真機動態檢查。
+- **限定原生：** 只安裝至 Contract QA／iPhone 17 Pro Max／iOS 26.4／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852。安裝前實看正常 Explore，無未送出表單，完整備份 83 個資料檔；API GET 為 HTTP 200／v5／253 items。[Home Screen](../cool-spot-prototype-local-evidence-2026-10-06/icon-c-b1yxscjh/02-home-c.png) 實際顯示 C，以 native icon tap 啟動並回到 [正常 API Explore](../cool-spot-prototype-local-evidence-2026-10-06/icon-c-b1yxscjh/03-normal-explore-c.png)：27 in this area／All／collapsed，沒有 launch arguments。沒有安裝或改動 Icon QA／owner iPhone 17 Pro Max／Contribution Preview；操作目標透過 Simulator Window menu 明確選定 Contract QA。
+- **保存與範圍：** [verification](../cool-spot-prototype-local-evidence-2026-10-06/icon-c-b1yxscjh/verification.json) 確認 79 個原有 non-SplashBoard 檔案全部 byte-identical，53 份 preference dictionaries 相等。4 個舊 OS launch snapshots 旋轉、產生 8 個新 snapshots，未清除或還原私人資料。54 個原有 README／images／Swift／project／test-plan／shared-scheme files hashes 和 staged patch 均未變。原 B+ icon 與完整私人 data backup 保存於專案外。當時同步更新這三份既有 active documents 和提案 manifest；40 個 A–E IDs／待確認送出後問題不變。該原生驗證批次沒有 push／hooks／API／DB／sibling checkout 或額外 agent；本機 checkpoint 與檔案清理記錄如下。
+
+**檔案清理與本機 checkpoint：** Owner 隨後要求將正式 icon、README／資產清理、PRODUCT、AGENTS 和本 walkthrough 合併為單一 commit，訊息為 **Add app icon and update README assets**，parent 為 `4727d35`；實際 revision 以 git log 核對。刪除 11 張未引用的舊 README／icon 圖片，保留正式 AppIcon.icon 三個來源檔、既有 Xcode Resources 接線與 README 的 160 px 縮圖／1024 px 原圖。46 個比較資料檔完整移至 ignored `.impeccable/review/native-2026-10-06-icon-design/`；`design/app-icon/review-2026-10-06` 留 ignored 本機 alias，因此上列 C 提案／比較圖／appearance links 仍可在本機開啟，這些歷史素材不加入 commit。下方 2026-10-05 提案排查紀錄一併保存，三項待確認改善仍未授權實作。這次只做來源、設定、圖片／連結與 Git scope 檢查，沒有重跑 build／tests、操作 Simulator／API／DB 或 push；上列 build／原生結果保留為先前的 dated evidence。
+
+本輪確認 C 主圖接入與正常啟動；六種靜態 exports 不是全部原生 appearance／桌布適應／physical gyro 驗收。原 B+ 的選定和首次接入結果保留為下方 dated evidence；之後 app 使用本節的 C。
+
+### 2026-10-06：B+ App Icon 接入 prototype Xcode
+
+Owner 已選定 B+，本輪明確指定桌面 `cool-spot-prototype`，branch `Prototyping`；來源 HEAD `f3671c6` 加既有 README／VisitorReportsView／文件與圖片工作變更。只新增 [AppIcon.icon](cool-spot/AppIcon.icon) 的三個來源檔並在 [project.pbxproj](cool-spot.xcodeproj/project.pbxproj) 加入 file reference、app group 與 app target Resources membership。素材 bytes 與已選定 B+ 一致；Debug／Release 原有 `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon` 正確匹配，沒有改 scheme／test plan／Swift／API／DB 或 sibling `cool-spot`。
+
+- **建置與 Xcode：** Xcode 26.4.1 的 Debug／Release simulator builds 均 exit0／BUILD SUCCEEDED，actool 實際編譯 AppIcon.icon；產物含 Assets.car、fallback AppIcon PNG，iPhone／iPad Info.plist primary icon name 均 AppIcon。只編譯、未做 iPad runtime 或 appearance matrix；沒有 XCTest。Release 有未改動 ContentView 的 DEBUG-only 分支不可達 warning、兩次建置均有 AppIntents metadata skipped warning，無 icon 編譯錯誤。Live Xcode 已自動載入 reference，navigator 顯示 Icon Composer Icon，File inspector 的 Target Membership 是 cool-spot Default；目前選中 AppIcon.icon。
+- **限定原生：** 只操作指定 Contract QA／iPhone 17 Pro Max／iOS 26.4／D3C4BAE1-F7BE-4D7B-AF0C-A23744C41852。安裝前實看正常 Explore、無未送出表單；備份完整 83 檔資料，API GET 回 HTTP 200／v5／253 items。安裝後 [Home Screen](../cool-spot-prototype-local-evidence-2026-10-06/icon-b-plus-j4quwlaj/02-home-b-plus.png) 顯示 B+；以 native icon tap 啟動，回到正常 [API Explore](../cool-spot-prototype-local-evidence-2026-10-06/icon-b-plus-j4quwlaj/03-normal-explore-after.png)，相同 27 in this area／All／collapsed panel，沒有 preview flags。QA 最後留在正常 Explore；沒有操作 owner 的 iPhone 17 Pro Max／Contribution Preview／Icon QA 或改它們的 app。
+- **保存與範圍：** 原有 79 個 non-SplashBoard 檔案全部 byte-identical，52 份 preferences dictionaries 相等；4 個 OS launch snapshots 正常輪替，未還原或刪除私人資料。完整 backup、before patch／hashes、[verification](../cool-spot-prototype-local-evidence-2026-10-06/icon-b-plus-j4quwlaj/verification.json)、[Debug log](../cool-spot-prototype-local-evidence-2026-10-06/icon-b-plus-j4quwlaj/debug-build.log)／[Release log](../cool-spot-prototype-local-evidence-2026-10-06/icon-b-plus-j4quwlaj/release-build.log) 存於專案外。README 有同期外部更新，本輪未覆寫；其他既有來源檔保存，staged patch 未變，Xcode refresh 改了 index metadata bytes。未 commit／push；A–E IDs 和提案送出後待討論項目不變。
+
+這次確認主圖接入、原生 Home Screen 與正常啟動，不代表所有 dark／clear／tinted 外觀、真機動態反光、visionOS 或首次理解驗收。B+ 的設計選擇已確認；後續服務與旅程範圍仍依下列既有記錄。
+
+### 2026-10-05：正常提案送出、重啟與 You 後續排查
+
+Owner 委託繼續排查；來源 Prototyping／f3671c6。本輪只檢查現行正常 App，不改 Swift、模型、API、資料庫或已接受排版。指定 Contract QA／iPhone 17 Pro Max／iOS 26.4；開始無未送出表單，先備份 QA 原有 83 個資料檔並核對 API listener，GET 實際 HTTP 200／v5／253 筆。私人證據仍放專案外，透過既有 ignored native evidence symlink 引用。
+
+- **B09／B11 局部：** John Harvard Library → Suggest an edit，未改答案按 Send 正確顯示 Change at least one detail；Seating 改 Limited seating，[Your changes](.impeccable/review/native-2026-10-05/contribution-end-to-end/01-update-seating-summary.png) 顯示 Seating provided → Limited seating。送出到共用 [completion](.impeccable/review/native-2026-10-05/contribution-end-to-end/02-update-completion.png)，Done 回原地點詳情；公開 Facilities 仍是 Seating provided。
+- **B01／B02／B11 局部：** chooser 搜尋 The British Museum，選 Apple Maps 的 Directors House／WC1B 3DE 結果；沒有假稱核對 Great Russell Street result。選 Indoors／Fans，未加照片或其他選填答案，成功到同一 [completion](.impeccable/review/native-2026-10-05/contribution-end-to-end/03-recognised-completion.png)。這些答案僅為隔離 QA 測試，不是對真實場所設施的查證。
+- **重啟保存與 You：** 兩筆新提案及原有一筆紀錄都在 [You](.impeccable/review/native-2026-10-05/contribution-end-to-end/04-you-persisted-records.png)。對重啟前後 serialized journeys 作語意核對（features 是 Set，忽略 JSON 陣列編碼次序），原有提案、收藏、notes／reports／drafts 保留；新提案的原值與建議值保存。Native tap 紀錄沒有跳轉；source 的 ContributionRow 也是非互動 HStack，沒有日期、摘要或提案詳情。工具未能可靠點 You tab，這段使用既有 `--you-tab` 僅指定起始頁；source 確認仍是正常 API／UserDefaults store，不能說成完整 tab 手動點擊驗證。
+- **E01 局部／補件斷點：** 正常 Settings → Prototype controls 明確顯示 Public place publishing requires the backend，沒有 Publish locally。只對本輪 British Museum 提案模擬 Needs clarification；[Action needed](.impeccable/review/native-2026-10-05/contribution-end-to-end/05-action-needed-without-action.png) 要求 clearer photo，但沒有補件入口，You 仍顯示 1 update needs more information。Serialized check 確認只有這筆新 QA 提案的 status 改變，其他 journey 值未變。
+
+#### 待確認的下一批改善：三個送出後問題
+
+Owner 要求保留這三項作為後續工作。**狀態：已排查、已記錄；方案待確認，尚未授權實作。** 記錄問題不代表接受其現有缺陷，也不代表已批准全部建議。沿用 B11／E01，不新增或更名 A–E case IDs。
+
+| 問題與任務影響 | 實際證據 | 推薦與取捨／待選擇 |
+|---|---|---|
+| 審核文案與實際本機狀態不符；使用者可能期待真人審核及公開結果 | completion 說 waiting for review，You 說 A reviewer will check；實際只有本機保存與狀態模擬 | 主文清楚交代本機保存／審核示範，完成頁與 You 一致。較少模擬正式服務的感覺，但展示更可信；待確認英文文案與 Send for review 是否保留示範語意。 |
+| 找得到紀錄卻無法回看答案；同地點多筆更新難以分辨 | Native tap 卡片無跳轉；ContributionRow 無詳情入口、提交時間或修改摘要，模型仍保留原值／建議值 | 卡片開啟只讀提案詳情，呈現地點、提交時間、已送答案／更新差異及有附照片時的照片；完成頁提供直接入口。新增一個閱讀頁面，先解決回看，不連帶加入編輯；待確認這個最小範圍。 |
+| Action needed 要求補件卻無法完成；後續任務成為死路 | 對本輪 QA 提案模擬 Needs clarification 後，You 顯示需要更多資訊及 clearer photo，沒有補照片／重新送出入口 | 這批先明確標示模擬回饋與補件未支援；完整補件／重新送出另做行為批次。保留能力邊界，但尚未完成完整審核閉環；若要納入作品展示，需另確認是否投入完整補件流程。 |
+
+**推薦最小批次：** 狀態文案＋可回看的只讀提案詳情＋完成頁直接入口；Action needed 同批交代模擬限制。完整補件／重新送出留下一批，不自動擴充 backend、upload、draft 或 Report 功能。涉及新行為時沿用 owner TDD override：先解釋 cases、寫 tests／helpers 並驗證 Red，再提供完整最小 Green 由 owner 輸入；本次記錄不延伸先前直接 Green 委託。
+
+以上推薦是設計判斷。原則來源：[Apple Writing](https://developer.apple.com/design/human-interface-guidelines/writing)、[Apple Alerts](https://developer.apple.com/design/human-interface-guidelines/alerts)、[NN/g Visibility of system status](https://www.nngroup.com/articles/visibility-system-status/)。它們支持清楚狀態、可行的下一步及節制中斷，不規定本 App 必須另加 Review page／alert。方案確認後才更新 PRODUCT 的 agreed rules；詳細問題與驗證仍集中在本 walkthrough。
+
+限制：本輪沒有送出新地圖位置／私人 Pin 的有效含照片提案，未驗證 B03–B05／B10 的照片選取、替換與重啟顯示；也未驗證真實審核、遠端寫入、全部 A–E、VoiceOver 或裝置／字級矩陣。沒有新 XCTest、Red／Green 或 build；沿用已記錄的 adoption builds，不以成功保存冒充完整 UX 驗收。Owner Preview 未操作、未重裝；QA 最後恢復無 launch flags 的正常 Explore。只更新 AGENTS 與本 walkthrough，保留外部同期 README／五張圖片及 staging；沒有 commit／push、hooks、額外 agent 或 sibling checkout 修改。
+
 ### 2026-10-05：Owner 接受 contribution Proposal，採用到正常 App
 
 Owner 明確委託「可以，我覺得你可以改到 app 上了」。只操作 prototype／Prototyping，採用時來源為 d0ebf2f。Owner 隨後要求本地 commit，checkpoint 名為 **Refine registration and place edit forms**；只收錄兩份 Swift 與三份既有 active documents，排除 owner project／staged plan／schemes 和私人 evidence／backups，不 push。Register／Suggest an edit 共用已接受的 ContributionFlow：`usesRefinedContributionLayout` 預設 `true`，DEBUG Current／Proposal 仍可覆寫；geometry logs 限制在明確 comparison mode。正常 **cool-spot** scheme 不需 Proposal argument；Report、已接受的 Explore／Detail 排版保持原樣。
@@ -1691,7 +1739,7 @@ A/B/C 的搜尋結果可能另有 MapKit 近似場所。B 同一場所不應同�
 
 1. 先在隔離 QA 依 B11 送出一筆本輪 TEST 場所提案；核對 You → Places you’ve added or updated 中最新提案為 **In review**。
 2. You → Settings → Prototype controls：正常 API 模式不應有 **Publish locally**，應有 Public place publishing requires the backend 的說明。
-3. 返回提案詳情，原答案／照片仍保留，狀態仍為 In review；Explore 的 API 清單不應因提案而新增／覆蓋場所。
+3. 返回 Places you’ve added or updated，核對原提案仍為 In review；目前紀錄不能開提案詳情，不能由此聲稱已核對原答案／照片。Explore 的 API 清單不應因提案而新增／覆蓋場所。答案／照片的 serialized recovery 需另列工程證據，不能取代可回看的 UI。
 4. 關閉表單後正常重啟，再確認私人提案仍在；只有正常 API 清單從服務重新載入。
 
 **界線：** Needs clarification／Do not publish 仍是本機狀態模擬，沒有遠端送審／上傳或真正發布。舊 Publish locally 只在明確 memory-only 範例模式保留；其 idempotence／identity／photos／archive 行為由本輪兩項 legacy regressions 驗證，不把它們說成正常 API UI 或跨裝置服務。原提案／私人照片不刪除，歷史公開快照保存但不重播。

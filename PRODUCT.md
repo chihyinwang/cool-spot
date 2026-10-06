@@ -22,6 +22,8 @@ People exposed to heat while outside or travelling, potentially tired, hurried, 
 
 Calm, trustworthy, fresh and helpful. Preserve the native SwiftUI interface, system typography, SF Symbols and teal/mint identity while improving clarity. Mutual aid should help someone else, not turn heat exposure into competitive engagement.
 
+App icon, accepted 2026-10-06: the primary icon now uses the C refinement of the resting figure in cool shade, with a warmer amber sun, fresher mint/teal gradients, a narrower neck and seat, and the figure/seat raised 32 px on the 1024 px canvas. [AppIcon.icon](cool-spot/AppIcon.icon) contains the editable figure/scene SVG vectors and Icon Composer settings included in the app target. Foreground specular highlights and translucency remain off; neutral shadow is 14%, with a white figure fill for Mono appearances. The interface's existing semantic teal/mint colours are retained. B+ remains the dated prior selection; static appearance exports and actual simulator adoption have different verification limits, recorded in the walkthrough.
+
 ## References and anti-references
 
 Apple Maps and iOS conventions inform familiar map/navigation behavior; Google Maps informs separation of saving, visitor experience and place corrections. These are design references, not claims that our specific flows are platform requirements. Avoid tourism-style rewards, leaderboards, database jargon, decorative dashboard patterns and unsupported claims that a place is currently cool, safe, open or has seats available.

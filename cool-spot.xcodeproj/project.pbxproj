@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B10600012D000001001D0001 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B10600022D000001001D0001 /* AppIcon.icon */; };
 		6D011D2F2C000001001D0001 /* cool_spotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D2E2C000001001D0001 /* cool_spotApp.swift */; };
 		6D011D312C000001001D0001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D302C000001001D0001 /* ContentView.swift */; };
 		6D011D3D2C000001001D0001 /* cool_spotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D011D3C2C000001001D0001 /* cool_spotTests.swift */; };
@@ -54,6 +55,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B10600022D000001001D0001 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		6D011D292C000001001D0001 /* cool-spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cool-spot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D011D2E2C000001001D0001 /* cool_spotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cool_spotApp.swift; sourceTree = "<group>"; };
 		6D011D302C000001001D0001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 		6D011D2D2C000001001D0001 /* cool-spot */ = {
 			isa = PBXGroup;
 			children = (
+				B10600022D000001001D0001 /* AppIcon.icon */,
 				6D011D2E2C000001001D0001 /* cool_spotApp.swift */,
 				6D011D302C000001001D0001 /* ContentView.swift */,
 				6D011D502C000001001D0001 /* PrototypeModels.swift */,
@@ -260,6 +263,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B10600012D000001001D0001 /* AppIcon.icon in Resources */,
 				6D022E042C000001001D0001 /* Resources/CommunityPhoto3.jpg in Resources */,
 				6D022E032C000001001D0001 /* Resources/CommunityPhoto2.jpg in Resources */,
 				6D022E022C000001001D0001 /* Resources/CommunityPhoto1.jpg in Resources */,
