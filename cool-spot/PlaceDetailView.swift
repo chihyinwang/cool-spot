@@ -109,11 +109,13 @@ struct CoolSpotDetailView: View {
             let entry = [spot.access == .unsure ? nil : spot.access.summary, spot.entrySummary]
                 .compactMap { $0 }.joined(separator: " · ")
             if !entry.isEmpty { Text(entry) }
-            if spot.seating == .none || spot.seating == .limited {
-                Text(spot.seating.displayName).fontWeight(.semibold)
+            if spot.seating != .unsure {
+                Text(spot.seating.displayName)
+                    .fontWeight(spot.seating == .none || spot.seating == .limited ? .semibold : .regular)
             }
-            if spot.information.wheelchairAccessible == false {
-                Text("Not wheelchair accessible").fontWeight(.semibold)
+            if let accessible = spot.information.wheelchairAccessible {
+                Text(accessible ? "Wheelchair accessible" : "Not wheelchair accessible")
+                    .fontWeight(accessible ? .regular : .semibold)
             }
             if let limit = spot.information.postedStayLimit.label {
                 Text(limit).fontWeight(.medium)
@@ -1089,11 +1091,12 @@ struct ReportChoice: View {
     let selected: Bool
     var showsSelection = true
     let action: () -> Void
+    @ScaledMetric(relativeTo: .body) private var iconWidth = 24.0
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: LayoutSpacing.related) {
-                Image(systemName: symbol).frame(width: 24).accessibilityHidden(true)
+                Image(systemName: symbol).frame(width: iconWidth).accessibilityHidden(true)
                 Text(title).layoutPriority(1).fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: LayoutSpacing.text)
                 if showsSelection {

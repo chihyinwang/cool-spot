@@ -4,6 +4,35 @@
 
 ## 本輪狀態與起點
 
+### 2026-10-06：首次回報入口暫復原與待辦使用者比較
+
+Owner 質疑單一 Share how it felt 入口是否會降低回報意願，並明確要求先暫復原三個直接答案、記下使用者測試。來源 Prototyping／`f622c18` 加上上一輪未 commit 的 UI 修正。現在首次符合資格的 Your reports 再次直接顯示 Not cooler／A little cooler／Much cooler；點答案進既有表單並預填，仍須 Publish report 才完成回報。保留首段已知座位／wheelchair facts 和 ReportChoice／FactRow 的 ScaledMetric 修正。草稿、歷史、資格、Visit time 與 presence 規則不變；C05／D01 恢復直接答案 click paths，40 個 IDs 不變。下方單一入口截圖與原生證據保留為前一輪對照，已不是目前首次入口。
+
+**待辦：首次回報入口的探索性使用者比較**（owner 要求記錄；尚未招募、執行或排程，沒有研究結果）。本節是此待辦的唯一記錄位置，不另建立測試 guide 或平行 handoff。
+
+- **比較 A／B：** A 為三個直接答案 → 預填 Report 表單 → Publish；B 為 Share how it felt → 空白 Report 表單 → 選答案 → Publish。兩版都使用目前相同座位資訊、顏色、大字修正、資料、资格與表單，只改入口。若需要重建 B，讓 eligible-first-visit 的單一 SecondaryButton 呼叫 openVisitReport()，以空白答案進既有表單，並對照下方上一輪截圖；目前不增加正式產品切換器。
+- **要驗證的競爭假設：** A 的具體答案和較少操作可能提高自發開始／完成；B 節省空間可能幫助前往判斷。均未被證明。畫面較乾淨、agent 能操作、編譯成功都不算回報意願證據。
+- **第一輪方法：** 約 6–8 位接近 London heat/travel 目標情境的使用者；第一次接觸分配不同版本。先給找地方休息的任務，觀察進入條件／座位／限制是否能被找到並正確理解；另給剛完成造訪的情境，先觀察是否自行注意到回報，再明確請其留下感受。最後問猶豫、預期填答量、是否以為點答案即送出。補看另一版可討論原因，但不能當獨立首次使用。實驗室注意到入口不等於自然場景長期回報意願。
+- **記錄：** 找資訊／完成任務的過程、入口發現、開始後放棄、是否保留／改選答案、理解與誤觸，以及操作後原因。小樣本用於找問題，不宣稱轉換率勝者或百分比提升。
+- **有足夠實際流量後：** 才另評估隨機 A/B，事先定義樣本與成功指標：符合資格且看過詳情者的完成回報率、開始後完成率／放棄率；以找地方判斷表現及正確理解／誤觸作 guardrails。分母需同一 eligibility、同一次尚未回報造訪，不能只看入口點擊數。現行 Report 仍是 device-local prototype，不把 memory QA 操作當正式使用數據；此待辦不授權新增 telemetry、公開 Report backend、招募訊息或產品規則。
+- **採用規則：** 依任務觀察修正最明顯問題；不能因多數人說某版好看即定案。若證據不足，維持三選暫定入口並清楚記錄未知；正式統計須在看結果前定義可接受差異，避免事後挑指標。保留主要任務的 PRODUCT 優先順序，同时承認回報對訪客證據的價值。
+
+**本輪工程驗證：** 最新 [Debug](.impeccable/review/native-2026-10-06-detail-refinement/quick-entry-restoration/debug-build.log)／[Release](.impeccable/review/native-2026-10-06-detail-refinement/quick-entry-restoration/release-build.log) 都 exit0／BUILD SUCCEEDED。Contract QA 的 isolated memory example 顯示三個入口與首段 Seating provided／negative wheelchair fact；Not cooler 直接預填且 Publish enabled，改 Much cooler → Finish later → Draft · Much cooler → Continue 保留答案與原 Visit time。沒有按 Publish 或分享 presence。兩張新的原生 PNG 與 [review board](.impeccable/review/native-2026-10-06-detail-refinement/quick-entry-restoration/review.png) 保存在原有 ignored archive 的子目錄，board 只等比例縮放排版。開始時 QA 有一份空白 Idea Store Bow Report，先以 Finish later 保護原草稿；前後所有 53 preference dictionaries 語意相同（JSON object 編碼順序不當作內容改變）。安裝／檢查相對 Finish later 後 baseline 的原 79 non-SplashBoard 檔全部 byte-identical、無新增；owner simulator 原 33 檔全部相同、無新增。15 個 project／plan／schemes／tests／icon 檔及原 staging 保留，[verification](.impeccable/review/native-2026-10-06-detail-refinement/quick-entry-restoration/verification.json) 已記錄。最後無 launch arguments 回正常 API Explore，All／27／collapsed。這與上述待辦真人測試分開記錄；沒有新增 XCTest、完整 accessibility／真人 UX 結論、commit/push、backend/DB、hooks、sibling 或額外 agent。
+
+**本機 checkpoint：** Owner 隨後要求 commit；訊息為 **Refine place detail facts and Dynamic Type layout**，parent `f622c18`，實際 revision 以 git log 核對。只收錄 PlaceDetailView／PrototypeSharedViews 與三份 active documents；三選入口維持暫定預設，真人比較仍待辦。私人截圖／備份／logs 維持 ignored。這次 Git 記錄沒有新增 build／test／原生操作或 UX acceptance；沒有 push 或 hooks。
+
+### 2026-10-06：詳情決策資訊與大字級間距精修
+
+Owner 在 critique annotations 明確要求先改大字級 Report 和詳情資訊優先順序；Register 排列先給建議，送出後／補件與地圖聚合留下一波。來源為 Prototyping／`f622c18` 加本節的 working changes。README 配色刷新已依 owner 要求 amend 成同一 **Refine app colour roles and map markers** checkpoint；第三張圖改為實際 Report 表單，五張 full-size 圖／五張縮圖與 alt／caption 均更新。
+
+- **實作：** `ReportChoice` 的 24 pt 圖示欄以 body `@ScaledMetric` 縮放，`FactRow` 同步以 subheadline 縮放。詳情首段現在顯示所有已知 seating／wheelchair 值；negative 保持 semibold，unknown 不猜測。完整 Facilities 保留同一來源值，不宣稱有即時空位。首次可回報狀態改成單一 **Share how it felt**，點開既有 Report 表單才選三個答案；沒有新增 chooser／review step，也沒有更改 eligibility、草稿、publish、presence 或模型。歷史／草稿入口維持原來狀態。更新下方 A01／C05／D01 click paths，40 個 IDs 保留。
+- **建置：** [Debug](.impeccable/review/native-2026-10-06-detail-refinement/debug-build.log)／[Release](.impeccable/review/native-2026-10-06-detail-refinement/release-build.log) 均 exit0／BUILD SUCCEEDED。Release 保留既有 DEBUG 分支不可達與 ModuleCache 路徑 warning、AppIntents metadata skipped；沒有 source build error。這是 presentation／entry refinement，沒有新增或執行 XCTest；不是完整 accessibility 或 device matrix。
+- **限定原生：** 只在 Contract QA／iPhone 17 Pro Max／iOS 26.4，以隔離 memory example 檢查首次入口、draft、history、away 和 Report accessibility5 的 light／dark。實際點 Share how it felt → 三個答案沒有預選、Publish disabled；選 A little cooler → Publish enabled；Finish later → Draft · A little cooler／Continue report；再次進入保留答案及原 Visit time，人數沒有增加。未按 Publish、未送出 contribution。兩個大字 appearance 完整三選列與 Facilities FactRow 間距可辨。正常無 flags 的 John Harvard Library 半卡顯示 Seating provided／Wheelchair accessible，沒有將未知入場資格寫成 Open to everyone；source GLA · 2025 與選中 map marker 保留。
+- **圖集：** 共 15 張新的原生 PNG；[detail before/after](.impeccable/review/native-2026-10-06-detail-refinement/detail-comparison.png)、[大字 Report／FactRow](.impeccable/review/native-2026-10-06-detail-refinement/large-text-review.png)、[draft／history／away](.impeccable/review/native-2026-10-06-detail-refinement/state-review.png)，以及 [正常 API 半卡](.impeccable/review/native-2026-10-06-detail-refinement/captures/api-detail-medium.png)。比較 board 只排版／等比例縮小原生截圖，沒有重畫 UI；before 來自已保存 colour review，所有 originals 與 launch route manifest 保留在 ignored archive。
+- **保存與範圍：** [verification](.impeccable/review/native-2026-10-06-detail-refinement/verification.json)：QA 原 77 個 non-SplashBoard 檔中 76 個 byte-identical，僅一個 KnownSceneSessions 系統檔改變，另新增兩個系統 scene 檔；全部 53 preference dictionaries 相等，owner simulator 原 25 檔全相同。沒有清空／還原／寫入私人 journeys。15 個 project／test-plan／scheme／tests／icon 檔保持原樣。最後以無 launch arguments 回 [正常 API Explore](.impeccable/review/native-2026-10-06-detail-refinement/final-normal-explore.png)，All／27 in this area／collapsed；HTTP 200／v5／253 items。UI 修正與三份既有 active docs 留未 commit；沒有 push、DB／backend、hooks、sibling 或額外 agent。
+
+Register 的建議是 recognised-place 的 Location → Indoors/outdoors + cooling features → Specific area（optional）→ current type/name corrections → Photo → More details；unlisted 的必填 Name 仍放在前面的 Location、Photo 仍必填。這只記錄本輪推薦，不修改已接受的 ContributionFlow 或 required rules。
+
 ### 2026-10-06：App 配色精修與一次 review 圖集
 
 Owner 要求按高標準 Impeccable/native iOS 判斷完成修改，並一次呈現受影響頁面的截圖。來源 Prototyping／`e7441cc`，開始 working tree clean。使用單一 agent，沿用 native SwiftUI／system type／teal-mint 與既有導航；没有 web detector、瀏覽器 mock 或第二位獨立 reviewer。本節是已授權實作與限定驗證，**owner 視覺 review 尚待完成**。
@@ -1399,7 +1428,7 @@ Impeccable detector 對 `cool-spot` 回傳 `[]`，沒有 SwiftUI 版面驗證效
 
 1. 正常 Run → Explore：預設 **All**／收合 Cool Spots 面板，成功載入才顯示目前區域 count。**Show list** 或點 grabber 展開同一清單；依離地圖中心的直線距離排序。點搜尋入口 → 輸入 `John Harvard Library` → 點同名 Cool Spot；也可從清單或地圖標記開啟。
 2. 確認地圖移到場所、半卡上方仍看得見標記。讀名稱、GLA · 2025、降溫設施與費用／入場限制；上滑展開。
-3. 頁首讀有值的費用、使用資格與重要限制；未知資格不應顯示 Open to everyone。有 Cooling area／posted stay limit 就直接顯示；來源另在地址下方，GLA · 2025 不是 cooling tag。往下經過 Visitor experiences／照片（若有），**Facilities & accessibility** 預設收起，展開完整座位／飲水／廁所／輪椅／人員／桌子資訊。重要 negative 可在頁首與完整設施重現同一值。接著展開預設收起的 **More place information**，讀有值的補充文字與 **Place details**／**View nearby streets**／**Suggest an edit**；沒有已知 Apple identity 就沒有 Place details。系統卡關閉回同一 detail。
+3. 頁首讀有值的費用、使用資格、座位、輪椅資訊與重要限制；未知資格不應顯示 Open to everyone，未知 seating／wheelchair 不新增肯定或否定。有 Cooling area／posted stay limit 就直接顯示；來源另在地址下方，GLA · 2025 不是 cooling tag。往下經過 Visitor experiences／照片（若有），**Facilities & accessibility** 預設收起，展開完整座位／飲水／廁所／輪椅／人員／桌子資訊。重要 negative 可在頁首與完整設施重現同一值。接著展開預設收起的 **More place information**，讀有值的補充文字與 **Place details**／**View nearby streets**／**Suggest an edit**；沒有已知 Apple identity 就沒有 Place details。系統卡關閉回同一 detail。
 4. 檢查 identity/facts、**Visitor experiences**、有值才出現的 Photos、補充資訊與 **People cooling here** 之間的分隔。無回報顯示 **No visitor reports yet.**；有回報才有統計、分布及 Read all reports。自己的 draft／published 在固定 Your reports 容器，正常 API mode 不加 fixture evidence；presence status/action 保持一組，不等於場內總人數。
 
 **觀察：** 是否足以決定去不去、還缺什麼？GLA 時間仍留在資料中但不在 app 卡顯示；要看場所時間可開 Place details，資料依系統卡提供。座位表示設有座位，並非現在有空位。

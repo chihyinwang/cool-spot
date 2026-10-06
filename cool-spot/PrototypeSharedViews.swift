@@ -38,9 +38,10 @@ struct InfoPill: View {
 struct FactRow: View {
     let symbol: String
     let title: String
+    @ScaledMetric(relativeTo: .subheadline) private var iconWidth = 24.0
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Image(systemName: symbol).foregroundStyle(AppStyle.informationAccent).frame(width: 24)
+            Image(systemName: symbol).foregroundStyle(AppStyle.informationAccent).frame(width: iconWidth)
                 .accessibilityHidden(true)
             Text(title).font(.subheadline).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
