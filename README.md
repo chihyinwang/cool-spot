@@ -1,4 +1,4 @@
-[![Cool Spot app icon: a person sitting in shade beside sunlight.](https://github.com/user-attachments/assets/0bcf60f3-ff72-476b-b5d8-a5b2cb6ac318)](https://github.com/user-attachments/assets/fee31127-3365-4584-860a-3701fa45d53d)
+[<img src="https://github.com/user-attachments/assets/fee31127-3365-4584-860a-3701fa45d53d" alt="Cool Spot app icon: a person sitting in shade beside sunlight." width="160">](https://github.com/user-attachments/assets/fee31127-3365-4584-860a-3701fa45d53d)
 
 # Cool Spot
 
@@ -8,7 +8,7 @@ Cool Spot is a native iOS prototype for finding places to cool down in London. I
 
 | Explore | Place detail · Example photos | Report · Quick entry |
 | :---: | :---: | :---: |
-| [![Explore a London map with cooling filters and a place preview.](https://github.com/user-attachments/assets/f9e21ae6-059c-49a9-ae3c-cda93694e8d2)](https://github.com/user-attachments/assets/8e3261d8-692a-41ec-b979-82b4b8ae8daf) | [![Example Community Room detail showing illustrative photos, facilities and additional place information.](https://github.com/user-attachments/assets/932c31db-665e-4a88-bb2b-44497442878f)](https://github.com/user-attachments/assets/ea52e133-c560-42c1-962b-dafb0ce51d8f) | [![Example Community Room detail with seating information and three direct visit-experience choices.](https://github.com/user-attachments/assets/d96ca2cf-ee54-4daf-a6a5-6f0df4ed028b)](https://github.com/user-attachments/assets/87c89e7e-300c-4b25-bef1-38c30fa56c1a) |
+| [<img src="https://github.com/user-attachments/assets/8e3261d8-692a-41ec-b979-82b4b8ae8daf" alt="Explore a London map with cooling filters and a place preview." width="240">](https://github.com/user-attachments/assets/8e3261d8-692a-41ec-b979-82b4b8ae8daf) | [<img src="https://github.com/user-attachments/assets/ea52e133-c560-42c1-962b-dafb0ce51d8f" alt="Example Community Room detail showing illustrative photos, facilities and additional place information." width="240">](https://github.com/user-attachments/assets/ea52e133-c560-42c1-962b-dafb0ce51d8f) | [<img src="https://github.com/user-attachments/assets/87c89e7e-300c-4b25-bef1-38c30fa56c1a" alt="Example Community Room detail with seating information and three direct visit-experience choices." width="240">](https://github.com/user-attachments/assets/87c89e7e-300c-4b25-bef1-38c30fa56c1a) |
 
 ## Features
 
@@ -24,7 +24,7 @@ Reports and place proposals are saved on the device in this prototype.
 
 | Suggest an edit | How this works · Simulated example |
 | :---: | :---: |
-| [![Suggest an edit showing a note field and an Add Fans / Remove Air conditioning change summary.](https://github.com/user-attachments/assets/49adadc7-cbc5-41ce-b767-b3a827c30331)](https://github.com/user-attachments/assets/335c2f07-7a59-44ab-a568-b228150f61a9) | [![The app’s How this works screen: anonymous ten-minute sharing and an example map count increasing from two to three.](https://github.com/user-attachments/assets/8b7590d2-42c8-4636-b5aa-103f92c6e339)](https://github.com/user-attachments/assets/af200391-cf8d-4e77-a786-d6d4e2d0ffe9) |
+| [<img src="https://github.com/user-attachments/assets/335c2f07-7a59-44ab-a568-b228150f61a9" alt="Suggest an edit showing a note field and an Add Fans / Remove Air conditioning change summary." width="300">](https://github.com/user-attachments/assets/335c2f07-7a59-44ab-a568-b228150f61a9) | [<img src="https://github.com/user-attachments/assets/af200391-cf8d-4e77-a786-d6d4e2d0ffe9" alt="The app’s How this works screen: anonymous ten-minute sharing and an example map count increasing from two to three." width="300">](https://github.com/user-attachments/assets/af200391-cf8d-4e77-a786-d6d4e2d0ffe9) |
 
 ## Engineering
 
